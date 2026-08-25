@@ -53,7 +53,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 /* Numbers are tabular everywhere — a system rule, not an option. */
 .kpi__value, .pcell, .capband__value, .barlist__value, .colchart__val,
 .log__date, .chg__date, .entry__metric, .minigrid__v,
-.prow__year, .attention__value { font-variant-numeric: var(--numeric-tabular, tabular-nums); }
+.attention__value { font-variant-numeric: tabular-nums; }
 
 /* ==========================================================================
    2 · Boot / error states
@@ -335,8 +335,6 @@ button, input, select, textarea { font: inherit; color: inherit; }
 }
 .btn:hover { background: var(--color-surface); border-color: var(--color-border-emphasis); }
 .btn.is-open { border-color: var(--color-border-contrast); }
-.btn.is-focus { border-color: var(--color-border-accent); }
-.btn__hint { color: var(--color-text-muted); font-size: var(--text-sm); font-weight: var(--font-regular); }
 
 .btn--primary {
   background: var(--color-accent); border-color: var(--color-accent);
@@ -518,21 +516,6 @@ button, input, select, textarea { font: inherit; color: inherit; }
 }
 .dd__searchfield input::-webkit-search-cancel-button { display: none; }
 
-.dd__quick { padding: 0 var(--space-5) var(--space-4); }
-.quickchip {
-  display: inline-flex; align-items: center;
-  height: var(--control-height-md); padding: 0 var(--space-6);
-  border: var(--border-hairline) solid var(--color-border-strong);
-  border-radius: var(--radius);
-  background: var(--color-surface); color: var(--color-text);
-  font-size: var(--text-base); font-weight: var(--font-semibold); cursor: pointer;
-}
-.quickchip:hover { background: var(--color-surface-hover); }
-.quickchip.is-on {
-  background: var(--color-toggle-on); border-color: var(--color-toggle-on);
-  color: var(--color-toggle-on-fg);
-}
-
 /* The list scrolls; the search, the bulk row and the footnote stay put. */
 .dd__scroll { max-height: 214px; overflow-y: auto; display: flex; flex-direction: column; gap: 1px; }
 .dd__empty { padding: var(--space-6) var(--space-5); font-size: var(--text-base); color: var(--color-text-muted); }
@@ -557,6 +540,18 @@ button, input, select, textarea { font: inherit; color: inherit; }
   min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .toolbar .btn { min-width: 0; }
+/* A filter you switch on, not a mode you enter — so it reads as a checkbox. */
+.toolbar__check {
+  display: inline-flex; align-items: center; gap: var(--space-4);
+  min-height: var(--control-height-lg); padding-inline: var(--space-4);
+  border-radius: var(--radius); cursor: pointer;
+  font-size: var(--text-base); color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+.toolbar__check:hover { background: var(--color-surface-hover); color: var(--color-text-strong); }
+.toolbar__check input { width: 16px; height: 16px; margin: 0; accent-color: var(--color-brand); cursor: pointer; }
+.toolbar__check:has(input:checked) { color: var(--color-text-strong); font-weight: var(--font-medium); }
+
 .toolbar__sep { width: 1px; height: var(--space-11); background: var(--color-border); }
 .toolbar__spacer { flex: 1; }
 
@@ -588,7 +583,15 @@ button, input, select, textarea { font: inherit; color: inherit; }
   border: 0; border-radius: var(--radius-lg); background: var(--color-surface);
   cursor: pointer;
 }
-.entry:hover { background: var(--color-surface-hover); }
+/*
+ * A card on the page ground cannot signal hover by tinting: the hover grey and
+ * the ground are a single step apart, so a tinted card dissolves into the page.
+ * It lifts instead, and the arrow leans towards where the click leads.
+ */
+.entry { transition: box-shadow .12s ease; }
+.entry:hover, .entry:focus-visible { box-shadow: var(--shadow-raised); }
+.entry__arrow { transition: transform .12s ease; }
+.entry:hover .entry__arrow { transform: translateX(2px); }
 .entry__head { display: block; }
 .entry__title { display: block; font-size: var(--text-card); font-weight: var(--font-semibold); color: var(--color-text-strong); }
 .entry__sub {
@@ -634,7 +637,6 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .mslist__title { display: block; font-size: var(--text-base); font-weight: var(--font-semibold); color: var(--color-text-strong); }
 .mslist__meta { display: block; margin-top: var(--space-1); font-size: var(--text-sm); color: var(--color-text-muted); }
 .mslist__row.is-late .mslist__q, .mslist__row.is-late .mslist__meta { color: var(--color-danger-fg); }
-.mslist__row.is-pending .mslist__q, .mslist__row.is-pending .mslist__meta { color: var(--color-warn-fg-alt); }
 
 .attention { display: flex; flex-direction: column; gap: var(--space-4); }
 .attention__row {
@@ -726,7 +728,6 @@ button, input, select, textarea { font: inherit; color: inherit; }
   --row-bg: var(--color-surface-hover);
 }
 
-
 /*
  * The identifying columns stay put while the quarters scroll under them.
  * Frozen cells need an opaque ground, hence --row-bg on every row.
@@ -747,7 +748,6 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .pgrid__track:not(.is-scrolled) .prow--sum .is-frozen,
 .pgrid__track:not(.is-scrolled) .prow--foot .is-frozen,
 .pgrid__track:not(.is-scrolled) .prow--load .is-frozen { box-shadow: none; }
-
 
 .prow--head {
   min-height: 30px; --row-bg: var(--color-surface);
@@ -890,9 +890,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 }
 .ampel--none  { background: var(--color-neutral-bg); border-color: var(--color-neutral-solid); }
 
-
 /* Footer rows -------------------------------------------------------------- */
-
 
 .prow--sum, .prow--foot, .prow--load { --row-bg: var(--color-surface-frame); }
 .prow--sum {
@@ -1055,7 +1053,6 @@ button, input, select, textarea { font: inherit; color: inherit; }
   margin-bottom: var(--space-5);
   font-size: var(--text-base); font-weight: var(--font-semibold); color: var(--color-text-strong);
 }
-.modal__empty { font-size: var(--text-base); color: var(--color-text-muted); }
 
 .minigrid { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: var(--space-2); }
 .minigrid__col { display: flex; flex-direction: column; gap: var(--space-2); text-align: center; }
@@ -1141,7 +1138,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .rebook__empty { color: var(--color-text-muted); cursor: default; }
 .rebook__reason { padding: 0 var(--space-11) var(--space-9); }
 
-.share { display: flex; gap: var(--space-4); padding: var(--space-8) var(--space-11) var(--space-6); }
+.share { display: flex; gap: var(--space-4); padding: var(--space-8) var(--space-11) var(--space-11); }
 .share__field { flex: 1; min-width: 0; }
 .share__field input {
   width: 100%; height: var(--control-height-xl); padding: 0 var(--space-6);
@@ -1150,22 +1147,27 @@ button, input, select, textarea { font: inherit; color: inherit; }
   font-family: var(--font-mono); font-size: var(--text-sm);
 }
 .share .btn { height: var(--control-height-xl); flex: 0 0 auto; }
-.share__state { padding: 0 var(--space-11) var(--space-9); display: grid; gap: var(--space-4); }
-.share__state > div { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: var(--space-6); }
-.share__state dt { font-size: var(--text-base); color: var(--color-text-muted); }
-.share__state dd { font-size: var(--text-base); color: var(--color-text-strong); }
 
 .modal__meta-line { margin-top: var(--space-2); font-size: var(--text-base); color: var(--color-text-muted); }
 
-/* Editing is a mode, and the wireframe wants that said out loud. */
+/*
+ * Editing is a mode, and the wireframe wants that said out loud. It sits dead
+ * centre of the bar rather than after the crumbs, so it does not move when the
+ * path gets longer. Below the layout width it goes back into the flow.
+ */
+.crumbbar .crumbs { position: relative; }
 .editbanner {
-  margin-left: auto;
+  position: absolute; left: 50%; transform: translateX(-50%);
   display: inline-flex; align-items: center; gap: var(--space-3);
   padding: 2px var(--space-5);
   border: var(--border-hairline) solid var(--color-warn-border);
   border-radius: var(--radius); background: var(--color-warn-bg-subtle);
   color: var(--color-warn-fg-alt);
   font-size: var(--text-sm); font-weight: var(--font-semibold);
+  white-space: nowrap;
+}
+@media (max-width: 900px) {
+  .editbanner { position: static; transform: none; margin-left: auto; }
 }
 
 /* ==========================================================================
@@ -1451,13 +1453,6 @@ button, input, select, textarea { font: inherit; color: inherit; }
 #swagger .swagger-ui .btn.authorize { color: #1f6f43; border-color: #1f6f43; }
 #swagger .swagger-ui .btn.authorize svg { fill: #1f6f43; }
 
-
-
-
-
-
-
-
 /* ==========================================================================
    15 · Print layout
    ========================================================================== */
@@ -1556,7 +1551,6 @@ button, input, select, textarea { font: inherit; color: inherit; }
   font-size: 10px; color: var(--color-text-muted);
 }
 
-
 /* ==========================================================================
    16 · Empty state, narrow notice, toast
    ========================================================================== */
@@ -1627,7 +1621,6 @@ button, input, select, textarea { font: inherit; color: inherit; }
   .chg, .log { grid-template-columns: minmax(0, 1fr); gap: var(--space-2); }
   .chg--head, .log--head { display: none; }
   .rebook { grid-template-columns: minmax(0, 1fr); }
-  .rebook__arrow { transform: rotate(90deg); justify-self: center; }
 }
 
 @page { size: A4 portrait; margin: 12mm; }

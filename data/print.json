@@ -1,0 +1,51 @@
+{
+  "documentId": "RP-2026-0825-01",
+  "sender": [
+    "Schweizerische Bundesverwaltung",
+    "Bundesamt für Bauten und Logistik BBL",
+    "Bereich Bauten"
+  ],
+  "title": "Ressourcenplanung — Übersicht",
+  "classification": "Klassifizierung: intern",
+  "createdBy": "Max Muster",
+  "createdAt": "25.08.2026, 07:15",
+  "syncedAt": "25.08.2026, 03:00",
+  "legend": {
+    "label": "Legende",
+    "steps": [
+      {
+        "step": "1",
+        "label": "bis 39 %"
+      },
+      {
+        "step": "2",
+        "label": "40 – 79 %"
+      },
+      {
+        "step": "3",
+        "label": "80 – 119 %"
+      },
+      {
+        "step": "4",
+        "label": "ab 120 %"
+      }
+    ],
+    "marker": "▲ Projektleitung über 100 % im Quartal",
+    "noLead": "ohne Projektleitung",
+    "thresholds": "Auslastung: Überlast über 100 · knapp 95 – 100 · ok 80 – 94 · frei darunter"
+  },
+  "notes": [
+    {
+      "label": "Plankopf",
+      "text": "Wiederholt sich auf jeder Seite: Absender, Dokumenttitel, Umfang, Filter, Einheit und Klassifizierung. Was auf dem Bildschirm im Hover steht, muss hier behauptet sein — deshalb die feste Legende."
+    },
+    {
+      "label": "Format",
+      "text": "A4 hoch, ein Jahr pro Blatt: vier Quartale und elf Zeilen, Fusszeilen und Summen auf jedem Blatt. Folgejahre auf eigenen Blättern, die Spalten bleiben identisch. Alternativ A4 quer: alle acht Quartale auf einem Blatt."
+    },
+    {
+      "label": "Fusszeile",
+      "text": "Zeitstempel der Erstellung, erstellende Person, Datenstand der ePPM-Spiegelung, Dokument-ID und Seitenzahl. Der Export ist damit zitierfähig — «Stand 25.08., 07:15» ist die Referenz in der Sitzung."
+    }
+  ]
+}

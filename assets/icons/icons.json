@@ -1,7 +1,9 @@
 {
   "source": "lucide-static v1.34.0 (ISC)",
   "icons": [
+    "arrow-down-wide-narrow",
     "arrow-right",
+    "arrow-up-narrow-wide",
     "arrow-up-right",
     "bell",
     "calendar-days",
@@ -14,6 +16,7 @@
     "ellipsis-vertical",
     "external-link",
     "info",
+    "layout-grid",
     "list",
     "minus",
     "pencil",

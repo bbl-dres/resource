@@ -32,14 +32,23 @@ function stringify(v) {
   return esc(v);
 }
 
+/*
+ * An ARIA state wants the word "false", not the empty string a boolean renders
+ * to everywhere else: aria-expanded="" is not "collapsed", it is invalid. So a
+ * boolean landing in an ARIA slot spells itself out, and every other slot keeps
+ * the conditional idiom where false means "render nothing".
+ */
+const ARIA_SLOT = /\saria-[a-z]+="$/;
+
 export function html(strings, ...values) {
   let out = strings[0];
-  for (let i = 0; i < values.length; i++) out += stringify(values[i]) + strings[i + 1];
+  for (let i = 0; i < values.length; i++) {
+    const v = values[i];
+    out += (typeof v === 'boolean' && ARIA_SLOT.test(strings[i]) ? String(v) : stringify(v))
+      + strings[i + 1];
+  }
   return new Html(out);
 }
-
-/** ARIA state attributes need the literal words, not the ''-for-false default. */
-export const aria = v => (v ? 'true' : 'false');
 
 /**
  * Emit a bare attribute fragment (`disabled`, `data-x="1"`, …) unescaped.
@@ -77,6 +86,9 @@ export const icons = {
   gantt: (s = 15) => ico('chart-gantt', s),
   pencil: (s = 15) => ico('pencil', s),
   share: (s = 15) => ico('share-2', s),
+  sortAsc: (s = 14) => ico('arrow-up-narrow-wide', s),
+  sortDesc: (s = 14) => ico('arrow-down-wide-narrow', s),
+  grid: (s = 14) => ico('layout-grid', s),
   download: (s = 15) => ico('download', s),
   users: (s = 15) => ico('users', s),
   externalLink: (s = 13) => ico('external-link', s)
@@ -104,12 +116,12 @@ export function badge(n) {
  * A dropdown trigger + panel. `body` is the panel content.
  * `id` doubles as the state.menu key.
  */
-export function dropdown({ id, label, hint, count, width = 244, align = 'left', body, cls = '' }) {
+export function dropdown({ id, label, lead, count, width = 244, align = 'left', body, cls = '' }) {
   const open = state.menu === id;
   return html`<div class="dd ${cls}" data-menu="${id}">
     <button type="button" class="btn ${open ? 'is-open' : ''}" data-act="menu" data-val="${id}"
-            aria-expanded="${aria(open)}" aria-haspopup="menu">
-      ${label}${hint && html`<span class="btn__hint">${hint}</span>`}${count ? badge(count) : ''}${icons.chevronDown()}
+            aria-expanded="${open}" aria-haspopup="menu">
+      ${lead ?? ''}${label}${count ? badge(count) : ''}${icons.chevronDown()}
     </button>
     ${open && menuPanel({ align, width, body })}
   </div>`;
@@ -130,13 +142,13 @@ export function menuGroupLabel(text) {
 
 export function menuRadio(label, checked, act, val, meta) {
   return html`<button type="button" class="dd__item ${checked ? 'is-checked' : ''}" role="menuitemradio"
-      aria-checked="${aria(checked)}" data-act="${act}" data-val="${val}">
+      aria-checked="${checked}" data-act="${act}" data-val="${val}">
     <span>${label}</span>${meta && html`<span class="dd__meta">${meta}</span>`}${checked && html`<span class="dd__check">${icons.check()}</span>`}
   </button>`;
 }
 
 export function menuCheckbox(label, on, act, val, meta) {
-  return html`<button type="button" class="dd__item" role="menuitemcheckbox" aria-checked="${aria(on)}"
+  return html`<button type="button" class="dd__item" role="menuitemcheckbox" aria-checked="${on}"
       data-act="${act}" data-val="${val}">
     <span>${label}</span>${meta && html`<span class="dd__meta">${meta}</span>`}${pillSwitch(on)}
   </button>`;
@@ -144,7 +156,7 @@ export function menuCheckbox(label, on, act, val, meta) {
 
 export function menuTick(label, on, act, val, meta) {
   return html`<button type="button" class="dd__item ${on ? 'is-checked' : ''}" role="menuitemcheckbox"
-      aria-checked="${aria(on)}" data-act="${act}" data-val="${val}">
+      aria-checked="${on}" data-act="${act}" data-val="${val}">
     <span class="dd__tickbox ${on ? 'is-on' : ''}" aria-hidden="true"></span>
     <span class="dd__label">${label}</span>${meta && html`<span class="dd__meta">${meta}</span>`}
   </button>`;
@@ -153,7 +165,7 @@ export function menuTick(label, on, act, val, meta) {
 export function segmented(options, value, act) {
   return html`<div class="segmented" role="group">
     ${options.map(o => html`<button type="button" class="${o.value === value ? 'is-on' : ''}"
-      aria-pressed="${aria(o.value === value)}" data-act="${act}" data-val="${o.value}">${t(o.label)}</button>`)}
+      aria-pressed="${o.value === value}" data-act="${act}" data-val="${o.value}">${t(o.label)}</button>`)}
   </div>`;
 }
 
@@ -190,12 +202,12 @@ export function appHeader() {
 
         <div class="dd">
           <button type="button" class="hdr-btn" data-act="menu" data-val="lang"
-                  aria-expanded="${aria(open)}" aria-haspopup="menu" aria-label="${t('Sprache wählen')}">
+                  aria-expanded="${open}" aria-haspopup="menu" aria-label="${t('Sprache wählen')}">
             ${state.lang.toUpperCase()}${icons.chevronDown()}
           </button>
           ${open && html`<div class="dd__panel dd__panel--right" role="menu" style="width:216px">
             ${langs.map(l => html`<button type="button" class="dd__item ${state.lang === l.code ? 'is-checked' : ''}"
-                role="menuitemradio" aria-checked="${aria(state.lang === l.code)}"
+                role="menuitemradio" aria-checked="${state.lang === l.code}"
                 ${attr(!l.available, 'aria-disabled="true" disabled')}
                 ${attr(l.available, `data-act="lang" data-val="${l.code}"`)}>
               <span>${l.label} <span class="dd__meta">${l.tag}</span></span>
@@ -267,7 +279,7 @@ export function pageHeader({ crumbs, title, actions = [], chrome = true }) {
 
 export function editToggle() {
   return html`<button type="button" class="btn btn--toggle ${state.edit ? 'is-on' : ''}"
-      data-act="edit-toggle" aria-pressed="${aria(state.edit)}">
+      data-act="edit-toggle" aria-pressed="${state.edit}">
     ${pillSwitch(state.edit, 'switch--edit')}${t('Bearbeiten')}
   </button>`;
 }
@@ -276,7 +288,7 @@ export function exportMenu() {
   const open = state.menu === 'export';
   return html`<div class="dd">
     <button type="button" class="btn ${open ? 'is-open' : ''}" data-act="menu" data-val="export"
-            aria-expanded="${aria(open)}" aria-haspopup="menu">${t('Exportieren')}${icons.chevronDown()}</button>
+            aria-expanded="${open}" aria-haspopup="menu">${t('Exportieren')}${icons.chevronDown()}</button>
     ${open && html`<div class="dd__panel dd__panel--right" role="menu" style="width:270px">
       <button type="button" class="dd__item" role="menuitem" data-act="export" data-val="csv">${t('Als CSV exportieren')}</button>
       <button type="button" class="dd__item" role="menuitem" data-act="export" data-val="xlsx">${t('Als Excel exportieren')}</button>
@@ -334,13 +346,18 @@ const COLUMNS = [
 export function toolbar({ attributes = true } = {}) {
   const active = sortKey();
   const groupLabel = GROUPS.find(g => g.id === state.group).label;
+  const mine = data.meta.user.personId;
+  const minesOnly = state.leads.length === 1 && state.leads[0] === mine;
 
   return html`<div class="toolbar">
     ${expandableSearch({ variant: 'toolbar', placeholder: 'Projekt, ID oder Person' })}
 
     ${dropdown({
-      id: 'sort', label: `${t('Sortierung')}: ${t(active.label)}`,
-      hint: t(state.sortDir === 'desc' ? 'absteigend' : 'aufsteigend'), width: 244,
+      id: 'sort',
+      // The direction is a glyph, but it still has to be announced.
+      lead: html`${state.sortDir === 'desc' ? icons.sortDesc() : icons.sortAsc()}
+        <span class="sr-only">${t(state.sortDir === 'desc' ? 'absteigend' : 'aufsteigend')}</span>`,
+      label: `${t('Sortierung')}: ${t(active.label)}`, width: 244,
       body: html`${menuGroupLabel(t('Sortieren nach'))}
         ${SORTS.map(k => menuRadio(t(sortKey(k).label), state.sort === k, 'sort', k))}
         ${divider()}
@@ -349,7 +366,7 @@ export function toolbar({ attributes = true } = {}) {
     })}
 
     ${dropdown({
-      id: 'group', label: `${t('Gruppieren nach')}: ${t(groupLabel)}`, width: 288,
+      id: 'group', lead: icons.grid(), label: `${t('Gruppieren nach')}: ${t(groupLabel)}`, width: 288,
       body: html`${menuGroupLabel(t('Gruppieren nach'))}
         ${GROUPS.map(g => menuRadio(t(g.label), state.group === g.id, 'group', g.id))}`
     })}
@@ -386,8 +403,12 @@ export function toolbar({ attributes = true } = {}) {
     <span class="toolbar__sep" aria-hidden="true"></span>
 
     <button type="button" class="btn btn--danger-toggle ${state.overloadOnly ? 'is-on' : ''}"
-      data-act="overload-toggle" aria-pressed="${aria(state.overloadOnly)}">${t('Nur Überlast')}</button>
+      data-act="overload-toggle" aria-pressed="${state.overloadOnly}">${t('Nur Überlast')}</button>
 
+    ${mine ? html`<label class="toolbar__check">
+      <input type="checkbox" data-act="my-projects" ${attr(minesOnly, 'checked')}>
+      <span>${t('Mir zugewiesen')}</span>
+    </label>` : ''}
 
     <span class="toolbar__spacer"></span>
 
@@ -424,7 +445,6 @@ function leadMenuBody() {
   // Selected first, so a choice never scrolls out of sight as the list grows.
   const selected = matches.filter(e => state.leads.includes(e.id));
   const rest = matches.filter(e => !state.leads.includes(e.id));
-  const mine = data.meta.user.personId;
 
   return html`${menuGroupLabel(t('Mehrfachauswahl · Ausgewählte oben'))}
     <div class="dd__search">
@@ -434,10 +454,6 @@ function leadMenuBody() {
                placeholder="${t('Person suchen')}" aria-label="${t('Person suchen')}" autocomplete="off">
       </label>
     </div>
-    ${mine && html`<div class="dd__quick">
-      <button type="button" class="quickchip ${state.leads.length === 1 && state.leads[0] === mine ? 'is-on' : ''}"
-              data-act="my-projects">${t('Meine Projekte')}</button>
-    </div>`}
     <div class="dd__bulk">
       <button type="button" data-act="bulk" data-kind="leads" data-val="all">${t('Alle')}</button>
       <span aria-hidden="true">·</span>
@@ -503,8 +519,7 @@ export function appFooter() {
     <span class="shell-footer__links">
       ${m.footerLinks.map(l => l.tab
         ? html`<a href="#?tab=${l.tab}" data-act="tab" data-val="${l.tab}">${t(l.label)}</a>`
-        : html`<a href="${l.href}" target="_blank" rel="noopener noreferrer">${t(l.label)}
-            ${icons.externalLink(12)}</a>`)}
+        : html`<a href="${l.href}" target="_blank" rel="noopener noreferrer">${t(l.label)}</a>`)}
     </span>
   </div></footer>`;
 }

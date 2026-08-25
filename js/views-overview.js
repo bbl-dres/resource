@@ -12,7 +12,7 @@ import {
 import {
   html, raw, icons, pageHeader, editToggle, exportMenu, toolbar, activeFilterRow,
   timeControls, columnChart, tooNarrow, phaseOf,
-  aria, attr
+  attr
 } from './ui.js';
 
 /* -----------------------------------------------------------------------------
@@ -307,6 +307,8 @@ function pensumGrid() {
   const tot = totals(list);
   const span = leadColumnCount();
   const { tpl, minWidth, sticky } = gridLayout();
+  // One period list for the whole grid: every row must agree on the time axis.
+  const cols = periods();
   const q0 = data.quarters[0];
 
   // Visual row index, so the edit popover can be positioned by calc().
@@ -318,7 +320,7 @@ function pensumGrid() {
     // Termine tab does it. It sticks to the left so it survives a scroll.
     const head = g.label && html`<h2 class="pgrouphead">
       <button type="button" class="pgrouphead__toggle"
-              data-act="toggle-group" data-val="${g.key}" aria-expanded="${aria(!collapsed)}">
+              data-act="toggle-group" data-val="${g.key}" aria-expanded="${!collapsed}">
         <span class="caret ${collapsed ? 'is-collapsed' : ''}" aria-hidden="true">${icons.chevronDown()}</span>
         <span class="pgrouphead__name">${g.label}</span>
         <span class="count-pill">${g.projects.length}</span>
@@ -328,14 +330,14 @@ function pensumGrid() {
     if (collapsed) return html`<section class="pgroup">${head}</section>`;
 
     const rows = g.projects.map(p => {
-      const row = projectRow(p, tpl, sticky, rowIdx);
+      const row = projectRow(p, tpl, sticky, cols, rowIdx);
       rowIdx++;
       return row;
     });
     // Each card repeats the column header, the same way a Gantt group card
     // repeats its axis — a group has to be readable on its own.
     return html`<section class="pgroup">${head}
-      <div class="pblock">${columnHeader(tpl, sticky)}${rows}</div>
+      <div class="pblock">${columnHeader(tpl, sticky, cols)}${rows}</div>
     </section>`;
   });
 
@@ -354,22 +356,22 @@ function pensumGrid() {
             ${state.footDetails ? t('Details ausblenden') : t('Details anzeigen')}
           </button>
         </div>
-        ${periods().map((period, i) => html`<span class="pcell pcell--sum ${qBorder(i)}">${fmt(periodValue(tot.demand, period))}</span>`)}
+        ${cols.map(period => html`<span class="pcell pcell--sum ${yearRule(period)}">${fmt(periodValue(tot.demand, period))}</span>`)}
         ${state.trend && html`<span></span>`}
       </div>
 
       ${state.footDetails && html`
-        ${footRow(t('davon vor Baukredit-Freigabe'), tot.preCredit, tpl, span)}
-        ${footRow(t('davon extern beauftragt'), tot.external, tpl, span)}
-        ${footRow(t('Kapazität netto, nach Abwesenheiten'), tot.net, tpl, span)}`}
+        ${footRow(t('davon vor Baukredit-Freigabe'), tot.preCredit, tpl, span, cols)}
+        ${footRow(t('davon extern beauftragt'), tot.external, tpl, span, cols)}
+        ${footRow(t('Kapazität netto, nach Abwesenheiten'), tot.net, tpl, span, cols)}`}
 
       <div class="prow prow--load" style="grid-template-columns:${raw(tpl)}">
         <div style="grid-column:span ${span}" class="prow__sumlabel is-frozen">${t('Auslastung')}</div>
-        ${periods().map((period, i) => {
+        ${cols.map(period => {
           const q = period.quarters[0];
           const pct = periodValue(tot.utilisation, period);
           const st = loadStatus(pct);
-          return html`<span class="pcell pcell--load is-${st.key} ${qBorder(i)}"
+          return html`<span class="pcell pcell--load is-${st.key} ${yearRule(period)}"
               title="${period.label}: ${pct} % — ${t(st.label)} · ${tot.booked[q]} % ${t('gebucht auf')} ${tot.net[q]} % ${t('netto')}">
             <span class="pcell__pct">${pct} %</span>
           </span>`;
@@ -388,7 +390,7 @@ function pensumGrid() {
 
 /** The same swatch legend the print sheet carries, so both read alike. */
 export function heatLegend() {
-  const l = data.api.print.legend;
+  const l = data.print.legend;
   return html`<div class="heatlegend">
     <span class="heatlegend__label">${t(l.label)}</span>
     ${l.steps.map(s => html`<span class="heatlegend__item">
@@ -399,15 +401,14 @@ export function heatLegend() {
   </div>`;
 }
 
-function qBorder(i) {
-  return (i === 0 || i === 2 || i === 6) ? 'is-yearstart' : '';
-}
+/** The rule that separates one year from the next, drawn on its first column. */
+const yearRule = period => (period.yearStart ? 'is-yearstart' : '');
 
 /**
  * A column header that sorts. Clicking the active column flips the direction,
  * and the toolbar dropdown reads the same two pieces of state.
  */
-function sortHead(key, label, cls = '', style = '', title = '') {
+function sortHead(key, label, { cls = '', style = '', title = '' } = {}) {
   const active = state.sort === key;
   return html`<span class="pcell--text ${cls} ${active ? 'is-sorted' : ''}" style="${style}">
     <button type="button" class="sorthead" data-act="sort-col" data-val="${key}"
@@ -424,44 +425,49 @@ function sortHead(key, label, cls = '', style = '', title = '') {
  * A pinned column therefore needs the running offset of the ones before it,
  * which gridLayout() has already worked out.
  */
-const pinCls = (s, k) =>
-  (s[k] === undefined ? '' : `is-frozen ${k === s.last ? 'is-frozen-last' : ''}`);
+const pinCls = (s, k, extra = '') =>
+  `${extra} ${s[k] === undefined ? '' : `is-frozen ${k === s.last ? 'is-frozen-last' : ''}`}`.trim();
 const pinLeft = (s, k) => (s[k] === undefined ? '' : `left:${s[k]}px`);
 
+/** The class and offset a pinned column needs, as sortHead's options. */
+const pin = (s, k, extra = '') => ({ cls: pinCls(s, k, extra), style: pinLeft(s, k) });
+
 /** The year band and the column names, repeated at the top of every group card. */
-function columnHeader(tpl, sticky) {
+function columnHeader(tpl, sticky, cols) {
   const q0 = data.quarters[0];
   return html`
     <div class="prow prow--head" style="grid-template-columns:${raw(tpl)}">
-      ${state.cols.id && sortHead('id', 'ID', pinCls(sticky, 'id'), pinLeft(sticky, 'id'))}
-      ${sortHead('projekt', t('Projekt'), pinCls(sticky, 'title'), pinLeft(sticky, 'title'))}
-      ${state.cols.phase && sortHead('phase', t('SIA-Phase'), pinCls(sticky, 'phase'), pinLeft(sticky, 'phase'))}
-      ${state.cols.lead && sortHead('lead', t('Projektleitung'), pinCls(sticky, 'lead'), pinLeft(sticky, 'lead'))}
+      ${state.cols.id && sortHead('id', 'ID', pin(sticky, 'id'))}
+      ${sortHead('projekt', t('Projekt'), pin(sticky, 'title'))}
+      ${state.cols.phase && sortHead('phase', t('SIA-Phase'), pin(sticky, 'phase'))}
+      ${state.cols.lead && sortHead('lead', t('Projektleitung'), pin(sticky, 'lead'))}
       ${state.ampel && html`<span class="pcell--text pcell--ampelhead ${pinCls(sticky, 'ampel')}" style="${pinLeft(sticky, 'ampel')}"
         title="${t('Auslastung der Projektleitung im laufenden Quartal')}">${t('Ampel')}</span>`}
-      ${state.cols.portfolio && sortHead('portfolio', t('Teilportfolio'), pinCls(sticky, 'portfolio'), pinLeft(sticky, 'portfolio'))}
-      ${state.cols.priority && sortHead('priority', t('Priorität'), pinCls(sticky, 'priority'), pinLeft(sticky, 'priority'))}
+      ${state.cols.portfolio && sortHead('portfolio', t('Teilportfolio'), pin(sticky, 'portfolio'))}
+      ${state.cols.priority && sortHead('priority', t('Priorität'), pin(sticky, 'priority'))}
       ${state.cols.nextMs && html`<span class="pcell--text ${pinCls(sticky, 'nextMs')}" style="${pinLeft(sticky, 'nextMs')}">${t('Nächster Meilenstein')}</span>`}
-      ${state.cols.credit && sortHead('credit', t('Kredit CHF'), `pcell--num ${pinCls(sticky, 'credit')}`, pinLeft(sticky, 'credit'))}
-      ${state.target && sortHead('target', `${t('Soll')} ${data.quarters[0].short}`, `pcell--num ${pinCls(sticky, 'target')}`, pinLeft(sticky, 'target'))}
-      ${periods().map((period, i) => sortHead(`q${period.quarters[0]}`,
-        period.short,
-        `pcell--num ${period.isNow ? 'is-today' : ''} ${qBorder(i)}`, '',
-        period.isNow ? `${t('Heute')}, ${data.meta.todayLabel} — ${t('laufendes Quartal, gesperrt')}` : period.label))}
+      ${state.cols.credit && sortHead('credit', t('Kredit CHF'), pin(sticky, 'credit', 'pcell--num'))}
+      ${state.target && sortHead('target', `${t('Soll')} ${data.quarters[0].short}`, pin(sticky, 'target', 'pcell--num'))}
+      ${cols.map(period => sortHead(`q${period.quarters[0]}`, period.short, {
+        cls: `pcell--num ${period.isNow ? 'is-today' : ''} ${yearRule(period)}`,
+        title: period.isNow
+          ? `${t('Heute')}, ${data.meta.todayLabel} — ${t('laufendes Quartal, gesperrt')}`
+          : period.label
+      }))}
       ${state.trend && html`<span class="pcell--text">${t('Verlauf')}</span>`}
     </div>`;
 }
 
 
-function footRow(label, values, tpl, span) {
+function footRow(label, values, tpl, span, cols) {
   return html`<div class="prow prow--foot" style="grid-template-columns:${raw(tpl)}">
     <div style="grid-column:span ${span}" class="prow__footlabel is-frozen">${label}</div>
-    ${periods().map((period, i) => html`<span class="pcell pcell--foot ${qBorder(i)}">${fmt(periodValue(values, period))}</span>`)}
+    ${cols.map(period => html`<span class="pcell pcell--foot ${yearRule(period)}">${fmt(periodValue(values, period))}</span>`)}
     ${state.trend && html`<span></span>`}
   </div>`;
 }
 
-function projectRow(p, tpl, sticky, rowIdx) {
+function projectRow(p, tpl, sticky, cols, rowIdx) {
   const lead = p.leadId ? data.peopleById[p.leadId] : null;
   const cells = projectDemand(p);
   const a = ampel(p.leadId, 0);
@@ -491,7 +497,7 @@ function projectRow(p, tpl, sticky, rowIdx) {
     ${state.cols.credit && html`<span class="pcell pcell--credit ${pinCls(sticky, 'credit')}" style="${pinLeft(sticky, 'credit')}">${p.creditLabel}</span>`}
     ${state.target && html`<span class="pcell pcell--target ${pinCls(sticky, 'target')} ${targetOver ? 'is-over' : ''}" style="${pinLeft(sticky, 'target')}">${num(p.target)}${unitSuffix()}</span>`}
 
-    ${periods().map((period, i) => {
+    ${cols.map(period => {
       const q = period.quarters[0];
       const v = periodValue(cells, period);
       const over = lead ? period.quarters.some(x => personUtilisation(p.leadId, x) > 100) : false;
@@ -502,7 +508,7 @@ function projectRow(p, tpl, sticky, rowIdx) {
         + (over ? ` — ${t('Person über 100 % belegt, Überlast')}` : '')
         + (locked ? ` — ${t('laufendes Quartal, gesperrt')}` : '');
       return html`<button type="button"
-        class="pcell pcell--val heat-${heatStep(v)} ${over ? 'is-warn' : ''} ${editing ? 'is-editing' : ''} ${isEdited(p, q) ? 'is-edited' : ''} ${qBorder(i)}"
+        class="pcell pcell--val heat-${heatStep(v)} ${over ? 'is-warn' : ''} ${editing ? 'is-editing' : ''} ${isEdited(p, q) ? 'is-edited' : ''} ${yearRule(period)}"
         data-act="cell" data-val="${p.id}" data-q="${q}" data-fk="cell:${p.id}:${q}"
         aria-label="${description}" title="${description}" ${attr(!state.edit || locked, 'data-locked="1"')}>
         ${label}
@@ -510,7 +516,7 @@ function projectRow(p, tpl, sticky, rowIdx) {
     })}
 
     ${state.trend && html`<span class="pcell pcell--trend">
-      ${periods().map(period => { const v = periodValue(cells, period); return html`<span class="spark" style="height:${v ? Math.max(8, Math.round(v / 120 * 100)) : 0}%"
+      ${cols.map(period => { const v = periodValue(cells, period); return html`<span class="spark" style="height:${v ? Math.max(8, Math.round(v / 120 * 100)) : 0}%"
         class="${v ? '' : 'is-empty'}"></span>`; })}
     </span>`}
   </div>`;
@@ -588,267 +594,3 @@ function editPopover() {
 /* -----------------------------------------------------------------------------
    Modals — project detail and rebooking
    -------------------------------------------------------------------------- */
-
-export function renderModal() {
-  if (!state.modal) return '';
-  const body = state.modal.type === 'project' ? projectModal(state.modal)
-    : state.modal.type === 'share' ? shareModal(state.modal)
-      : state.modal.type === 'assign' ? assignModal(state.modal)
-        : rebookModal(state.modal);
-  return html`<div class="scrim" data-act="close-modal">
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" data-stop>${body}</div>
-  </div>`;
-}
-
-/**
- * The URL already carries tab, view, filters, grouping, unit and search, so the
- * share dialog only has to show it and make it easy to take.
- */
-/** Give a project a lead, or hand it to somebody else. */
-function assignModal({ projectId, search = '', targetId }) {
-  const project = data.projectsById[projectId];
-  const current = project.leadId ? data.peopleById[project.leadId] : null;
-  const query = search.trim().toLowerCase();
-  const candidates = data.people.filter(x => !query || x.name.toLowerCase().includes(query));
-
-  return html`
-    <header class="modal__head">
-      <div>
-        <p class="modal__kicker">${t('Projektleitung')}</p>
-        <h2 class="modal__title" id="modal-title">${project.title}</h2>
-        <p class="modal__meta-line">${current
-          ? `${t('Aktuell')}: ${current.name} · ${personUtilisation(current.id, 0)} %`
-          : t('Aktuell nicht zugewiesen')}</p>
-      </div>
-      <button type="button" class="modal__close" data-act="close-modal" aria-label="${t('Schliessen')}">${icons.close(14)}</button>
-    </header>
-
-    <div class="rebook__to">
-      <label class="dd__searchfield">
-        ${icons.search(14)}
-        <input type="search" role="combobox" aria-expanded="true" aria-controls="assign-list"
-               data-act="assign-search" data-fk="assign-search" value="${search}"
-               placeholder="${t('Person suchen')}" aria-label="${t('Person suchen')}" autocomplete="off">
-      </label>
-      <ul class="rebook__list" id="assign-list" role="listbox" aria-label="${t('Person wählen')}">
-        ${candidates.length ? candidates.map(c => html`<li role="option" tabindex="-1"
-            aria-selected="${aria(c.id === targetId)}" class="${c.id === targetId ? 'is-on' : ''}"
-            data-act="assign-target" data-val="${c.id}">
-          <span>${c.name}</span>
-          <span class="rebook__role">${c.role} · ${personUtilisation(c.id, 0)} %</span>
-        </li>`) : html`<li class="rebook__empty">${t('Keine Person gefunden.')}</li>`}
-      </ul>
-    </div>
-
-    <footer class="modal__foot">
-      ${current && html`<button type="button" class="btn" data-act="assign-clear">${t('Zuweisung aufheben')}</button>`}
-      <button type="button" class="btn" data-act="close-modal">${t('Abbrechen')}</button>
-      <button type="button" class="btn btn--primary" data-act="assign-apply" ${attr(!targetId, 'disabled')}>${t('Zuweisen')}</button>
-    </footer>`;
-}
-
-function shareModal({ copied }) {
-  const chips = activeFilters();
-  return html`
-    <header class="modal__head">
-      <div>
-        <p class="modal__kicker">${t('Teilen')}</p>
-        <h2 class="modal__title" id="modal-title">${t('Diese Ansicht teilen')}</h2>
-      </div>
-      <button type="button" class="modal__close" data-act="close-modal" aria-label="${t('Schliessen')}">${icons.close(14)}</button>
-    </header>
-
-    <p class="modal__lead">${t('Der Link enthält Ansicht, Filter, Gruppierung, Sortierung und Einheit — wer ihn öffnet, sieht genau diesen Stand.')}</p>
-
-    <div class="share">
-      <label class="share__field">
-        <span class="sr-only">${t('Link')}</span>
-        <input type="text" readonly value="${location.href}" data-fk="share-url"
-               data-act="share-select" aria-label="${t('Link')}">
-      </label>
-      <button type="button" class="btn btn--primary" data-act="share-copy">
-        ${copied ? icons.check(14) : icons.externalLink(14)}${copied ? t('Kopiert') : t('Link kopieren')}
-      </button>
-    </div>
-
-    <dl class="share__state">
-      <div><dt>${t('Ansicht')}</dt><dd>${t(tabLabel())}</dd></div>
-      <div><dt>${t('Aktive Filter')}</dt><dd>${chips.length ? chips.map(c => t(c.label)).join(', ') : t('keine')}</dd></div>
-      <div><dt>${t('Einheit')}</dt><dd>${state.unit === 'fte' ? 'FTE' : t('Pensum in %')}</dd></div>
-    </dl>
-
-    <footer class="modal__foot">
-      <button type="button" class="btn btn--primary" data-act="close-modal">${t('Schliessen')}</button>
-    </footer>`;
-}
-
-const TAB_LABELS = {
-  start: 'Einstieg', uebersicht: 'Übersicht', termine: 'Termine',
-  dashboard: 'Dashboard', verlauf: 'Verlauf', api: 'API-Dokumentation', export: 'Drucklayout'
-};
-const tabLabel = () => TAB_LABELS[state.tab] ?? state.tab;
-
-function projectModal({ projectId }) {
-  const p = data.projectsById[projectId];
-  const lead = p.leadId ? data.peopleById[p.leadId] : null;
-  const cells = projectDemand(p);
-  const phase = phaseOf(p.phase);
-  const q0 = data.quarters[0];
-  const nextMs = data.milestones.items
-    .filter(m => m.projectId === p.id)
-    .sort((a, b) => a.planDate.localeCompare(b.planDate))[0];
-  const nextName = nextMs && data.milestones.catalog.find(c => c.code === nextMs.code)?.name;
-  const log = data.changes.filter(c => c.projectId === p.id);
-  const util = lead ? personUtilisation(lead.id, 0) : null;
-
-  // The wireframe is explicit: five facts, always the same, in this order.
-  const facts = [
-    {
-      term: 'SIA-Phase',
-      value: phase.label,
-      sub: `${t('Hauptphase')} ${phase.main}`
-    },
-    {
-      term: 'Projektleitung',
-      value: lead ? lead.name : t('— nicht zugewiesen'),
-      sub: lead ? `${t('Auslastung')} ${q0.short}: ${util > 100 ? '▲ ' : ''}${util} %` : t('Bedarf offen'),
-      tone: lead ? (util > 100 ? 'danger' : null) : 'warn'
-    },
-    {
-      term: `${t('Pensum')} ${q0.label}`,
-      value: fmt(cells[0]),
-      sub: `${t('Soll')} ${fmt(p.target)} · ${cells[0] > p.target ? t('über Soll') : t('im Soll')}`,
-      tone: cells[0] > p.target ? 'danger' : null
-    },
-    {
-      term: 'Kredit CHF',
-      value: p.creditLabel,
-      sub: p.preCredit ? t('Freigabe steht aus') : t('Kredit freigegeben')
-    },
-    {
-      term: 'Nächster Meilenstein',
-      value: nextMs ? `${nextMs.code} · ${deDate(nextMs.planDate)}` : '—',
-      sub: nextMs ? `${nextName} · ${nextMs.statusLabel.replace('▲ ', '')}` : t('kein Gate im Zeitraum'),
-      tone: nextMs && nextMs.status !== 'ok' ? 'danger' : null
-    }
-  ];
-
-  return html`
-    <header class="modal__head">
-      <div>
-        <p class="modal__kicker">${p.number} · ${t(data.portfoliosById[p.portfolio].label)} · ${p.location.split(',')[0]}</p>
-        <h2 class="modal__title" id="modal-title">${p.title}</h2>
-      </div>
-      <button type="button" class="modal__close" data-act="close-modal" aria-label="${t('Schliessen')}">${icons.close(14)}</button>
-    </header>
-
-    <dl class="facts">
-      ${facts.map(f => html`<div class="facts__row">
-        <dt>${t(f.term)}</dt>
-        <dd class="${f.tone ? 'is-' + f.tone : ''}">${f.value}<span class="facts__sub">${f.sub}</span></dd>
-      </div>`)}
-    </dl>
-
-    <section class="modal__section">
-      <h3>${t('Pensum je Quartal')}</h3>
-      <div class="minigrid">
-        ${data.quarters.map((q, i) => html`<div class="minigrid__col">
-          <span class="minigrid__q">${q.short}<span>/${String(q.year).slice(2)}</span></span>
-          <span class="minigrid__v heat-${heatStep(cells[i])}">${num(cells[i])}</span>
-        </div>`)}
-      </div>
-    </section>
-
-    ${log.length ? html`<section class="modal__section">
-      <h3>${t('Letzte Änderungen')}</h3>
-      <ul class="modal__log">
-        ${log.map(c => html`<li><span>${c.dateLabel}</span><span>${t(c.field)}</span><span>${c.change}</span><span>${c.value}</span></li>`)}
-      </ul>
-    </section>` : ''}
-
-    <footer class="modal__foot">
-      <button type="button" class="btn" data-act="open-termine" data-val="${p.id}">${t('In Termine öffnen')}</button>
-      <button type="button" class="btn btn--primary" data-act="noop">${t('Im ePPM öffnen')}</button>
-    </footer>`;
-}
-
-function deDate(iso) {
-  const [y, m, d] = iso.split('-');
-  return `${d}.${m}.${y}`;
-}
-
-function rebookModal({ projectId, q, amount, targetId, quarters = 2, search = '', reason = '' }) {
-  const p = data.projectsById[projectId];
-  const from = p.leadId ? data.peopleById[p.leadId] : null;
-  const quarter = data.quarters[q];
-  const query = search.trim().toLowerCase();
-  const candidates = data.people
-    .filter(x => x.id !== p.leadId)
-    .filter(x => !query || x.name.toLowerCase().includes(query));
-  const target = targetId ? data.peopleById[targetId] : null;
-  const ready = target && amount > 0 && reason.trim();
-
-  return html`
-    <header class="modal__head">
-      <div>
-        <p class="modal__kicker">${t('Pensum umbuchen')}</p>
-        <h2 class="modal__title" id="modal-title">${p.title}</h2>
-        <p class="modal__meta-line">${t('Rolle Projektleitung')} · ${t('ab')} ${quarter.label}, ${quarters} ${t('Quartale')}</p>
-      </div>
-      <button type="button" class="modal__close" data-act="close-modal" aria-label="${t('Schliessen')}">${icons.close(14)}</button>
-    </header>
-
-    <p class="modal__lead">${t('Ein Vorgang statt zwei Transaktionen: von, an, Betrag und Zeitraum ergeben einen Verlaufseintrag mit beiden Seiten.')}</p>
-
-    <div class="rebook">
-      <div class="rebook__field">
-        <span class="rebook__label">${t('Von')}</span>
-        <span class="rebook__readonly">${from ? from.name : t('nicht zugewiesen')}</span>
-      </div>
-      <div class="rebook__field rebook__field--amount">
-        <label class="rebook__label" for="rebook-amount">${t('Pensum')}</label>
-        <span class="rebook__amount">
-          <input id="rebook-amount" type="number" min="0" max="${cellValue(p, q)}" step="5"
-                 value="${amount}" data-act="rebook-amount" data-fk="rebook-amount">
-          <span>%</span>
-        </span>
-      </div>
-      <div class="rebook__field rebook__field--quarters">
-        <label class="rebook__label" for="rebook-quarters">${t('Dauer')}</label>
-        <span class="rebook__amount">
-          <input id="rebook-quarters" type="number" min="1" max="${data.quarters.length - q}" step="1"
-                 value="${quarters}" data-act="rebook-quarters" data-fk="rebook-quarters">
-          <span>${t('Quartale')}</span>
-        </span>
-      </div>
-    </div>
-
-    <div class="rebook__to">
-      <span class="rebook__label">${t('An')}</span>
-      <label class="dd__searchfield">
-        ${icons.search(14)}
-        <input type="search" role="combobox" aria-expanded="true" aria-controls="rebook-list"
-               data-act="rebook-search" data-fk="rebook-search" value="${search}"
-               placeholder="${t('Person suchen — Name oder Kürzel')}" aria-label="${t('Person suchen')}" autocomplete="off">
-      </label>
-      <ul class="rebook__list" id="rebook-list" role="listbox" aria-label="${t('Person wählen')}">
-        ${candidates.length ? candidates.map(c => html`<li role="option" tabindex="-1"
-            aria-selected="${aria(c.id === targetId)}" class="${c.id === targetId ? 'is-on' : ''}"
-            data-act="rebook-target" data-val="${c.id}">
-          <span>${c.name}</span><span class="rebook__role">${c.role}</span>
-        </li>`) : html`<li class="rebook__empty">${t('Keine Person gefunden.')}</li>`}
-      </ul>
-    </div>
-
-    <label class="pop__reason rebook__reason">
-      <span class="pop__reasonlabel">${t('Begründung')}
-        <span>${t('— Pflicht bei jeder Umbuchung')}</span></span>
-      <textarea rows="2" data-act="rebook-reason" data-fk="rebook-reason"
-        placeholder="${t('Entlastung Projektleitung gemäss Beschluss Abteilungssitzung 24.08.2026.')}">${reason}</textarea>
-    </label>
-
-    <footer class="modal__foot">
-      <button type="button" class="btn" data-act="close-modal">${t('Abbrechen')}</button>
-      <button type="button" class="btn btn--primary" data-act="rebook-apply" ${attr(!ready, 'disabled')}>${t('Umbuchen')}</button>
-    </footer>`;
-}

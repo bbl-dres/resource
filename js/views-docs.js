@@ -23,8 +23,8 @@ export function renderApi() {
       crumbs: ['Bauprojekte', 'API'],
       title: 'API-Dokumentation',
       chrome: false,
-      actions: html`<a class="btn" href="data/openapi.json" download="ressourcenplanung-openapi.json">
-        ${icons.download(15)}${t('OpenAPI 3.1 laden')}</a>`
+      actions: html`<a class="btn" href="." data-act="home">
+        ${icons.chevronLeft(15)}${t('Zurück')}</a>`
     })}
     <div class="wrap"><div class="content">
       <div id="swagger" data-swagger></div>
@@ -113,7 +113,7 @@ export function renderExport() {
 }
 
 function printSheet(sheet) {
-  const cfg = data.api.print;
+  const cfg = data.print;
   const all = filteredProjects();
   // How many rows the paper actually holds at a 26px row height.
   const perSheet = sheet.id === 'hoch' ? 24 : 14;

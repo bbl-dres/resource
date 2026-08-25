@@ -12,10 +12,12 @@ import {
 } from './store.js';
 import { loadIcons } from './icons.js';
 import { html, appHeader, appFooter, toast } from './ui.js';
-import { renderLanding, renderUebersicht, renderModal } from './views-overview.js';
+import { renderLanding, renderUebersicht } from './views-overview.js';
+import { renderModal } from './views-modals.js';
 import { renderTermine } from './views-schedule.js';
 import { renderDashboard, renderVerlauf } from './views-analysis.js';
 import { renderApi, renderExport, mountSwagger } from './views-docs.js';
+import { exportCsv, exportXlsx } from './export.js';
 
 const root = document.getElementById('app');
 
@@ -312,7 +314,14 @@ const actions = {
   'close-modal': () => setState({ modal: null }),
   export: (val) => {
     if (val === 'pdf') return setState({ tab: 'export', menu: null });
-    flash(`${t('Export')} «${val.toUpperCase()}» — ${t('im Prototyp nicht hinterlegt.')}`);
+    setState({ menu: null });
+    try {
+      const name = val === 'csv' ? exportCsv() : exportXlsx();
+      flash(`${name} — ${t('heruntergeladen')}`);
+    } catch (error) {
+      console.error(error);
+      flash(t('Export fehlgeschlagen.'));
+    }
   },
   sheet: (val) => setState({ sheet: val }),
   print: () => window.print()

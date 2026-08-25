@@ -10,7 +10,6 @@ import {
 import {
   html, raw, icons, pageHeader, editToggle, exportMenu, toolbar, activeFilterRow,
   timeControls, tooNarrow,
-  aria
 } from './ui.js';
 
 
@@ -72,7 +71,7 @@ function ganttView() {
       return html`<section class="gantt__group">
         ${g.label && html`<h2 class="pgrouphead">
           <button type="button" class="pgrouphead__toggle" data-act="toggle-group" data-val="g:${g.key}"
-                  aria-expanded="${aria(!collapsed)}">
+                  aria-expanded="${!collapsed}">
             <span class="caret ${collapsed ? 'is-collapsed' : ''}" aria-hidden="true">${icons.chevronDown()}</span>
             <span class="pgrouphead__name">${g.label}</span>
             <span class="count-pill">${g.projects.length}</span>
@@ -99,11 +98,11 @@ function ganttView() {
           <div class="capband__title">${t('Auslastung')}</div>
         </div>
         <div class="capband__cells">
-          ${cols.map((col, i) => {
+          ${cols.map(col => {
             const pct = periodValue(tot.utilisation, col);
             const q = col.quarters[0];
             const st = loadStatus(pct);
-            return html`<div class="capband__cell is-${st.key} ${bandStart(cols, i) ? 'is-yearstart' : ''}"
+            return html`<div class="capband__cell is-${st.key} ${col.yearStart ? 'is-yearstart' : ''}"
                 title="${col.label}: ${pct} % — ${t(st.label)} · ${tot.booked[q]} % ${t('gebucht auf')} ${tot.net[q]} % ${t('netto')}">
               <span class="capband__value">${pct} %</span>
             </div>`;
@@ -123,7 +122,7 @@ function ganttView() {
  * capacity band was reduced to figures.
  */
 function ganttLegend() {
-  const l = data.api.print.legend;
+  const l = data.print.legend;
   return html`<div class="heatlegend">
     <span class="heatlegend__label">${t('Legende')}</span>
     <span class="heatlegend__item"><span class="heatlegend__swatch is-delay"></span>${t('Verzug')}</span>
@@ -135,16 +134,12 @@ function ganttLegend() {
   </div>`;
 }
 
-/** The year a column sits in, and where a new one starts. */
-const bandOf = col => data.quarters[col.quarters[0]].year;
-const bandStart = (cols, i) => i === 0 || bandOf(cols[i]) !== bandOf(cols[i - 1]);
-
 function ganttAxis(cols) {
   // At year scale the columns already are the years, so a band would repeat them.
   const bands = [];
   if (state.scale !== 'jahr') {
     cols.forEach((col, i) => {
-      if (bandStart(cols, i)) bands.push({ label: bandOf(col), span: 1 });
+      if (col.yearStart) bands.push({ label: col.year, span: 1 });
       else bands[bands.length - 1].span++;
     });
   }
@@ -155,7 +150,7 @@ function ganttAxis(cols) {
         ${bands.map(b => html`<div class="gantt__year" style="grid-column:span ${b.span}">${b.label}</div>`)}
       </div>` : ''}
       <div class="gantt__quarters">
-        ${cols.map((col, i) => html`<div class="${col.isNow ? 'is-today' : ''} ${bandStart(cols, i) ? 'is-yearstart' : ''}"
+        ${cols.map(col => html`<div class="${col.isNow ? 'is-today' : ''} ${col.yearStart ? 'is-yearstart' : ''}"
           title="${col.label}">${col.short}</div>`)}
       </div>
     </div>
@@ -174,7 +169,7 @@ function ganttRow(p, cols) {
               title="${p.title}">${p.title}</button>
     </div>
     <div class="gantt__track">
-      ${cols.map((_, n) => html`<span class="gantt__gridline ${bandStart(cols, n) ? 'is-yearstart' : ''}"
+      ${cols.map((col, n) => html`<span class="gantt__gridline ${col.yearStart ? 'is-yearstart' : ''}"
         style="grid-column:${n + 1}"></span>`)}
       ${bars.map((b, i) => ganttBar(b, i, bars, cols))}
       ${bars.some(b => b.openEnd) && openEndRail(bars.find(b => b.openEnd), cols)}

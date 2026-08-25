@@ -9,7 +9,7 @@
 
 const DATA_FILES = [
   'meta', 'phases', 'people', 'capacity', 'projects',
-  'milestones', 'changes', 'dashboard', 'i18n', 'api'
+  'milestones', 'changes', 'dashboard', 'i18n', 'print'
 ];
 
 /** Raw data, populated by load(). */
@@ -290,13 +290,15 @@ export function heatStep(v) {
 
 /** Traffic light for the row's project lead, based on the current quarter. */
 export function ampel(personId, q = 0) {
-  if (!personId) return { key: 'none', title: 'Keine Projektleitung zugewiesen — keine Ampel' };
+  if (!personId) {
+    return { key: 'none', word: 'ohne Projektleitung', title: 'Keine Projektleitung zugewiesen — keine Ampel' };
+  }
   const person = data.peopleById[personId];
   const pct = personUtilisation(personId, q);
   const key = pct > 100 ? 'over' : pct >= 95 ? 'tight' : 'ok';
   const word = key === 'over' ? 'Überlast' : key === 'tight' ? 'knapp' : 'im Rahmen';
   const label = data.quarters[q].label;
-  return { key, pct, title: `${person.name}: ${pct} % der Anstellung in ${label} — ${word}` };
+  return { key, pct, word, title: `${person.name}: ${pct} % der Anstellung in ${label} — ${word}` };
 }
 
 /* -----------------------------------------------------------------------------
@@ -338,6 +340,25 @@ const MONTHS_DE = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep
  * a year is the average of its quarters — never their sum.
  */
 export function periods() {
+  return markYears(buildPeriods());
+}
+
+/**
+ * A year starts wherever a column's year differs from the one before it. Both
+ * grids draw their separator from this, so they cannot disagree — and it stays
+ * right at every scale and wherever the window has been stepped to.
+ */
+function markYears(cols) {
+  let previous = null;
+  return cols.map(col => {
+    const year = data.quarters[col.quarters[0]].year;
+    const yearStart = previous === null || year !== previous;
+    previous = year;
+    return { ...col, year, yearStart };
+  });
+}
+
+function buildPeriods() {
   const qs = data.quarters;
   const off = state.periodOffset;
 

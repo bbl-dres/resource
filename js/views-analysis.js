@@ -11,7 +11,6 @@ import {
 import {
   html, icons, pageHeader, exportMenu, toolbar, activeFilterRow,
   columnChart, barList, kpiStrip,
-  aria
 } from './ui.js';
 
 /* =============================================================================
@@ -53,7 +52,7 @@ function biCard(id, title, subtitle, body, { full = false } = {}) {
       </div>
       <div class="dd bi-card__tools">
         <button type="button" class="iconbtn ${open ? 'is-open' : ''}" data-act="menu" data-val="card:${id}"
-                aria-expanded="${aria(open)}" aria-haspopup="menu"
+                aria-expanded="${open}" aria-haspopup="menu"
                 aria-label="${t('Karte exportieren oder teilen')}">${icons.kebab(15)}</button>
         ${open && html`<div class="dd__panel dd__panel--right" role="menu" style="width:212px">
           ${menu.items.map(label => html`<button type="button" class="dd__item" role="menuitem"

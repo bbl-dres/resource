@@ -35,7 +35,7 @@ running the content through Jekyll.
 |---|---|---|
 | Einstieg (landing) | `#?tab=start` | What is due today: KPI entries, next milestones, who is overbooked, utilisation by quarter, recent changes. Every card leads into a tab. |
 | Übersicht | `#?tab=uebersicht` | The pensum grid: projects × eight quarters, with a capacity footer. Switch on **Bearbeiten** to edit a cell. |
-| Termine | `#?tab=termine&view=gantt` | Three views of the same milestones: **Gantt** (phase bars plus a capacity band), **Liste** (one row per milestone), **Kalender** (twelve months as columns). |
+| Termine | `#?tab=termine` | The bar plan: phase bars, milestone diamonds and a today line, with the same capacity band the Übersicht carries in its footer. Same time scale and period stepper as the Übersicht. |
 | Dashboard | `#?tab=dashboard` | The KPI strip plus aggregates over phase, person, location and budget. |
 | Verlauf | `#?tab=verlauf` | The immutable change log for app-owned fields. |
 | API | `#?tab=api` | Swagger UI over `data/openapi.json` — a real OpenAPI 3.1 document, 13 operations in five groups, with a response example per endpoint. Reached from the **API** link in the footer. |
@@ -56,10 +56,12 @@ running the content through Jekyll.
 - **Grouping and sorting**, column and unit toggles (`%` ↔ FTE), *Soll-Pensum* and *Verlauf* columns.
 - **Expandable search** in the header and in the toolbar: click the icon, the field grows in place.
   The two open independently and share the query.
-- **Menus that behave like menus.** The project-lead menu filters as you type, offers
-  *Meine Projekte*, floats selected entries to the top and scrolls at 214px. Arrow keys roam,
-  `Escape` closes and hands focus back to the trigger, and panels stay inside the window.
-- **Frozen grid columns.** ID and project stay put while the quarters scroll under them.
+- **Menus that behave like menus.** The project-lead menu filters as you type, floats selected
+  entries to the top and scrolls at 214px. Arrow keys roam, `Escape` closes and hands focus back
+  to the trigger, and panels stay inside the window. *Mir zugewiesen* sits in the toolbar itself.
+- **Frozen master data.** Every lead column — ID, project, phase, lead, Ampel, budget — holds its
+  place while only the time axis scrolls under it. There is no scrollbar: the arrows beside
+  *Heute* step the window, and the rows fade out at the right edge where the axis continues.
 - **Time scale.** Jahr / Quartal / Monat with a period stepper. A pensum is a rate, so a year is
   the average of its quarters and a month carries its quarter's figure — never a sum.
 - **Assigning a lead.** In edit mode the Projektleitung cell opens a searchable picker; every
@@ -67,6 +69,14 @@ running the content through Jekyll.
 - **Sortable columns.** Clicking a header sorts by it; clicking the active one flips the
   direction. The sort dropdown and the headers read the same state.
 - **Teilen** opens a dialog with the shareable URL for the current view.
+- **CSV and Excel export.** Both write the grid exactly as it stands on screen — same columns,
+  filters, grouping, sorting and time scale. The CSV is semicolon-separated with a UTF-8 BOM so
+  Excel opens it natively in a de-CH locale; the `.xlsx` is a real workbook with number formats,
+  column widths and the same frozen pane, written without a library.
+- **CSV and Excel export.** Both write the grid exactly as it stands on screen — same columns,
+  filters, grouping, sorting and time scale. The CSV is semicolon-separated with a UTF-8 BOM so
+  Excel opens it natively in a de-CH locale; the `.xlsx` is a real workbook with number formats,
+  column widths and the same frozen pane, written without a library.
 - **DE / EN.** The language menu translates the interface live. FR and IT are listed as pending,
   exactly as the wireframe specifies.
 - **URL state.** Tab, view, filters, grouping, sorting, unit and search live in the hash, so any
@@ -86,10 +96,12 @@ js/
   store.js            data loading, application state, URL sync, all derived figures
   ui.js               html`` templating, icons, and the shared shell components
   icons.js            loads the Lucide SVGs into one in-document sprite
-  views-overview.js   landing page, pensum grid, edit popover, project and rebook modals
-  views-schedule.js   Termine: Gantt, Liste, Kalender
+  views-overview.js   landing page, pensum grid, edit popover
+  views-modals.js     the four dialogs: project, assign, rebook, share
+  views-schedule.js   Termine: the bar plan and its capacity band
   views-analysis.js   Dashboard and Verlauf
-  views-docs.js       API reference and the PDF print layout
+  views-docs.js       Swagger UI mount and the PDF print layout
+  export.js           the CSV and XLSX writers
 data/                 static mock data, see below
 assets/
   swiss-logo-flag.svg
@@ -107,10 +119,11 @@ State changes re-render `#app` wholesale. With eleven rows that is far below a f
 and focus, caret position and scroll offset are restored afterwards, so typing and
 tabbing survive a re-render.
 
-Two helpers exist because of how the escaping works, and both are worth knowing about:
+Two rules follow from how the escaping works:
 
-- `aria(value)` renders `"true"` / `"false"` — a bare boolean interpolates to an empty
-  string so that `` cond && html`…` `` renders nothing.
+- A boolean renders to the empty string, so that `` cond && html`…` `` renders nothing. The one
+  exception is an ARIA slot, where `html` spells the boolean out — `aria-expanded=""` is not
+  "collapsed", it is invalid.
 - `attr(cond, 'disabled')` emits a raw attribute fragment; interpolating that string
   directly would escape it and the attribute would silently never apply.
 
@@ -136,7 +149,7 @@ Everything lives in `data/` as plain JSON.
 | `phases.json` | SIA 112 main phases and sub-phases |
 | `dashboard.json` | The one dashboard series that is not derivable (budget by year) |
 | `i18n.json` | The DE → EN dictionary |
-| `api.json` | The print letterhead, legend and document metadata |
+| `print.json` | The print letterhead, legend and document metadata |
 | `openapi.json` | The OpenAPI 3.1 document Swagger UI renders |
 
 **Nothing that can be computed is stored.** Demand totals, net capacity, utilisation,
@@ -157,30 +170,28 @@ its split by SIA phase, the project count per phase, and the milestone counts
 
 ---
 
-Two review documents sit alongside this one: [docs/DESIGN-REVIEW.md](docs/DESIGN-REVIEW.md) is a
-measured design and accessibility audit (contrast, greyscale legibility, density on a small
-laptop, target sizes, ARIA), and the gap analysis below.
+Three review documents sit alongside this one:
 
-A full comparison against the mockup — what was missing, what deviates and what was fixed —
-is in [docs/GAP-ANALYSIS.md](docs/GAP-ANALYSIS.md).
+- [docs/GAP-ANALYSIS.md](docs/GAP-ANALYSIS.md) — a full comparison against the mockup: what was
+  missing, what deviates and what was fixed.
+- [docs/DESIGN-REVIEW.md](docs/DESIGN-REVIEW.md) — a measured design and accessibility audit:
+  contrast, greyscale legibility, density on a small laptop, target sizes, ARIA.
+- [docs/CODE-REVIEW.md](docs/CODE-REVIEW.md) — correctness, structure, duplication and dead
+  code, with the fixes applied.
 
 ## Deliberate deviations from the wireframe
 
 Worth reviewing — each is a one-line change if you disagree:
 
-1. **Coloured phase bars in the Gantt.** The wireframe draws every bar in the same
-   neutral steel; the prototype tints them with the SIA phase palette that the design
-   already defines for the phase dots. It makes the phase chain readable at a glance.
-   To revert, drop `is-phase ${phaseClass(b.phase)}` in `js/views-schedule.js`.
-2. **Grouping is applied, not decorative.** The wireframe's toolbar reads
+1. **Grouping is applied, not decorative.** The wireframe's toolbar reads
    "Gruppieren nach: Projektleitung" while the grid renders flat. Here grouping really
    groups, and the default is **Teilportfolio** on every tab.
-3. **Teilportfolio split.** The wireframe's dashboard shows Inland 312 % and Sport 35 %;
+2. **Teilportfolio split.** The wireframe's dashboard shows Inland 312 % and Sport 35 %;
    those numbers do not tie to any assignment of the eleven projects. The prototype
    derives the card from the data and lands on 310 % and 37 %.
-4. **Change-log pagination.** The wireframe shows "1 – 25 von 214 Einträgen". The
+3. **Change-log pagination.** The wireframe shows "1 – 25 von 214 Einträgen". The
    prototype has nine real entries and says so.
-5. **Design annotations removed.** The wireframe's "Wofür / Stärke / Grenze" notes are
+4. **Design annotations removed.** The wireframe's "Wofür / Stärke / Grenze" notes are
    review commentary and are not part of the application.
 
 ## Known limits
@@ -198,8 +209,8 @@ Worth reviewing — each is a one-line change if you disagree:
 - **Rebooking** moves the whole project lead rather than splitting the allocation into
   two person-level rows. The data model does not carry per-person allocations yet — the API
   reference shows the `allocations` shape a real implementation would use.
-- Export, sharing, the time-scale switch (Jahr / Monat) and the period stepper are
-  inert and say so.
+- **The Gantt's own list and calendar views are gone.** They showed the same milestones
+  without adding a reading the bar plan does not already give.
 
 ## Licence
 
