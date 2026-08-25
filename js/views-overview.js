@@ -204,7 +204,10 @@ function utilisationCard() {
       <h2 class="card__title">${t('Auslastung nach Quartal')}</h2>
       <p class="card__sub">${t('Bedarf gegen Kapazität netto')} · ${t('öffnet die Übersicht')}</p>
     </header>
-    ${columnChart(utilisationChartRows(), { height: 150, refAt: 100, refLabel: '100 %' })}
+    <button type="button" class="chartlink" data-act="tab" data-val="uebersicht"
+            aria-label="${t('Auslastung nach Quartal')} — ${t('öffnet die Übersicht')}">
+      ${columnChart(utilisationChartRows(), { height: 150, refAt: 100, refLabel: '100 %' })}
+    </button>
   </section>`;
 }
 

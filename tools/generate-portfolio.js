@@ -243,7 +243,8 @@ function makeTeam(rosterTarget) {
    -------------------------------------------------------------------------- */
 
 const GATE = { '11': 'MS1', '21': 'MS2', '31': 'MS3', '33': 'MS4', '41': 'MS5', '53': 'MS6' };
-const QUARTER_IDS = read('meta').quarters.map(q => q.id);
+const META = read('meta');
+const QUARTER_IDS = META.quarters.map(q => q.id);
 const QUARTER_END = ['2026-09-30', '2026-12-31', '2027-03-31', '2027-06-30',
   '2027-09-30', '2027-12-31', '2028-03-31', '2028-06-30'];
 
@@ -324,23 +325,29 @@ const leads = people.filter(p => LEAD_ROLES.has(p.role));
 
 /* Existing assignments stay; the rest are spread over the team, and a handful
    are deliberately left open because that case has to stay visible. */
-const load = Object.fromEntries(people.map(p => [p.id, 0]));
-for (const p of existing) if (p.leadId) load[p.leadId] += p.demand[0];
-
 /*
- * Each project goes to somebody drawn from the least loaded third of the team.
- * Drawing from the whole team leaves both ends ragged — people with nothing at
- * all, and people at twice their contract — which reads as a data fault rather
- * than as the real overload the view exists to show. Drawing from the four
- * least loaded keeps the spread tight without making everyone identical.
+ * Assignment minimises the peak a person would end up carrying, quarter by
+ * quarter and against their own contract. Balancing on a total — or on the
+ * current quarter — lets a project that peaks later slip past the check, and a
+ * 40 % contract ends up leading an 85 % project. What is displayed is the peak,
+ * so the peak is what the assignment optimises.
  */
-const ratio = person => load[person.id] / person.employment;
+const loadQ = Object.fromEntries(people.map(p => [p.id, Array(QUARTERS).fill(0)]));
+for (const p of existing) {
+  if (p.leadId) p.demand.forEach((v, q) => { loadQ[p.leadId][q] += v; });
+}
+
+const peakWith = (person, project) => Math.max(...loadQ[person.id]
+  .map((v, q) => (v + (project ? project.demand[q] : 0)) / person.employment));
+
 for (const p of generated) {
   if (rnd() < 0.05) continue;                        // ohne Projektleitung
-  const pool = [...leads].sort((a, b) => ratio(a) - ratio(b)).slice(0, 4);
+  // The three who would carry it most lightly; one of them at random, so the
+  // team does not come out identical.
+  const pool = [...leads].sort((a, b) => peakWith(a, p) - peakWith(b, p)).slice(0, 3);
   const to = pick(pool);
   p.leadId = to.id;
-  load[to.id] += p.demand[0];
+  p.demand.forEach((v, q) => { loadQ[to.id][q] += v; });
 }
 
 /*
@@ -378,6 +385,92 @@ const milestones = read('milestones');
 const existingIds = new Set(milestones.items.map(m => m.projectId));
 milestones.items = [...milestones.items,
   ...makeMilestones(generated).filter(m => !existingIds.has(m.projectId))];
+
+/*
+ * A change log for a portfolio this size. The nine hand-written entries stay at
+ * the top — they are the ones the landing page tells its story with — and the
+ * generated history sits behind them, over the ten weeks before today.
+ */
+const CHANGE_DAYS = 70;
+const WORDS = {
+  Pensum: [
+    'Bauleitung Etappe 2 vorgezogen', 'Pensum nach Rückmeldung Nutzer erhöht',
+    'Aufwand Submission nach unten korrigiert', 'Zusatzaufwand Schadstoffsanierung',
+    'Begleitung Bauherr reduziert', 'Mehraufwand Koordination Haustechnik',
+    'Aufwand Ausschreibung neu geschätzt', 'Betreuung nach Vergabe reduziert',
+    'Aufwand nach Einsprache erhöht', 'Planungsaufwand nach Vorprojekt angepasst'
+  ],
+  Meilenstein: [
+    'MS3 Vorprojekt neu terminiert', 'MS4 Baukredit neu terminiert',
+    'MS5 Vergabe neu terminiert', 'MS2 Machbarkeit bestätigt',
+    'MS6 Abnahme neu terminiert'
+  ],
+  Termin: [
+    'Bauende verschoben', 'Baubeginn vorgezogen', 'Bezug neu terminiert',
+    'Etappierung angepasst', 'Submissionsfrist verlängert'
+  ],
+  Projektleitung: ['Übergabe nach Pensionierung', 'Übergabe wegen Überlast', 'Neuzuteilung Teilportfolio'],
+  'Begründung': [
+    'Überlast freigegeben', 'Abweichung dokumentiert', 'Freigabe Bereichsleitung erfasst'
+  ],
+  Abwesenheiten: ['Ferien erfasst', 'Weiterbildung erfasst', 'Militärdienst erfasst']
+};
+
+function changeLog() {
+  const out = [];
+  const today = new Date(META.today + 'T00:00:00');
+  const stamp = (back) => {
+    const d = new Date(today.getTime() - back * 86400000);
+    // The federal administration does not book changes at the weekend.
+    if (d.getDay() === 0) d.setDate(d.getDate() - 2);
+    if (d.getDay() === 6) d.setDate(d.getDate() - 1);
+    const iso = d.toISOString().slice(0, 10);
+    const [y, m, dd] = iso.split('-');
+    return { date: iso, dateLabel: `${dd}.${m}.${y}` };
+  };
+
+  const withLead = projects.filter(p => p.leadId);
+  for (let i = 0; i < 240; i++) {
+    const p = pick(withLead);
+    const lead = people.find(x => x.id === p.leadId);
+    const field = weighted([['Pensum', 46], ['Meilenstein', 16], ['Termin', 12],
+      ['Begründung', 12], ['Projektleitung', 7], ['Abwesenheiten', 7]]);
+    const when = stamp(4 + Math.floor(rnd() * CHANGE_DAYS));
+
+    let value;
+    if (field === 'Pensum') {
+      const from = Math.max(5, Math.round(Math.max(...p.demand) * (0.5 + rnd() * 0.5) / 5) * 5);
+      const to = Math.max(5, from + (rnd() < 0.55 ? 1 : -1) * (5 + Math.floor(rnd() * 4) * 5));
+      value = `${from} % → ${to} %`;
+    } else if (field === 'Meilenstein' || field === 'Termin') {
+      const a = between(0, 5);
+      value = `${QUARTER_IDS[a].slice(4)}/${QUARTER_IDS[a].slice(2, 4)} → ${QUARTER_IDS[a + 1].slice(4)}/${QUARTER_IDS[a + 1].slice(2, 4)}`;
+    } else if (field === 'Projektleitung') {
+      value = `${pick(people).shortName} → ${lead ? lead.shortName : '—'}`;
+    } else if (field === 'Abwesenheiten') {
+      value = `+${between(1, 4) * 5} %`;
+    } else {
+      value = 'erfasst';
+    }
+
+    out.push({
+      id: `c-gen-${i}`,
+      date: when.date,
+      dateLabel: when.dateLabel,
+      actor: lead ? lead.name : META.user.name,
+      projectId: p.id,
+      projectLabel: p.location,
+      field,
+      change: pick(WORDS[field]),
+      value,
+      onLanding: false
+    });
+  }
+  return out.sort((a, b) => b.date.localeCompare(a.date));
+}
+
+const changes = read('changes');
+write('changes', [...changes, ...changeLog()]);
 
 /* Committed credit by year of realisation, derived rather than asserted. */
 const dashboard = read('dashboard');

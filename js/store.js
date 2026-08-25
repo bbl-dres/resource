@@ -51,6 +51,9 @@ const DEFAULT_STATE = {
   menuSearch: '',          // filter inside the open dropdown
   modal: null,             // { type: 'project'|'rebook', ... }
   footDetails: false,
+  bi: 'allgemein',         // dashboard section: allgemein | personen
+  pSort: 'peak',           // person table: name | role | employment | projects | peak | q0…q7
+  pDir: 'desc',
   showAll: { attention: false, milestones: false },   // landing cards, expanded
   searchOpen: { header: false, toolbar: false },   // the two fields open independently
   collapsedGroups: {},
@@ -111,6 +114,7 @@ export function readUrl() {
   if (p.get('sort')) patch.sort = p.get('sort');
   if (p.get('dir')) patch.sortDir = p.get('dir');
   if (p.get('group')) patch.group = p.get('group');
+  if (p.get('bi')) patch.bi = p.get('bi');
   if (p.has('q')) patch.search = p.get('q');
   if (p.has('phase')) patch.phases = list('phase');
   if (p.has('lead')) patch.leads = list('lead');
@@ -134,6 +138,7 @@ export function writeUrl() {
   if (state.sort !== 'projekt') p.set('sort', state.sort);
   if (state.sortDir !== 'asc') p.set('dir', state.sortDir);
   if (state.group !== 'portfolio') p.set('group', state.group);
+  if (state.tab === 'dashboard' && state.bi !== 'allgemein') p.set('bi', state.bi);
   if (state.search) p.set('q', state.search);
   if (state.phases.length) p.set('phase', state.phases.join(','));
   if (state.leads.length) p.set('lead', state.leads.join(','));
@@ -565,12 +570,51 @@ export function milestoneStats() {
    Derived: the KPI strip, shared by every tab
    -------------------------------------------------------------------------- */
 
+/**
+ * Everything the person table shows, in one place: the load a person carries in
+ * each period against their own contract, plus the peak — which is the answer a
+ * single quarter cannot give.
+ */
+export function personRows() {
+  const cols = periods();
+  return data.people.map(person => {
+    const values = cols.map(col =>
+      Math.round(periodValue(person.baseLoad, col) / person.employment * 100));
+    const leads = data.projects.filter(p => p.leadId === person.id).length;
+    return {
+      person, values, leads,
+      peak: leads ? Math.max(...values) : null,
+      now: values[0]
+    };
+  });
+}
+
+/** Sorters for the person table, one per column the header offers. */
+export const P_SORTS = {
+  name: r => r.person.name,
+  role: r => r.person.role,
+  employment: r => r.person.employment,
+  projects: r => r.leads,
+  peak: r => r.peak ?? -1
+};
+
+export function sortPersonRows(rows) {
+  const q = /^q(\d+)$/.exec(state.pSort);
+  const value = q ? (r => r.values[Number(q[1])] ?? -1) : (P_SORTS[state.pSort] ?? P_SORTS.peak);
+  const dir = state.pDir === 'asc' ? 1 : -1;
+  return [...rows].sort((a, b) => {
+    const x = value(a), y = value(b);
+    return (typeof x === 'string' ? x.localeCompare(y) : x - y) * dir;
+  });
+}
+
 export function kpis() {
   const list = filteredProjects();
   const tot = totals(list);
   const credit = list.reduce((a, p) => a + (p.credit ?? 0), 0);
   const peak = data.dashboard.creditByYear.rows.reduce((a, r) => (r.value > a.value ? r : a));
-  const over = data.people.filter(p => personLoad(p.id, 0) > 100);
+  const over = data.people.filter(p => personLoad(p.id, 0) > 100)
+    .sort((a, b) => personUtilisation(b.id, 0) - personUtilisation(a.id, 0));
   const overQuarters = tot.utilisation.filter(v => v > 100).length;
   const lastOver = tot.utilisation.reduce((last, v, i) => (v > 100 ? i : last), -1);
   const unassigned = list.filter(p => !p.leadId);
@@ -597,9 +641,13 @@ export function kpis() {
     people: {
       label: 'Personen über 100 %',
       value: `${over.length} von ${data.people.length}`,
+      // Three names give the note a face; a list of twenty is a wall.
       note: over.length
-        ? '▲ ' + over.map(p => `${p.shortName} ${personLoad(p.id, 0)}`).join(' · ')
+        ? '▲ ' + over.slice(0, 3).map(p => `${p.shortName} ${personLoad(p.id, 0)}`).join(' · ')
         : 'alle innerhalb der Anstellung',
+      more: over.length > 3
+        ? { label: `${over.length - 3} weitere`, act: 'scroll-to', val: 'card-personen' }
+        : null,
       alert: over.length > 0
     },
     unassigned: {

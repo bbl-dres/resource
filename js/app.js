@@ -325,6 +325,17 @@ const actions = {
       flash(t('Export fehlgeschlagen.'));
     }
   },
+  /* The strip names a few; the card below carries the rest. */
+  bi: (val) => setState({ bi: val }),
+
+  /* Clicking the sorted column flips it; a new column starts on its own default. */
+  'sort-person': (val) => setState(s => (s.pSort === val
+    ? { pDir: s.pDir === 'asc' ? 'desc' : 'asc' }
+    : { pSort: val, pDir: val === 'name' || val === 'role' ? 'asc' : 'desc' })),
+
+  'scroll-to': (val) => root.querySelector(`#${val}`)
+    ?.scrollIntoView({ behavior: 'smooth', block: 'start' }),
+
   sheet: (val) => setState({ sheet: val }),
   print: () => window.print()
 };

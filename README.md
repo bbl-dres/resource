@@ -36,10 +36,10 @@ running the content through Jekyll.
 | Einstieg (landing) | `#?tab=start` | What is due today: KPI entries, next milestones, who is overbooked, utilisation by quarter, recent changes. Every card leads into a tab. |
 | Übersicht | `#?tab=uebersicht` | The pensum grid: projects × eight quarters, with a capacity footer. Switch on **Bearbeiten** to edit a cell. |
 | Termine | `#?tab=termine` | The bar plan: phase bars, milestone diamonds and a today line, with the same capacity band the Übersicht carries in its footer. Same time scale and period stepper as the Übersicht. |
-| Dashboard | `#?tab=dashboard` | The KPI strip plus aggregates over phase, person, location and budget. |
+| Dashboard | `#?tab=dashboard&bi=…` | The KPI strip, then two sections: **Allgemein** (utilisation and free capacity over time, project count by phase, demand by portfolio, committed credit by year and by phase) and **Personen** (utilisation per person and quarter as a grid, sortable, with a peak column and a per-quarter count of people over their contract). |
 | Verlauf | `#?tab=verlauf` | The immutable change log for app-owned fields. |
 | API | `#?tab=api` | Swagger UI over `data/openapi.json` — a real OpenAPI 3.1 document, 13 operations in five groups, with a response example per endpoint. Reached from the **API** link in the footer. |
-| Drucklayout | `#?tab=export` | The PDF export: A4 portrait and A4 landscape sheets with letterhead, fixed legend and document ID. Reached from **Exportieren → Als PDF exportieren**. |
+| Drucklayout | `#?tab=export` | The PDF export, every page of it: A4 portrait carries four quarters and 24 rows per sheet, landscape all eight quarters and 14 rows. 111 projects come out as 10 portrait sheets or 8 landscape ones, each with letterhead, legend, document ID and «Blatt x von y»; the totals close each quarter block. Reached from **Exportieren → Als PDF exportieren**. |
 
 ### Interactions that actually work
 
@@ -59,6 +59,9 @@ running the content through Jekyll.
 - **Menus that behave like menus.** The project-lead menu filters as you type, floats selected
   entries to the top and scrolls at 214px. Arrow keys roam, `Escape` closes and hands focus back
   to the trigger, and panels stay inside the window. *Mir zugewiesen* sits in the toolbar itself.
+- **A person's utilisation over time.** The Dashboard's *Personen* section reuses the pensum grid
+  with people as the rows: contract, project count, peak, and one column per period. A peak column
+  because a single quarter misleads — 21 people are over 100 % today, 35 at some point in the window.
 - **Frozen master data.** Every lead column — ID, project, phase, lead, Ampel, budget — holds its
   place while only the time axis scrolls under it. There is no scrollbar: the arrows beside
   *Heute* step the window, and the rows fade out at the right edge where the axis continues.
@@ -147,7 +150,7 @@ Everything lives in `data/` as plain JSON.
 | `capacity.json` | Gross capacity, absences and externally contracted work per quarter |
 | `projects.json` | 111 projects: phase, lead, budget, demand per quarter, target, Gantt bars |
 | `milestones.json` | 86 gates with planned and forecast dates and status |
-| `changes.json` | The change log |
+| `changes.json` | The change log — 9 hand-written entries plus 240 generated over the ten weeks before today |
 | `phases.json` | SIA 112 main phases and sub-phases |
 | `dashboard.json` | The one dashboard series that is not derivable (budget by year) |
 | `i18n.json` | The DE → EN dictionary |

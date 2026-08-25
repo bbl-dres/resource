@@ -5,19 +5,28 @@
 
 import {
   data, state, t, fmtMio, totals, loadStatus, cellValue,
-  personLoad, personUtilisation, filteredProjects
+  personLoad, personUtilisation, filteredProjects,
+  periods, heatStep, personRows, sortPersonRows
 } from './store.js';
 
 import {
-  html, icons, pageHeader, exportMenu, toolbar, activeFilterRow,
-  columnChart, barList, kpiStrip,
+  html, raw, icons, pageHeader, exportMenu, toolbar, activeFilterRow,
+  columnChart, barList, kpiStrip, segmented,
 } from './ui.js';
 
 /* =============================================================================
    Dashboard
    ========================================================================== */
 
+/* The KPI strip and the filters hold for both sections, so they stay above them. */
+const BI_SECTIONS = [
+  { value: 'allgemein', label: 'Allgemein' },
+  { value: 'personen', label: 'Personen' }
+];
+
 export function renderDashboard() {
+  const section = BI_SECTIONS.some(s => s.value === state.bi) ? state.bi : 'allgemein';
+
   return html`
     ${pageHeader({
       crumbs: ['Bauprojekte', 'Dashboard'],
@@ -28,23 +37,130 @@ export function renderDashboard() {
     <div class="wrap"><div class="content">
       ${toolbar()}
       ${activeFilterRow()}
-      <div class="bi-grid">
-        ${kpiStrip()}
+      ${kpiStrip()}
+      <div class="bibar">${segmented(BI_SECTIONS, section, 'bi')}</div>
+      ${section === 'personen' ? personSection() : html`<div class="bi-grid">
         ${utilisationCard()}
         ${phaseCountCard()}
-        ${personCard()}
         ${portfolioCard()}
-        ${creditYearCard()}
         ${creditPhaseCard()}
-      </div>
+        ${creditYearCard()}
+      </div>`}
     </div></div>`;
 }
 
+/* =============================================================================
+   «Personen» — the same grid the Übersicht uses, with people as the rows
+   ========================================================================== */
+
+/** Fixed widths in px, so every row can be told exactly how wide the track is. */
+const P_COL = { name: 150, role: 130, employment: 70, projects: 60, peak: 76, quarter: 72 };
+
+function personLayout(cols) {
+  const lead = [
+    ['name', `minmax(${P_COL.name}px, 1fr)`], ['role', `${P_COL.role}px`],
+    ['employment', `${P_COL.employment}px`], ['projects', `${P_COL.projects}px`],
+    ['peak', `${P_COL.peak}px`]
+  ];
+  const sticky = {};
+  let offset = 0;
+  for (const [key] of lead) { sticky[key] = offset; offset += P_COL[key]; }
+  sticky.width = offset;
+  sticky.last = 'peak';
+
+  return {
+    tpl: `${lead.map(([, track]) => track).join(' ')} repeat(${cols.length}, minmax(var(--grid-quarter), 1fr))`,
+    minWidth: offset + P_COL.quarter * cols.length,
+    sticky
+  };
+}
+
+const pinCls = (s, k, extra = '') =>
+  `${extra} is-frozen ${k === s.last ? 'is-frozen-last' : ''}`.trim();
+
+/** A sortable header cell for the person table. */
+function personHead(key, label, sticky, cls = '') {
+  const active = state.pSort === key;
+  const frozen = sticky[key] !== undefined;
+  return html`<span class="pcell--text ${cls} ${frozen ? pinCls(sticky, key) : ''} ${active ? 'is-sorted' : ''}"
+      style="${frozen ? `left:${sticky[key]}px` : ''}">
+    <button type="button" class="sorthead" data-act="sort-person" data-val="${key}"
+            aria-label="${t('Sortieren nach')} ${label}">
+      <span class="sorthead__label">${label}</span>
+      <span class="sorthead__dir" aria-hidden="true">${active ? (state.pDir === 'asc' ? '↑' : '↓') : ''}</span>
+    </button>
+  </span>`;
+}
+
+function personSection() {
+  const cols = periods();
+  const { tpl, minWidth, sticky } = personLayout(cols);
+  const rows = sortPersonRows(personRows());
+  // The one figure this table alone can give: how many people are over their
+  // own contract, quarter by quarter.
+  const overPerCol = cols.map((_, i) => rows.filter(r => r.leads && r.values[i] > 100).length);
+
+  const pin = key => raw(`${pinCls(sticky, key)}" style="left:${sticky[key]}px`);
+
+  return html`<section class="grid-card">
+    <div class="scrollbox">
+    <div class="pgrid" data-scroll>
+      <div class="pgrid__track" style="min-width:${minWidth}px; --sticky-w:${sticky.width}px">
+        <div class="pblock">
+          <div class="prow prow--head" style="grid-template-columns:${raw(tpl)}">
+            ${personHead('name', t('Person'), sticky)}
+            ${personHead('role', t('Rolle'), sticky)}
+            ${personHead('employment', t('Anst.'), sticky, 'pcell--num')}
+            ${personHead('projects', t('Proj.'), sticky, 'pcell--num')}
+            ${personHead('peak', t('Spitze'), sticky, 'pcell--num')}
+            ${cols.map((col, i) => personHead(`q${i}`, col.short,
+              sticky, `pcell--num ${col.isNow ? 'is-today' : ''} ${col.yearStart ? 'is-yearstart' : ''}`))}
+          </div>
+
+          ${rows.map(r => html`<div class="prow" style="grid-template-columns:${raw(tpl)}">
+            <span class="pcell pcell--title ${pin('name')}">
+              <button type="button" class="prow__title" data-act="filter-lead" data-val="${r.person.id}"
+                      title="${t('Übersicht auf diese Person filtern')}">${r.person.name}</button>
+            </span>
+            <span class="pcell pcell--phase ${pin('role')}">${t(r.person.role)}</span>
+            <span class="pcell pcell--target ${pin('employment')}">${r.person.employment} %</span>
+            <span class="pcell pcell--target ${pin('projects')}">${r.leads || '—'}</span>
+            <span class="pcell pcell--target ${r.peak > 100 ? 'is-over' : ''} ${pin('peak')}">${
+              r.peak === null ? '—' : `${r.peak} %`}</span>
+            ${cols.map((col, i) => {
+              const v = r.values[i];
+              const label = r.leads ? `${v} %` : '—';
+              return html`<span class="pcell pcell--val ${r.leads ? `heat-${heatStep(v)}` : ''}
+                  ${r.leads && v > 100 ? 'is-warn' : ''} ${col.yearStart ? 'is-yearstart' : ''}"
+                  title="${r.person.name}, ${col.label}: ${label} ${t('der Anstellung')}">${label}</span>`;
+            })}
+          </div>`)}
+        </div>
+
+        <div class="pblock pblock--foot">
+          <div class="prow prow--load" style="grid-template-columns:${raw(tpl)}">
+            <div style="grid-column:span 5" class="prow__sumlabel is-frozen">
+              ${t('Personen über 100 %')}
+              <span class="prow__sumnote">${data.people.length} ${t('Personen')} · ${
+                data.people.reduce((a, p) => a + p.employment, 0)} % ${t('Anstellung')}</span>
+            </div>
+            ${overPerCol.map((v, i) => html`<span class="pcell pcell--load is-${v > 0 ? 'danger' : 'neutral'}
+                ${cols[i].yearStart ? 'is-yearstart' : ''}">
+              <span class="pcell__pct">${v}</span>
+            </span>`)}
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+  </section>`;
+}
+
 /** Card shell with the kebab export menu the mockup puts on every card. */
-function biCard(id, title, subtitle, body, { full = false } = {}) {
+function biCard(id, title, subtitle, body, { full = false, wide = false } = {}) {
   const open = state.menu === `card:${id}`;
   const menu = data.dashboard.cardMenu;
-  return html`<section class="bi-card ${full ? 'bi-card--full' : ''}">
+  return html`<section class="bi-card ${full ? 'bi-card--full' : ''} ${wide ? 'bi-card--wide' : ''}" id="card-${id}">
     <header class="bi-card__head">
       <div>
         <h2 class="bi-card__title">${t(title)}</h2>
@@ -118,6 +234,8 @@ function phaseCountCard() {
     barList(rows, { max: Math.max(1, ...rows.map(r => r.value)) }));
 }
 
+/* Replaced by the «Personen» section — kept for reference during the rebuild. */
+// eslint-disable-next-line no-unused-vars
 function personCard() {
   const q0 = data.quarters[0];
   const rows = data.people.map(p => {
@@ -149,7 +267,7 @@ function portfolioCard() {
     .sort((a, b) => b.value - a.value);
   return biCard('teilportfolio', 'Bedarf nach Teilportfolio',
     `${data.quarters[0].label} · ${t('Pensum in %')}`,
-    barList(rows, { gap: 10 }));
+    barList(rows, { gap: 10 }), { wide: true });
 }
 
 function creditYearCard() {
@@ -171,7 +289,7 @@ function creditPhaseCard() {
     .sort((a, b) => b.value - a.value);
   return biCard('kreditphase', 'Kredit nach SIA-Phase',
     `${t('Gesamt')} ${fmtMio(total)} CHF · ${t('gebundene Mittel')}`,
-    barList(rows, { gap: 10 }));
+    barList(rows, { gap: 10 }), { wide: true });
 }
 
 /* =============================================================================

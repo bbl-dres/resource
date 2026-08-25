@@ -419,7 +419,21 @@ Damit die Erweiterung nicht rückgängig macht, was die Design-Review erreicht h
 
 ---
 
-## 12 · Empfohlene Reihenfolge
+## 12 · Umgesetzt
+
+Ein erster Schritt steht bereits: der Dashboard-Reiter ist in **Allgemein** und
+**Personen** geteilt (`&bi=…` in der URL). *Allgemein* trägt die fünf
+bestehenden Karten, *Personen* die Auslastung je Person und Quartal als Raster —
+mit Spalte *Spitze* (Abschnitt 5.2) und einer Fusszeile, die je Quartal zählt,
+wie viele Personen über ihrer Anstellung liegen.
+
+Was aus diesem Vorschlag noch fehlt: der feste Kopf mit der Ankergrafik, die
+Verteilungsgrafik (5.1), die Ränder (5.3), und die Abschnitte *Pipeline*,
+*Termine* und *Mittel*.
+
+---
+
+## 13 · Empfohlene Reihenfolge
 
 Nach Wirkung je Aufwand:
 

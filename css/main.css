@@ -323,9 +323,21 @@ button, input, select, textarea { font: inherit; color: inherit; }
   margin-top: var(--space-3); font-size: var(--text-xl);
   font-weight: var(--font-semibold); color: var(--color-text-strong);
 }
+.kpi__more {
+  display: inline-flex; align-items: center; min-height: 24px;
+  border: 0; padding: 0; background: none;
+  font: inherit; color: var(--color-text-link); cursor: pointer;
+}
+.kpi__more:hover { text-decoration: underline; text-underline-offset: 2px; }
 .kpi__note { margin-top: var(--space-1); font-size: var(--text-sm); color: var(--color-text-muted); }
 .kpi.is-alert .kpi__value { color: var(--color-danger-fg); }
-.kpi.is-alert .kpi__note { color: var(--color-danger-fg); font-weight: var(--font-semibold); }
+.kpi.is-alert .kpi__more {
+  display: inline-flex; align-items: center; min-height: 24px;
+  border: 0; padding: 0; background: none;
+  font: inherit; color: var(--color-text-link); cursor: pointer;
+}
+.kpi__more:hover { text-decoration: underline; text-underline-offset: 2px; }
+.kpi__note { color: var(--color-danger-fg); font-weight: var(--font-semibold); }
 
 /* ==========================================================================
    5 · Buttons, switches, chips, dropdowns
@@ -1368,6 +1380,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
   box-shadow: var(--shadow-raised);
 }
 .bi-card--full { grid-column: 1 / -1; }
+.bi-card--wide { grid-column: span 2; }
 .bi-card__head { display: flex; align-items: flex-start; gap: var(--space-6); }
 .bi-card__head > div:first-child { flex: 1; min-width: 0; }
 .bi-card__title { font-size: var(--text-sub); font-weight: var(--font-semibold); color: var(--color-text-strong); }
@@ -1375,7 +1388,41 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .bi-card__tools { margin-left: auto; }
 .bi-card__section { padding-top: var(--space-8); border-top: var(--border-hairline) solid var(--color-border-subtle); }
 .bi-card__subtitle { font-size: var(--text-base); font-weight: var(--font-semibold); color: var(--color-text-strong); }
-.bi-card__section .colchart { margin-top: var(--space-6); }
+.bi-card__section /* A chart that leads somewhere is a control, and has to look reachable. */
+.chartlink {
+  display: block; width: 100%; border: 0; padding: var(--space-3);
+  margin: calc(-1 * var(--space-3)); border-radius: var(--radius);
+  background: none; font: inherit; color: inherit; text-align: left; cursor: pointer;
+}
+.chartlink:hover { background: var(--color-surface-hover); }
+
+/* The two dashboard sections: a control row of its own, under the KPI strip. */
+.bibar { display: flex; align-items: center; gap: var(--space-6); }
+
+/* The person table's summary label carries a second line of context. */
+.prow__sumnote {
+  margin-left: var(--space-5);
+  font-weight: var(--font-regular); color: var(--color-text-muted); font-size: var(--text-sm);
+}
+
+.colchart { margin-top: var(--space-6); }
+
+/* A chart that leads somewhere is a control, and has to look reachable. */
+.chartlink {
+  display: block; width: 100%; border: 0; padding: var(--space-3);
+  margin: calc(-1 * var(--space-3)); border-radius: var(--radius);
+  background: none; font: inherit; color: inherit; text-align: left; cursor: pointer;
+}
+.chartlink:hover { background: var(--color-surface-hover); }
+
+/* The two dashboard sections: a control row of its own, under the KPI strip. */
+.bibar { display: flex; align-items: center; gap: var(--space-6); }
+
+/* The person table's summary label carries a second line of context. */
+.prow__sumnote {
+  margin-left: var(--space-5);
+  font-weight: var(--font-regular); color: var(--color-text-muted); font-size: var(--text-sm);
+}
 
 .colchart { display: flex; flex-direction: column; gap: var(--space-4); }
 .colchart__plot { position: relative; height: var(--chart-h, 150px); }
@@ -1480,7 +1527,11 @@ button, input, select, textarea { font: inherit; color: inherit; }
    15 · Print layout
    ========================================================================== */
 
-.sheetbar { display: flex; align-items: center; justify-content: flex-end; gap: var(--space-8); flex-wrap: wrap; }
+/* The sheet format sits where the time scale sits: below the filters, left. */
+.sheetbar {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--space-8); flex-wrap: wrap;
+}
 
 .mount {
   display: flex; justify-content: center; padding: 0;
@@ -1494,6 +1545,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
   display: flex; flex-direction: column;
   color: var(--color-text-strong);
 }
+/* The mount is a stack of sheets, not one sheet. */
+.mount { display: flex; flex-direction: column; align-items: center; gap: var(--space-12); }
 .sheet--hoch { width: 800px; min-height: 1131px; padding: 28px 32px; }
 .sheet--quer { width: 1100px; min-height: 778px; padding: 30px 34px; }
 
@@ -1555,6 +1608,23 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .sheet__row--load .is-danger { color: var(--color-danger-fg); }
 .sheet__row--load .is-warn { color: var(--color-warn-fg); }
 .sheet__row--load .is-ok { color: var(--color-ok-fg); }
+
+/* Grouping from the toolbar, printed: a heading before, a sum after. */
+.sheet__row--group {
+  margin-top: var(--space-8);
+  background: var(--color-surface-frame);
+  font-weight: var(--font-bold); color: var(--color-text-strong);
+  border-top: var(--border-hairline) solid var(--color-border-strong);
+}
+.sheet__row--head + .sheet__row--group { margin-top: 0; }
+.sheet__groupcount {
+  margin-left: var(--space-5);
+  font-weight: var(--font-regular); color: var(--color-text-muted);
+}
+.sheet__row--groupsum {
+  font-weight: var(--font-semibold); color: var(--color-text-strong);
+  border-bottom: var(--border-hairline) solid var(--color-border);
+}
 
 .sheet__legend {
   display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
@@ -1649,7 +1719,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 @page { size: A4 portrait; margin: 12mm; }
 
 @media print {
-  .shell-header, .tabs, .toolbar, .timebar, .toast, .shell-footer,
+  .shell-header, .tabs, .toolbar, .filterbar, .timebar, .toast, .shell-footer,
   .page-header__actions, .sheetbar, .crumbs { display: none !important; }
   body { background: #fff; }
   .grid-card, .table-card, .card, .bi-card, .gantt__card, .capband { break-inside: avoid; }
@@ -1662,6 +1732,9 @@ button, input, select, textarea { font: inherit; color: inherit; }
     width: auto !important; min-height: 0; padding: 0;
     box-shadow: none; break-inside: avoid;
   }
+  /* One sheet, one page. The last one must not push out an empty trailing page. */
+  .sheet + .sheet { break-before: page; }
+  .mount { gap: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {

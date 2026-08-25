@@ -1,0 +1,1806 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wireframe — Dashboard, Ressourcenplanung BBL</title>
+<style>
+:root{
+  --navy:#12213e; --white:#fff; --page:#eef1f6; --surface:#fff; --frame:#f5f7fb;
+  --line-subtle:#e3e9f3; --line:#ced3dd; --line-strong:#a4a8b0;
+  --text:#1f2937; --text-strong:#111827; --muted:#636b7a;
+  --steel-100:#f0f4fa; --steel-250:#dbe3f5; --steel-300:#d6e3f3; --steel-450:#c2d5ec;
+  --blue:#1d4ed8; --red-100:#f5dada; --red-700:#b91c1c; --red-800:#991b1b;
+  --amber-100:#f5eac0; --amber-900:#78350f; --green-100:#dcfbe7; --green-800:#166534;
+  --w:1440px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--page)}
+body{font:14px/1.45 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;color:var(--text);-webkit-font-smoothing:antialiased}
+h1,h2,h3{margin:0}
+code{font:12px/1 ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--steel-100);padding:1px 4px;border-radius:3px}
+em{font-style:normal;color:#c7d2fe}
+
+.page{padding:56px 56px 96px;display:flex;flex-direction:column;gap:14px}
+.doc{width:var(--w);display:flex;flex-direction:column;gap:8px;margin-bottom:26px}
+.doc h1{font-size:23px;font-weight:600;color:var(--text-strong)}
+.doc p{margin:0;font-size:15px;color:var(--muted);max-width:96ch}
+.doc__meta{display:flex;gap:22px;flex-wrap:wrap;font-size:13px;color:var(--muted);
+  border-top:1px solid var(--line);padding-top:10px;margin-top:6px}
+.doc__meta b{color:var(--text-strong);font-weight:600}
+
+.frame{width:var(--w);display:flex;flex-direction:column;gap:12px;margin-top:30px}
+.frame__head{display:flex;align-items:baseline;gap:12px;border-bottom:2px solid var(--navy);padding-bottom:8px;flex-wrap:wrap}
+.frame__no{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:26px;padding:0 9px;
+  border-radius:6px;background:var(--navy);color:#fff;font-size:14px;font-weight:700}
+.frame__title{font-size:17px;font-weight:600;color:var(--text-strong)}
+.frame__sub{font-size:13px;color:var(--muted)}
+
+.screen{background:var(--frame);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+
+.appbar{height:56px;background:var(--navy);display:flex;align-items:center;justify-content:space-between;padding:0 24px;color:#fff}
+.appbar__brand{display:flex;align-items:center;gap:11px;font-size:12px;line-height:1.3;font-weight:600}
+.appbar__flag{width:20px;height:20px;background:#d8232a;position:relative;display:inline-block;flex:0 0 auto}
+.appbar__flag::before,.appbar__flag::after{content:"";position:absolute;background:#fff}
+.appbar__flag::before{left:8.5px;top:4px;width:3px;height:12px}
+.appbar__flag::after{left:4px;top:8.5px;width:12px;height:3px}
+.appbar__right{display:flex;align-items:center;gap:8px;font-size:12px;color:#c7d2fe}
+.appbar__dot{width:22px;height:22px;border-radius:50%;background:#31415f;display:inline-block}
+.crumbbar{background:#fff;border-bottom:1px solid var(--line);padding:9px 24px;font-size:13px;color:var(--muted)}
+.pagehead{background:#fff;padding:14px 24px 0}
+.pagehead h2{font-size:21px;font-weight:600;color:var(--text-strong)}
+.tabs{display:flex;gap:2px;margin-top:12px;box-shadow:inset 0 -1px 0 var(--line)}
+.tabs__tab{padding:0 14px;height:38px;display:inline-flex;align-items:center;font-size:14px;color:var(--muted);border-bottom:2px solid transparent}
+.tabs__tab.is-active{color:var(--text-strong);font-weight:600;border-bottom-color:var(--navy)}
+.toolbar{display:flex;align-items:center;gap:8px;padding:14px 24px 0}
+.ctrl{height:32px;display:inline-flex;align-items:center;padding:0 11px;border:1px solid var(--line-strong);
+  border-radius:6px;background:#fff;font-size:13px;color:var(--text)}
+.ctrl--icon{width:32px;padding:0}
+.toolbar__spacer{flex:1}
+
+.kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:18px 24px 0}
+.kpi{background:#fff;border-radius:8px;padding:13px 15px;box-shadow:0 1px 2px rgba(16,24,40,.04),0 4px 12px rgba(16,24,40,.06)}
+.kpi.is-alert{box-shadow:inset 3px 0 0 var(--red-700),0 1px 2px rgba(16,24,40,.04),0 4px 12px rgba(16,24,40,.06)}
+.kpi__label{font-size:12px;color:var(--muted)}
+.kpi__value{font-size:23px;font-weight:700;color:var(--text-strong);margin-top:2px}
+.kpi__note{font-size:12px;color:var(--muted);margin-top:2px}
+
+.tabrow{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:6px 24px 0}
+.tabrow__hint{font-size:12px;color:var(--muted)}
+.segmented{display:inline-flex;border:1px solid var(--line-strong);border-radius:6px;overflow:hidden;background:#fff}
+.segmented__btn{border:0;background:none;font:inherit;font-size:13px;padding:0 15px;height:32px;color:var(--text);
+  border-right:1px solid var(--line);cursor:default}
+.segmented__btn:last-child{border-right:0}
+.segmented__btn.is-on{background:var(--navy);color:#fff;font-weight:600}
+
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;padding:14px 24px 24px}
+.card{background:#fff;border-radius:8px;padding:15px 17px;display:flex;flex-direction:column;gap:11px;
+  box-shadow:0 1px 2px rgba(16,24,40,.04),0 4px 12px rgba(16,24,40,.06)}
+.card--wide{grid-column:1/-1}
+.card--anchor{margin:14px 24px 0}
+.card__head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.card__title{font-size:15px;font-weight:600;color:var(--text-strong);display:flex;align-items:center;gap:8px}
+.card__sub{margin:2px 0 0;font-size:12px;color:var(--muted)}
+.card__note{margin:0;font-size:12.5px;line-height:1.55;color:var(--text);background:var(--steel-100);
+  border-left:3px solid var(--navy);border-radius:0 4px 4px 0;padding:8px 11px}
+.card__note strong{color:var(--text-strong)}
+.stars{font-size:11px;color:var(--amber-900);letter-spacing:.5px}
+.pill{font-size:11px;font-weight:600;padding:3px 8px;border-radius:99px;background:var(--steel-250);color:var(--text-strong);white-space:nowrap}
+
+.chart{position:relative;padding-top:16px}
+.chart__cols{display:flex;align-items:flex-end;gap:6px;height:var(--h)}
+.col{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:3px;height:100%}
+.col__v{font-size:11px;font-weight:600;color:var(--text-strong)}
+.col__bar{width:100%;border-radius:3px 3px 0 0;background:var(--steel-300)}
+.col__bar.is-over{background:var(--red-100);box-shadow:inset 0 0 0 1px var(--red-700)}
+.col__bar.is-tight{background:var(--amber-100);box-shadow:inset 0 0 0 1px #d97706}
+.col__bar.is-ok{background:var(--green-100);box-shadow:inset 0 0 0 1px #16a34a}
+.col__bar.is-free{background:var(--steel-100);box-shadow:inset 0 0 0 1px var(--line)}
+.col__stack{width:100%;display:flex;flex-direction:column;border-radius:3px 3px 0 0;overflow:hidden}
+.seg{width:100%}
+.seg--bound{background:var(--steel-450)}
+.seg--pre{background:var(--steel-250)}
+.seg--ext{background:repeating-linear-gradient(45deg,var(--steel-100) 0 4px,var(--steel-250) 4px 8px)}
+.seg--p0{background:var(--steel-100)}
+.seg--p1{background:var(--steel-250)}
+.seg--p2{background:var(--steel-300)}
+.seg--p3{background:var(--steel-450)}
+.seg--ok{background:var(--green-100);box-shadow:inset 0 -1px 0 #16a34a}
+.seg--late{background:var(--red-100);box-shadow:inset 0 -1px 0 var(--red-700)}
+.seg--open{background:repeating-linear-gradient(45deg,#fff 0 4px,var(--amber-100) 4px 8px)}
+.chart__axis{display:flex;gap:6px;margin-top:6px;border-top:1px solid var(--line-subtle);padding-top:5px}
+.chart__axis span{flex:1;text-align:center;font-size:11px;color:var(--muted);min-width:0}
+.chart__ref{position:absolute;left:0;right:0;border-top:1px dashed var(--line-strong);z-index:1}
+.chart__ref span{position:absolute;right:0;top:-16px;font-size:10px;color:var(--muted);background:#fff;padding:0 3px}
+.chart__refline{position:absolute;left:0;right:0;bottom:22px;height:var(--h);pointer-events:none;z-index:1;
+  display:flex;gap:6px;align-items:flex-end}
+.chart__refline span{flex:1;position:relative}
+.chart__refline span::after{content:"";position:absolute;left:0;right:0;bottom:0;border-top:2px solid var(--navy);
+  transform:translateY(0)}
+.chart__note{margin:5px 0 0;font-size:11px;color:var(--muted)}
+.chart--zero .chart__cols{align-items:stretch}
+.col--zero{justify-content:stretch}
+.col__up{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:3px;width:100%}
+.col__down{flex:1;display:flex;flex-direction:column;justify-content:flex-start;align-items:center;gap:3px;width:100%}
+.col__down .col__bar{border-radius:0 0 3px 3px}
+.col__zero{height:1px;background:var(--line-strong);width:100%}
+
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:11.5px;color:var(--muted);padding-top:2px}
+.legend__item{display:inline-flex;align-items:center;gap:6px}
+.swatch{width:11px;height:11px;border-radius:2px;box-shadow:inset 0 0 0 1px var(--line-strong)}
+.swatch--line{width:14px;height:0;border-top:2px solid var(--navy);box-shadow:none;border-radius:0}
+
+.barlist{display:flex;flex-direction:column;gap:7px}
+.barlist__row{display:grid;grid-template-columns:minmax(120px,1.1fr) minmax(0,2fr) auto;align-items:center;gap:10px}
+.barlist__label{font-size:12.5px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.barlist__track{height:15px;background:var(--steel-100);border-radius:3px;overflow:hidden}
+.barlist__bar{display:block;height:100%;background:var(--steel-450);border-radius:3px}
+.barlist__bar.is-over{background:var(--red-100);box-shadow:inset 0 0 0 1px var(--red-700)}
+.barlist__bar.is-free{background:var(--green-100);box-shadow:inset 0 0 0 1px #16a34a}
+.barlist__value{font-size:12px;font-weight:600;color:var(--text-strong);white-space:nowrap}
+
+.split{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+.split__title{margin:0 0 6px;font-size:12.5px;font-weight:600;color:var(--text-strong)}
+.split__title--danger{color:var(--red-800)}
+.split__title--ok{color:var(--green-800)}
+
+.ptable{border:1px solid var(--line-subtle);border-radius:6px;overflow:hidden;font-size:12px}
+.ptable__row{display:grid;grid-template-columns:132px 50px 44px 54px repeat(8,1fr);align-items:stretch;
+  border-bottom:1px solid var(--line-subtle);min-height:29px}
+.ptable__row:last-child{border-bottom:0}
+.ptable__row--head{background:var(--frame);font-weight:600;color:var(--text-strong);position:relative}
+.ptable__name,.ptable__num,.ptable__q,.cell{display:flex;align-items:center;padding:0 8px}
+.ptable__name{border-right:1px solid var(--line-subtle)}
+.ptable__num{justify-content:flex-end;color:var(--muted)}
+.ptable__num.is-over{color:var(--red-800);font-weight:700}
+.ptable__q{justify-content:flex-end;font-size:11px}
+.ptable__row--head .ptable__num,.ptable__row--head .ptable__q{color:var(--text-strong)}
+.cell{justify-content:flex-end;font-variant-numeric:tabular-nums}
+.cell.is-over{color:var(--red-800);font-weight:700}
+.ptable__gap{padding:5px 10px;font-size:11px;color:var(--muted);background:var(--frame);
+  border-bottom:1px solid var(--line-subtle);text-align:center;letter-spacing:2px}
+.heat-0{background:#fff}
+.heat-1{background:var(--steel-100)}
+.heat-2{background:var(--steel-250)}
+.heat-3{background:var(--steel-300)}
+.heat-4{background:var(--steel-450)}
+
+.matrix{display:grid;grid-template-columns:150px repeat(var(--cols),1fr);gap:2px;font-size:11.5px}
+.matrix__corner{}
+.matrix__head{text-align:center;font-weight:600;color:var(--text-strong);padding:3px 2px;font-size:11px}
+.matrix__label{display:flex;align-items:center;padding-right:8px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.matrix__cell{display:flex;align-items:center;justify-content:center;height:27px;border-radius:3px;
+  box-shadow:inset 0 0 0 1px var(--line-subtle);font-variant-numeric:tabular-nums}
+
+.splitbar{display:flex;height:32px;border-radius:5px;overflow:hidden;box-shadow:inset 0 0 0 1px var(--line-strong)}
+.splitbar__seg{display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--text-strong)}
+
+.placeholder{margin:0;font-size:12.5px;line-height:1.6;color:var(--muted);border:1px dashed var(--line-strong);
+  border-radius:6px;padding:14px 15px;background:var(--frame)}
+.placeholder em{color:var(--text-strong);font-style:italic}
+
+.note{width:var(--w);background:#fff;border-left:3px solid var(--navy);border-radius:0 8px 8px 0;padding:14px 18px;
+  font-size:13.5px;line-height:1.6;color:var(--text)}
+.note b{color:var(--text-strong)}
+</style>
+</head>
+<body>
+<div class="page">
+
+<div class="doc">
+  <h1>Dashboard — Wireframe zur fachlichen Analyse</h1>
+  <p>Vorschlag für die Gliederung des Dashboards: ein fester Kopf aus KPI-Streifen und Auslastungskurve,
+     darunter fünf Abschnitte nach Betrachtungseinheit. Alle sechs bestehenden Karten behalten einen Platz;
+     vier fehlende kommen dazu. Begründung in
+     <code>docs/DASHBOARD-STUDY.md</code>.</p>
+  <div class="doc__meta">
+    <span><b>Datenstand</b> Stand 25.08.2026, 07:15</span>
+    <span><b>111</b> Projekte</span>
+    <span><b>46</b> Personen</span>
+    <span><b>86</b> Gates</span>
+    <span><b>972 Mio. CHF</b> gebunden</span>
+    <span><b>Alle Zahlen</b> aus <code>data/</code> gerechnet, nicht erfunden</span>
+  </div>
+</div>
+
+<div class="note">
+  <b>Zwei Entscheidungen tragen den Vorschlag.</b>
+  Erstens: <b>«Auslastung nach Quartal» gehört in keinen Abschnitt.</b> Sie ist die Zahl, gegen die jede andere
+  Aussage gelesen wird, und steht deshalb über der Reiterleiste — sichtbar in jedem Abschnitt. Ein Klick auf ein
+  Quartal setzt das Bezugsquartal für den Abschnitt darunter.
+  Zweitens: <b>«Auslastung nach Person» bekommt einen eigenen Abschnitt.</b> Bei 46 Personen — realistisch
+  über 100 — ist eine Karte mit einem Balken je Person keine Auswertung mehr, und eine Momentaufnahme führt in die
+  Irre: im laufenden Quartal sind <b>21</b> Personen über 100 %, über die acht Quartale hinweg aber <b>35</b>.
+</div>
+
+<article class="frame">
+    <header class="frame__head">
+      <span class="frame__no">1</span>
+      <span class="frame__title">Kopf und Abschnitt «Kapazität»</span>
+      <span class="frame__sub">volle Anwendungs-Chrome · Betrachtungseinheit: Quartale</span>
+    </header>
+    <div class="screen">
+      <div class="appbar">
+        <div class="appbar__brand">
+          <span class="appbar__flag"></span>
+          <span>Bundesamt für Bauten und Logistik BBL<br><em>Ressourcenplanung</em></span>
+        </div>
+        <div class="appbar__right"><span class="appbar__dot"></span><span>Sonja Beispiel</span></div>
+      </div>
+      <div class="crumbbar">Bauprojekte › Dashboard</div>
+      <div class="pagehead">
+        <h2>Ressourcenplanung</h2>
+        <div class="tabs">
+          <span class="tabs__tab">Übersicht</span><span class="tabs__tab">Termine</span>
+          <span class="tabs__tab is-active">Dashboard</span><span class="tabs__tab">Verlauf</span>
+        </div>
+      </div>
+      <div class="toolbar">
+        <span class="ctrl ctrl--icon"></span>
+        <span class="ctrl">Sortierung: Projekt</span>
+        <span class="ctrl">Gruppieren nach: Teilportfolio</span>
+        <span class="ctrl">Phase</span><span class="ctrl">Projektleitung</span>
+        <span class="ctrl">Teilportfolio</span><span class="ctrl">Nur Überlast</span>
+        <span class="toolbar__spacer"></span><span class="ctrl">Attribute</span>
+      </div>
+      <div class="kpi-strip">
+  <div class="kpi is-alert">
+    <div class="kpi__label">Auslastung</div>
+    <div class="kpi__value">106 %</div>
+    <div class="kpi__note">4122 % Bedarf auf 3670 % netto</div>
+  </div><div class="kpi is-alert">
+    <div class="kpi__label">Personen über 100 %</div>
+    <div class="kpi__value">21 von 46</div>
+    <div class="kpi__note">35 in mindestens einem Quartal</div>
+  </div><div class="kpi is-alert">
+    <div class="kpi__label">Überfällige Gates</div>
+    <div class="kpi__value">24</div>
+    <div class="kpi__note">von 86 · 64 % Termintreue</div>
+  </div><div class="kpi ">
+    <div class="kpi__label">Nicht zugewiesener Bedarf</div>
+    <div class="kpi__value">35 %</div>
+    <div class="kpi__note">3 Projekte ohne Projektleitung</div>
+  </div>
+</div><section class="card card--anchor">
+  <header class="card__head">
+    <div>
+      <h3 class="card__title">Auslastung nach Quartal</h3>
+      <p class="card__sub">Bedarf gegen Kapazität netto · gilt für alle Abschnitte · Klick setzt das Bezugsquartal</p>
+    </div>
+    <span class="pill pill--anchor">fester Kopf</span>
+  </header>
+  <div class="chart" style="--h:108px">
+    <div class="chart__ref" style="bottom:76.92307692307693%"><span>100 %</span></div>
+    <div class="chart__cols">
+      <div class="col">
+        <span class="col__v">106</span>
+        <div class="col__bar is-over" style="height:81.5%"></div>
+      </div><div class="col">
+        <span class="col__v">106</span>
+        <div class="col__bar is-over" style="height:81.5%"></div>
+      </div><div class="col">
+        <span class="col__v">111</span>
+        <div class="col__bar is-over" style="height:85.4%"></div>
+      </div><div class="col">
+        <span class="col__v">109</span>
+        <div class="col__bar is-over" style="height:83.8%"></div>
+      </div><div class="col">
+        <span class="col__v">102</span>
+        <div class="col__bar is-over" style="height:78.5%"></div>
+      </div><div class="col">
+        <span class="col__v">82</span>
+        <div class="col__bar is-ok" style="height:63.1%"></div>
+      </div><div class="col">
+        <span class="col__v">72</span>
+        <div class="col__bar is-free" style="height:55.4%"></div>
+      </div><div class="col">
+        <span class="col__v">63</span>
+        <div class="col__bar is-free" style="height:48.5%"></div>
+      </div>
+    </div>
+    <div class="chart__axis"><span>Q3/26</span><span>Q4/26</span><span>Q1/27</span><span>Q2/27</span><span>Q3/27</span><span>Q4/27</span><span>Q1/28</span><span>Q2/28</span></div>
+  </div>
+</section>
+  <div class="tabrow">
+    <div class="segmented" role="tablist">
+  <button class="segmented__btn is-on">Kapazität</button><button class="segmented__btn ">Personen</button><button class="segmented__btn ">Pipeline</button><button class="segmented__btn ">Termine</button><button class="segmented__btn ">Mittel</button>
+</div>
+    <span class="tabrow__hint">Betrachtungseinheit: Quartale</span>
+  </div><div class="cards">
+<section class="card card--wide">
+    <header class="card__head">
+      <div>
+        <h3 class="card__title">Bedarf nach Bindungsgrad<span class="stars">★★★</span></h3>
+        <p class="card__sub">Pensum in % je Quartal · gestapelt gegen Kapazität netto</p>
+      </div>
+    </header>
+    <div class="chart" style="--h:170px">
+    <div class="chart__refline"><span style="bottom:67.8%"></span><span style="bottom:72.2%"></span><span style="bottom:75.1%"></span><span style="bottom:74.4%"></span><span style="bottom:70.2%"></span><span style="bottom:74.4%"></span><span style="bottom:75.1%"></span><span style="bottom:74.4%"></span></div>
+    <div class="chart__cols">
+      <div class="col">
+        <span class="col__v">4122 %</span>
+        <div class="col__stack" style="height:76.2%">
+          <div class="seg seg--ext"
+            style="height:5.9%"
+            title="extern beauftragt: 245 %"></div><div class="seg seg--pre"
+            style="height:45.7%"
+            title="vor Baukredit-Freigabe: 1882 %"></div><div class="seg seg--bound"
+            style="height:48.4%"
+            title="gebunden, nach Baukredit-Freigabe: 1995 %"></div>
+        </div>
+      </div><div class="col">
+        <span class="col__v">4405 %</span>
+        <div class="col__stack" style="height:81.4%">
+          <div class="seg seg--ext"
+            style="height:6.2%"
+            title="extern beauftragt: 275 %"></div><div class="seg seg--pre"
+            style="height:46.8%"
+            title="vor Baukredit-Freigabe: 2060 %"></div><div class="seg seg--bound"
+            style="height:47.0%"
+            title="gebunden, nach Baukredit-Freigabe: 2070 %"></div>
+        </div>
+      </div><div class="col">
+        <span class="col__v">4830 %</span>
+        <div class="col__stack" style="height:89.3%">
+          <div class="seg seg--ext"
+            style="height:6.4%"
+            title="extern beauftragt: 310 %"></div><div class="seg seg--pre"
+            style="height:50.6%"
+            title="vor Baukredit-Freigabe: 2445 %"></div><div class="seg seg--bound"
+            style="height:43.0%"
+            title="gebunden, nach Baukredit-Freigabe: 2075 %"></div>
+        </div>
+      </div><div class="col">
+        <span class="col__v">4690 %</span>
+        <div class="col__stack" style="height:86.7%">
+          <div class="seg seg--ext"
+            style="height:6.6%"
+            title="extern beauftragt: 310 %"></div><div class="seg seg--pre"
+            style="height:56.9%"
+            title="vor Baukredit-Freigabe: 2670 %"></div><div class="seg seg--bound"
+            style="height:36.5%"
+            title="gebunden, nach Baukredit-Freigabe: 1710 %"></div>
+        </div>
+      </div><div class="col">
+        <span class="col__v">4155 %</span>
+        <div class="col__stack" style="height:76.8%">
+          <div class="seg seg--ext"
+            style="height:6.9%"
+            title="extern beauftragt: 285 %"></div><div class="seg seg--pre"
+            style="height:64.0%"
+            title="vor Baukredit-Freigabe: 2660 %"></div><div class="seg seg--bound"
+            style="height:29.1%"
+            title="gebunden, nach Baukredit-Freigabe: 1210 %"></div>
+        </div>
+      </div><div class="col">
+        <span class="col__v">3565 %</span>
+        <div class="col__stack" style="height:65.9%">
+          <div class="seg seg--ext"
+            style="height:7.0%"
+            title="extern beauftragt: 250 %"></div><div class="seg seg--pre"
+            style="height:73.8%"
+            title="vor Baukredit-Freigabe: 2630 %"></div><div class="seg seg--bound"
+            style="height:19.2%"
+            title="gebunden, nach Baukredit-Freigabe: 685 %"></div>
+        </div>
+      </div><div class="col">
+        <span class="col__v">3145 %</span>
+        <div class="col__stack" style="height:58.1%">
+          <div class="seg seg--ext"
+            style="height:7.2%"
+            title="extern beauftragt: 225 %"></div><div class="seg seg--pre"
+            style="height:80.8%"
+            title="vor Baukredit-Freigabe: 2540 %"></div><div class="seg seg--bound"
+            style="height:12.1%"
+            title="gebunden, nach Baukredit-Freigabe: 380 %"></div>
+        </div>
+      </div><div class="col">
+        <span class="col__v">2730 %</span>
+        <div class="col__stack" style="height:50.5%">
+          <div class="seg seg--ext"
+            style="height:7.3%"
+            title="extern beauftragt: 200 %"></div><div class="seg seg--pre"
+            style="height:89.9%"
+            title="vor Baukredit-Freigabe: 2455 %"></div><div class="seg seg--bound"
+            style="height:2.7%"
+            title="gebunden, nach Baukredit-Freigabe: 75 %"></div>
+        </div>
+      </div>
+    </div>
+    <div class="chart__axis"><span>Q3/26</span><span>Q4/26</span><span>Q1/27</span><span>Q2/27</span><span>Q3/27</span><span>Q4/27</span><span>Q1/28</span><span>Q2/28</span></div>
+    <p class="chart__note">Referenzlinie je Quartal: Kapazität netto</p>
+  </div><div class="legend"><span class="legend__item"><span class="swatch seg--bound"></span>gebunden — nicht verschiebbar</span><span class="legend__item"><span class="swatch seg--pre"></span>vor Baukredit-Freigabe — verschiebbar</span><span class="legend__item"><span class="swatch seg--ext"></span>extern beauftragt</span><span class="legend__item"><span class="swatch swatch--line"></span>Kapazität netto</span></div>
+    <p class="card__note"><strong>2445 % von 4830 %</strong> in Q1/27 liegen vor der Baukredit-Freigabe — die Hälfte der Überlast steckt in Projekten, die noch gar nicht freigegeben sind. Das ist die erste Handlungsoption, und heute ist sie unsichtbar.</p>
+  </section>
+
+<section class="card ">
+    <header class="card__head">
+      <div>
+        <h3 class="card__title">Freie Kapazität je Quartal<span class="stars">★★</span></h3>
+        <p class="card__sub">Kapazität netto minus gebuchtes Pensum · negativ = Unterdeckung</p>
+      </div>
+    </header>
+    <div class="chart chart--zero" style="--h:140px">
+    <div class="chart__cols">
+      <div class="col col--zero">
+        <div class="col__up"></div>
+        <div class="col__zero"></div>
+        <div class="col__down"><div class="col__bar is-over" style="height:12.0%"></div>
+          <span class="col__v">-207 %</span></div>
+      </div><div class="col col--zero">
+        <div class="col__up"></div>
+        <div class="col__zero"></div>
+        <div class="col__down"><div class="col__bar is-over" style="height:13.1%"></div>
+          <span class="col__v">-225 %</span></div>
+      </div><div class="col col--zero">
+        <div class="col__up"></div>
+        <div class="col__zero"></div>
+        <div class="col__down"><div class="col__bar is-over" style="height:26.5%"></div>
+          <span class="col__v">-455 %</span></div>
+      </div><div class="col col--zero">
+        <div class="col__up"></div>
+        <div class="col__zero"></div>
+        <div class="col__down"><div class="col__bar is-over" style="height:20.6%"></div>
+          <span class="col__v">-355 %</span></div>
+      </div><div class="col col--zero">
+        <div class="col__up"></div>
+        <div class="col__zero"></div>
+        <div class="col__down"><div class="col__bar is-over" style="height:4.1%"></div>
+          <span class="col__v">-70 %</span></div>
+      </div><div class="col col--zero">
+        <div class="col__up"><span class="col__v">+710 %</span>
+          <div class="col__bar is-ok" style="height:41.3%"></div></div>
+        <div class="col__zero"></div>
+        <div class="col__down"></div>
+      </div><div class="col col--zero">
+        <div class="col__up"><span class="col__v">+1145 %</span>
+          <div class="col__bar is-ok" style="height:66.6%"></div></div>
+        <div class="col__zero"></div>
+        <div class="col__down"></div>
+      </div><div class="col col--zero">
+        <div class="col__up"><span class="col__v">+1495 %</span>
+          <div class="col__bar is-ok" style="height:87.0%"></div></div>
+        <div class="col__zero"></div>
+        <div class="col__down"></div>
+      </div>
+    </div>
+    <div class="chart__axis"><span>Q3/26</span><span>Q4/26</span><span>Q1/27</span><span>Q2/27</span><span>Q3/27</span><span>Q4/27</span><span>Q1/28</span><span>Q2/28</span></div>
+  </div>
+    <p class="card__note">Die Zahl, mit der man Zusagen macht. Negativ bis Q3/27, danach Luft.</p>
+  </section>
+
+<section class="card ">
+    <header class="card__head">
+      <div>
+        <h3 class="card__title">Auslastung nach Teilportfolio<span class="stars">★★</span></h3>
+        <p class="card__sub">Q3/2026 · Pensum in % · bestehende Karte, unverändert</p>
+      </div>
+    </header>
+    <div class="barlist">
+    <div class="barlist__row">
+      <span class="barlist__label">Verwaltung</span>
+      <span class="barlist__track"><span class="barlist__bar "
+        style="width:100.0%"></span></span>
+      <span class="barlist__value">990 %</span>
+    </div><div class="barlist__row">
+      <span class="barlist__label">Zoll</span>
+      <span class="barlist__track"><span class="barlist__bar "
+        style="width:69.2%"></span></span>
+      <span class="barlist__value">685 %</span>
+    </div><div class="barlist__row">
+      <span class="barlist__label">Kultur und Denkmäler</span>
+      <span class="barlist__track"><span class="barlist__bar "
+        style="width:60.1%"></span></span>
+      <span class="barlist__value">595 %</span>
+    </div><div class="barlist__row">
+      <span class="barlist__label">Sport</span>
+      <span class="barlist__track"><span class="barlist__bar "
+        style="width:53.7%"></span></span>
+      <span class="barlist__value">532 %</span>
+    </div><div class="barlist__row">
+      <span class="barlist__label">Justiz und Polizei</span>
+      <span class="barlist__track"><span class="barlist__bar "
+        style="width:48.5%"></span></span>
+      <span class="barlist__value">480 %</span>
+    </div><div class="barlist__row">
+      <span class="barlist__label">Bauten im Ausland</span>
+      <span class="barlist__track"><span class="barlist__bar "
+        style="width:47.0%"></span></span>
+      <span class="barlist__value">465 %</span>
+    </div><div class="barlist__row">
+      <span class="barlist__label">Bildung und Forschung</span>
+      <span class="barlist__track"><span class="barlist__bar "
+        style="width:37.9%"></span></span>
+      <span class="barlist__value">375 %</span>
+    </div>
+  </div>
+    
+  </section>
+
+<section class="card ">
+    <header class="card__head">
+      <div>
+        <h3 class="card__title">Kapazitätslücke nach Teilportfolio<span class="stars">★★</span></h3>
+        <p class="card__sub">Q3/2026 · Bedarf minus zugeordnete Kapazität</p>
+      </div>
+    </header>
+    <p class="placeholder">Bedarf je Bereich gegen die Summe der Anstellungsgrade der Personen, die
+   dort führen. Beantwortet nicht <em>wo der Bedarf ist</em>, sondern <em>wo er nicht gedeckt ist</em> —
+   und damit, zwischen welchen Bereichen umgeschichtet werden kann.</p>
+    <p class="card__note">Braucht keine neuen Daten, aber eine Zuordnung Person → Teilportfolio, die heute nur über die geführten Projekte besteht.</p>
+  </section></div>
+    </div>
+  </article>
+
+<article class="frame">
+    <header class="frame__head">
+      <span class="frame__no">2</span>
+      <span class="frame__title">Abschnitt «Personen»</span>
+      <span class="frame__sub">der neue Abschnitt · Betrachtungseinheit: Köpfe · Kopf und Toolbar bleiben stehen</span>
+    </header>
+    <div class="screen">
+      
+      <div class="kpi-strip">
+  <div class="kpi is-alert">
+    <div class="kpi__label">Auslastung</div>
+    <div class="kpi__value">106 %</div>
+    <div class="kpi__note">4122 % Bedarf auf 3670 % netto</div>
+  </div><div class="kpi is-alert">
+    <div class="kpi__label">Personen über 100 %</div>
+    <div class="kpi__value">21 von 46</div>
+    <div class="kpi__note">35 in mindestens einem Quartal</div>
+  </div><div class="kpi is-alert">
+    <div class="kpi__label">Überfällige Gates</div>
+    <div class="kpi__value">24</div>
+    <div class="kpi__note">von 86 · 64 % Termintreue</div>
+  </div><div class="kpi ">
+    <div class="kpi__label">Nicht zugewiesener Bedarf</div>
+    <div class="kpi__value">35 %</div>
+    <div class="kpi__note">3 Projekte ohne Projektleitung</div>
+  </div>
+</div><section class="card card--anchor">
+  <header class="card__head">
+    <div>
+      <h3 class="card__title">Auslastung nach Quartal</h3>
+      <p class="card__sub">Bedarf gegen Kapazität netto · gilt für alle Abschnitte · Klick setzt das Bezugsquartal</p>
+    </div>
+    <span class="pill pill--anchor">fester Kopf</span>
+  </header>
+  <div class="chart" style="--h:108px">
+    <div class="chart__ref" style="bottom:76.92307692307693%"><span>100 %</span></div>
+    <div class="chart__cols">
+      <div class="col">
+        <span class="col__v">106</span>
+        <div class="col__bar is-over" style="height:81.5%"></div>
+      </div><div class="col">
+        <span class="col__v">106</span>
+        <div class="col__bar is-over" style="height:81.5%"></div>
+      </div><div class="col">
+        <span class="col__v">111</span>
+        <div class="col__bar is-over" style="height:85.4%"></div>
+      </div><div class="col">
+        <span class="col__v">109</span>
+        <div class="col__bar is-over" style="height:83.8%"></div>
+      </div><div class="col">
+        <span class="col__v">102</span>
+        <div class="col__bar is-over" style="height:78.5%"></div>
+      </div><div class="col">
+        <span class="col__v">82</span>
+        <div class="col__bar is-ok" style="height:63.1%"></div>
+      </div><div class="col">
+        <span class="col__v">72</span>
+        <div class="col__bar is-free" style="height:55.4%"></div>
+      </div><div class="col">
+        <span class="col__v">63</span>
+        <div class="col__bar is-free" style="height:48.5%"></div>
+      </div>
+    </div>
+    <div class="chart__axis"><span>Q3/26</span><span>Q4/26</span><span>Q1/27</span><span>Q2/27</span><span>Q3/27</span><span>Q4/27</span><span>Q1/28</span><span>Q2/28</span></div>
+  </div>
+</section>
+  <div class="tabrow">
+    <div class="segmented" role="tablist">
+  <button class="segmented__btn ">Kapazität</button><button class="segmented__btn is-on">Personen</button><button class="segmented__btn ">Pipeline</button><button class="segmented__btn ">Termine</button><button class="segmented__btn ">Mittel</button>
+</div>
+    <span class="tabrow__hint">Betrachtungseinheit: Köpfe</span>
+  </div><div class="cards">
+<section class="card card--wide">
+    <header class="card__head">
+      <div>
+        <h3 class="card__title">Auslastungsverteilung<span class="stars">★★★</span></h3>
+        <p class="card__sub">Q3/2026 · Anzahl Personen je Band · Bezugsquartal aus dem Kopf</p>
+      </div>
+    </header>
+    <div class="split">
+    <div>
+      <p class="split__title">Q3/2026 — Portfolio bei 106 %</p>
+      <div class="chart" style="--h:118px">
+    
+    <div class="chart__cols">
+      <div class="col">
+        <span class="col__v">6</span>
+        <div class="col__bar is-free" style="height:33.0%"></div>
+      </div><div class="col">
+        <span class="col__v">7</span>
+        <div class="col__bar is-free" style="height:38.5%"></div>
+      </div><div class="col">
+        <span class="col__v">6</span>
+        <div class="col__bar is-ok" style="height:33.0%"></div>
+      </div><div class="col">
+        <span class="col__v">6</span>
+        <div class="col__bar is-tight" style="height:33.0%"></div>
+      </div><div class="col">
+        <span class="col__v">13</span>
+        <div class="col__bar is-over" style="height:71.4%"></div>
+      </div><div class="col">
+        <span class="col__v">8</span>
+        <div class="col__bar is-over" style="height:44.0%"></div>
+      </div>
+    </div>
+    <div class="chart__axis"><span>unter 60</span><span>60 – 79</span><span>80 – 94</span><span>95 – 100</span><span>101 – 120</span><span>über 120</span></div>
+  </div>
+    </div>
+    <div>
+      <p class="split__title">Q4/2027 — Portfolio bei 82 %</p>
+      <div class="chart" style="--h:118px">
+    
+    <div class="chart__cols">
+      <div class="col">
+        <span class="col__v">14</span>
+        <div class="col__bar is-free" style="height:76.9%"></div>
+      </div><div class="col">
+        <span class="col__v">6</span>
+        <div class="col__bar is-free" style="height:33.0%"></div>
+      </div><div class="col">
+        <span class="col__v">9</span>
+        <div class="col__bar is-ok" style="height:49.5%"></div>
+      </div><div class="col">
+        <span class="col__v">2</span>
+        <div class="col__bar is-tight" style="height:11.0%"></div>
+      </div><div class="col">
+        <span class="col__v">4</span>
+        <div class="col__bar is-over" style="height:22.0%"></div>
+      </div><div class="col">
+        <span class="col__v">11</span>
+        <div class="col__bar is-over" style="height:60.4%"></div>
+      </div>
+    </div>
+    <div class="chart__axis"><span>unter 60</span><span>60 – 79</span><span>80 – 94</span><span>95 – 100</span><span>101 – 120</span><span>über 120</span></div>
+  </div>
+    </div>
+  </div>
+    <p class="card__note">Das Portfolio steht in Q4/2027 bei <strong>82 %</strong> — rechnerisch entspannt.
+      Tatsächlich sitzen dort <strong>14 Personen unter 60 %</strong> und gleichzeitig
+      <strong>11 über 120 %</strong>. Die Kapazität ist da, sie liegt auf den falschen Leuten.
+      Kein Portfolio-Aggregat kann das zeigen.</p>
+  </section>
+
+<section class="card card--wide">
+    <header class="card__head">
+      <div>
+        <h3 class="card__title">Auslastung je Person und Quartal<span class="stars">★★★</span></h3>
+        <p class="card__sub">46 Personen · % gegen die eigene Anstellung · dasselbe Raster wie die Übersicht</p>
+      </div>
+    </header>
+    <div class="ptable">
+    <div class="ptable__row ptable__row--head">
+      <span class="ptable__name">Person</span>
+      <span class="ptable__num">Anst.</span>
+      <span class="ptable__num">Proj.</span>
+      <span class="ptable__num">Spitze</span>
+      <span class="ptable__q">Q3/26</span><span class="ptable__q">Q4/26</span><span class="ptable__q">Q1/27</span><span class="ptable__q">Q2/27</span><span class="ptable__q">Q3/27</span><span class="ptable__q">Q4/27</span><span class="ptable__q">Q1/28</span><span class="ptable__q">Q2/28</span>
+    </div>
+    
+      <div class="ptable__row">
+        <span class="ptable__name">Sonja B.</span>
+        <span class="ptable__num">100 %</span>
+        <span class="ptable__num">3</span>
+        <span class="ptable__num is-over">245 %</span>
+        <span class="cell heat-4 is-over">225</span><span class="cell heat-4 is-over">245</span><span class="cell heat-4 is-over">245</span><span class="cell heat-4 is-over">225</span><span class="cell heat-4 is-over">200</span><span class="cell heat-4 is-over">160</span><span class="cell heat-3 is-over">105</span><span class="cell heat-2 ">70</span>
+      </div>
+      <div class="ptable__row">
+        <span class="ptable__name">Corina M.</span>
+        <span class="ptable__num">100 %</span>
+        <span class="ptable__num">2</span>
+        <span class="ptable__num is-over">205 %</span>
+        <span class="cell heat-4 is-over">190</span><span class="cell heat-4 is-over">170</span><span class="cell heat-4 is-over">170</span><span class="cell heat-4 is-over">205</span><span class="cell heat-4 is-over">180</span><span class="cell heat-4 is-over">120</span><span class="cell heat-4 is-over">145</span><span class="cell heat-4 is-over">145</span>
+      </div>
+      <div class="ptable__row">
+        <span class="ptable__name">Walter B.</span>
+        <span class="ptable__num">100 %</span>
+        <span class="ptable__num">2</span>
+        <span class="ptable__num is-over">180 %</span>
+        <span class="cell heat-3 is-over">115</span><span class="cell heat-4 is-over">120</span><span class="cell heat-4 is-over">145</span><span class="cell heat-4 is-over">155</span><span class="cell heat-4 is-over">180</span><span class="cell heat-4 is-over">165</span><span class="cell heat-3 ">95</span><span class="cell heat-1 ">35</span>
+      </div>
+      <div class="ptable__row">
+        <span class="ptable__name">Sara M.</span>
+        <span class="ptable__num">100 %</span>
+        <span class="ptable__num">2</span>
+        <span class="ptable__num is-over">175 %</span>
+        <span class="cell heat-4 is-over">125</span><span class="cell heat-4 is-over">140</span><span class="cell heat-4 is-over">165</span><span class="cell heat-4 is-over">175</span><span class="cell heat-4 is-over">135</span><span class="cell heat-4 is-over">135</span><span class="cell heat-4 is-over">170</span><span class="cell heat-4 is-over">160</span>
+      </div>
+      <div class="ptable__row">
+        <span class="ptable__name">Urs B.</span>
+        <span class="ptable__num">100 %</span>
+        <span class="ptable__num">2</span>
+        <span class="ptable__num is-over">170 %</span>
+        <span class="cell heat-4 is-over">135</span><span class="cell heat-3 ">100</span><span class="cell heat-3 is-over">110</span><span class="cell heat-4 is-over">145</span><span class="cell heat-4 is-over">145</span><span class="cell heat-4 is-over">170</span><span class="cell heat-4 is-over">145</span><span class="cell heat-4 is-over">145</span>
+      </div>
+      <div class="ptable__row">
+        <span class="ptable__name">Luca B.</span>
+        <span class="ptable__num">100 %</span>
+        <span class="ptable__num">2</span>
+        <span class="ptable__num is-over">170 %</span>
+        <span class="cell heat-3 ">100</span><span class="cell heat-3 ">100</span><span class="cell heat-4 is-over">170</span><span class="cell heat-4 is-over">170</span><span class="cell heat-4 is-over">155</span><span class="cell heat-4 is-over">120</span><span class="cell heat-4 is-over">120</span><span class="cell heat-4 is-over">145</span>
+      </div><div class="ptable__gap">⋯ 36 weitere Zeilen ⋯</div>
+      <div class="ptable__row">
+        <span class="ptable__name">Ines M.</span>
+        <span class="ptable__num">100 %</span>
+        <span class="ptable__num">2</span>
+        <span class="ptable__num is-over">130 %</span>
+        <span class="cell heat-1 ">10</span><span class="cell heat-3 ">80</span><span class="cell heat-3 is-over">105</span><span class="cell heat-4 is-over">130</span><span class="cell heat-4 is-over">130</span><span class="cell heat-4 is-over">130</span><span class="cell heat-2 ">70</span><span class="cell heat-1 ">20</span>
+      </div>
+      <div class="ptable__row">
+        <span class="ptable__name">Vera M.</span>
+        <span class="ptable__num">80 %</span>
+        <span class="ptable__num">2</span>
+        <span class="ptable__num is-over">106 %</span>
+        <span class="cell heat-1 ">31</span><span class="cell heat-2 ">44</span><span class="cell heat-3 is-over">106</span><span class="cell heat-3 is-over">106</span><span class="cell heat-3 ">88</span><span class="cell heat-2 ">56</span><span class="cell heat-2 ">44</span><span class="cell heat-2 ">50</span>
+      </div>
+      <div class="ptable__row">
+        <span class="ptable__name">Marta M.</span>
+        <span class="ptable__num">60 %</span>
+        <span class="ptable__num">2</span>
+        <span class="ptable__num ">100 %</span>
+        <span class="cell heat-2 ">50</span><span class="cell heat-2 ">75</span><span class="cell heat-3 ">83</span><span class="cell heat-3 ">100</span><span class="cell heat-3 ">100</span><span class="cell heat-3 ">100</span><span class="cell heat-3 ">100</span><span class="cell heat-2 ">50</span>
+      </div>
+      <div class="ptable__row">
+        <span class="ptable__name">Petra M.</span>
+        <span class="ptable__num">80 %</span>
+        <span class="ptable__num">1</span>
+        <span class="ptable__num ">69 %</span>
+        <span class="cell heat-2 ">50</span><span class="cell heat-2 ">50</span><span class="cell heat-2 ">69</span><span class="cell heat-2 ">69</span><span class="cell heat-2 ">69</span><span class="cell heat-1 ">38</span><span class="cell heat-1 ">38</span><span class="cell heat-2 ">63</span>
+      </div>
+  </div>
+    <p class="card__note">Kopfspalten eingefroren, Zeitachse scrollt, sortierbar nach Spitze / laufender Last / freier Kapazität,
+      gruppierbar nach Rolle. <strong>Das Bauteil existiert bereits</strong> — es ist das Pensum-Raster
+      der Übersicht mit Personen statt Projekten als Zeilen. Die Spalte <em>Spitze</em> ist die Ergänzung:
+      sie beantwortet, was eine Momentaufnahme verschweigt.</p>
+  </section>
+
+<section class="card card--wide">
+    <header class="card__head">
+      <div>
+        <h3 class="card__title">Die Ränder<span class="stars">★★</span></h3>
+        <p class="card__sub">Die Umbuchungsliste · jede Zeile führt in die gefilterte Übersicht</p>
+      </div>
+    </header>
+    <div class="split">
+    <div>
+      <p class="split__title split__title--danger">Überlast — höchste Spitze</p>
+      <div class="barlist">
+    <div class="barlist__row">
+      <span class="barlist__label">Sonja B. · 3 Projekte</span>
+      <span class="barlist__track"><span class="barlist__bar is-over"
+        style="width:100.0%"></span></span>
+      <span class="barlist__value">245 % von 100 %</span>
+    </div><div class="barlist__row">
+      <span class="barlist__label">Corina M. · 2 Projekte</span>
+      <span class="barlist__track"><span class="barlist__bar is-over"
+        style="width:83.7%"></span></span>
+      <span class="barlist__value">205 % von 100 %</span>
+    </div><div class="barlist__row">
+      <span class="barlist__label">Walter B. · 2 Projekte</span>
+      <span class="barlist__track"><span class="barlist__bar is-over"
+        style="width:73.5%"></span></span>
+      <span class="barlist__value">180 % von 100 %</span>
+    </div><div class="barlist__row">
+      <span class="barlist__label">Sara M. · 2 Projekte</span>
+      <span class="barlist__track"><span class="barlist__bar is-over"
+        style="width:71.4%"></span></span>
+      <span class="barlist__value">175 % von 100 %</span>
+    </div><div class="barlist__row">
+      <span class="barlist__label">Urs B. · 2 Projekte</span>
+      <span class="barlist__track"><span class="barlist__bar is-over"
+        style="width:69.4%"></span></span>
+      <span class="barlist__value">170 % von 100 %</span>
+    </div>
+  </div>
+    </div>
+    <div>
+      <p class="split__title split__title--ok">Freie Kapazität — Q3/2026</p>
+      <div class="barlist">
+    <div class="barlist__row">
+      <span class="barlist__label">Ines M. · 2 Projekte</span>
+      <span class="barlist__track"><span class="barlist__bar is-free"
+        style="width:90.0%"></span></span>
+      <span class="barlist__value">90 % frei</span>
+    </div><div class="barlist__row">
+      <span class="barlist__label">Vera M. · 2 Projekte</span>
+      <span class="barlist__track"><span class="barlist__bar is-free"
+        style="width:49.0%"></span></span>
+      <span class="barlist__value">49 % frei</span>
+    </div><div class="barlist__row">
+      <span class="barlist__label">Marta M. · 2 Projekte</span>
+      <span class="barlist__track"><span class="barlist__bar is-free"
+        style="width:10.0%"></span></span>
+      <span class="barlist__value">10 % frei</span>
+    </div><div class="barlist__row">
+      <span class="barlist__label">Petra M. · 1 Projekte</span>
+      <span class="barlist__track"><span class="barlist__bar is-free"
+        style="width:30.0%"></span></span>
+      <span class="barlist__value">30 % frei</span>
+    </div><div class="barlist__row">
+      <span class="barlist__label">Leon B. · 4 Projekte</span>
+      <span class="barlist__track"><span class="barlist__bar is-free"
+        style="width:2.0%"></span></span>
+      <span class="barlist__value">2 % frei</span>
+    </div>
+  </div>
+    </div>
+  </div>
+    
+  </section>
+
+<section class="card ">
+    <header class="card__head">
+      <div>
+        <h3 class="card__title">Kapazität nach Rolle<span class="stars">★★</span></h3>
+        <p class="card__sub">Q3/2026 · Bedarf gegen Anstellung je Rolle</p>
+      </div>
+    </header>
+    <div class="barlist">
+    <div class="barlist__row">
+      <span class="barlist__label">Projektleitung · 43</span>
+      <span class="barlist__track"><span class="barlist__bar is-over"
+        style="width:100.0%"></span></span>
+      <span class="barlist__value">3905 % von 3890 %</span>
+    </div><div class="barlist__row">
+      <span class="barlist__label">Projektentwicklung · 2</span>
+      <span class="barlist__track"><span class="barlist__bar is-over"
+        style="width:4.7%"></span></span>
+      <span class="barlist__value">182 % von 180 %</span>
+    </div><div class="barlist__row">
+      <span class="barlist__label">Bauleitung · 1</span>
+      <span class="barlist__track"><span class="barlist__bar "
+        style="width:1.5%"></span></span>
+      <span class="barlist__value">60 % von 60 %</span>
+    </div>
+  </div>
+    <p class="card__note">Eine freie Bauleitung löst keinen Engpass in der Projektleitung. <strong>Datenlage:</strong>
+      die Mock-Belegschaft ist 43 × Projektleitung, 2 × Projektentwicklung, 1 × Bauleitung — kein realistischer
+      Rollenmix, und diese Karte braucht ihn.</p>
+  </section></div>
+    </div>
+  </article>
+
+<article class="frame">
+    <header class="frame__head">
+      <span class="frame__no">3</span>
+      <span class="frame__title">Abschnitt «Pipeline»</span>
+      <span class="frame__sub">Betrachtungseinheit: Projekte</span>
+    </header>
+    <div class="screen">
+      
+      <div class="kpi-strip">
+  <div class="kpi is-alert">
+    <div class="kpi__label">Auslastung</div>
+    <div class="kpi__value">106 %</div>
+    <div class="kpi__note">4122 % Bedarf auf 3670 % netto</div>
+  </div><div class="kpi is-alert">
+    <div class="kpi__label">Personen über 100 %</div>
+    <div class="kpi__value">21 von 46</div>
+    <div class="kpi__note">35 in mindestens einem Quartal</div>
+  </div><div class="kpi is-alert">
+    <div class="kpi__label">Überfällige Gates</div>
+    <div class="kpi__value">24</div>
+    <div class="kpi__note">von 86 · 64 % Termintreue</div>
+  </div><div class="kpi ">
+    <div class="kpi__label">Nicht zugewiesener Bedarf</div>
+    <div class="kpi__value">35 %</div>
+    <div class="kpi__note">3 Projekte ohne Projektleitung</div>
+  </div>
+</div><section class="card card--anchor">
+  <header class="card__head">
+    <div>
+      <h3 class="card__title">Auslastung nach Quartal</h3>
+      <p class="card__sub">Bedarf gegen Kapazität netto · gilt für alle Abschnitte · Klick setzt das Bezugsquartal</p>
+    </div>
+    <span class="pill pill--anchor">fester Kopf</span>
+  </header>
+  <div class="chart" style="--h:108px">
+    <div class="chart__ref" style="bottom:76.92307692307693%"><span>100 %</span></div>
+    <div class="chart__cols">
+      <div class="col">
+        <span class="col__v">106</span>
+        <div class="col__bar is-over" style="height:81.5%"></div>
+      </div><div class="col">
+        <span class="col__v">106</span>
+        <div class="col__bar is-over" style="height:81.5%"></div>
+      </div><div class="col">
+        <span class="col__v">111</span>
+        <div class="col__bar is-over" style="height:85.4%"></div>
+      </div><div class="col">
+        <span class="col__v">109</span>
+        <div class="col__bar is-over" style="height:83.8%"></div>
+      </div><div class="col">
+        <span class="col__v">102</span>
+        <div class="col__bar is-over" style="height:78.5%"></div>
+      </div><div class="col">
+        <span class="col__v">82</span>
+        <div class="col__bar is-ok" style="height:63.1%"></div>
+      </div><div class="col">
+        <span class="col__v">72</span>
+        <div class="col__bar is-free" style="height:55.4%"></div>
+      </div><div class="col">
+        <span class="col__v">63</span>
+        <div class="col__bar is-free" style="height:48.5%"></div>
+      </div>
+    </div>
+    <div class="chart__axis"><span>Q3/26</span><span>Q4/26</span><span>Q1/27</span><span>Q2/27</span><span>Q3/27</span><span>Q4/27</span><span>Q1/28</span><span>Q2/28</span></div>
+  </div>
+</section>
+  <div class="tabrow">
+    <div class="segmented" role="tablist">
+  <button class="segmented__btn ">Kapazität</button><button class="segmented__btn ">Personen</button><button class="segmented__btn is-on">Pipeline</button><button class="segmented__btn ">Termine</button><button class="segmented__btn ">Mittel</button>
+</div>
+    <span class="tabrow__hint">Betrachtungseinheit: Projekte</span>
+  </div><div class="cards">
+<section class="card card--wide">
+    <header class="card__head">
+      <div>
+        <h3 class="card__title">Phasenfluss über die Zeit<span class="stars">★★★</span></h3>
+        <p class="card__sub">Anzahl Projekte je SIA-Hauptphase · aus den Balken jedes Projekts abgeleitet</p>
+      </div>
+    </header>
+    <div class="chart" style="--h:180px">
+    
+    <div class="chart__cols">
+      <div class="col">
+        <span class="col__v">91</span>
+        <div class="col__stack" style="height:82.9%">
+          <div class="seg seg--p1"
+            style="height:1.1%"
+            title="6 Bewirtschaftung: 1"></div><div class="seg seg--p0"
+            style="height:35.2%"
+            title="5 Realisierung: 32"></div><div class="seg seg--p3"
+            style="height:15.4%"
+            title="4 Ausschreibung: 14"></div><div class="seg seg--p2"
+            style="height:27.5%"
+            title="3 Projektierung: 25"></div><div class="seg seg--p1"
+            style="height:18.7%"
+            title="2 Vorstudien: 17"></div><div class="seg seg--p0"
+            style="height:2.2%"
+            title="1 Strategische Planung: 2"></div>
+        </div>
+      </div><div class="col">
+        <span class="col__v">92</span>
+        <div class="col__stack" style="height:83.8%">
+          <div class="seg seg--p1"
+            style="height:1.1%"
+            title="6 Bewirtschaftung: 1"></div><div class="seg seg--p0"
+            style="height:41.3%"
+            title="5 Realisierung: 38"></div><div class="seg seg--p3"
+            style="height:9.8%"
+            title="4 Ausschreibung: 9"></div><div class="seg seg--p2"
+            style="height:33.7%"
+            title="3 Projektierung: 31"></div><div class="seg seg--p1"
+            style="height:12.0%"
+            title="2 Vorstudien: 11"></div><div class="seg seg--p0"
+            style="height:2.2%"
+            title="1 Strategische Planung: 2"></div>
+        </div>
+      </div><div class="col">
+        <span class="col__v">98</span>
+        <div class="col__stack" style="height:89.3%">
+          <div class="seg seg--p1"
+            style="height:1.0%"
+            title="6 Bewirtschaftung: 1"></div><div class="seg seg--p0"
+            style="height:46.9%"
+            title="5 Realisierung: 46"></div><div class="seg seg--p3"
+            style="height:7.1%"
+            title="4 Ausschreibung: 7"></div><div class="seg seg--p2"
+            style="height:32.7%"
+            title="3 Projektierung: 32"></div><div class="seg seg--p1"
+            style="height:11.2%"
+            title="2 Vorstudien: 11"></div><div class="seg seg--p0"
+            style="height:1.0%"
+            title="1 Strategische Planung: 1"></div>
+        </div>
+      </div><div class="col">
+        <span class="col__v">88</span>
+        <div class="col__stack" style="height:80.2%">
+          <div class="seg seg--p1"
+            style="height:0.0%"
+            title="6 Bewirtschaftung: 0"></div><div class="seg seg--p0"
+            style="height:51.1%"
+            title="5 Realisierung: 45"></div><div class="seg seg--p3"
+            style="height:3.4%"
+            title="4 Ausschreibung: 3"></div><div class="seg seg--p2"
+            style="height:37.5%"
+            title="3 Projektierung: 33"></div><div class="seg seg--p1"
+            style="height:8.0%"
+            title="2 Vorstudien: 7"></div><div class="seg seg--p0"
+            style="height:0.0%"
+            title="1 Strategische Planung: 0"></div>
+        </div>
+      </div><div class="col">
+        <span class="col__v">84</span>
+        <div class="col__stack" style="height:76.5%">
+          <div class="seg seg--p1"
+            style="height:0.0%"
+            title="6 Bewirtschaftung: 0"></div><div class="seg seg--p0"
+            style="height:50.0%"
+            title="5 Realisierung: 42"></div><div class="seg seg--p3"
+            style="height:9.5%"
+            title="4 Ausschreibung: 8"></div><div class="seg seg--p2"
+            style="height:35.7%"
+            title="3 Projektierung: 30"></div><div class="seg seg--p1"
+            style="height:4.8%"
+            title="2 Vorstudien: 4"></div><div class="seg seg--p0"
+            style="height:0.0%"
+            title="1 Strategische Planung: 0"></div>
+        </div>
+      </div><div class="col">
+        <span class="col__v">73</span>
+        <div class="col__stack" style="height:66.5%">
+          <div class="seg seg--p1"
+            style="height:1.4%"
+            title="6 Bewirtschaftung: 1"></div><div class="seg seg--p0"
+            style="height:46.6%"
+            title="5 Realisierung: 34"></div><div class="seg seg--p3"
+            style="height:13.7%"
+            title="4 Ausschreibung: 10"></div><div class="seg seg--p2"
+            style="height:35.6%"
+            title="3 Projektierung: 26"></div><div class="seg seg--p1"
+            style="height:2.7%"
+            title="2 Vorstudien: 2"></div><div class="seg seg--p0"
+            style="height:0.0%"
+            title="1 Strategische Planung: 0"></div>
+        </div>
+      </div><div class="col">
+        <span class="col__v">65</span>
+        <div class="col__stack" style="height:59.2%">
+          <div class="seg seg--p1"
+            style="height:1.5%"
+            title="6 Bewirtschaftung: 1"></div><div class="seg seg--p0"
+            style="height:50.8%"
+            title="5 Realisierung: 33"></div><div class="seg seg--p3"
+            style="height:18.5%"
+            title="4 Ausschreibung: 12"></div><div class="seg seg--p2"
+            style="height:27.7%"
+            title="3 Projektierung: 18"></div><div class="seg seg--p1"
+            style="height:1.5%"
+            title="2 Vorstudien: 1"></div><div class="seg seg--p0"
+            style="height:0.0%"
+            title="1 Strategische Planung: 0"></div>
+        </div>
+      </div><div class="col">
+        <span class="col__v">56</span>
+        <div class="col__stack" style="height:51.0%">
+          <div class="seg seg--p1"
+            style="height:1.8%"
+            title="6 Bewirtschaftung: 1"></div><div class="seg seg--p0"
+            style="height:55.4%"
+            title="5 Realisierung: 31"></div><div class="seg seg--p3"
+            style="height:19.6%"
+            title="4 Ausschreibung: 11"></div><div class="seg seg--p2"
+            style="height:21.4%"
+            title="3 Projektierung: 12"></div><div class="seg seg--p1"
+            style="height:1.8%"
+            title="2 Vorstudien: 1"></div><div class="seg seg--p0"
+            style="height:0.0%"
+            title="1 Strategische Planung: 0"></div>
+        </div>
+      </div>
+    </div>
+    <div class="chart__axis"><span>Q3/26</span><span>Q4/26</span><span>Q1/27</span><span>Q2/27</span><span>Q3/27</span><span>Q4/27</span><span>Q1/28</span><span>Q2/28</span></div>
+    
+  </div><div class="legend"><span class="legend__item"><span class="swatch seg--p0"></span>1 Strategie</span><span class="legend__item"><span class="swatch seg--p1"></span>2 Vorstudien</span><span class="legend__item"><span class="swatch seg--p2"></span>3 Projektierung</span><span class="legend__item"><span class="swatch seg--p3"></span>4 Ausschreibung</span><span class="legend__item"><span class="swatch seg--p0"></span>5 Realisierung</span><span class="legend__item"><span class="swatch seg--p1"></span>6 Bewirtschaftung</span></div>
+    <p class="card__note">Die Welle ist sichtbar: Phase 5 wächst von 32 auf 46 Projekte
+      bis Q1/27 — genau die Quartale mit Auslastung
+      über 100 %. Und Phase 2 fällt von 17 auf 1: <strong>es rückt nichts nach.</strong>
+      Einstellungen und Akquisition werden an dieser Grafik geplant.</p>
+  </section>
+
+<section class="card ">
+    <header class="card__head">
+      <div>
+        <h3 class="card__title">Anzahl Projekte nach SIA-Phase<span class="stars">★★</span></h3>
+        <p class="card__sub">111 Projekte im gesetzten Umfang · bestehende Karte, unverändert</p>
+      </div>
+    </header>
+    <div class="barlist">
+    <div class="barlist__row">
+      <span class="barlist__label">1 Strategische Planung</span>
+      <span class="barlist__track"><span class="barlist__bar "
+        style="width:10.3%"></span></span>
+      <span class="barlist__value">4</span>
+    </div><div class="barlist__row">
+      <span class="barlist__label">2 Vorstudien</span>
+      <span class="barlist__track"><span class="barlist__bar "
+        style="width:59.0%"></span></span>
+      <span class="barlist__value">23</span>
+    </div><div class="barlist__row">
+      <span class="barlist__label">3 Projektierung</span>
+      <span class="barlist__track"><span class="barlist__bar "
+        style="width:79.5%"></span></span>
+      <span class="barlist__value">31</span>
+    </div><div class="barlist__row">
+      <span class="barlist__label">4 Ausschreibung</span>
+      <span class="barlist__track"><span class="barlist__bar "
+        style="width:33.3%"></span></span>
+      <span class="barlist__value">13</span>
+    </div><div class="barlist__row">
+      <span class="barlist__label">5 Realisierung</span>
+      <span class="barlist__track"><span class="barlist__bar "
+        style="width:100.0%"></span></span>
+      <span class="barlist__value">39</span>
+    </div><div class="barlist__row">
+      <span class="barlist__label">6 Bewirtschaftung</span>
+      <span class="barlist__track"><span class="barlist__bar "
+        style="width:2.6%"></span></span>
+      <span class="barlist__value">1</span>
+    </div>
+  </div>
+    <p class="card__note">Die Momentaufnahme zum Fluss darüber.</p>
+  </section>
+
+<section class="card ">
+    <header class="card__head">
+      <div>
+        <h3 class="card__title">Teilportfolio × SIA-Phase<span class="stars">★★</span></h3>
+        <p class="card__sub">Anzahl Projekte je Zelle · Heat-Rampe wie im Pensum-Raster</p>
+      </div>
+    </header>
+    <div class="matrix" style="--cols:6">
+    <span class="matrix__corner"></span>
+    <span class="matrix__head">1 Strategie</span><span class="matrix__head">2 Vorstudien</span><span class="matrix__head">3 Projektierung</span><span class="matrix__head">4 Ausschreibung</span><span class="matrix__head">5 Realisierung</span><span class="matrix__head">6 Bewirtschaftung</span>
+    <span class="matrix__label">Verwaltung</span>
+      <span class="matrix__cell heat-0">–</span><span class="matrix__cell heat-3">6</span><span class="matrix__cell heat-3">7</span><span class="matrix__cell heat-2">4</span><span class="matrix__cell heat-4">11</span><span class="matrix__cell heat-0">–</span><span class="matrix__label">Zoll</span>
+      <span class="matrix__cell heat-0">–</span><span class="matrix__cell heat-2">3</span><span class="matrix__cell heat-2">5</span><span class="matrix__cell heat-1">2</span><span class="matrix__cell heat-2">4</span><span class="matrix__cell heat-0">–</span><span class="matrix__label">Justiz und Polizei</span>
+      <span class="matrix__cell heat-1">1</span><span class="matrix__cell heat-2">3</span><span class="matrix__cell heat-3">6</span><span class="matrix__cell heat-1">2</span><span class="matrix__cell heat-3">6</span><span class="matrix__cell heat-0">–</span><span class="matrix__label">Bildung und Forschung</span>
+      <span class="matrix__cell heat-0">–</span><span class="matrix__cell heat-2">4</span><span class="matrix__cell heat-1">1</span><span class="matrix__cell heat-1">2</span><span class="matrix__cell heat-2">5</span><span class="matrix__cell heat-0">–</span><span class="matrix__label">Bauten im Ausland</span>
+      <span class="matrix__cell heat-1">2</span><span class="matrix__cell heat-1">2</span><span class="matrix__cell heat-2">5</span><span class="matrix__cell heat-1">2</span><span class="matrix__cell heat-2">3</span><span class="matrix__cell heat-0">–</span><span class="matrix__label">Kultur und Denkmäler</span>
+      <span class="matrix__cell heat-1">1</span><span class="matrix__cell heat-2">4</span><span class="matrix__cell heat-2">3</span><span class="matrix__cell heat-1">1</span><span class="matrix__cell heat-2">5</span><span class="matrix__cell heat-0">–</span><span class="matrix__label">Sport</span>
+      <span class="matrix__cell heat-0">–</span><span class="matrix__cell heat-1">1</span><span class="matrix__cell heat-2">4</span><span class="matrix__cell heat-0">–</span><span class="matrix__cell heat-2">5</span><span class="matrix__cell heat-1">1</span>
+  </div>
+    <p class="card__note">Sucht den Klumpen: ein Bereich, der mit vielen Projekten gleichzeitig in derselben Phase steht.</p>
+  </section>
+
+<section class="card ">
+    <header class="card__head">
+      <div>
+        <h3 class="card__title">Bedarf nach Priorität<span class="stars">★★</span></h3>
+        <p class="card__sub">Pensum in % je Quartal · gestapelt</p>
+      </div>
+    </header>
+    <div class="chart" style="--h:150px">
+    
+    <div class="chart__cols">
+      <div class="col">
+        <span class="col__v">4122 %</span>
+        <div class="col__stack" style="height:76.2%">
+          <div class="seg seg--ext"
+            style="height:26.5%"
+            title="tief: 1092 %"></div><div class="seg seg--pre"
+            style="height:46.5%"
+            title="mittel: 1915 %"></div><div class="seg seg--bound"
+            style="height:27.0%"
+            title="hoch: 1115 %"></div>
+        </div>
+      </div><div class="col">
+        <span class="col__v">4405 %</span>
+        <div class="col__stack" style="height:81.4%">
+          <div class="seg seg--ext"
+            style="height:23.3%"
+            title="tief: 1025 %"></div><div class="seg seg--pre"
+            style="height:50.1%"
+            title="mittel: 2205 %"></div><div class="seg seg--bound"
+            style="height:26.7%"
+            title="hoch: 1175 %"></div>
+        </div>
+      </div><div class="col">
+        <span class="col__v">4830 %</span>
+        <div class="col__stack" style="height:89.3%">
+          <div class="seg seg--ext"
+            style="height:21.9%"
+            title="tief: 1060 %"></div><div class="seg seg--pre"
+            style="height:52.7%"
+            title="mittel: 2545 %"></div><div class="seg seg--bound"
+            style="height:25.4%"
+            title="hoch: 1225 %"></div>
+        </div>
+      </div><div class="col">
+        <span class="col__v">4690 %</span>
+        <div class="col__stack" style="height:86.7%">
+          <div class="seg seg--ext"
+            style="height:20.3%"
+            title="tief: 950 %"></div><div class="seg seg--pre"
+            style="height:53.5%"
+            title="mittel: 2510 %"></div><div class="seg seg--bound"
+            style="height:26.2%"
+            title="hoch: 1230 %"></div>
+        </div>
+      </div><div class="col">
+        <span class="col__v">4155 %</span>
+        <div class="col__stack" style="height:76.8%">
+          <div class="seg seg--ext"
+            style="height:20.8%"
+            title="tief: 865 %"></div><div class="seg seg--pre"
+            style="height:51.6%"
+            title="mittel: 2145 %"></div><div class="seg seg--bound"
+            style="height:27.6%"
+            title="hoch: 1145 %"></div>
+        </div>
+      </div><div class="col">
+        <span class="col__v">3565 %</span>
+        <div class="col__stack" style="height:65.9%">
+          <div class="seg seg--ext"
+            style="height:22.0%"
+            title="tief: 785 %"></div><div class="seg seg--pre"
+            style="height:48.7%"
+            title="mittel: 1735 %"></div><div class="seg seg--bound"
+            style="height:29.3%"
+            title="hoch: 1045 %"></div>
+        </div>
+      </div><div class="col">
+        <span class="col__v">3145 %</span>
+        <div class="col__stack" style="height:58.1%">
+          <div class="seg seg--ext"
+            style="height:22.4%"
+            title="tief: 705 %"></div><div class="seg seg--pre"
+            style="height:49.9%"
+            title="mittel: 1570 %"></div><div class="seg seg--bound"
+            style="height:27.7%"
+            title="hoch: 870 %"></div>
+        </div>
+      </div><div class="col">
+        <span class="col__v">2730 %</span>
+        <div class="col__stack" style="height:50.5%">
+          <div class="seg seg--ext"
+            style="height:21.1%"
+            title="tief: 575 %"></div><div class="seg seg--pre"
+            style="height:52.4%"
+            title="mittel: 1430 %"></div><div class="seg seg--bound"
+            style="height:26.6%"
+            title="hoch: 725 %"></div>
+        </div>
+      </div>
+    </div>
+    <div class="chart__axis"><span>Q3/26</span><span>Q4/26</span><span>Q1/27</span><span>Q2/27</span><span>Q3/27</span><span>Q4/27</span><span>Q1/28</span><span>Q2/28</span></div>
+    
+  </div><div class="legend"><span class="legend__item"><span class="swatch seg--bound"></span>Priorität hoch</span><span class="legend__item"><span class="swatch seg--pre"></span>Priorität mittel</span><span class="legend__item"><span class="swatch seg--ext"></span>Priorität tief</span></div>
+    <p class="card__note">Die unbequeme Frage: in Q1/27 entfallen <strong>1060 % von 4830 %</strong>
+      auf Projekte tiefer Priorität — rund ein Fünftel. Das ist die erste Verschiebung, die man prüft.</p>
+  </section></div>
+    </div>
+  </article>
+
+<article class="frame">
+    <header class="frame__head">
+      <span class="frame__no">4</span>
+      <span class="frame__title">Abschnitt «Termine»</span>
+      <span class="frame__sub">neu · Betrachtungseinheit: Gates</span>
+    </header>
+    <div class="screen">
+      
+      <div class="kpi-strip">
+  <div class="kpi is-alert">
+    <div class="kpi__label">Auslastung</div>
+    <div class="kpi__value">106 %</div>
+    <div class="kpi__note">4122 % Bedarf auf 3670 % netto</div>
+  </div><div class="kpi is-alert">
+    <div class="kpi__label">Personen über 100 %</div>
+    <div class="kpi__value">21 von 46</div>
+    <div class="kpi__note">35 in mindestens einem Quartal</div>
+  </div><div class="kpi is-alert">
+    <div class="kpi__label">Überfällige Gates</div>
+    <div class="kpi__value">24</div>
+    <div class="kpi__note">von 86 · 64 % Termintreue</div>
+  </div><div class="kpi ">
+    <div class="kpi__label">Nicht zugewiesener Bedarf</div>
+    <div class="kpi__value">35 %</div>
+    <div class="kpi__note">3 Projekte ohne Projektleitung</div>
+  </div>
+</div><section class="card card--anchor">
+  <header class="card__head">
+    <div>
+      <h3 class="card__title">Auslastung nach Quartal</h3>
+      <p class="card__sub">Bedarf gegen Kapazität netto · gilt für alle Abschnitte · Klick setzt das Bezugsquartal</p>
+    </div>
+    <span class="pill pill--anchor">fester Kopf</span>
+  </header>
+  <div class="chart" style="--h:108px">
+    <div class="chart__ref" style="bottom:76.92307692307693%"><span>100 %</span></div>
+    <div class="chart__cols">
+      <div class="col">
+        <span class="col__v">106</span>
+        <div class="col__bar is-over" style="height:81.5%"></div>
+      </div><div class="col">
+        <span class="col__v">106</span>
+        <div class="col__bar is-over" style="height:81.5%"></div>
+      </div><div class="col">
+        <span class="col__v">111</span>
+        <div class="col__bar is-over" style="height:85.4%"></div>
+      </div><div class="col">
+        <span class="col__v">109</span>
+        <div class="col__bar is-over" style="height:83.8%"></div>
+      </div><div class="col">
+        <span class="col__v">102</span>
+        <div class="col__bar is-over" style="height:78.5%"></div>
+      </div><div class="col">
+        <span class="col__v">82</span>
+        <div class="col__bar is-ok" style="height:63.1%"></div>
+      </div><div class="col">
+        <span class="col__v">72</span>
+        <div class="col__bar is-free" style="height:55.4%"></div>
+      </div><div class="col">
+        <span class="col__v">63</span>
+        <div class="col__bar is-free" style="height:48.5%"></div>
+      </div>
+    </div>
+    <div class="chart__axis"><span>Q3/26</span><span>Q4/26</span><span>Q1/27</span><span>Q2/27</span><span>Q3/27</span><span>Q4/27</span><span>Q1/28</span><span>Q2/28</span></div>
+  </div>
+</section>
+  <div class="tabrow">
+    <div class="segmented" role="tablist">
+  <button class="segmented__btn ">Kapazität</button><button class="segmented__btn ">Personen</button><button class="segmented__btn ">Pipeline</button><button class="segmented__btn is-on">Termine</button><button class="segmented__btn ">Mittel</button>
+</div>
+    <span class="tabrow__hint">Betrachtungseinheit: Gates</span>
+  </div><div class="cards">
+<section class="card card--wide">
+    <header class="card__head">
+      <div>
+        <h3 class="card__title">Termintreue je Quartal<span class="stars">★★★</span></h3>
+        <p class="card__sub">86 Gates · nach Fälligkeit im Plan</p>
+      </div>
+    </header>
+    <div class="chart" style="--h:160px">
+    
+    <div class="chart__cols">
+      <div class="col">
+        <span class="col__v">11</span>
+        <div class="col__stack" style="height:65.5%">
+          <div class="seg seg--open"
+            style="height:0.0%"
+            title="ohne Termin: 0"></div><div class="seg seg--late"
+            style="height:36.4%"
+            title="verschoben: 4"></div><div class="seg seg--ok"
+            style="height:63.6%"
+            title="im Termin: 7"></div>
+        </div>
+      </div><div class="col">
+        <span class="col__v">14</span>
+        <div class="col__stack" style="height:83.3%">
+          <div class="seg seg--open"
+            style="height:28.6%"
+            title="ohne Termin: 4"></div><div class="seg seg--late"
+            style="height:21.4%"
+            title="verschoben: 3"></div><div class="seg seg--ok"
+            style="height:50.0%"
+            title="im Termin: 7"></div>
+        </div>
+      </div><div class="col">
+        <span class="col__v">15</span>
+        <div class="col__stack" style="height:89.3%">
+          <div class="seg seg--open"
+            style="height:0.0%"
+            title="ohne Termin: 0"></div><div class="seg seg--late"
+            style="height:46.7%"
+            title="verschoben: 7"></div><div class="seg seg--ok"
+            style="height:53.3%"
+            title="im Termin: 8"></div>
+        </div>
+      </div><div class="col">
+        <span class="col__v">13</span>
+        <div class="col__stack" style="height:77.4%">
+          <div class="seg seg--open"
+            style="height:7.7%"
+            title="ohne Termin: 1"></div><div class="seg seg--late"
+            style="height:7.7%"
+            title="verschoben: 1"></div><div class="seg seg--ok"
+            style="height:84.6%"
+            title="im Termin: 11"></div>
+        </div>
+      </div><div class="col">
+        <span class="col__v">14</span>
+        <div class="col__stack" style="height:83.3%">
+          <div class="seg seg--open"
+            style="height:0.0%"
+            title="ohne Termin: 0"></div><div class="seg seg--late"
+            style="height:35.7%"
+            title="verschoben: 5"></div><div class="seg seg--ok"
+            style="height:64.3%"
+            title="im Termin: 9"></div>
+        </div>
+      </div><div class="col">
+        <span class="col__v">7</span>
+        <div class="col__stack" style="height:41.7%">
+          <div class="seg seg--open"
+            style="height:14.3%"
+            title="ohne Termin: 1"></div><div class="seg seg--late"
+            style="height:14.3%"
+            title="verschoben: 1"></div><div class="seg seg--ok"
+            style="height:71.4%"
+            title="im Termin: 5"></div>
+        </div>
+      </div><div class="col">
+        <span class="col__v">9</span>
+        <div class="col__stack" style="height:53.6%">
+          <div class="seg seg--open"
+            style="height:11.1%"
+            title="ohne Termin: 1"></div><div class="seg seg--late"
+            style="height:22.2%"
+            title="verschoben: 2"></div><div class="seg seg--ok"
+            style="height:66.7%"
+            title="im Termin: 6"></div>
+        </div>
+      </div><div class="col">
+        <span class="col__v">3</span>
+        <div class="col__stack" style="height:17.9%">
+          <div class="seg seg--open"
+            style="height:0.0%"
+            title="ohne Termin: 0"></div><div class="seg seg--late"
+            style="height:33.3%"
+            title="verschoben: 1"></div><div class="seg seg--ok"
+            style="height:66.7%"
+            title="im Termin: 2"></div>
+        </div>
+      </div>
+    </div>
+    <div class="chart__axis"><span>Q3/26</span><span>Q4/26</span><span>Q1/27</span><span>Q2/27</span><span>Q3/27</span><span>Q4/27</span><span>Q1/28</span><span>Q2/28</span></div>
+    
+  </div><div class="legend"><span class="legend__item"><span class="swatch seg--ok"></span>im Termin</span><span class="legend__item"><span class="swatch seg--late"></span>verschoben</span><span class="legend__item"><span class="swatch seg--open"></span>ohne Termin</span></div>
+    <p class="card__note"><strong>55 im Termin, 24 verschoben, 7 ohne Termin</strong> — eine Termintreue von
+      64 %. Für ein Portfolio dieser Grösse ist das schlecht, und heute kommt es
+      im Dashboard nicht vor.</p>
+  </section>
+
+<section class="card ">
+    <header class="card__head">
+      <div>
+        <h3 class="card__title">Verzug nach Sub-Phase<span class="stars">★★★</span></h3>
+        <p class="card__sub">Wo im SIA-Ablauf der Verzug entsteht · ⌀ Quartale</p>
+      </div>
+    </header>
+    <div class="barlist">
+    <div class="barlist__row">
+      <span class="barlist__label">53 Inbetriebnahme</span>
+      <span class="barlist__track"><span class="barlist__bar is-over"
+        style="width:100.0%"></span></span>
+      <span class="barlist__value">10 Gates · ⌀ 1.2 Q</span>
+    </div><div class="barlist__row">
+      <span class="barlist__label">41 Ausschreibung</span>
+      <span class="barlist__track"><span class="barlist__bar is-over"
+        style="width:60.0%"></span></span>
+      <span class="barlist__value">6 Gates · ⌀ 1.3 Q</span>
+    </div><div class="barlist__row">
+      <span class="barlist__label">31 Vorprojekt</span>
+      <span class="barlist__track"><span class="barlist__bar is-over"
+        style="width:40.0%"></span></span>
+      <span class="barlist__value">4 Gates · ⌀ 1.5 Q</span>
+    </div><div class="barlist__row">
+      <span class="barlist__label">33 Bewilligungsverf.</span>
+      <span class="barlist__track"><span class="barlist__bar is-over"
+        style="width:20.0%"></span></span>
+      <span class="barlist__value">2 Gates · ⌀ 1.5 Q</span>
+    </div><div class="barlist__row">
+      <span class="barlist__label">21 Machbarkeit</span>
+      <span class="barlist__track"><span class="barlist__bar is-over"
+        style="width:10.0%"></span></span>
+      <span class="barlist__value">1 Gates · ⌀ 2.0 Q</span>
+    </div><div class="barlist__row">
+      <span class="barlist__label">52 Ausführung</span>
+      <span class="barlist__track"><span class="barlist__bar is-over"
+        style="width:10.0%"></span></span>
+      <span class="barlist__value">1 Gates · ⌀ 2.0 Q</span>
+    </div>
+  </div>
+    <p class="card__note">Die Häufung liegt am Ende der Kette und in der Ausschreibung — beides Schritte mit Abhängigkeit
+      von Dritten. Bestätigt sich das, heisst die Massnahme <strong>Vorlaufzeit</strong>, nicht mehr Personal.</p>
+  </section>
+
+<section class="card ">
+    <header class="card__head">
+      <div>
+        <h3 class="card__title">Gate-Last je Quartal<span class="stars">★★</span></h3>
+        <p class="card__sub">Anzahl fälliger Gates · Durchsatz der Genehmigungsgremien</p>
+      </div>
+    </header>
+    <div class="chart" style="--h:130px">
+    
+    <div class="chart__cols">
+      <div class="col">
+        <span class="col__v">11</span>
+        <div class="col__bar is-tight" style="height:63.8%"></div>
+      </div><div class="col">
+        <span class="col__v">14</span>
+        <div class="col__bar is-over" style="height:81.2%"></div>
+      </div><div class="col">
+        <span class="col__v">15</span>
+        <div class="col__bar is-over" style="height:87.0%"></div>
+      </div><div class="col">
+        <span class="col__v">13</span>
+        <div class="col__bar is-over" style="height:75.4%"></div>
+      </div><div class="col">
+        <span class="col__v">14</span>
+        <div class="col__bar is-over" style="height:81.2%"></div>
+      </div><div class="col">
+        <span class="col__v">7</span>
+        <div class="col__bar is-ok" style="height:40.6%"></div>
+      </div><div class="col">
+        <span class="col__v">9</span>
+        <div class="col__bar is-tight" style="height:52.2%"></div>
+      </div><div class="col">
+        <span class="col__v">3</span>
+        <div class="col__bar is-ok" style="height:17.4%"></div>
+      </div>
+    </div>
+    <div class="chart__axis"><span>Q3/26</span><span>Q4/26</span><span>Q1/27</span><span>Q2/27</span><span>Q3/27</span><span>Q4/27</span><span>Q1/28</span><span>Q2/28</span></div>
+  </div>
+    <p class="card__note">Eine Häufung von Baukredit-Gates in einem Quartal ist ein eigenes Risiko, unabhängig von der Personalkapazität.</p>
+  </section>
+
+<section class="card ">
+    <header class="card__head">
+      <div>
+        <h3 class="card__title">Verzugsverteilung<span class="stars">★</span></h3>
+        <p class="card__sub">Gates nach Verschiebung in Quartalen</p>
+      </div>
+    </header>
+    <div class="barlist">
+    <div class="barlist__row">
+      <span class="barlist__label">1 Quartal</span>
+      <span class="barlist__track"><span class="barlist__bar is-over"
+        style="width:100.0%"></span></span>
+      <span class="barlist__value">13</span>
+    </div><div class="barlist__row">
+      <span class="barlist__label">2 Quartale</span>
+      <span class="barlist__track"><span class="barlist__bar is-over"
+        style="width:76.9%"></span></span>
+      <span class="barlist__value">10</span>
+    </div><div class="barlist__row">
+      <span class="barlist__label">3 Quartale</span>
+      <span class="barlist__track"><span class="barlist__bar is-over"
+        style="width:0.0%"></span></span>
+      <span class="barlist__value">0</span>
+    </div>
+  </div>
+    <p class="card__note">Trennt «überall ein bisschen» von «wenige, dafür massiv» — zwei Probleme mit zwei Massnahmen.</p>
+  </section></div>
+    </div>
+  </article>
+
+<article class="frame">
+    <header class="frame__head">
+      <span class="frame__no">5</span>
+      <span class="frame__title">Abschnitt «Mittel»</span>
+      <span class="frame__sub">Betrachtungseinheit: Franken</span>
+    </header>
+    <div class="screen">
+      
+      <div class="kpi-strip">
+  <div class="kpi is-alert">
+    <div class="kpi__label">Auslastung</div>
+    <div class="kpi__value">106 %</div>
+    <div class="kpi__note">4122 % Bedarf auf 3670 % netto</div>
+  </div><div class="kpi is-alert">
+    <div class="kpi__label">Personen über 100 %</div>
+    <div class="kpi__value">21 von 46</div>
+    <div class="kpi__note">35 in mindestens einem Quartal</div>
+  </div><div class="kpi is-alert">
+    <div class="kpi__label">Überfällige Gates</div>
+    <div class="kpi__value">24</div>
+    <div class="kpi__note">von 86 · 64 % Termintreue</div>
+  </div><div class="kpi ">
+    <div class="kpi__label">Nicht zugewiesener Bedarf</div>
+    <div class="kpi__value">35 %</div>
+    <div class="kpi__note">3 Projekte ohne Projektleitung</div>
+  </div>
+</div><section class="card card--anchor">
+  <header class="card__head">
+    <div>
+      <h3 class="card__title">Auslastung nach Quartal</h3>
+      <p class="card__sub">Bedarf gegen Kapazität netto · gilt für alle Abschnitte · Klick setzt das Bezugsquartal</p>
+    </div>
+    <span class="pill pill--anchor">fester Kopf</span>
+  </header>
+  <div class="chart" style="--h:108px">
+    <div class="chart__ref" style="bottom:76.92307692307693%"><span>100 %</span></div>
+    <div class="chart__cols">
+      <div class="col">
+        <span class="col__v">106</span>
+        <div class="col__bar is-over" style="height:81.5%"></div>
+      </div><div class="col">
+        <span class="col__v">106</span>
+        <div class="col__bar is-over" style="height:81.5%"></div>
+      </div><div class="col">
+        <span class="col__v">111</span>
+        <div class="col__bar is-over" style="height:85.4%"></div>
+      </div><div class="col">
+        <span class="col__v">109</span>
+        <div class="col__bar is-over" style="height:83.8%"></div>
+      </div><div class="col">
+        <span class="col__v">102</span>
+        <div class="col__bar is-over" style="height:78.5%"></div>
+      </div><div class="col">
+        <span class="col__v">82</span>
+        <div class="col__bar is-ok" style="height:63.1%"></div>
+      </div><div class="col">
+        <span class="col__v">72</span>
+        <div class="col__bar is-free" style="height:55.4%"></div>
+      </div><div class="col">
+        <span class="col__v">63</span>
+        <div class="col__bar is-free" style="height:48.5%"></div>
+      </div>
+    </div>
+    <div class="chart__axis"><span>Q3/26</span><span>Q4/26</span><span>Q1/27</span><span>Q2/27</span><span>Q3/27</span><span>Q4/27</span><span>Q1/28</span><span>Q2/28</span></div>
+  </div>
+</section>
+  <div class="tabrow">
+    <div class="segmented" role="tablist">
+  <button class="segmented__btn ">Kapazität</button><button class="segmented__btn ">Personen</button><button class="segmented__btn ">Pipeline</button><button class="segmented__btn ">Termine</button><button class="segmented__btn is-on">Mittel</button>
+</div>
+    <span class="tabrow__hint">Betrachtungseinheit: Franken</span>
+  </div><div class="cards">
+<section class="card ">
+    <header class="card__head">
+      <div>
+        <h3 class="card__title">Kredit nach Jahr<span class="stars">★★★</span></h3>
+        <p class="card__sub">Gebundene Mittel nach Jahr der Realisierung · bestehende Karte, erweitert</p>
+      </div>
+    </header>
+    <div class="barlist">
+    <div class="barlist__row">
+      <span class="barlist__label">2026</span>
+      <span class="barlist__track"><span class="barlist__bar "
+        style="width:97.3%"></span></span>
+      <span class="barlist__value">289,9 Mio.</span>
+    </div><div class="barlist__row">
+      <span class="barlist__label">2027</span>
+      <span class="barlist__track"><span class="barlist__bar "
+        style="width:100.0%"></span></span>
+      <span class="barlist__value">298,0 Mio.</span>
+    </div><div class="barlist__row">
+      <span class="barlist__label">2028</span>
+      <span class="barlist__track"><span class="barlist__bar "
+        style="width:54.9%"></span></span>
+      <span class="barlist__value">163,7 Mio.</span>
+    </div><div class="barlist__row">
+      <span class="barlist__label">2029 und später</span>
+      <span class="barlist__track"><span class="barlist__bar "
+        style="width:73.9%"></span></span>
+      <span class="barlist__value">220,2 Mio.</span>
+    </div>
+  </div>
+    <p class="card__note">Die Steuerungsfrage ist nicht <em>wann Geld gebunden ist</em>, sondern <em>gebundene Mittel gegen die
+      Jahrestranche</em> — Minderausgabe ist in der Bundesverwaltung so erklärungsbedürftig wie Mehrausgabe.
+      <strong>Fehlende Daten:</strong> ein Feld <code>budgetByYear</code> in <code>data/meta.json</code> genügt.</p>
+  </section>
+
+<section class="card ">
+    <header class="card__head">
+      <div>
+        <h3 class="card__title">Anteil vor Baukredit-Freigabe<span class="stars">★★</span></h3>
+        <p class="card__sub">972 Mio. CHF gebunden · davon noch nicht freigegeben</p>
+      </div>
+    </header>
+    <div class="splitbar">
+    <span class="splitbar__seg seg--bound" style="width:63.8%">
+      620 Mio. freigegeben</span>
+    <span class="splitbar__seg seg--pre" style="width:36.2%">
+      351 Mio.</span>
+  </div>
+    <p class="card__note"><strong>36 % der gebundenen Mittel sind noch nicht freigegeben.</strong>
+      Das Gegenstück zum Bindungsgrad des Bedarfs, auf der Geldseite.</p>
+  </section>
+
+<section class="card ">
+    <header class="card__head">
+      <div>
+        <h3 class="card__title">Kredit nach SIA-Phase<span class="stars">★★</span></h3>
+        <p class="card__sub">Gesamt 972 Mio. CHF · bestehende Karte, unverändert</p>
+      </div>
+    </header>
+    <div class="barlist">
+    <div class="barlist__row">
+      <span class="barlist__label">5 Realisierung</span>
+      <span class="barlist__track"><span class="barlist__bar "
+        style="width:100.0%"></span></span>
+      <span class="barlist__value">469 Mio.</span>
+    </div><div class="barlist__row">
+      <span class="barlist__label">3 Projektierung</span>
+      <span class="barlist__track"><span class="barlist__bar "
+        style="width:55.4%"></span></span>
+      <span class="barlist__value">260 Mio.</span>
+    </div><div class="barlist__row">
+      <span class="barlist__label">4 Ausschreibung</span>
+      <span class="barlist__track"><span class="barlist__bar "
+        style="width:30.9%"></span></span>
+      <span class="barlist__value">145 Mio.</span>
+    </div><div class="barlist__row">
+      <span class="barlist__label">2 Vorstudien</span>
+      <span class="barlist__track"><span class="barlist__bar "
+        style="width:19.6%"></span></span>
+      <span class="barlist__value">92 Mio.</span>
+    </div><div class="barlist__row">
+      <span class="barlist__label">6 Bewirtschaftung</span>
+      <span class="barlist__track"><span class="barlist__bar "
+        style="width:1.4%"></span></span>
+      <span class="barlist__value">7 Mio.</span>
+    </div>
+  </div>
+    
+  </section>
+
+<section class="card ">
+    <header class="card__head">
+      <div>
+        <h3 class="card__title">Kredit nach Teilportfolio<span class="stars">★</span></h3>
+        <p class="card__sub">Neben die Bedarfsverteilung gelegt</p>
+      </div>
+    </header>
+    <div class="barlist">
+    <div class="barlist__row">
+      <span class="barlist__label">Verwaltung</span>
+      <span class="barlist__track"><span class="barlist__bar "
+        style="width:100.0%"></span></span>
+      <span class="barlist__value">236 Mio. · 990 %</span>
+    </div><div class="barlist__row">
+      <span class="barlist__label">Justiz und Polizei</span>
+      <span class="barlist__track"><span class="barlist__bar "
+        style="width:61.9%"></span></span>
+      <span class="barlist__value">146 Mio. · 480 %</span>
+    </div><div class="barlist__row">
+      <span class="barlist__label">Zoll</span>
+      <span class="barlist__track"><span class="barlist__bar "
+        style="width:61.3%"></span></span>
+      <span class="barlist__value">144 Mio. · 685 %</span>
+    </div><div class="barlist__row">
+      <span class="barlist__label">Bauten im Ausland</span>
+      <span class="barlist__track"><span class="barlist__bar "
+        style="width:60.2%"></span></span>
+      <span class="barlist__value">142 Mio. · 465 %</span>
+    </div><div class="barlist__row">
+      <span class="barlist__label">Sport</span>
+      <span class="barlist__track"><span class="barlist__bar "
+        style="width:48.8%"></span></span>
+      <span class="barlist__value">115 Mio. · 532 %</span>
+    </div><div class="barlist__row">
+      <span class="barlist__label">Bildung und Forschung</span>
+      <span class="barlist__track"><span class="barlist__bar "
+        style="width:46.9%"></span></span>
+      <span class="barlist__value">110 Mio. · 375 %</span>
+    </div><div class="barlist__row">
+      <span class="barlist__label">Kultur und Denkmäler</span>
+      <span class="barlist__track"><span class="barlist__bar "
+        style="width:33.3%"></span></span>
+      <span class="barlist__value">79 Mio. · 595 %</span>
+    </div>
+  </div>
+    <p class="card__note">Zeigt, wo viel Geld auf wenig Personal trifft — und umgekehrt.</p>
+  </section></div>
+    </div>
+  </article>
+
+<div class="note" style="margin-top:34px">
+  <b>Was fehlt, um das Beste davon zu bauen.</b>
+  <b>Pensum je Person und Quartal</b> statt nur je Projekt — heute trägt die Projektleitung rechnerisch das ganze
+  Projektpensum, man sieht also <em>dass</em> jemand überlastet ist, aber nicht <em>welches Projekt</em> man kürzen
+  müsste. Dazu: ein realistischer <b>Rollenmix</b> (heute 43 × Projektleitung, 2 × Projektentwicklung, 1 × Bauleitung),
+  <b>Abwesenheiten je Person</b>, <b>Jahrestranchen</b> für den Mittelabfluss, <b>Ist-Kosten</b> je Projekt und
+  <b>Planstände über die Zeit</b> für die Prognosegüte. Die API-Referenz beschreibt unter <code>allocations</code>
+  bereits die Form des ersten und wichtigsten dieser Felder.
+</div>
+
+<div class="doc" style="margin-top:34px">
+  <div class="doc__meta" style="border-top:0;padding-top:0">
+    <span>Prototyp, fiktive Inhalte — nur zur Demonstration.</span>
+    <span>Wireframe erzeugt aus <code>data/</code> · Stand 25.08.2026, 07:15</span>
+  </div>
+</div>
+
+</div>
+</body>
+</html>

@@ -317,7 +317,9 @@ export function kpiStrip() {
     ${cards.map(c => html`<div class="kpi ${c.alert ? 'is-alert' : ''}">
       <div class="kpi__label">${t(c.label)}</div>
       <div class="kpi__value">${c.value}</div>
-      <div class="kpi__note">${c.note}</div>
+      <div class="kpi__note">${c.note}${c.more ? html`<span aria-hidden="true"> · </span><button
+      type="button" class="kpi__more" data-act="${c.more.act}" data-val="${c.more.val}"
+      >${t(c.more.label)}</button>` : ''}</div>
     </div>`)}
   </div>`;
 }

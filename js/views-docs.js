@@ -8,10 +8,13 @@
 
 import {
   data, state, t, num, unitSuffix, cellValue, projectDemand,
-  personUtilisation, totals, loadStatus, heatStep, filteredProjects, activeFilters
+  personUtilisation, totals, loadStatus, heatStep, filteredProjects, activeFilters,
+  groupProjects
 } from './store.js';
 
-import { html, raw, icons, pageHeader, exportMenu, phaseOf, scopeLine } from './ui.js';
+import {
+  html, raw, icons, pageHeader, exportMenu, toolbar, activeFilterRow, phaseOf, scopeLine
+} from './ui.js';
 
 /* =============================================================================
    API documentation
@@ -86,9 +89,16 @@ function loadSwagger() {
    PDF print layout — «Drucklayout»
    ========================================================================== */
 
+/*
+ * `rows` is how many the paper actually holds, not a guess. A4 hoch is 1131 px
+ * tall at this scale less 56 px of padding, and the fixed furniture — letter
+ * head 74, column header 24, legend 64, footer 24, plus 22 of table margin —
+ * leaves about 840 px. At a 27 px row that is 31. A4 quer: 778 − 60 − 167 = 551, so 19.
+ * A group heading costs 1.6 rows, because it carries a gap above it.
+ */
 const SHEETS = [
-  { id: 'hoch', label: 'A4 hoch', caption: 'Übersicht als PDF, A4 hoch', quarters: 4 },
-  { id: 'quer', label: 'A4 quer', caption: 'Acht Quartale auf einem Blatt', quarters: 8 }
+  { id: 'hoch', label: 'A4 hoch', caption: 'Übersicht als PDF, A4 hoch', quarters: 4, rows: 31 },
+  { id: 'quer', label: 'A4 quer', caption: 'Acht Quartale auf einem Blatt', quarters: 8, rows: 19 }
 ];
 
 export function renderExport() {
@@ -102,36 +112,107 @@ export function renderExport() {
         <button type="button" class="btn btn--primary" data-act="print">${icons.download(15)}${t('Drucken')}</button>`
     })}
     <div class="wrap"><div class="content">
+      ${toolbar({ attributes: false })}
+      ${activeFilterRow()}
       <div class="sheetbar">
         <div class="segmented">
           ${SHEETS.map(s => html`<button type="button" class="${s.id === sheet.id ? 'is-on' : ''}"
             aria-pressed="${s.id === sheet.id}" data-act="sheet" data-val="${s.id}">${t(s.label)}</button>`)}
         </div>
       </div>
-      <div class="mount">${printSheet(sheet)}</div>
+      <div class="mount">${printSheets(sheet)}</div>
     </div></div>`;
 }
 
-function printSheet(sheet) {
-  const cfg = data.print;
+/*
+ * A report prints everything. Portrait holds four quarters and 24 rows, so a
+ * portfolio of this size needs a stack: every quarter block, and within each
+ * block every page of rows. The totals close each block, the way a real
+ * summary sheet does — not each page, which would invite reading a page total
+ * as a portfolio total.
+ */
+/**
+ * The sheet is a stream of rows, not a list of projects: the grouping from the
+ * toolbar puts a heading before each group and a sum after it — the per-group
+ * figures the grid leaves out because they belong on paper.
+ */
+function sheetRows() {
+  const rows = [];
+  for (const group of groupProjects()) {
+    if (group.label) rows.push({ kind: 'group', label: group.label, count: group.projects.length });
+    group.projects.forEach(p => rows.push({ kind: 'project', p }));
+    if (group.label) rows.push({ kind: 'sum', label: group.label, projects: group.projects });
+  }
+  return rows;
+}
+
+/**
+ * Break the stream into pages. A heading never ends a page, and a group that
+ * runs over one carries its heading to the top of the next.
+ */
+const ROW_COST = { group: 1.6, sum: 1, project: 1 };
+const costOf = page => page.reduce((a, r) => a + ROW_COST[r.kind], 0);
+
+function paginate(rows, perPage) {
+  const pages = [];
+  let page = [];
+  let group = null;
+
+  for (const row of rows) {
+    if (row.kind === 'group') group = row;
+    const cost = costOf(page);
+    // A heading on the last line of a page belongs to the next one.
+    const orphan = row.kind === 'group' && cost + ROW_COST.group > perPage;
+    if (cost + ROW_COST[row.kind] > perPage || orphan) {
+      pages.push(page);
+      page = group && row.kind === 'project' ? [{ ...group, continued: true }] : [];
+    }
+    page.push(row);
+  }
+  if (page.length) pages.push(page);
+
+  /*
+   * A sum belongs to rows the reader can see. If a break left one at the top of
+   * a page on its own, pull the last row of the previous page along with it.
+   */
+  for (let i = 1; i < pages.length; i++) {
+    while (pages[i][0]?.kind === 'sum' && pages[i - 1].length > 1) {
+      pages[i].unshift(pages[i - 1].pop());
+      if (pages[i][0].kind !== 'sum') break;
+    }
+  }
+  return pages.length ? pages : [[]];
+}
+
+function printSheets(sheet) {
   const all = filteredProjects();
-  // How many rows the paper actually holds at a 26px row height.
-  const perSheet = sheet.id === 'hoch' ? 24 : 14;
-  const rows = all.slice(0, perSheet);
-  const rest = all.length - rows.length;
-  const quarters = data.quarters.slice(0, sheet.quarters);
+  const perSheet = sheet.rows;
+  const blocks = [];
+  for (let from = 0; from < data.quarters.length; from += sheet.quarters) {
+    blocks.push(data.quarters.slice(from, from + sheet.quarters).map((_, i) => from + i));
+  }
+  const pages = paginate(sheetRows(), perSheet);
+  const total = blocks.length * pages.length;
+
+  let page = 0;
+  return blocks.flatMap(block => pages.map((rows, i) => {
+    page++;
+    return printSheet(sheet, { rows, all, block, page, total, last: i === pages.length - 1 });
+  }));
+}
+
+function printSheet(sheet, { rows, all, block, page, total, last }) {
+  const cfg = data.print;
+  const quarters = block.map(q => data.quarters[q]);
   const tot = totals(all);
   const chips = activeFilters();
-  // Portrait fits four quarters, so a longer period needs further sheets.
-  const quarterSheets = Math.ceil(data.quarters.length / sheet.quarters);
-  const pages = Math.max(1, Math.ceil(all.length / perSheet)) * quarterSheets;
 
   const cols = sheet.id === 'hoch'
-    ? `64px minmax(0, 200px) 96px 92px 62px repeat(${sheet.quarters}, 54px)`
-    : `78px minmax(0, 244px) 120px 112px 76px repeat(${sheet.quarters}, 50px)`;
+    ? `64px minmax(0, 200px) 96px 92px 62px repeat(${block.length}, 54px)`
+    : `78px minmax(0, 244px) 120px 112px 76px repeat(${block.length}, 50px)`;
 
   const span = 5;
-  const numbers = (values, cls = '') => quarters.map((_, q) =>
+  const numbers = (values, cls = '') => block.map(q =>
     html`<span class="sheet__num ${cls}">${num(values[q])}</span>`);
 
   return html`<article class="sheet sheet--${sheet.id}" style="--sheet-cols:${raw(cols)}">
@@ -143,7 +224,7 @@ function printSheet(sheet) {
       <div class="sheet__titles">
         <div class="sheet__title">${t(cfg.title)}</div>
         <div class="sheet__sub">${t('Pensum je Projekt und Quartal')} · ${state.unit === 'fte' ? t('Pensum in FTE') : t('Pensum in %')}
-          · ${quarters[0].label} – ${quarters[quarters.length - 1].label}${sheet.id === 'hoch' ? ' · Blatt 1' : ''}</div>
+          · ${quarters[0].label} – ${quarters[quarters.length - 1].label}</div>
       </div>
       <div class="sheet__meta">
         <span>${t('Umfang')}: ${scopeLine(all.length)}</span>
@@ -163,31 +244,39 @@ function printSheet(sheet) {
         ${quarters.map(q => html`<span class="sheet__num">${q.short}/${String(q.year).slice(2)}</span>`)}
       </div>
 
-      ${rows.map(p => {
+      ${rows.map(row => {
+        if (row.kind === 'group') {
+          return html`<div class="sheet__row sheet__row--group">
+            <span style="grid-column:span ${block.length + 5}">${t(row.label)}
+              <span class="sheet__groupcount">${row.count} ${t('Projekte')}${
+                row.continued ? ` · ${t('Fortsetzung')}` : ''}</span></span>
+          </div>`;
+        }
+        if (row.kind === 'sum') {
+          const values = block.map(q => row.projects.reduce((a, p) => a + projectDemand(p)[q], 0));
+          return html`<div class="sheet__row sheet__row--groupsum">
+            <span style="grid-column:span ${span}">${t('Summe')} ${t(row.label)}</span>
+            ${values.map(v => html`<span class="sheet__num">${num(v)}</span>`)}
+          </div>`;
+        }
+
+        const p = row.p;
         const cells = projectDemand(p);
         const lead = p.leadId ? data.peopleById[p.leadId] : null;
-        return html`<div class="sheet__row ${p.unassigned ? 'is-unassigned' : ''}">
+        return html`<div class="sheet__row ${p.leadId ? '' : 'is-unassigned'}">
           <span class="sheet__id">${p.number}</span>
           <span class="sheet__project">${p.title}</span>
           <span class="sheet__muted">${phaseOf(p.phase).label}</span>
           <span class="sheet__muted">${lead ? lead.name : t('nicht zugewiesen')}</span>
           <span class="sheet__num sheet__muted">${p.creditLabel}</span>
-          ${quarters.map((_, q) => {
+          ${block.map(q => {
             const over = lead && personUtilisation(p.leadId, q) > 100;
             return html`<span class="sheet__cell heat-${heatStep(cells[q])}">${over && cells[q] > 0 ? '▲ ' : ''}${cells[q] ? num(cells[q]) : '–'}</span>`;
           })}
         </div>`;
       })}
 
-      ${(rest > 0 || quarterSheets > 1) && html`<div class="sheet__row sheet__row--more">
-        <span style="grid-column:span ${quarters.length + 5}">
-          ${rest > 0 ? `… ${rest} ${t('weitere Zeilen auf dem nächsten Blatt')}` : ''}
-          ${rest > 0 && quarterSheets > 1 ? ' · ' : ''}
-          ${quarterSheets > 1 ? `${t('Quartale')} ${data.quarters[sheet.quarters].label} – ${data.quarters[data.quarters.length - 1].label} ${t('auf einem eigenen Blatt')}` : ''}
-        </span>
-      </div>`}
-
-      <div class="sheet__row sheet__row--sum">
+      ${last ? html`<div class="sheet__row sheet__row--sum">
         <span style="grid-column:span ${span}">${t('Bedarf total')}</span>${numbers(tot.demand)}
       </div>
       <div class="sheet__row sheet__row--foot">
@@ -201,8 +290,10 @@ function printSheet(sheet) {
       </div>
       <div class="sheet__row sheet__row--load">
         <span style="grid-column:span ${span}">${t('Auslastung')}</span>
-        ${quarters.map((_, q) => html`<span class="sheet__num is-${loadStatus(tot.utilisation[q]).key}">${tot.utilisation[q]} %</span>`)}
-      </div>
+        ${block.map(q => html`<span class="sheet__num is-${loadStatus(tot.utilisation[q]).key}">${tot.utilisation[q]} %</span>`)}
+      </div>` : html`<div class="sheet__row sheet__row--more">
+        <span style="grid-column:span ${block.length + 5}">${t('Fortsetzung auf dem nächsten Blatt')}</span>
+      </div>`}
     </div>
 
     <div class="sheet__legend">
@@ -217,7 +308,7 @@ function printSheet(sheet) {
     <footer class="sheet__foot">
       <span>${t('Erstellt am')} ${cfg.createdAt} ${t('durch')} ${cfg.createdBy} · ${t('Datenstand ePPM')}: ${cfg.syncedAt}</span>
       <span>${cfg.documentId}</span>
-      <span>${t('Blatt')} 1 ${t('von')} ${pages}</span>
+      <span>${t('Blatt')} ${page} ${t('von')} ${total}</span>
     </footer>
   </article>`;
 }
