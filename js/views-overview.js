@@ -368,11 +368,21 @@ function pensumGrid() {
       ${state.editing && editPopover()}
     </div>
 
-    <p class="grid-legend">
-      ${t('Farblogik')}: ${t('Blau kodiert nur die Höhe des Pensums, die Ampel den Zustand der Projektleitung — jede Zelle erklärt ihre Farbe im Hover.')}
-      ${t('Die Ampel bezieht sich auf das aktuelle Quartal')} ${q0.label}. ${t('Die rote Marke am Spaltenkopf ist')} «${t('Heute')}, ${data.meta.todayLabel}» — ${t('das laufende Quartal ist für Änderungen gesperrt.')}
-    </p>
+    ${heatLegend()}
   </section>`;
+}
+
+/** The same swatch legend the print sheet carries, so both read alike. */
+export function heatLegend() {
+  const l = data.api.print.legend;
+  return html`<div class="heatlegend">
+    <span class="heatlegend__label">${t(l.label)}</span>
+    ${l.steps.map(s => html`<span class="heatlegend__item">
+      <span class="heatlegend__swatch heat-${s.step}"></span>${s.label}</span>`)}
+    <span class="heatlegend__item">${icons.warn(11)}${t('Projektleitung über 100 % im Quartal')}</span>
+    <span class="heatlegend__item"><span class="heatlegend__swatch is-nolead"></span>${t(l.noLead)}</span>
+    <span class="heatlegend__item">${t(l.thresholds)}</span>
+  </div>`;
 }
 
 function qBorder(i) {
@@ -421,7 +431,7 @@ function columnHeader(tpl, span, sticky) {
       ${state.cols.credit && sortHead('credit', t('Kredit CHF'), 'pcell--num')}
       ${state.target && sortHead('target', `${t('Soll')} ${q0.short}`, 'pcell--num')}
       ${data.quarters.map((q, i) => sortHead(`q${i}`,
-        i === 0 ? `${q.short} · ${t('heute')}` : q.short,
+        q.short,
         `pcell--num ${i === 0 ? 'is-today' : ''} ${qBorder(i)}`, '',
         i === 0 ? `${t('Heute')}, ${data.meta.todayLabel} — ${t('laufendes Quartal, gesperrt')}` : q.label))}
       ${state.trend && html`<span class="pcell--text">${t('Verlauf')}</span>`}
