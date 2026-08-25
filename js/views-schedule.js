@@ -36,7 +36,7 @@ export function renderTermine() {
       crumbs: ['Bauprojekte', 'Termine'],
       title: 'Ressourcenplanung',
       actions: html`${editToggle()}${exportMenu()}
-        <button type="button" class="btn" data-act="noop">${t('Teilen')}</button>`
+        <button type="button" class="btn" data-act="share">${icons.share(14)}${t('Teilen')}</button>`
     })}
     <div class="wrap"><div class="content">
       ${toolbar()}
@@ -224,7 +224,7 @@ function listView() {
               <button type="button" class="linkbtn" data-act="open-project" data-val="${m.projectId}">${m.project.location}</button>
               <span class="msrow__meta">${m.project.kind} · ${m.project.number}</span>
             </span>
-            <span class="msrow__phase"><span class="phase-dot ${phaseClass(m.subPhase)}"></span>${m.subPhase}</span>
+            <span class="msrow__phase">${m.subPhase}</span>
             <span>${m.lead ? m.lead.name : t('nicht zugewiesen')}</span>
             <span class="msrow__date">${shortQ(m.plan)}</span>
             <span class="msrow__date">${m.forecast ? shortQ(m.forecast) : t('offen')}</span>

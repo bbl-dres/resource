@@ -6,12 +6,12 @@ import {
   data, state, t, num, fmt, unitSuffix, fmtMio,
   cellValue, projectDemand, isEdited, personLoad, personUtilisation,
   totals, loadStatus, heatStep, ampel, filteredProjects, groupProjects,
-  milestones, milestoneStats, kpis
+  activeFilters, milestones, milestoneStats, kpis
 } from './store.js';
 
 import {
   html, raw, icons, pageHeader, editToggle, exportMenu, toolbar, activeFilterRow,
-  timeControls, columnChart, tooNarrow, phaseOf, phaseClass,
+  timeControls, columnChart, tooNarrow, phaseOf,
   aria, attr
 } from './ui.js';
 
@@ -89,7 +89,7 @@ export function renderLanding() {
       title: 'Ressourcenplanung',
       chrome: false,
       actions: html`${exportMenu()}
-        <button type="button" class="btn" data-act="noop">${t('Teilen')}</button>
+        <button type="button" class="btn" data-act="share">${icons.share(14)}${t('Teilen')}</button>
         <button type="button" class="btn btn--primary" data-act="tab" data-val="uebersicht">${t('Zur Planung')}</button>`
     })}
 
@@ -226,7 +226,7 @@ export function renderUebersicht() {
       crumbs: ['Bauprojekte', 'Übersicht'],
       title: 'Ressourcenplanung',
       actions: html`${editToggle()}${exportMenu()}
-        <button type="button" class="btn" data-act="noop">${t('Teilen')}</button>`
+        <button type="button" class="btn" data-act="share">${icons.share(14)}${t('Teilen')}</button>`
     })}
     <div class="wrap"><div class="content">
       ${state.narrow ? tooNarrow('Das Pensum-Raster') : html`
@@ -260,11 +260,12 @@ function gridLayout() {
   let minWidth = 0;
   const add = (track, px) => { parts.push(track); minWidth += px; };
 
-  if (state.ampel) add('var(--grid-col-ampel)', COL_W.ampel);
   if (c.id) add('var(--grid-col-id)', COL_W.id);
   add(`minmax(${COL_W.title}px, 1fr)`, COL_W.title);       // Projekt
   if (c.phase) add('var(--grid-col-phase)', COL_W.phase);
   if (c.lead) add('var(--grid-col-lead)', COL_W.lead);
+  // The signal reports on the project lead, so it sits beside that column.
+  if (state.ampel) add('var(--grid-col-ampel)', COL_W.ampel);
   if (c.portfolio) add(`${COL_W.portfolio}px`, COL_W.portfolio);
   if (c.priority) add(`${COL_W.priority}px`, COL_W.priority);
   if (c.nextMs) add(`${COL_W.nextMs}px`, COL_W.nextMs);
@@ -274,9 +275,8 @@ function gridLayout() {
   if (state.trend) add('var(--grid-col-trend)', COL_W.trend);
 
   // The identifying columns stay put while the quarters scroll under them.
-  const sticky = { ampel: 0 };
-  sticky.id = state.ampel ? COL_W.ampel : 0;
-  sticky.title = sticky.id + (c.id ? COL_W.id : 0);
+  const sticky = { id: 0 };
+  sticky.title = c.id ? COL_W.id : 0;
   sticky.width = sticky.title + COL_W.title;
 
   return { tpl: parts.join(' '), minWidth, sticky };
@@ -301,64 +301,41 @@ function pensumGrid() {
   // Visual row index, so the edit popover can be positioned by calc().
   let rowIdx = 0;
   const body = groups.map(g => {
-    const rows = [];
-    if (g.label) {
-      const collapsed = state.collapsedGroups[g.key];
-      const groupSum = data.quarters.map((_, q) => g.projects.reduce((a, p) => a + cellValue(p, q), 0));
-      rows.push(html`<div class="prow prow--group" style="grid-template-columns:${raw(tpl)}">
-        <button type="button" class="prow__grouphead is-frozen" style="grid-column:span ${span}"
-                data-act="toggle-group" data-val="${g.key}" aria-expanded="${aria(!collapsed)}">
-          <span class="caret ${collapsed ? 'is-collapsed' : ''}" aria-hidden="true">${icons.chevronDown()}</span>
-          <span class="prow__groupname">${g.label}</span>
-          <span class="prow__groupcount">${g.projects.length}</span>
-        </button>
-        ${groupSum.map((v, q) => html`<span class="pcell pcell--sum ${q === 0 ? 'is-current' : ''}">${num(v)}</span>`)}
-        ${state.trend && html`<span></span>`}
-      </div>`);
+    const collapsed = g.label ? state.collapsedGroups[g.key] : false;
+
+    // The header sits on the page ground above its card, exactly as the
+    // Termine tab does it. It sticks to the left so it survives a scroll.
+    const head = g.label && html`<header class="pgrouphead">
+      <button type="button" class="pgrouphead__toggle"
+              data-act="toggle-group" data-val="${g.key}" aria-expanded="${aria(!collapsed)}"
+              aria-label="${t('Gruppe')} ${g.label} ${t('ein- oder ausklappen')}">
+        <span class="caret ${collapsed ? 'is-collapsed' : ''}" aria-hidden="true">${icons.chevronDown()}</span>
+        <span class="pgrouphead__name">${g.label}</span>
+      </button>
+      <span class="count-pill">${g.projects.length}</span>
+    </header>`;
+
+    if (collapsed) return html`<section class="pgroup">${head}</section>`;
+
+    const rows = g.projects.map(p => {
+      const row = projectRow(p, tpl, sticky, rowIdx);
       rowIdx++;
-      if (collapsed) return rows;
-    }
-    g.projects.forEach(p => {
-      rows.push(projectRow(p, tpl, sticky, rowIdx));
-      rowIdx++;
+      return row;
     });
-    return rows;
+    // Each card repeats the column header, the same way a Gantt group card
+    // repeats its axis — a group has to be readable on its own.
+    return html`<section class="pgroup">${head}
+      <div class="pblock">${columnHeader(tpl, span, sticky)}${rows}</div>
+    </section>`;
   });
 
   return html`<section class="grid-card">
     <div class="pgrid">
      <div class="pgrid__track" style="min-width:${minWidth}px; --sticky-w:${sticky.width}px">
 
-      <div class="prow prow--years" style="grid-template-columns:${raw(tpl)}">
-        <div class="prow__yearlabel is-frozen" style="grid-column:span ${span}">
-          <span>${t('Projekt')}</span>
-          <span class="prow__unit">${state.unit === 'fte' ? t('Pensum in FTE') : t('Pensum in %')}</span>
-        </div>
-        ${yearHeaders()}
-        ${state.trend && html`<span></span>`}
-      </div>
-
-      <div class="prow prow--head" style="grid-template-columns:${raw(tpl)}">
-        ${state.ampel && html`<span class="is-frozen" style="left:${sticky.ampel}px"></span>`}
-        ${state.cols.id && html`<span class="pcell--text is-frozen" style="left:${sticky.id}px">ID</span>`}
-        <span class="pcell--text is-frozen is-frozen-last" style="left:${sticky.title}px">${t('Projekt')}</span>
-        ${state.cols.phase && html`<span class="pcell--text">${t('SIA-Phase')}</span>`}
-        ${state.cols.lead && html`<span class="pcell--text">${t('Projektleitung')}</span>`}
-        ${state.cols.portfolio && html`<span class="pcell--text">${t('Teilportfolio')}</span>`}
-        ${state.cols.priority && html`<span class="pcell--text">${t('Priorität')}</span>`}
-        ${state.cols.nextMs && html`<span class="pcell--text">${t('Nächster Meilenstein')}</span>`}
-        ${state.cols.credit && html`<span class="pcell--num">${t('Kredit CHF')}</span>`}
-        ${state.target && html`<span class="pcell--num">${t('Soll')} ${q0.short}</span>`}
-        ${data.quarters.map((q, i) => html`<span class="pcell--num ${i === 0 ? 'is-today' : ''} ${qBorder(i)}"
-            title="${i === 0 ? `${t('Heute')}, ${data.meta.todayLabel} — ${t('laufendes Quartal, gesperrt')}` : q.label}">
-          ${q.short}${i === 0 ? html` · ${t('heute')}` : ''}</span>`)}
-        ${state.trend && html`<span class="pcell--text">${t('Verlauf')}</span>`}
-      </div>
-
       ${body}
 
-      <div class="pnote">${list.length} ${t('von')} ${data.projects.length} ${t('Zeilen des gesetzten Umfangs geladen')} — ${t('bei grösserem Umfang laden weitere beim Scrollen, Kopf- und Summenzeilen bleiben fixiert')}</div>
-
+      <div class="pblock pblock--foot">
       <div class="prow prow--sum" style="grid-template-columns:${raw(tpl)}">
         <div style="grid-column:span ${span}" class="prow__sumlabel is-frozen">
           ${t('Bedarf total')}
@@ -386,6 +363,7 @@ function pensumGrid() {
         })}
         ${state.trend && html`<span></span>`}
       </div>
+      </div>
 
       ${state.editing && editPopover()}
     </div>
@@ -399,6 +377,37 @@ function pensumGrid() {
 
 function qBorder(i) {
   return (i === 0 || i === 2 || i === 6) ? 'is-yearstart' : '';
+}
+
+/** The year band and the column names, repeated at the top of every group card. */
+function columnHeader(tpl, span, sticky) {
+  const q0 = data.quarters[0];
+  return html`
+    <div class="prow prow--years" style="grid-template-columns:${raw(tpl)}">
+      <div class="prow__yearlabel is-frozen" style="grid-column:span ${span}">
+        <span>${t('Projekt')}</span>
+        <span class="prow__unit">${state.unit === 'fte' ? t('Pensum in FTE') : t('Pensum in %')}</span>
+      </div>
+      ${yearHeaders()}
+      ${state.trend && html`<span></span>`}
+    </div>
+
+    <div class="prow prow--head" style="grid-template-columns:${raw(tpl)}">
+      ${state.ampel && html`<span class="is-frozen" style="left:${sticky.ampel}px"></span>`}
+      ${state.cols.id && html`<span class="pcell--text is-frozen" style="left:${sticky.id}px">ID</span>`}
+      <span class="pcell--text is-frozen is-frozen-last" style="left:${sticky.title}px">${t('Projekt')}</span>
+      ${state.cols.phase && html`<span class="pcell--text">${t('SIA-Phase')}</span>`}
+      ${state.cols.lead && html`<span class="pcell--text">${t('Projektleitung')}</span>`}
+      ${state.cols.portfolio && html`<span class="pcell--text">${t('Teilportfolio')}</span>`}
+      ${state.cols.priority && html`<span class="pcell--text">${t('Priorität')}</span>`}
+      ${state.cols.nextMs && html`<span class="pcell--text">${t('Nächster Meilenstein')}</span>`}
+      ${state.cols.credit && html`<span class="pcell--num">${t('Kredit CHF')}</span>`}
+      ${state.target && html`<span class="pcell--num">${t('Soll')} ${q0.short}</span>`}
+      ${data.quarters.map((q, i) => html`<span class="pcell--num ${i === 0 ? 'is-today' : ''} ${qBorder(i)}"
+          title="${i === 0 ? `${t('Heute')}, ${data.meta.todayLabel} — ${t('laufendes Quartal, gesperrt')}` : q.label}">
+        ${q.short}${i === 0 ? html` · ${t('heute')}` : ''}</span>`)}
+      ${state.trend && html`<span class="pcell--text">${t('Verlauf')}</span>`}
+    </div>`;
 }
 
 function yearHeaders() {
@@ -430,7 +439,7 @@ function projectRow(p, tpl, sticky, rowIdx) {
   const nextMs = data.milestones.items.find(m => m.projectId === p.id);
   const targetOver = state.target && cells[0] > p.target;
 
-  return html`<div class="prow ${p.unassigned ? 'is-unassigned' : ''}" style="grid-template-columns:${raw(tpl)}"
+  return html`<div class="prow" style="grid-template-columns:${raw(tpl)}"
       data-row="${rowIdx}">
     ${state.ampel && html`<span class="pcell pcell--ampel is-frozen" style="left:${sticky.ampel}px">
       <span class="ampel ampel--${a.key}" role="img" aria-label="${a.title}" title="${a.title}"></span>
@@ -440,9 +449,12 @@ function projectRow(p, tpl, sticky, rowIdx) {
       <button type="button" class="prow__title" data-act="open-project" data-val="${p.id}" title="${p.title}">${p.title}</button>
     </span>
     ${state.cols.phase && html`<span class="pcell pcell--phase">
-      <span class="phase-dot ${phaseClass(p.phase)}" aria-hidden="true"></span>${phase.label}
+      ${phase.label}
     </span>`}
-    ${state.cols.lead && html`<span class="pcell pcell--lead ${!lead ? 'is-none' : ''}">${lead ? lead.name : t('— nicht zugewiesen')}</span>`}
+    ${state.cols.lead && html`<span class="pcell pcell--lead ${!lead ? 'is-none' : ''}">${lead ? lead.name : html`<span class="lead-open">${t('nicht zugewiesen')}</span>`}</span>`}
+    ${state.ampel && html`<span class="pcell pcell--ampel">
+      <span class="ampel ampel--${a.key}" role="img" aria-label="${a.title}" title="${a.title}"></span>
+    </span>`}
     ${state.cols.portfolio && html`<span class="pcell pcell--text">${t(data.portfoliosById[p.portfolio].label)}</span>`}
     ${state.cols.priority && html`<span class="pcell pcell--text">${t(p.priority)}</span>`}
     ${state.cols.nextMs && html`<span class="pcell pcell--text">${nextMs ? `${nextMs.code} · ${data.quarters[data.quarterIndex[nextMs.plan]].label}` : '—'}</span>`}
@@ -548,11 +560,59 @@ function editPopover() {
 
 export function renderModal() {
   if (!state.modal) return '';
-  const body = state.modal.type === 'project' ? projectModal(state.modal) : rebookModal(state.modal);
+  const body = state.modal.type === 'project' ? projectModal(state.modal)
+    : state.modal.type === 'share' ? shareModal(state.modal)
+      : rebookModal(state.modal);
   return html`<div class="scrim" data-act="close-modal">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" data-stop>${body}</div>
   </div>`;
 }
+
+/**
+ * The URL already carries tab, view, filters, grouping, unit and search, so the
+ * share dialog only has to show it and make it easy to take.
+ */
+function shareModal({ copied }) {
+  const chips = activeFilters();
+  return html`
+    <header class="modal__head">
+      <div>
+        <p class="modal__kicker">${t('Teilen')}</p>
+        <h2 class="modal__title" id="modal-title">${t('Diese Ansicht teilen')}</h2>
+      </div>
+      <button type="button" class="modal__close" data-act="close-modal" aria-label="${t('Schliessen')}">${icons.close(14)}</button>
+    </header>
+
+    <p class="modal__lead">${t('Der Link enthält Ansicht, Filter, Gruppierung, Sortierung und Einheit — wer ihn öffnet, sieht genau diesen Stand.')}</p>
+
+    <div class="share">
+      <label class="share__field">
+        <span class="sr-only">${t('Link')}</span>
+        <input type="text" readonly value="${location.href}" data-fk="share-url"
+               data-act="share-select" aria-label="${t('Link')}">
+      </label>
+      <button type="button" class="btn btn--primary" data-act="share-copy">
+        ${copied ? icons.check(14) : icons.externalLink(14)}${copied ? t('Kopiert') : t('Link kopieren')}
+      </button>
+    </div>
+
+    <dl class="share__state">
+      <div><dt>${t('Ansicht')}</dt><dd>${t(tabLabel())}</dd></div>
+      <div><dt>${t('Aktive Filter')}</dt><dd>${chips.length ? chips.map(c => t(c.label)).join(', ') : t('keine')}</dd></div>
+      <div><dt>${t('Einheit')}</dt><dd>${state.unit === 'fte' ? 'FTE' : t('Pensum in %')}</dd></div>
+    </dl>
+
+    <footer class="modal__foot">
+      <p class="modal__footnote">${t('Der Prototyp speichert nichts — der Link beschreibt nur die Ansicht.')}</p>
+      <button type="button" class="btn btn--primary" data-act="close-modal">${t('Schliessen')}</button>
+    </footer>`;
+}
+
+const TAB_LABELS = {
+  start: 'Einstieg', uebersicht: 'Übersicht', termine: 'Termine',
+  dashboard: 'Dashboard', verlauf: 'Verlauf', api: 'API-Dokumentation', export: 'Drucklayout'
+};
+const tabLabel = () => TAB_LABELS[state.tab] ?? state.tab;
 
 function projectModal({ projectId }) {
   const p = data.projectsById[projectId];
@@ -571,7 +631,7 @@ function projectModal({ projectId }) {
   const facts = [
     {
       term: 'SIA-Phase',
-      value: html`<span class="phase-dot ${phaseClass(p.phase)}"></span>${phase.label}`,
+      value: phase.label,
       sub: `${t('Hauptphase')} ${phase.main}`
     },
     {

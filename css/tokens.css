@@ -311,6 +311,9 @@
   --shadow-menu-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.18),
                     0 8px 10px -6px rgba(0, 0, 0, 0.1);
   --shadow-card:  0 8px 24px rgba(0, 0, 0, 0.14);
+  /* Content cards sit on the page ground with a soft lift instead of a border. */
+  --shadow-raised: 0 1px 2px rgba(16, 24, 40, 0.04), 0 4px 12px rgba(16, 24, 40, 0.06);
+  --shadow-raised-hover: 0 1px 2px rgba(16, 24, 40, 0.05), 0 8px 20px rgba(16, 24, 40, 0.09);
   --shadow-modal: 0 24px 48px rgba(0, 0, 0, 0.18);
 
   --rail-danger: inset 3px 0 0 var(--red-600);

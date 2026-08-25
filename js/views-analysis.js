@@ -10,7 +10,7 @@ import {
 
 import {
   html, icons, pageHeader, exportMenu, toolbar, activeFilterRow,
-  columnChart, barList, phaseClass,
+  columnChart, barList, kpiStrip,
   aria
 } from './ui.js';
 
@@ -24,9 +24,10 @@ export function renderDashboard() {
       crumbs: ['Bauprojekte', 'Dashboard'],
       title: 'Ressourcenplanung',
       actions: html`${exportMenu()}
-        <button type="button" class="btn" data-act="noop">${t('Teilen')}</button>`
+        <button type="button" class="btn" data-act="share">${icons.share(14)}${t('Teilen')}</button>`
     })}
     <div class="wrap"><div class="content">
+      ${kpiStrip()}
       ${toolbar()}
       ${activeFilterRow()}
       <div class="bi-grid">
@@ -187,7 +188,7 @@ export function renderVerlauf() {
       crumbs: ['Bauprojekte', 'Verlauf'],
       title: 'Ressourcenplanung',
       actions: html`${exportMenu()}
-        <button type="button" class="btn" data-act="noop">${t('Teilen')}</button>`
+        <button type="button" class="btn" data-act="share">${icons.share(14)}${t('Teilen')}</button>`
     })}
     <div class="wrap"><div class="content">
       ${toolbar({ attributes: false })}

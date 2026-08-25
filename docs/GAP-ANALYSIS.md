@@ -198,7 +198,52 @@ below the facts, since they are what makes an *interactive* prototype worth clic
 
 ---
 
-## 4. Carried over from the first pass
+## 4. Defects found while reviewing
+
+Not gaps against the mockup — things that were simply broken or inconsistent.
+
+### 4.1 The pensum grid came apart when columns were added ✅
+
+Every row in the grid is its own CSS grid, and the scroll container sized each one
+independently (`min-width: max-content` per row). As soon as the track grew wider than the
+window — extra attribute columns, or a 1280px laptop — rows resolved to *different* widths,
+so the header no longer stood over its own cells and the left edge showed a partial column.
+
+**Fixed** by giving the grid one scroll track with a measured `min-width`, computed from the
+visible columns, and making every row exactly as wide as that track. A regression test now
+asserts that all rows resolve to a single width with every optional column switched on.
+
+The same pass implemented the wireframe's third degradation step: **the identifying columns
+(signal, ID, project) now freeze** while the quarters scroll under them, with a shadow that
+appears only once the track is actually scrolled.
+
+### 4.2 Every Gantt group card had a horizontal scrollbar ✅
+
+The Gantt used fixed `128px` quarter columns, so `360 + 8 × 128 = 1384px` sat inside a card
+whose content box was 1382px after its borders — a two-pixel overflow produced a scrollbar on
+every group. Quarter columns are now `minmax(0, 1fr)` with an explicit minimum, so they fill the
+card and scroll only when the window genuinely cannot hold eight quarters. The *Heute* marker
+moved from pixel arithmetic to a proportional offset so it stays correct at any width.
+
+### 4.3 The two search fields shared one open state ✅
+
+Clicking the toolbar search also expanded the header search, because both read a single
+`searchOpen` boolean. They now open and close independently. The query stays shared — it is the
+same filter — and a dot marks a collapsed field that still holds one.
+
+### 4.4 Inconsistencies across tabs ✅
+
+- The overload filter read `Nur Überlast` on three tabs and `Nur überfällige` on Termine.
+  It is now the same button everywhere; the overdue axis was dropped rather than kept as a
+  second, tab-specific control.
+- Default grouping is now **Teilportfolio** on every tab, so switching tabs does not reshuffle
+  the rows.
+- Grouped rows in the Übersicht ran together in one block while the Termine tab spaced its
+  groups apart. The Übersicht now uses the same group header treatment and the same spacing.
+- `Bauprojekte` in the breadcrumb was inert; it now returns to the entry page, and carries a
+  real `href` to the application root so middle-click works.
+
+## 5. Carried over from the first pass
 
 These were already recorded in the README and remain accurate:
 
@@ -210,7 +255,7 @@ These were already recorded in the README and remain accurate:
 - **Change-log count** reflects the nine real entries rather than the mockup's `von 214`. ➖ kept.
 - **Design annotations** (`Wofür / Stärke / Grenze`) removed as review commentary. ➖ kept.
 
-## 5. Still open
+## 6. Still open
 
 - 📋 **Sticky grid columns.** Below ~1280px the pensum grid scrolls horizontally but the left
   text columns do not freeze. The wireframe's degradation order is
@@ -220,3 +265,7 @@ These were already recorded in the README and remain accurate:
   the contracted percentage. The wireframe is inconsistent; both readings are reproduced and the
   question is unresolved.
 - 📋 **Time scale** (`Jahr` / `Monat`) and the period stepper are inert.
+- 📋 **The signed-in user.** The mockup's avatar reads `MB` but never says who that is, while its
+  lead menu offers `Meine Projekte` — which only means something if the viewer leads projects.
+  The prototype signs in as **Sonja Beispiel (SB)**, one of the six, so the quick filter works.
+  `Max Muster` remains the separate administrative actor in the change log, as in the mockup.

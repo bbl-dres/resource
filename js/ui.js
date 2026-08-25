@@ -243,9 +243,9 @@ export function expandableSearch({ variant, placeholder, title }) {
 }
 
 export function pageHeader({ crumbs, title, actions = [], chrome = true }) {
-  return html`<div class="band">
-    <div class="wrap page-header">
-      <nav class="crumbs" aria-label="Pfad">
+  return html`
+    <div class="crumbbar">
+      <nav class="wrap crumbs" aria-label="Pfad">
         ${crumbs.map((c, i) => {
           const last = i === crumbs.length - 1;
           const sep = i > 0 ? html`<span aria-hidden="true">›</span>` : '';
@@ -256,14 +256,14 @@ export function pageHeader({ crumbs, title, actions = [], chrome = true }) {
             : html`<a class="crumbs__link" href="." data-act="tab" data-val="start">${t(c)}</a>`}`;
         })}
       </nav>
+    </div>
+    <div class="wrap page-header">
       <div class="page-header__row">
         <h1 class="page-title">${t(title)}</h1>
         <div class="page-header__actions">${actions}</div>
       </div>
-      ${chrome && kpiStrip()}
       ${chrome && tabBar()}
-    </div>
-  </div>`;
+    </div>`;
 }
 
 export function editToggle() {
@@ -363,10 +363,7 @@ export function toolbar({ attributes = true } = {}) {
           <span aria-hidden="true">·</span>
           <button type="button" data-act="bulk" data-kind="phases" data-val="none">${t('Keine')}</button>
         </div>
-        ${data.phases.main.map(m => {
-          const n = filteredCountBy(p => p.phase[0] === m.id);
-          return menuTick(t(m.label), state.phases.includes(m.id), 'toggle-phase', m.id, `${n}`);
-        })}`
+        ${data.phases.main.map(m => menuTick(t(m.label), state.phases.includes(m.id), 'toggle-phase', m.id))}`
     })}
 
     ${dropdown({
@@ -376,14 +373,13 @@ export function toolbar({ attributes = true } = {}) {
 
     ${dropdown({
       id: 'portfolio', label: t('Teilportfolio'), count: state.portfolios.length, width: 276,
-      body: html`${menuGroupLabel(`${t('Mehrfachauswahl')} · ${t('Bedarf')} ${data.quarters[0].label}`)}
+      body: html`${menuGroupLabel(t('Mehrfachauswahl'))}
         <div class="dd__bulk">
           <button type="button" data-act="bulk" data-kind="portfolios" data-val="all">${t('Alle')}</button>
           <span aria-hidden="true">·</span>
           <button type="button" data-act="bulk" data-kind="portfolios" data-val="none">${t('Keine')}</button>
         </div>
-        ${data.meta.portfolios.map(pf => menuTick(t(pf.label), state.portfolios.includes(pf.id), 'toggle-portfolio', pf.id,
-          `${data.projects.filter(p => p.portfolio === pf.id).reduce((a, p) => a + p.demand[0], 0)} %`))}`
+        ${data.meta.portfolios.map(pf => menuTick(t(pf.label), state.portfolios.includes(pf.id), 'toggle-portfolio', pf.id))}`
     })}
 
     <span class="toolbar__sep" aria-hidden="true"></span>
@@ -420,11 +416,8 @@ export function toolbar({ attributes = true } = {}) {
 function leadMenuBody() {
   const q = state.menuSearch.trim().toLowerCase();
   const entries = [
-    ...data.people.map(p => ({
-      id: p.id, name: p.name,
-      meta: `${countBy(x => x.leadId === p.id)} · ${p.employment} %`
-    })),
-    { id: 'none', name: t('nicht zugewiesen'), meta: `${countBy(x => !x.leadId)} · —` }
+    ...data.people.map(p => ({ id: p.id, name: p.name })),
+    { id: 'none', name: t('nicht zugewiesen') }
   ];
   const matches = entries.filter(e => !q || e.name.toLowerCase().includes(q));
   // Selected first, so a choice never scrolls out of sight as the list grows.
@@ -451,14 +444,13 @@ function leadMenuBody() {
     </div>
     <div class="dd__scroll">
       ${matches.length
-        ? [...selected, ...rest].map(e => menuTick(e.name, state.leads.includes(e.id), 'toggle-lead', e.id, e.meta))
+        ? [...selected, ...rest].map(e => menuTick(e.name, state.leads.includes(e.id), 'toggle-lead', e.id))
         : html`<p class="dd__empty">${t('Keine Person gefunden.')}</p>`}
     </div>
     ${menuNote(`${matches.length} ${t('von')} 34 ${t('Personen')} · ${t('weitere beim Scrollen')}`)}`;
 }
 
-function countBy(fn) { return data.projects.filter(fn).length; }
-function filteredCountBy(fn) { return data.projects.filter(fn).length; }
+
 
 export function activeFilterRow() {
   const chips = activeFilters();

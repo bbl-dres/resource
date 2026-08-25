@@ -38,6 +38,8 @@ running the content through Jekyll.
 | Termine | `#?tab=termine&view=gantt` | Three views of the same milestones: **Gantt** (phase bars plus a capacity band), **Liste** (one row per milestone), **Kalender** (twelve months as columns). |
 | Dashboard | `#?tab=dashboard` | Aggregates over phase, person, location and budget. |
 | Verlauf | `#?tab=verlauf` | The immutable change log for app-owned fields. |
+| API | `#?tab=api` | The REST reference — five endpoint groups, the nested-JSONB project shape and the eIAM auth note. Reached from the **API** link in the footer. |
+| Drucklayout | `#?tab=export` | The PDF export: A4 portrait and A4 landscape sheets with letterhead, fixed legend and document ID. Reached from **Exportieren → Als PDF exportieren**. |
 
 ### Interactions that actually work
 
@@ -46,12 +48,18 @@ running the content through Jekyll.
   when the change pushes someone over their contracted percentage. The current quarter is locked.
 - **Live recalculation.** Applying an edit moves the demand total, the utilisation row, the
   capacity band, the KPI strip and every dashboard aggregate — nothing is hard-coded.
-- **Umbuchen.** From the edit popover, move a pensum to another person and see both utilisations
-  before and after.
+- **Umbuchen.** From the edit popover: von / Pensum / Dauer, a person picker that filters as you
+  type and answers to the arrow keys, and a reason that is mandatory for every rebooking.
+  One entry lands in the change log carrying both sides.
 - **Filtering.** Phase, project lead, location, free-text search and *Nur Überlast*, with removable
   chips. Filters survive a tab switch and are written to the URL.
 - **Grouping and sorting**, column and unit toggles (`%` ↔ FTE), *Soll-Pensum* and *Verlauf* columns.
 - **Expandable search** in the header and in the toolbar: click the icon, the field grows in place.
+  The two open independently and share the query.
+- **Menus that behave like menus.** The project-lead menu filters as you type, offers
+  *Meine Projekte*, floats selected entries to the top and scrolls at 214px. Arrow keys roam,
+  `Escape` closes and hands focus back to the trigger, and panels stay inside the window.
+- **Frozen grid columns.** Signal, ID and project stay put while the quarters scroll under them.
 - **DE / EN.** The language menu translates the interface live. FR and IT are listed as pending,
   exactly as the wireframe specifies.
 - **URL state.** Tab, view, filters, grouping, sorting, unit and search live in the hash, so any
@@ -74,6 +82,7 @@ js/
   views-overview.js   landing page, pensum grid, edit popover, project and rebook modals
   views-schedule.js   Termine: Gantt, Liste, Kalender
   views-analysis.js   Dashboard and Verlauf
+  views-docs.js       API reference and the PDF print layout
 data/                 static mock data, see below
 assets/
   swiss-logo-flag.svg
@@ -120,6 +129,7 @@ Everything lives in `data/` as plain JSON.
 | `phases.json` | SIA 112 main phases and sub-phases |
 | `dashboard.json` | The one dashboard series that is not derivable (budget by year) |
 | `i18n.json` | The DE → EN dictionary |
+| `api.json` | The REST endpoints, the JSONB example, and the print letterhead and legend |
 
 **Nothing that can be computed is stored.** Demand totals, net capacity, utilisation,
 free capacity, per-person load, budget roll-ups, milestone counts and every KPI are
@@ -139,6 +149,9 @@ its split by SIA phase, the project count per phase, and the milestone counts
 
 ---
 
+A full comparison against the mockup — what was missing, what deviates and what was fixed —
+is in [docs/GAP-ANALYSIS.md](docs/GAP-ANALYSIS.md).
+
 ## Deliberate deviations from the wireframe
 
 Worth reviewing — each is a one-line change if you disagree:
@@ -149,7 +162,7 @@ Worth reviewing — each is a one-line change if you disagree:
    To revert, drop `is-phase ${phaseClass(b.phase)}` in `js/views-schedule.js`.
 2. **Grouping is applied, not decorative.** The wireframe's toolbar reads
    "Gruppieren nach: Projektleitung" while the grid renders flat. Here grouping really
-   groups, and the default is **Keine**.
+   groups, and the default is **Teilportfolio** on every tab.
 3. **Teilportfolio split.** The wireframe's dashboard shows Inland 312 % and Sport 35 %;
    those numbers do not tie to any assignment of the eleven projects. The prototype
    derives the card from the data and lands on 310 % and 37 %.
@@ -160,9 +173,9 @@ Worth reviewing — each is a one-line change if you disagree:
 
 ## Known limits
 
-- **No sticky columns.** Below roughly 1280 px the pensum grid scrolls horizontally, but
-  the left-hand text columns do not yet freeze. The wireframe's degradation order
-  (fewer quarters → hide attributes → freeze the left half) is only partly implemented.
+- **Fewer quarters first.** The wireframe's degradation order is *fewer quarters → hide
+  attributes → freeze the left half*. The prototype freezes the left half and scrolls, but does
+  not yet drop to six quarters on a narrow laptop.
 - **Below 900 px** the planning views show a reading path instead, as the wireframe
   prescribes. The landing page, the milestone list and the change log stay usable.
 - **`Personen über 100 %`** counts a raw load above 100, which is what the wireframe
@@ -171,7 +184,8 @@ Worth reviewing — each is a one-line change if you disagree:
   The wireframe is inconsistent here; both readings are reproduced faithfully and the
   question is open.
 - **Rebooking** moves the whole project lead rather than splitting the allocation into
-  two person-level rows. The data model does not carry per-person allocations yet.
+  two person-level rows. The data model does not carry per-person allocations yet — the API
+  reference shows the `allocations` shape a real implementation would use.
 - Export, sharing, the time-scale switch (Jahr / Monat) and the period stepper are
   inert and say so.
 
