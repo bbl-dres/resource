@@ -4,294 +4,437 @@ Rolle: Portfoliosteuerung Hochbau, öffentliche Bauherrschaft
 Stand: 111 Projekte, 46 Personen, 86 Gates, 972 Mio. CHF gebundene Mittel
 Auftrag: Vorschlag für Gliederung und Inhalte. **Analyse, keine Umsetzung.**
 
+Wireframe zum Vorschlag:
+[docs/wireframes/260826_Dashboard/Dashboard Bereichsleitung.html](wireframes/260826_Dashboard/Dashboard%20Bereichsleitung.html)
+
 ---
 
-## 1 · Befund zum heutigen Zustand
+## 1 · Befund
 
 Das Dashboard zeigt sechs Karten in einer Reihe:
 
-| Karte | Frage, die sie beantwortet |
-|---|---|
-| Auslastung nach Quartal | Sind wir überlastet? |
-| Anzahl Projekte nach SIA-Phase | Wie verteilt sich das Portfolio? |
-| Auslastung nach Person | Wer ist überlastet? |
-| Bedarf nach Teilportfolio | Wo liegt der Bedarf? |
-| Kredit nach Jahr | Wann fliesst Geld? |
-| Kredit nach SIA-Phase | Wie weit sind die Mittel gebunden? |
+| Karte | Frage | Urteil |
+|---|---|---|
+| Auslastung nach Quartal | Sind wir überlastet? | **Bleibt** — aber nicht in einem Reiter |
+| Anzahl Projekte nach SIA-Phase | Wie verteilt sich das Portfolio? | **Bleibt** — gehört zur Pipeline |
+| Auslastung nach Person | Wer ist überlastet? | **Bleibt** — braucht einen eigenen Reiter |
+| Bedarf nach Teilportfolio | Wo liegt der Bedarf? | **Bleibt** — gehört zur Kapazität |
+| Kredit nach Jahr | Wann fliesst Geld? | **Bleibt** — gehört zu den Mitteln |
+| Kredit nach SIA-Phase | Wie weit sind Mittel gebunden? | **Bleibt** — gehört zu den Mitteln |
 
-Drei Beobachtungen:
+Alle sechs sind fachlich richtig. Das Problem ist nicht ihr Inhalt, sondern dass
+sie ohne Gliederung nebeneinanderliegen, dass zwei tragende Fragen fehlen
+(Termintreue, Bindungsgrad des Bedarfs) und dass eine Karte bei der jetzigen
+Datenmenge auseinanderfällt.
 
-**Die Karten stehen nebeneinander, nicht in einem Argument.** Kapazität, Termine
-und Mittel sind drei verschiedene Fragen mit drei verschiedenen Adressaten und
-drei verschiedenen Handlungshorizonten. Nebeneinander gelegt konkurrieren sie
-um dieselbe Aufmerksamkeit, statt sich zu ergänzen.
+**Was fehlt:** Termintreue kommt im Dashboard nicht vor. 86 Gates, 24 verspätet,
+7 ohne Termin — eine Termintreue von 64 %. Neben der Auslastung ist das die
+zweite Steuerungsgrösse einer Bauherrschaft.
 
-**Eine Karte skaliert nicht mehr.** «Auslastung nach Person» zeichnete sechs
-Balken. Bei 46 Personen sind es 46, und die Karte wird zur Liste, durch die man
-scrollt. Eine Liste ist keine Auswertung.
-
-**Termintreue fehlt ganz.** 86 Gates, 24 davon verspätet, 7 ohne Termin — das ist
-neben der Auslastung die zweite Steuerungsgrösse einer Bauherrschaft, und sie
-kommt im Dashboard nicht vor. Sie steht nur als Zahl auf der Einstiegsseite.
-
-Ein zweiter Reiterstreifen ist deshalb die richtige Antwort — aber nicht als
-Ablage für vorhandene Karten, sondern als Gliederung nach der Frage, die
-jemand mitbringt.
+**Was nicht mehr trägt:** «Auslastung nach Person» zeichnete sechs Balken. Bei
+46 Personen sind es 46, bei 100+ wird die Karte zur Liste, durch die man
+scrollt. Eine Liste ist keine Auswertung. Dazu Abschnitt 4.
 
 ---
 
-## 2 · Was eine Bereichsleitung tatsächlich entscheidet
+## 2 · Was eine Bereichsleitung entscheidet
 
-Vier wiederkehrende Entscheidungen, in der Reihenfolge, in der sie anfallen:
+Fünf wiederkehrende Entscheidungen, in der Reihenfolge, in der sie anfallen:
 
-1. **Können wir das übernehmen?** — Bedarf gegen verfügbare Kapazität, über die
-   Zeit, nach Bereich und nach Person.
-2. **Was kommt auf uns zu?** — Pipeline: welche Projekte rücken wann in die
-   teure Phase 5 nach, und mit welchem Pensum.
-3. **Halten wir die Termine?** — Termintreue an den Gates, und wo im SIA-Ablauf
+1. **Können wir das übernehmen?** — Bedarf gegen Kapazität, über die Zeit und
+   nach Bereich.
+2. **Wer macht es?** — Auslastung, Überlast, freie Kapazität je Person.
+3. **Was kommt auf uns zu?** — welche Projekte rücken wann in die teure Phase 5
+   nach.
+4. **Halten wir die Termine?** — Termintreue an den Gates, und wo im SIA-Ablauf
    der Verzug entsteht.
-4. **Fliessen die Mittel?** — Kredittranchen gegen Jahresbudget. In der
+5. **Fliessen die Mittel?** — Kredittranchen gegen Jahresbudget. In der
    Bundesverwaltung ist Minderausgabe so erklärungsbedürftig wie Mehrausgabe:
    nicht abgerufene Tranchen verfallen.
 
-Diese vier Fragen sind die vorgeschlagenen Reiter.
+Jede dieser fünf Fragen hat eine eigene Betrachtungseinheit — Quartal, Person,
+Projekt, Gate, Franken. Das ist die Gliederung.
 
 ---
 
-## 3 · Vorschlag: vier Reiter
+## 3 · Vorschlag: fester Kopf, fünf Reiter
 
-    KPI-Streifen  ← bleibt oben, reitertunabhängig
-    ────────────────────────────────────────────
-    Kapazität │ Pipeline │ Termine │ Mittel
+```
+┌──────────────────────────────────────────────────────────────┐
+│  KPI-Streifen              4 Zahlen, immer sichtbar          │
+│  Auslastung nach Quartal   die Ankergrafik, immer sichtbar   │
+├──────────────────────────────────────────────────────────────┤
+│  Kapazität │ Personen │ Pipeline │ Termine │ Mittel          │
+└──────────────────────────────────────────────────────────────┘
+```
 
-Der zweite Streifen muss dem ersten optisch **untergeordnet** sein — der obere
-wechselt die Ansicht, der untere gliedert eine Ansicht. Empfehlung: das
-bestehende `segmented`-Element statt einer zweiten Reiterleiste, links unter dem
-KPI-Streifen, und der Zustand in der URL (`&bi=kapazitaet`), damit ein Link auf
-den Abschnitt zeigt.
+### Der Kopf bleibt stehen
 
-Der KPI-Streifen bleibt darüber und behält die vier Zahlen, die unabhängig vom
-gewählten Abschnitt gelten. Vorschlag zur Anpassung: **«Überfällige Gates»**
-statt «Gebundene Kredite» — der Kreditbetrag ist eine Bestandsgrösse ohne
-Handlungsauslöser und gehört in den Reiter *Mittel*, die überfälligen Gates
-sind ein Alarm.
+**«Auslastung nach Quartal» gehört in keinen Reiter.** Sie ist die Zahl, gegen
+die jede andere Aussage gelesen wird: 122 % Bedarf in einem Bereich heisst etwas
+anderes, wenn das Portfolio bei 106 % steht, als wenn es bei 80 % steht. Deshalb
+steht sie über der Reiterleiste, breit und flach, und bleibt in jedem Abschnitt
+sichtbar.
+
+Dazu kommt eine Interaktion, die die Gliederung zusammenhält: **ein Klick auf
+ein Quartal in der Ankergrafik setzt das Bezugsquartal für den Reiter darunter.**
+Die Verteilung im Reiter *Personen*, die Lücke im Reiter *Kapazität* und die
+Gate-Last im Reiter *Termine* beziehen sich dann alle auf dasselbe Quartal.
+
+Der KPI-Streifen behält seine vier Zahlen. Eine Anpassung: **«Überfällige Gates»
+statt «Gebundene Kredite»** — der Kreditbetrag ist eine Bestandsgrösse ohne
+Handlungsauslöser und gehört in den Reiter *Mittel*; die überfälligen Gates sind
+ein Alarm.
+
+### Die Reiterleiste ist untergeordnet
+
+Der obere Reiterstreifen wechselt die Ansicht, der untere gliedert eine Ansicht.
+Empfehlung: das bestehende `segmented`-Element statt einer zweiten Reiterleiste,
+und der Zustand in der URL (`&bi=personen`), damit ein Link auf den Abschnitt
+zeigt.
 
 ---
 
-## 4 · Reiter «Kapazität»
+## 4 · Reiter «Personen» — warum eigenständig
 
-Die wichtigste Änderung im ganzen Dashboard steht hier an erster Stelle.
+Die Anfrage, die am häufigsten kommt, verdient mehr als eine Karte. Drei Gründe,
+und der dritte ist der eigentliche.
 
-### 4.1 Bedarf gegen Kapazität, nach Bindungsgrad ★★★
+### 4.1 Die Datenmenge
 
-Heute zeigt die Karte eine Säule Auslastung je Quartal. Sie beantwortet «sind wir
-über 100 %», aber nicht die eigentliche Frage: **welcher Teil des Bedarfs ist
-überhaupt verschiebbar?**
+46 Personen heute, realistisch über 100. Ein Balken pro Person ergibt eine Liste,
+durch die man scrollt, ohne je einen Überblick zu bekommen. Alles andere im
+Dashboard verdichtet — diese eine Karte nicht.
 
-Vorschlag: gestapelte Säulen je Quartal, gegen eine Linie *Kapazität netto*.
+### 4.2 Die Betrachtungseinheit
 
-    ▓▓ gebunden (nach Baukredit-Freigabe)   — nicht verschiebbar
-    ▒▒ vor Baukredit-Freigabe               — verschiebbar
-    ░░ extern beauftragt                    — zugekauft
-    ── Kapazität netto                      — Referenzlinie
+Jede andere Karte rechnet in Projekten, Quartalen oder Franken. Personen sind
+eine eigene Achse mit eigenen Merkmalen — Anstellungsgrad, Rolle, Abwesenheiten —
+und mit eigenen Handlungen: umbuchen, zuweisen, Ferien planen. Diese Handlungen
+haben in einer Portfoliokarte keinen Platz.
 
-Aus den Daten heute rechenbar (`totals()` liefert `demand`, `preCredit`,
-`external`, `net`). Beispiel Q1/2027: 4 830 % Bedarf, davon 2 445 % vor
-Baukredit-Freigabe — **die Hälfte der Überlast liegt in Projekten, die noch gar
-nicht freigegeben sind.** Das ist eine Handlungsoption, und heute ist sie
+### 4.3 Eine Momentaufnahme führt in die Irre
+
+Das ist der eigentliche Grund. Aus den Daten:
+
+| Frage | Antwort |
+|---|---|
+| Über 100 % im laufenden Quartal | **18** von 46 |
+| Über 100 % in **mindestens einem** der acht Quartale | **34** von 46 |
+| Über 100 % in **allen** ersten vier Quartalen | **12** von 46 |
+| Personen mit Lastspitze im laufenden Quartal | **15** von 46 |
+
+Die heutige Karte zeigt das laufende Quartal und meldet 18 Fälle. Betroffen sind
+34. Für zwei Drittel der Belegschaft liegt die Spitze **nicht** im Quartal, das
+die Karte zeigt.
+
+Und weiter: nur 12 Personen sind durchgehend überlastet. Für die übrigen 22 ist
+die Überlast **episodisch** — ein Verschiebe-, kein Einstellungsproblem. Das ist
+eine völlig andere Managementkonsequenz, und die heutige Karte kann sie nicht
+zeigen.
+
+### 4.4 Der Beweis: Q4/2027
+
+Verteilung der Auslastung in drei Quartalen, Anzahl Personen je Band:
+
+| Quartal | < 60 % | 60–79 | 80–94 | 95–100 | 101–120 | > 120 % |
+|---|---|---|---|---|---|---|
+| Q3/2026 | 0 | 12 | 12 | 4 | 10 | 8 |
+| Q1/2027 | 7 | 4 | 6 | 4 | 5 | **20** |
+| Q4/2027 | **21** | 5 | 1 | 1 | 3 | **15** |
+
+Das Portfolio steht in Q4/2027 bei **82 %** — rechnerisch entspannt. Tatsächlich
+sitzen dort **21 Personen unter 60 %** und gleichzeitig **15 über 120 %**. Die
+Kapazität ist da, sie liegt nur auf den falschen Leuten.
+
+Kein Portfolio-Aggregat kann das zeigen. Es ist genau die Art von Befund, für die
+sich der eigene Reiter lohnt.
+
+---
+
+## 5 · Reiter «Personen» — Inhalt
+
+### 5.1 Auslastungsverteilung ★★★
+
+Histogramm über die sechs Bänder oben, für das im Kopf gewählte Quartal, mit
+Referenz bei 100 %. Farbe folgt der bestehenden `loadStatus`-Rampe, damit ein
+Band dieselbe Bedeutung trägt wie eine Zelle im Pensum-Raster.
+
+Beantwortet in einem Bild: ist die Last gleichmässig verteilt, oder gibt es zwei
+Lager? Daten vorhanden.
+
+### 5.2 Personen × Quartal als Raster ★★★
+
+Die tragende Ansicht des Reiters, und sie skaliert auf 100+ Zeilen, weil sie
+**dasselbe Bauteil ist wie die Übersicht** — nur mit Personen statt Projekten
+als Zeilen:
+
+* Zeilen: Personen · Spalten: die gewählten Perioden
+* Zelle: Auslastung in % gegen die eigene Anstellung, in der Heat-Rampe
+* eingefrorene Kopfspalten: Name, Anstellung, Rolle, Anzahl Projekte
+* Zeitachse scrollt, Perioden-Stepper und Jahr/Quartal/Monat gelten
+* sortierbar nach Spitzenlast, laufender Last, freier Kapazität, Name
+* gruppierbar nach Rolle oder Teilportfolio
+
+Das ist der grösste Umsetzungshebel im ganzen Vorschlag: Raster, Einfrieren,
+Sortierung, Gruppierung, Zeitachse, Export und Druck existieren bereits. Und
+das Bedienvokabular ist gelernt — wer die Übersicht kennt, kann diese Ansicht
+sofort bedienen.
+
+Eine Ergänzung gegenüber der Übersicht: **eine Sparkline oder Min/Max-Spalte je
+Person**, damit die Spitze sichtbar ist, ohne zu scrollen — das ist die Antwort
+auf 4.3.
+
+### 5.3 Die Ränder ★★
+
+Zwei kurze Listen unter dem Raster: die fünf am stärksten Überlasteten (Pensum,
+Anstellung, Anzahl Projekte, ab wann es abfällt) und die fünf mit der meisten
+freien Kapazität (freies Pensum, ab welchem Quartal). Jede Zeile führt in die
+gefilterte Übersicht.
+
+Das ist die Umbuchungsliste. Sie ist streng genommen nur das Raster nach zwei
+Sortierungen — aber nebeneinander gestellt ist sie eine Arbeitsanweisung, und
+das rechtfertigt die Wiederholung.
+
+### 5.4 Kapazität nach Rolle ★★
+
+Bedarf gegen Kapazität je Rolle. Eine freie Bauleitung löst keinen Engpass in
+der Projektleitung; die Gesamtzahl verdeckt das.
+
+> **Datenlage:** die Mock-Belegschaft ist 43 × Projektleitung, 2 ×
+> Projektentwicklung, 1 × Bauleitung. Das ist kein realistischer Rollenmix und
+> müsste vor dieser Karte korrigiert werden.
+
+### 5.5 Abwesenheiten ★
+
+Heute stehen Abwesenheiten nur als Portfoliozahl in `capacity.json`
+(460 / 225 / 190 / 230 …). Personenbezogen erfasst würden sie erklären, **warum**
+ein Quartal eng ist, statt nur **dass** es eng ist. Fehlende Daten.
+
+### 5.6 Was der Filter hier bedeutet
+
+Eine Feinheit, die vor der Umsetzung entschieden sein muss: die Toolbar filtert
+**Projekte**. Steht der Filter auf Teilportfolio = Zoll — welche Personen zeigt
+der Reiter dann, und mit welcher Last?
+
+Empfehlung: nur Personen mit Arbeit im gesetzten Umfang, aber **zwei Zahlen je
+Person** — Last im Umfang und Gesamtlast. Wer wissen will, ob jemand 40 % Zoll
+übernehmen kann, muss sehen, dass diese Person insgesamt schon bei 130 % steht.
+
+---
+
+## 6 · Reiter «Kapazität»
+
+### 6.1 Bedarf nach Bindungsgrad ★★★
+
+Die Ankergrafik im Kopf zeigt die Auslastung als eine Zahl je Quartal. Hier steht
+dieselbe Zeitreihe aufgeschlüsselt — gestapelte Säulen gegen die Linie
+*Kapazität netto*:
+
+```
+▓▓ gebunden, nach Baukredit-Freigabe   nicht verschiebbar
+▒▒ vor Baukredit-Freigabe              verschiebbar
+░░ extern beauftragt                   zugekauft
+── Kapazität netto                     Referenzlinie
+```
+
+Aus `totals()` vollständig rechenbar. Q1/2027: 4 830 % Bedarf, davon **2 445 %
+vor Baukredit-Freigabe** — die Hälfte der Überlast steckt in Projekten, die noch
+gar nicht freigegeben sind. Das ist eine Handlungsoption, und heute ist sie
 unsichtbar.
 
-### 4.2 Auslastungsverteilung statt Personenliste ★★★
+### 6.2 Freie Kapazität je Quartal ★★
 
-46 Balken sind keine Auswertung. Vorschlag: zwei Elemente nebeneinander.
+`net − booked`, als Säulenreihe mit Nulllinie, negativ nach unten. Die Zahl, mit
+der man Zusagen macht. Bei uns negativ bis Q3/2027, danach positiv.
 
-**Links — Histogramm der Auslastung** (Anzahl Personen je 20-%-Band, Referenz
-bei 100 %). Beantwortet: ist die Last gleichmässig verteilt oder gibt es zwei
-Lager? Aktuell: Median 90 %, 18 von 46 über 100 %, Spanne 65 – 225 %.
+### 6.3 Auslastung nach Teilportfolio ★★
 
-**Rechts — die Ränder namentlich.** Die fünf am stärksten überlasteten und die
-fünf am wenigsten ausgelasteten Personen, je mit Pensum, Anzahl Projekten und
-Klick auf die gefilterte Übersicht. Das ist die Umbuchungsliste.
+Die bestehende Karte, unverändert übernommen — sie beantwortet, wo der Bedarf
+liegt. Verwaltung 990 %, Zoll 685 %, Kultur 595 %, Sport 532 %.
 
-Die Mitte des Feldes braucht keine Namen. Die Ränder sind die Arbeit.
+### 6.4 Kapazitätslücke nach Teilportfolio ★★
 
-### 4.3 Freie Kapazität je Quartal ★★
-
-Die Umkehrung von 4.1, und die Zahl, mit der man Zusagen macht: `net − booked`.
-Bei uns negativ bis Q3/2027, danach positiv. Als kleine Säulenreihe mit
-Nulllinie — negativ nach unten. Zeigt in einem Bild, ab wann Neues geht.
-
-### 4.4 Kapazitätslücke nach Teilportfolio ★★
-
-Bedarf minus zugeordnete Kapazität je Bereich, laufendes Quartal. Beantwortet,
-**wo** die Lücke sitzt, und damit, zwischen welchen Bereichen umgeschichtet
-werden könnte. Braucht keine neuen Daten.
+Die Ergänzung dazu: Bedarf minus zugeordnete Kapazität je Bereich. Beantwortet
+nicht *wo der Bedarf ist*, sondern *wo er nicht gedeckt ist* — und damit,
+zwischen welchen Bereichen umgeschichtet werden kann.
 
 ---
 
-## 5 · Reiter «Pipeline»
+## 7 · Reiter «Pipeline»
 
-Heute liefert das Dashboard zwei statische Verteilungen (Anzahl je Phase, Bedarf
-je Bereich). Beides sind Momentaufnahmen. Die steuerungsrelevante Frage ist die
-Bewegung.
-
-### 5.1 Phasenfluss über die Zeit ★★★
+### 7.1 Phasenfluss über die Zeit ★★★
 
 Gestapelte Flächen: Anzahl Projekte je SIA-Hauptphase über die acht Quartale.
-Aus den `bars` jedes Projekts direkt ableitbar — die Phasenkette ist schon da.
+Aus den `bars` jedes Projekts direkt ableitbar — die Phasenkette liegt vor.
 
-Das ist die aussagekräftigste Grafik, die aus diesen Daten überhaupt zu bauen
-ist: man sieht die Welle, mit der Projekte in Phase 5 Realisierung nachrücken,
-also den Zeitpunkt, an dem der Pensumsbedarf strukturell steigt. Eine
-Bereichsleitung plant Einstellungen genau daran.
+```
+Phase 5  32  38  46  45  42  34  33  31
+Phase 4  14   9   7   3   8  10  12  11
+Phase 3  25  31  32  33  30  26  18  12
+Phase 2  17  11  11   7   4   2   1   1
+```
 
-### 5.2 Trichter Phase → Bedarf → Kredit ★★
+Die aussagekräftigste Grafik, die aus diesen Daten zu bauen ist. Man sieht die
+Welle: Phase 5 wächst von 32 auf 46 Projekte bis Q1/2027 — genau die Quartale,
+in denen die Auslastung über 100 % liegt. Und man sieht, dass Phase 2 von 17 auf
+1 fällt: **es rückt nichts nach.** Eine Bereichsleitung plant Einstellungen und
+Akquisition genau daran.
 
-Drei Spalten pro SIA-Hauptphase: Anzahl Projekte, Pensum, gebundene Mittel.
-Zeigt, dass die Phasen sehr unterschiedlich «schwer» sind — Phase 2 ist zahlreich
-und billig, Phase 5 ist wenig und teuer. Ersetzt die heutigen Karten
-*Anzahl nach Phase* und *Kredit nach Phase* durch eine, die beide vergleicht.
+### 7.2 Anzahl Projekte nach SIA-Phase ★★
 
-### 5.3 Matrix Teilportfolio × Phase ★★
+Die bestehende Karte, unverändert — die Momentaufnahme zum Fluss aus 7.1.
+Heute: P1 4, P2 23, P3 31, P4 13, P5 39, P6 1.
 
-Sieben Bereiche gegen sechs Hauptphasen, Zellwert = Anzahl oder Pensum, als
-Heatmap in derselben Blau-Rampe wie das Pensum-Raster. 42 Zellen auf kleinem
-Raum. Beantwortet: welcher Bereich hat einen Klumpen in einer Phase — etwa alle
-Asylzentren gleichzeitig in Ausschreibung.
+### 7.3 Matrix Teilportfolio × Phase ★★
 
-### 5.4 Bedarf nach Priorität ★★
+Sieben Bereiche gegen sechs Hauptphasen, Zellwert Anzahl oder Pensum, als
+Heatmap in der Pensum-Rampe. 42 Zellen auf kleinem Raum. Beantwortet: hat ein
+Bereich einen Klumpen in einer Phase — etwa alle Zollanlagen gleichzeitig in
+Ausschreibung.
 
-Gestapelte Säulen je Quartal nach `hoch / mittel / tief`. Die Frage dahinter ist
-unbequem und deshalb wichtig: **verbrauchen wir in den Überlastquartalen
-Kapazität für Projekte tiefer Priorität?** Wenn ja, ist das die erste
-Verschiebung, die man macht.
+### 7.4 Bedarf nach Priorität ★★
 
-### 5.5 Projekte ohne Projektleitung ★
-
-Kein Diagramm, eine Kennzahl mit Liste: Anzahl, offener Bedarf, ab wann. Heute
-3 Projekte. Gehört als Callout in den Reiter, nicht als Karte.
-
----
-
-## 6 · Reiter «Termine»
-
-Neu. Heute nicht vorhanden, obwohl die Daten vollständig da sind
-(`plan`, `forecast`, `status` je Gate).
-
-### 6.1 Termintreue je Quartal ★★★
-
-Gestapelte Säulen: Gates mit Fälligkeit im Quartal, aufgeteilt in
-*im Termin / verschoben / ohne Termin*. Die eine Grafik, an der man sieht, ob die
-Planung trägt. Aktuell: 55 im Termin, 24 verschoben, 7 ohne Termin — eine
-Termintreue von 64 %, was für ein Portfolio dieser Grösse schlecht ist und
-sichtbar sein muss.
-
-### 6.2 Verzug nach SIA-Phase ★★★
-
-Wo im Ablauf entsteht der Verzug? Balken je Sub-Phase mit dem durchschnittlichen
-Verzug in Quartalen. Erfahrungsgemäss konzentriert er sich auf
-**33 Bewilligungsverfahren** und **41 Ausschreibung** — Schritte, die von
-Dritten abhängen. Wenn die Daten das bestätigen, ist das ein Argument für
-Vorlauf­zeiten, nicht für mehr Personal.
-
-### 6.3 Gate-Last je Quartal ★★
-
-Anzahl fälliger Gates je Quartal, als schlichte Säulenreihe. Genehmigungs­gremien
-haben einen begrenzten Durchsatz; eine Häufung von Baukredit-Gates in einem
-Quartal ist ein eigenes Risiko, unabhängig von der Personalkapazität. Diese
-Grafik ist billig zu bauen und in der Praxis überraschend wirksam.
-
-### 6.4 Verzugsverteilung ★
-
-Histogramm: wie viele Gates um 0 / 1 / 2+ Quartale verschoben. Trennt
-«überall ein bisschen» von «wenige, dafür massiv» — zwei völlig verschiedene
-Probleme mit verschiedenen Massnahmen.
+Gestapelte Säulen je Quartal nach `hoch / mittel / tief`. Die unbequeme Frage:
+verbrauchen wir in den Überlastquartalen Kapazität für Projekte tiefer
+Priorität? In Q1/2027 sind es **1 060 % von 4 830 %** — rund ein Fünftel. Das ist
+die erste Verschiebung, die man prüft.
 
 ---
 
-## 7 · Reiter «Mittel»
+## 8 · Reiter «Termine»
 
-### 7.1 Mittelabfluss gegen Jahrestranche ★★★
+Neu. Die Daten sind vollständig vorhanden (`plan`, `forecast`, `status` je Gate).
 
-Die heutige Karte *Kredit nach Jahr* zeigt, wann Geld gebunden ist. Die
-Steuerungsfrage ist eine andere: **gebundene Mittel gegen das, was das Budget
-für dieses Jahr vorsieht.** Über- und Unterschreitung als abweichende Säule
-gegen eine Referenzlinie.
+### 8.1 Termintreue je Quartal ★★★
 
-> Fehlende Daten: die Jahrestranche selbst. Ein Feld `budgetByYear` in
+Gestapelte Säulen: fällige Gates je Quartal nach *im Termin / verschoben / ohne
+Termin*.
+
+```
+im Termin    7   7   8  11   9   5   6   2
+verschoben   4   3   7   1   5   1   2   1
+ohne Termin  0   4   0   1   0   1   1   0
+```
+
+64 % Termintreue über 86 Gates. Für ein Portfolio dieser Grösse ist das schlecht
+und muss sichtbar sein.
+
+### 8.2 Verzug nach Sub-Phase ★★★
+
+Wo im Ablauf entsteht der Verzug? Aus den Daten:
+
+| Sub-Phase | Gates verspätet | ⌀ Verzug |
+|---|---|---|
+| 53 Inbetriebnahme | 10 | 1,2 Quartale |
+| 41 Ausschreibung | 6 | 1,3 Quartale |
+| 31 Vorprojekt | 4 | 1,5 Quartale |
+| 33 Bewilligungsverfahren | 2 | 1,5 Quartale |
+
+Die Häufung liegt am Ende der Kette und in der Ausschreibung — beides Schritte
+mit Abhängigkeit von Dritten. Wenn sich das bestätigt, ist die Massnahme
+Vorlaufzeit, nicht mehr Personal. Diese Unterscheidung ist bares Geld wert.
+
+### 8.3 Gate-Last je Quartal ★★
+
+Anzahl fälliger Gates je Quartal als schlichte Säulenreihe. Genehmigungsgremien
+haben begrenzten Durchsatz; eine Häufung von Baukredit-Gates in einem Quartal
+ist ein eigenes Risiko, unabhängig von der Personalkapazität. Billig zu bauen,
+in der Praxis überraschend wirksam.
+
+### 8.4 Verzugsverteilung ★
+
+Histogramm: Gates um 0 / 1 / 2+ Quartale verschoben. Trennt «überall ein
+bisschen» von «wenige, dafür massiv» — zwei Probleme mit zwei Massnahmen.
+
+---
+
+## 9 · Reiter «Mittel»
+
+### 9.1 Kredit nach Jahr ★★★
+
+Die bestehende Karte, erweitert um die eigentliche Steuerungsfrage: gebundene
+Mittel **gegen die Jahrestranche**. Über- und Unterschreitung als abweichende
+Säule gegen eine Referenzlinie.
+
+Heute: 2026 289,9 · 2027 298,0 · 2028 163,7 · 2029 ff. 220,2 Mio.
+
+> **Fehlende Daten:** die Jahrestranche. Ein Feld `budgetByYear` in
 > `data/meta.json` genügt. Ohne sie bleibt die Karte eine Bestandszahl.
 
-### 7.2 Gebundene Mittel nach Bindungsgrad ★★
+### 9.2 Kredit nach SIA-Phase ★★
 
-Der Anteil vor Baukredit-Freigabe ist der Teil, der noch nicht sicher ist. Als
-zwei Segmente je Jahr: freigegeben / vor Freigabe. `preCredit` liegt vor.
+Die bestehende Karte, unverändert — wie viel des Portfolios steckt schon in der
+Realisierung. P5 469 Mio., P3 260 Mio., P4 145 Mio., P2 92 Mio.
 
-### 7.3 Mittel nach Teilportfolio ★★
+### 9.3 Anteil vor Baukredit-Freigabe ★★
 
-Die Verteilung über die sieben Bereiche, gegen die Bedarfsverteilung aus 4.4
-gelegt. Zeigt, wo viel Geld auf wenig Personal trifft und umgekehrt.
+**351 von 972 Mio. — 36 % der gebundenen Mittel sind noch nicht freigegeben.**
+Als zwei Segmente je Jahr: freigegeben / vor Freigabe. Das Gegenstück zu 6.1 auf
+der Geldseite, und `preCredit` liegt vor.
 
-### 7.4 Kredit nach SIA-Phase ★
+### 9.4 Kredit nach Teilportfolio ★
 
-Die bestehende Karte, unverändert übernehmen — sie beantwortet, wie viel des
-Portfolios schon in der Realisierung gebunden ist.
+Über die sieben Bereiche, neben die Bedarfsverteilung aus 6.3 gelegt. Zeigt, wo
+viel Geld auf wenig Personal trifft: Zoll trägt 144 Mio. bei 685 % Bedarf,
+Kultur 79 Mio. bei 595 %.
 
 ---
 
-## 8 · Was fehlt, um das Beste davon zu bauen
-
-Ehrlich benannt, weil die Hälfte der stärksten Auswertungen daran hängt:
+## 10 · Was fehlt, um das Beste davon zu bauen
 
 | Fehlt | Ermöglicht |
 |---|---|
-| **Pensum je Person und Quartal** statt nur je Projekt | Kapazität nach Rolle und Qualifikation; heute trägt die Projektleitung rechnerisch das ganze Projektpensum |
-| **Jahrestranchen** (`budgetByYear`) | Mittelabfluss gegen Budget — Abschnitt 7.1 |
+| **Pensum je Person und Quartal** statt nur je Projekt | Der ganze Reiter *Personen* auf belastbarer Grundlage. Heute trägt die Projektleitung rechnerisch das ganze Projektpensum, und man sieht zwar *dass* jemand überlastet ist, aber nicht *welches Projekt* man kürzen müsste |
+| **Realistischer Rollenmix** | Abschnitt 5.4 — heute 43 von 46 Projektleitung |
+| **Abwesenheiten je Person** | Abschnitt 5.5 |
+| **Jahrestranchen** (`budgetByYear`) | Abschnitt 9.1 |
 | **Ist-Kosten** je Projekt | Kostenabweichung, die zweite Hälfte der Finanzsicht |
 | **Planstände über die Zeit** (Snapshots) | Prognosegüte: wie oft verschiebt sich ein Gate, bevor es hält |
-| **Risiko-/Komplexitätsklasse** je Projekt | Gewichtete Priorisierung statt hoch/mittel/tief |
-| **Kalender der Genehmigungsgremien** | Gate-Last gegen tatsächlichen Durchsatz — Abschnitt 6.3 |
+| **Kalender der Genehmigungsgremien** | Gate-Last gegen tatsächlichen Durchsatz — Abschnitt 8.3 |
 
-Die API-Referenz beschreibt unter `allocations` bereits die Form, die das erste
-und wichtigste dieser Felder hätte.
+Die API-Referenz beschreibt unter `allocations` bereits die Form des ersten und
+wichtigsten dieser Felder.
 
 ---
 
-## 9 · Gestaltungsregeln für diesen Reiter
+## 11 · Gestaltungsregeln
 
 Damit die Erweiterung nicht rückgängig macht, was die Design-Review erreicht hat:
 
 * **Farbe bleibt verdient.** Blau kodiert Grösse, Rot/Gelb/Grün nur den Status
   gegen 100 %. Eine Kategorie bekommt keine eigene Farbe, nur weil sie eine
   Kategorie ist — gestapelte Segmente unterscheiden sich über Helligkeit
-  derselben Rampe und über Schraffur, damit sie auch in Schwarzweiss lesbar
-  bleiben.
+  derselben Rampe und über Schraffur, damit sie in Schwarzweiss lesbar bleiben.
 * **Keine Torten, keine Tachometer.** Anteile werden gestapelt oder als Balken
   gezeigt; ein Tacho zeigt eine Zahl auf der Fläche von zwölf.
 * **Jede Karte nennt ihre Bezugsgrösse.** «112 %» ohne «gegen Kapazität netto»
   ist keine Aussage.
 * **Jede Karte führt weiter.** Ein Klick filtert die Übersicht auf das, was die
-  Karte zeigt — das ist heute schon so und muss so bleiben.
+  Karte zeigt — das gilt heute schon und muss so bleiben.
 * **Vier bis fünf Karten je Reiter.** Mehr ist wieder der heutige Zustand, nur
-  in vier Stapeln.
-* **Filter gelten reiterübergreifend.** Der Toolbar-Filter bleibt über dem
-  KPI-Streifen und wirkt auf alle Abschnitte.
+  in fünf Stapeln.
+* **Filter gelten reiterübergreifend** und stehen über dem Kopf, nicht in den
+  Reitern.
 
 ---
 
-## 10 · Empfohlene Reihenfolge
+## 12 · Empfohlene Reihenfolge
 
 Nach Wirkung je Aufwand:
 
-1. **4.1 Bedarf nach Bindungsgrad** — ändert die zentrale Karte von einer
-   Feststellung in eine Handlungsoption. Daten vorhanden.
-2. **6.1 Termintreue je Quartal** — schliesst die grösste inhaltliche Lücke.
+1. **Reiter «Personen» mit Raster und Verteilung** (5.1, 5.2) — beantwortet die
+   häufigste Anfrage, repariert die Karte, die bei 46 Personen nicht mehr trägt,
+   und nutzt ein Bauteil, das bereits existiert. Daten vorhanden.
+2. **8.1 Termintreue je Quartal** — schliesst die grösste inhaltliche Lücke.
    Daten vorhanden.
-3. **4.2 Auslastungsverteilung** — repariert die Karte, die bei 46 Personen
-   nicht mehr funktioniert. Daten vorhanden.
-4. **5.1 Phasenfluss über die Zeit** — die stärkste Grafik im Vorschlag.
-   Daten vorhanden (`bars`).
-5. **Reitergliederung selbst** — sinnvoll, sobald 1–4 stehen; vorher gliedert
-   sie zu wenig Inhalt.
-6. **6.2 Verzug nach Phase**, **5.4 Bedarf nach Priorität** — beide billig,
+3. **6.1 Bedarf nach Bindungsgrad** — macht aus der zentralen Karte eine
+   Handlungsoption statt einer Feststellung. Daten vorhanden.
+4. **7.1 Phasenfluss über die Zeit** — die stärkste Einzelgrafik im Vorschlag.
+   Daten vorhanden.
+5. **Kopf und Reitergliederung** — die Ankergrafik nach oben, die fünf
+   Abschnitte darunter. Sinnvoll, sobald 1–4 stehen; vorher gliedert sie zu
+   wenig Inhalt.
+6. **8.2 Verzug nach Sub-Phase**, **7.4 Bedarf nach Priorität** — beide billig,
    beide unbequem, beide nützlich.
-7. **7.1 Mittelabfluss** — sobald die Jahrestranchen erfasst sind.
+7. **9.1 Mittelabfluss gegen Tranche** — sobald die Jahrestranchen erfasst sind.
