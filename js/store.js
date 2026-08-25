@@ -47,15 +47,20 @@ const DEFAULT_STATE = {
   overrides: {},           // 'projectId:q' -> value
   // transient ui
   menu: null,              // id of the open dropdown
+  menuSearch: '',          // filter inside the open dropdown
   modal: null,             // { type: 'project'|'rebook', ... }
   footDetails: false,
-  searchOpen: false,
+  searchOpen: { header: false, toolbar: false },   // the two fields open independently
   collapsedGroups: {},
   toast: null,
   narrow: false          // < 900px: planning grids are not usable
 };
 
-export const state = { ...DEFAULT_STATE, cols: { ...DEFAULT_STATE.cols } };
+export const state = {
+  ...DEFAULT_STATE,
+  cols: { ...DEFAULT_STATE.cols },
+  searchOpen: { ...DEFAULT_STATE.searchOpen }
+};
 
 const listeners = new Set();
 

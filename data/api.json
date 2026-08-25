@@ -1,0 +1,87 @@
+{
+  "version": "v1",
+  "spec": "OpenAPI 3.1 laden",
+  "groups": [
+    {
+      "title": "Projekte",
+      "intro": "Stammdaten gespiegelt aus SAP ePPM, lesend. Planungsdaten in verschachtelten JSONB-Feldern.",
+      "endpoints": [
+        { "method": "GET", "path": "/api/v1/projects", "description": "Liste, gefiltert über phase, lead, location, quarter_from, quarter_to. Paginiert." },
+        { "method": "GET", "path": "/api/v1/projects/{id}", "description": "Ein Projekt mit allocations, milestones und targets als verschachtelte Objekte." },
+        { "method": "PATCH", "path": "/api/v1/projects/{id}/allocations", "description": "Pensum je Person und Quartal setzen. Verlangt reason bei Überlast." },
+        { "method": "GET", "path": "/api/v1/projects/{id}/history", "description": "Änderungsprotokoll dieses Projekts, unveränderlich." }
+      ]
+    },
+    {
+      "title": "Kapazität",
+      "intro": "Personen, Anstellungsgrade und Abwesenheiten. App-eigen, sofern HR keine Schnittstelle liefert.",
+      "endpoints": [
+        { "method": "GET", "path": "/api/v1/capacity", "description": "Netto-Kapazität je Quartal, aggregiert über die gefilterte Menge." },
+        { "method": "GET", "path": "/api/v1/capacity/people", "description": "Auslastung je Person und Quartal, inklusive Anstellungsgrad." },
+        { "method": "PATCH", "path": "/api/v1/capacity/absences/{person_id}", "description": "Abwesenheiten je Quartal erfassen." }
+      ]
+    },
+    {
+      "title": "Meilensteine",
+      "intro": "Termine gespiegelt aus ePPM. Verschiebungen laufen als Antrag, nicht als Schreibzugriff.",
+      "endpoints": [
+        { "method": "GET", "path": "/api/v1/milestones", "description": "Gates mit plan_date, forecast_date und status. Filter wie bei Projekten." },
+        { "method": "POST", "path": "/api/v1/milestones/{id}/reschedule-request", "description": "Antrag auf Verschiebung mit Begründung. Antwort enthält request_id." }
+      ]
+    },
+    {
+      "title": "Verlauf und Export",
+      "intro": "Protokoll und Ausgabeformate.",
+      "endpoints": [
+        { "method": "GET", "path": "/api/v1/history", "description": "Alle Änderungen, paginiert, filterbar nach field, person, project, period." },
+        { "method": "GET", "path": "/api/v1/export", "description": "CSV oder XLSX der aktuellen Auswahl. Parameter format, view, filter." }
+      ]
+    },
+    {
+      "title": "Benutzer",
+      "intro": "Kein eigenes Benutzerverwaltungs-CRUD. Identität und Rollen kommen aus eIAM.",
+      "endpoints": [
+        { "method": "GET", "path": "/api/v1/me", "description": "Angemeldete Person, Rollen und zugängliche Abteilungen. Ableitung aus dem eIAM-Token." },
+        { "method": "GET", "path": "/api/v1/people", "description": "Personen der eigenen Abteilung für Filter und Zuweisung. Lesend." }
+      ]
+    }
+  ],
+  "panels": [
+    {
+      "title": "Projekt · verschachteltes JSONB",
+      "code": "{\n  \"id\": 8640100051,\n  \"title\": \"Musterlingen, Ahornweg 4+6\",\n  \"phase\": \"32\",\n  \"lead\": \"sonja.beispiel\",\n  \"location\": \"Musterlingen\",\n  \"budget_chf\": 3050000,\n  \"allocations\": [\n    { \"person\": \"sonja.beispiel\",\n      \"role\": \"projektleitung\",\n      \"quarter\": \"2026Q3\",\n      \"pensum_pct\": 50 }\n  ],\n  \"targets\": [\n    { \"quarter\": \"2026Q3\", \"pensum_pct\": 80 }\n  ],\n  \"milestones\": [\n    { \"code\": \"MS4\",\n      \"plan_date\": \"2027-06-30\",\n      \"forecast_date\": \"2027-06-30\",\n      \"status\": \"on_track\" }\n  ],\n  \"source\": \"eppm\",\n  \"synced_at\": \"2026-08-25T05:15:00Z\"\n}",
+      "note": "allocations, targets und milestones sind JSONB — sie ändern sich mit der Planung und brauchen keine eigene Tabelle pro Quartal. Was aus ePPM kommt, trägt source und synced_at."
+    },
+    {
+      "title": "Authentisierung",
+      "lead": "Bearer-Token aus eIAM, OIDC. Rollen als Claims: read, plan, admin. Die Abteilungszugehörigkeit kommt aus dem Token, nicht aus einem Parameter.",
+      "code": "Authorization: Bearer <eIAM-Token>\nAccept: application/json"
+    }
+  ],
+  "print": {
+    "documentId": "RP-2026-0825-01",
+    "sender": ["Schweizerische Bundesverwaltung", "Bundesamt für Bauten und Logistik BBL", "Bereich Bauten"],
+    "title": "Ressourcenplanung — Übersicht",
+    "classification": "Klassifizierung: intern",
+    "createdBy": "Max Muster",
+    "createdAt": "25.08.2026, 07:15",
+    "syncedAt": "25.08.2026, 03:00",
+    "legend": {
+      "label": "Legende",
+      "steps": [
+        { "step": "1", "label": "bis 39 %" },
+        { "step": "2", "label": "40 – 79 %" },
+        { "step": "3", "label": "80 – 119 %" },
+        { "step": "4", "label": "ab 120 %" }
+      ],
+      "marker": "▲ Projektleitung über 100 % im Quartal",
+      "noLead": "ohne Projektleitung",
+      "thresholds": "Auslastung: Überlast über 100 · knapp 95 – 100 · ok 80 – 94 · frei darunter"
+    },
+    "notes": [
+      { "label": "Plankopf", "text": "Wiederholt sich auf jeder Seite: Absender, Dokumenttitel, Umfang, Filter, Einheit und Klassifizierung. Was auf dem Bildschirm im Hover steht, muss hier behauptet sein — deshalb die feste Legende." },
+      { "label": "Format", "text": "A4 hoch, ein Jahr pro Blatt: vier Quartale und elf Zeilen, Fusszeilen und Summen auf jedem Blatt. Folgejahre auf eigenen Blättern, die Spalten bleiben identisch. Alternativ A4 quer: alle acht Quartale auf einem Blatt." },
+      { "label": "Fusszeile", "text": "Zeitstempel der Erstellung, erstellende Person, Datenstand der ePPM-Spiegelung, Dokument-ID und Seitenzahl. Der Export ist damit zitierfähig — «Stand 25.08., 07:15» ist die Referenz in der Sitzung." }
+    ]
+  }
+}

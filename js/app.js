@@ -99,19 +99,39 @@ const actions = {
   view: (val) => setState({ view: val, menu: null }),
   lang: (val) => setState({ lang: val, menu: null }),
 
-  menu: (val) => setState(s => ({ menu: s.menu === val ? null : val })),
+  menu: (val, el) => {
+    const opening = state.menu !== val;
+    setState({ menu: opening ? val : null, menuSearch: '' });
+    if (!opening) return;
+    // A pointer click leaves focus alone; a keyboard activation moves into the menu.
+    if (el.matches(':focus-visible')) {
+      requestAnimationFrame(() => {
+        const m = root.querySelector('.dd__panel');
+        (m?.querySelector('[data-act="menu-search"]') ?? m?.querySelector(MENU_ITEMS))?.focus();
+      });
+    }
+  },
 
-  'search-toggle': (val, el) => {
-    const variant = el.classList.contains('xsearch--header') ? 'header' : 'toolbar';
-    setState({ searchOpen: true, menu: null });
+  'search-toggle': (variant) => {
+    setState(s => ({ searchOpen: { ...s.searchOpen, [variant]: true }, menu: null }));
     focusSearch(variant);
   },
-  'search-close': () => setState({ searchOpen: false, search: '' }),
+  'search-close': (variant) => setState(s => {
+    const searchOpen = { ...s.searchOpen, [variant]: false };
+    // The query is shared, so it only clears when no field is left showing it.
+    return searchOpen.header || searchOpen.toolbar ? { searchOpen } : { searchOpen, search: '' };
+  }),
 
   sort: (val) => setState({ sort: val, menu: null }),
   group: (val) => setState({ group: val, menu: null }),
   unit: (val) => setState({ unit: val }),
   scale: () => flash(t('Der Prototyp zeigt Quartale; Jahr und Monat folgen.')),
+
+  'my-projects': () => {
+    const me = data.meta.user.personId;
+    const mine = state.leads.length === 1 && state.leads[0] === me;
+    setState({ leads: mine ? [] : [me] });
+  },
 
   'toggle-phase': (val) => toggleIn('phases', val),
   'toggle-lead': (val) => toggleIn('leads', val),
@@ -221,6 +241,8 @@ root.addEventListener('input', (event) => {
     state.search = el.value;                 // written directly: no re-render per keystroke
     clearTimeout(searchTimer);
     searchTimer = setTimeout(() => setState({}), 180);
+  } else if (act === 'menu-search') {
+    setState({ menuSearch: el.value });
   } else if (act === 'reason') {
     setState({ reason: el.value });
   } else if (act === 'draft-input') {
@@ -238,8 +260,63 @@ root.addEventListener('change', (event) => {
   }
 });
 
+/* -----------------------------------------------------------------------------
+   Menu keyboard behaviour — the standard menu-button pattern.
+   Arrow keys roam, Escape closes and hands focus back to the trigger, Tab
+   leaves rather than walking into a tree that is about to be re-rendered.
+   -------------------------------------------------------------------------- */
+
+const MENU_ITEMS = '[role="menuitem"], [role="menuitemradio"], [role="menuitemcheckbox"]';
+
+function menuElements() {
+  const panel = root.querySelector('.dd__panel');
+  if (!panel) return null;
+  const trigger = panel.closest('.dd')?.querySelector('[data-act="menu"]');
+  return { panel, trigger, items: [...panel.querySelectorAll(MENU_ITEMS)] };
+}
+
+/** Give focus back to the button that opened the menu. */
+function closeMenu({ restoreFocus = true } = {}) {
+  const id = state.menu;
+  setState({ menu: null, menuSearch: '' });
+  if (!restoreFocus || !id) return;
+  requestAnimationFrame(() => {
+    root.querySelector(`[data-act="menu"][data-val="${CSS.escape(id)}"]`)?.focus();
+  });
+}
+
+function moveMenuFocus(step) {
+  const m = menuElements();
+  if (!m || !m.items.length) return;
+  const here = m.items.indexOf(document.activeElement);
+  const next = step === 'first' ? 0
+    : step === 'last' ? m.items.length - 1
+      : (here + step + m.items.length) % m.items.length;
+  m.items[next]?.focus();
+}
+
 document.addEventListener('keydown', (event) => {
+  // A menu is open: it owns the arrow keys.
+  if (state.menu !== null && root.contains(event.target)) {
+    const inSearch = event.target.matches('[data-act="menu-search"]');
+    switch (event.key) {
+      case 'ArrowDown': event.preventDefault(); return moveMenuFocus(inSearch ? 'first' : 1);
+      case 'ArrowUp': event.preventDefault(); return moveMenuFocus(inSearch ? 'last' : -1);
+      case 'Home': if (!inSearch) { event.preventDefault(); return moveMenuFocus('first'); } break;
+      case 'End': if (!inSearch) { event.preventDefault(); return moveMenuFocus('last'); } break;
+      case 'Tab': event.preventDefault(); return closeMenu();
+      case 'Escape': event.preventDefault(); return closeMenu();
+      default: break;
+    }
+  }
   if (event.key === 'Escape' && closeOverlays()) event.preventDefault();
+
+  // Enter applies the pending pensum, matching the wireframe's stated contract.
+  if (event.key === 'Enter' && state.editing && root.contains(event.target)
+      && !event.target.matches('textarea, button')) {
+    const apply = root.querySelector('.pop [data-act="apply"]');
+    if (apply && !apply.disabled) { event.preventDefault(); actions.apply(); }
+  }
 });
 
 /** A click anywhere outside an open dropdown closes it. */
@@ -248,6 +325,13 @@ document.addEventListener('pointerdown', (event) => {
   if (event.target.closest('.dd')) return;
   setState({ menu: null });
 });
+
+/** The frozen columns cast a shadow only once the track is scrolled. */
+root.addEventListener('scroll', (event) => {
+  const scroller = event.target;
+  if (!scroller.classList?.contains('pgrid')) return;
+  scroller.firstElementChild?.classList.toggle('is-scrolled', scroller.scrollLeft > 0);
+}, true);
 
 /** The edit popover is anchored in viewport space, so scrolling closes it. */
 document.addEventListener('scroll', () => {

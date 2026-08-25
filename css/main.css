@@ -391,12 +391,16 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .dd { position: relative; }
 .dd__panel {
   position: absolute; top: calc(100% + var(--space-3)); z-index: var(--z-popover);
+  width: var(--dd-w, 244px);
+  /* never wider or taller than the window leaves room for */
+  max-width: calc(100vw - 2 * var(--space-8));
+  max-height: min(70vh, var(--dd-max-h, 70vh));
   padding: var(--space-4);
   border: var(--border-hairline) solid var(--color-border-strong);
   border-radius: var(--radius-lg);
   background: var(--color-surface); box-shadow: var(--shadow-menu-lg);
   display: flex; flex-direction: column; gap: 1px;
-  max-height: 70vh; overflow-y: auto;
+  overflow-y: auto;
 }
 .dd__panel--left { left: 0; }
 .dd__panel--right { right: 0; }
@@ -451,6 +455,41 @@ button, input, select, textarea { font: inherit; color: inherit; }
   font-size: var(--text-xs); line-height: var(--leading-relaxed); color: var(--color-text-muted);
 }
 .dd__segmented { padding: 0 var(--space-5) var(--space-5); }
+
+/* Search inside a menu — the lead list has to survive a real directory. */
+.dd__search { padding: 0 var(--space-5) var(--space-4); }
+.dd__searchfield {
+  display: flex; align-items: center; gap: var(--space-4);
+  height: var(--control-height); padding: 0 var(--space-5);
+  border: var(--border-hairline) solid var(--color-border-strong);
+  border-radius: var(--radius); background: var(--color-surface);
+  color: var(--color-text-muted);
+}
+.dd__searchfield:focus-within { border-color: var(--color-border-accent); }
+.dd__searchfield input {
+  flex: 1; min-width: 0; border: 0; background: none; outline: none;
+  font-size: var(--text-base); color: var(--color-text-strong);
+}
+.dd__searchfield input::-webkit-search-cancel-button { display: none; }
+
+.dd__quick { padding: 0 var(--space-5) var(--space-4); }
+.quickchip {
+  display: inline-flex; align-items: center;
+  height: var(--control-height-md); padding: 0 var(--space-6);
+  border: var(--border-hairline) solid var(--color-border-strong);
+  border-radius: var(--radius);
+  background: var(--color-surface); color: var(--color-text);
+  font-size: var(--text-base); font-weight: var(--font-semibold); cursor: pointer;
+}
+.quickchip:hover { background: var(--color-surface-hover); }
+.quickchip.is-on {
+  background: var(--color-toggle-on); border-color: var(--color-toggle-on);
+  color: var(--color-toggle-on-fg);
+}
+
+/* The list scrolls; the search, the bulk row and the footnote stay put. */
+.dd__scroll { max-height: 214px; overflow-y: auto; display: flex; flex-direction: column; gap: 1px; }
+.dd__empty { padding: var(--space-6) var(--space-5); font-size: var(--text-base); color: var(--color-text-muted); }
 .dd__segmented .segmented { width: 100%; }
 .dd__segmented .segmented button { flex: 1; }
 
@@ -604,24 +643,44 @@ button, input, select, textarea { font: inherit; color: inherit; }
   border-radius: var(--radius-lg); background: var(--color-surface); overflow: hidden;
 }
 
-.pgrid { overflow-x: auto; }
-.pgrid > * { min-width: max-content; }
+.pgrid { position: relative; overflow-x: auto; }
+
+/*
+ * One track for the whole grid. Every row is its own CSS grid, so they only
+ * line up when they are all exactly as wide as the track — letting each row
+ * size itself to its own content pulls the header out of step with the cells.
+ */
+.pgrid__track { min-width: max-content; }   /* overridden inline with the measured width */
 
 .prow {
-  display: grid; align-items: center;
+  display: grid; align-items: center; width: 100%;
   min-height: var(--row-height);
   border-bottom: var(--border-hairline) solid var(--color-border-subtle);
-  background: var(--color-surface);
+  background: var(--row-bg, var(--color-surface));
+  --row-bg: var(--color-surface);
   font-size: var(--text-base);
 }
 .prow:hover:not(.prow--years):not(.prow--head):not(.prow--sum):not(.prow--foot):not(.prow--load) {
-  background: var(--color-surface-hover);
+  --row-bg: var(--color-surface-hover);
 }
-.prow.is-unassigned { background: var(--color-warn-bg-subtle); }
+.prow.is-unassigned { --row-bg: var(--color-warn-bg-subtle); }
+
+/*
+ * The identifying columns stay put while the quarters scroll under them.
+ * Frozen cells need an opaque ground, hence --row-bg on every row.
+ */
+.is-frozen {
+  position: sticky; z-index: var(--z-raised);
+  background: var(--row-bg, var(--color-surface));
+}
+.prow--years .is-frozen, .prow--sum .is-frozen,
+.prow--foot .is-frozen, .prow--load .is-frozen { left: 0; }
+.is-frozen-last { box-shadow: 8px 0 8px -8px rgba(17, 24, 39, 0.22); }
+.pgrid__track:not(.is-scrolled) .is-frozen-last { box-shadow: none; }
 
 .prow--years {
   min-height: var(--row-height-header);
-  background: var(--color-surface-frame);
+  --row-bg: var(--color-surface-frame);
   border-bottom: var(--border-hairline) solid var(--color-border);
   font-size: var(--text-sm); font-weight: var(--font-semibold); color: var(--color-text-secondary);
 }
@@ -636,18 +695,18 @@ button, input, select, textarea { font: inherit; color: inherit; }
 }
 
 .prow--head {
-  min-height: 30px; background: var(--color-surface);
+  min-height: 30px; --row-bg: var(--color-surface);
   border-bottom: var(--border-hairline) solid var(--color-border-strong);
   font-size: var(--text-sm); font-weight: var(--font-semibold); color: var(--color-text-secondary);
 }
 .prow--head .pcell--text { padding-left: var(--space-6); }
 .prow--head .pcell--num { text-align: right; padding-right: var(--space-5); }
-.prow--head .is-today {
+.prow--head .pcell--num.is-today {
   background: var(--color-surface-sunken); color: var(--color-text-strong);
   font-weight: var(--font-bold); box-shadow: inset 0 2px 0 var(--color-danger-solid);
 }
 
-.prow--group { background: var(--color-surface-group); }
+.prow--group { --row-bg: var(--color-surface-group); }
 .prow__grouphead {
   display: flex; align-items: center; gap: var(--space-5);
   padding: 0 var(--space-6); height: 100%;
@@ -754,7 +813,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
   font-size: var(--text-sm); color: var(--color-text-muted); text-align: center;
 }
 
-.prow--sum, .prow--foot, .prow--load { background: var(--color-surface-frame); }
+.prow--sum, .prow--foot, .prow--load { --row-bg: var(--color-surface-frame); }
 .prow--sum {
   min-height: var(--row-height-sum);
   border-top: var(--border-hairline) solid var(--color-border-strong);

@@ -106,13 +106,22 @@ export function badge(n) {
  */
 export function dropdown({ id, label, hint, count, width = 244, align = 'left', body, cls = '' }) {
   const open = state.menu === id;
-  return html`<div class="dd ${cls}">
+  return html`<div class="dd ${cls}" data-menu="${id}">
     <button type="button" class="btn ${open ? 'is-open' : ''}" data-act="menu" data-val="${id}"
             aria-expanded="${aria(open)}" aria-haspopup="menu">
       ${label}${hint && html`<span class="btn__hint">${hint}</span>`}${count ? badge(count) : ''}${icons.chevronDown()}
     </button>
-    ${open && html`<div class="dd__panel dd__panel--${align}" role="menu" style="width:${width}px">${body}</div>`}
+    ${open && menuPanel({ align, width, body })}
   </div>`;
+}
+
+/**
+ * The panel itself. `--dd-w` lets the stylesheet clamp the width to the
+ * viewport, and `max-height` keeps a long list reachable near the bottom edge.
+ */
+export function menuPanel({ align = 'left', width = 244, body, label }) {
+  return html`<div class="dd__panel dd__panel--${align}" role="menu"
+      ${label ? raw(`aria-label="${esc(label)}"`) : ''} style="--dd-w:${width}px">${body}</div>`;
 }
 
 export function menuGroupLabel(text) {
@@ -216,10 +225,11 @@ export function appHeader() {
  * each render one; both drive the same query.
  */
 export function expandableSearch({ variant, placeholder, title }) {
-  const open = state.searchOpen;
+  const open = state.searchOpen[variant];
   if (!open) {
     return html`<button type="button" class="xsearch xsearch--${variant}" data-act="search-toggle"
-        aria-expanded="false" title="${t(title ?? placeholder)}" aria-label="${t('Suchfeld öffnen')}">
+        data-val="${variant}" aria-expanded="false"
+        title="${t(title ?? placeholder)}" aria-label="${t('Suchfeld öffnen')}">
       ${icons.search()}${state.search && html`<span class="xsearch__dot" aria-hidden="true"></span>`}
     </button>`;
   }
@@ -227,7 +237,7 @@ export function expandableSearch({ variant, placeholder, title }) {
     <span class="xsearch__icon" aria-hidden="true">${icons.search()}</span>
     <input type="search" data-act="search" data-fk="search-${variant}" value="${state.search}"
            placeholder="${t(placeholder)}" autocomplete="off" aria-label="${t(placeholder)}">
-    <button type="button" class="xsearch__close" data-act="search-close"
+    <button type="button" class="xsearch__close" data-act="search-close" data-val="${variant}"
             aria-label="${t('Suche schliessen')}">${icons.close(13)}</button>
   </div>`;
 }
@@ -298,9 +308,9 @@ export function kpiStrip() {
    -------------------------------------------------------------------------- */
 
 const SORTS = [
-  { id: 'projekt', label: 'Projekt A–Z' },
-  { id: 'pensum', label: 'Pensum aktuelles Quartal' },
-  { id: 'kredit', label: 'Kredit' }
+  { id: 'projekt', label: 'Projekt A–Z', short: 'Projekt', hint: 'A–Z' },
+  { id: 'pensum', label: 'Pensum aktuelles Quartal', short: 'Pensum', hint: 'aktuelles Quartal' },
+  { id: 'kredit', label: 'Kredit', short: 'Kredit', hint: 'absteigend' }
 ];
 const GROUPS = [
   { id: 'none', label: 'Keine' },
@@ -319,14 +329,14 @@ const COLUMNS = [
 ];
 
 export function toolbar({ attributes = true, overdue = false } = {}) {
-  const sortLabel = SORTS.find(s => s.id === state.sort).label;
+  const sort = SORTS.find(s => s.id === state.sort);
   const groupLabel = GROUPS.find(g => g.id === state.group).label;
 
   return html`<div class="toolbar">
     ${expandableSearch({ variant: 'toolbar', placeholder: 'Projekt, ID oder Person' })}
 
     ${dropdown({
-      id: 'sort', label: `${t('Sortierung')}: ${t(sortLabel)}`, width: 244,
+      id: 'sort', label: `${t('Sortierung')}: ${t(sort.short)}`, hint: sort.hint, width: 244,
       body: html`${menuGroupLabel(t('Sortieren nach'))}
         ${SORTS.map(s => menuRadio(t(s.label), state.sort === s.id, 'sort', s.id))}`
     })}
@@ -355,17 +365,7 @@ export function toolbar({ attributes = true, overdue = false } = {}) {
 
     ${dropdown({
       id: 'lead', label: t('Projektleitung'), count: state.leads.length, width: 312,
-      body: html`${menuGroupLabel(t('Mehrfachauswahl · Ausgewählte oben'))}
-        <div class="dd__bulk">
-          <button type="button" data-act="bulk" data-kind="leads" data-val="all">${t('Alle')}</button>
-          <span aria-hidden="true">·</span>
-          <button type="button" data-act="bulk" data-kind="leads" data-val="none">${t('Keine')}</button>
-        </div>
-        ${data.people.map(p => menuTick(p.name, state.leads.includes(p.id), 'toggle-lead', p.id,
-          `${countBy(x => x.leadId === p.id)} · ${p.employment} %`))}
-        ${menuTick(t('nicht zugewiesen'), state.leads.includes('none'), 'toggle-lead', 'none',
-          `${countBy(x => !x.leadId)} · —`)}
-        ${menuNote(`${data.people.length + 1} ${t('von')} 34 ${t('Personen')} · ${t('weitere beim Scrollen')}`)}`
+      body: leadMenuBody()
     })}
 
     ${dropdown({
@@ -406,6 +406,51 @@ export function toolbar({ attributes = true, overdue = false } = {}) {
         ${menuCheckbox(t('Nullwerte ausblenden'), state.hideZeros, 'toggle-flag', 'hideZeros')}`
     })}
   </div>`;
+}
+
+/**
+ * The lead menu is the one that has to survive a real directory: it filters as
+ * you type, offers the signed-in user's own projects in one click, floats the
+ * selected entries to the top and scrolls the rest.
+ */
+function leadMenuBody() {
+  const q = state.menuSearch.trim().toLowerCase();
+  const entries = [
+    ...data.people.map(p => ({
+      id: p.id, name: p.name,
+      meta: `${countBy(x => x.leadId === p.id)} · ${p.employment} %`
+    })),
+    { id: 'none', name: t('nicht zugewiesen'), meta: `${countBy(x => !x.leadId)} · —` }
+  ];
+  const matches = entries.filter(e => !q || e.name.toLowerCase().includes(q));
+  // Selected first, so a choice never scrolls out of sight as the list grows.
+  const selected = matches.filter(e => state.leads.includes(e.id));
+  const rest = matches.filter(e => !state.leads.includes(e.id));
+  const mine = data.meta.user.personId;
+
+  return html`${menuGroupLabel(t('Mehrfachauswahl · Ausgewählte oben'))}
+    <div class="dd__search">
+      <label class="dd__searchfield">
+        ${icons.search(14)}
+        <input type="search" data-act="menu-search" data-fk="menu-search" value="${state.menuSearch}"
+               placeholder="${t('Person suchen')}" aria-label="${t('Person suchen')}" autocomplete="off">
+      </label>
+    </div>
+    ${mine && html`<div class="dd__quick">
+      <button type="button" class="quickchip ${state.leads.length === 1 && state.leads[0] === mine ? 'is-on' : ''}"
+              data-act="my-projects">${t('Meine Projekte')}</button>
+    </div>`}
+    <div class="dd__bulk">
+      <button type="button" data-act="bulk" data-kind="leads" data-val="all">${t('Alle')}</button>
+      <span aria-hidden="true">·</span>
+      <button type="button" data-act="bulk" data-kind="leads" data-val="none">${t('Keine')}</button>
+    </div>
+    <div class="dd__scroll">
+      ${matches.length
+        ? [...selected, ...rest].map(e => menuTick(e.name, state.leads.includes(e.id), 'toggle-lead', e.id, e.meta))
+        : html`<p class="dd__empty">${t('Keine Person gefunden.')}</p>`}
+    </div>
+    ${menuNote(`${matches.length} ${t('von')} 34 ${t('Personen')} · ${t('weitere beim Scrollen')}`)}`;
 }
 
 function countBy(fn) { return data.projects.filter(fn).length; }

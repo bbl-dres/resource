@@ -238,22 +238,46 @@ export function renderUebersicht() {
 }
 
 /** The column template, rebuilt whenever a column is toggled. */
-function gridTemplate() {
+/** Fixed widths in px, mirroring the layout tokens in tokens.css. */
+const COL_W = {
+  ampel: 36, id: 100, title: 220, phase: 128, lead: 132,
+  portfolio: 110, priority: 90, nextMs: 150, credit: 112,
+  target: 76, quarter: 72, trend: 130
+};
+
+/**
+ * One description of the column layout for the whole grid.
+ *
+ * `minWidth` matters: every row is its own grid, so they only line up when they
+ * are all exactly as wide as the scroll track. Letting each row size itself to
+ * its own content is what pulled the header out of step with the cells.
+ */
+function gridLayout() {
   const c = state.cols;
   const parts = [];
-  if (state.ampel) parts.push('var(--grid-col-ampel)');
-  if (c.id) parts.push('var(--grid-col-id)');
-  parts.push('minmax(220px, 1fr)');                       // Projekt
-  if (c.phase) parts.push('var(--grid-col-phase)');
-  if (c.lead) parts.push('var(--grid-col-lead)');
-  if (c.portfolio) parts.push('110px');
-  if (c.priority) parts.push('90px');
-  if (c.nextMs) parts.push('150px');
-  if (c.credit) parts.push('var(--grid-col-budget)');
-  if (state.target) parts.push('var(--grid-col-target)');
-  parts.push('repeat(8, var(--grid-quarter))');
-  if (state.trend) parts.push('var(--grid-col-trend)');
-  return parts.join(' ');
+  let minWidth = 0;
+  const add = (track, px) => { parts.push(track); minWidth += px; };
+
+  if (state.ampel) add('var(--grid-col-ampel)', COL_W.ampel);
+  if (c.id) add('var(--grid-col-id)', COL_W.id);
+  add(`minmax(${COL_W.title}px, 1fr)`, COL_W.title);       // Projekt
+  if (c.phase) add('var(--grid-col-phase)', COL_W.phase);
+  if (c.lead) add('var(--grid-col-lead)', COL_W.lead);
+  if (c.portfolio) add(`${COL_W.portfolio}px`, COL_W.portfolio);
+  if (c.priority) add(`${COL_W.priority}px`, COL_W.priority);
+  if (c.nextMs) add(`${COL_W.nextMs}px`, COL_W.nextMs);
+  if (c.credit) add('var(--grid-col-budget)', COL_W.credit);
+  if (state.target) add('var(--grid-col-target)', COL_W.target);
+  add('repeat(8, var(--grid-quarter))', COL_W.quarter * 8);
+  if (state.trend) add('var(--grid-col-trend)', COL_W.trend);
+
+  // The identifying columns stay put while the quarters scroll under them.
+  const sticky = { ampel: 0 };
+  sticky.id = state.ampel ? COL_W.ampel : 0;
+  sticky.title = sticky.id + (c.id ? COL_W.id : 0);
+  sticky.width = sticky.title + COL_W.title;
+
+  return { tpl: parts.join(' '), minWidth, sticky };
 }
 
 /** How many columns sit left of the first quarter — used by the spanning rows. */
@@ -269,7 +293,7 @@ function pensumGrid() {
   const list = filteredProjects();
   const tot = totals(list);
   const span = leadColumnCount();
-  const tpl = gridTemplate();
+  const { tpl, minWidth, sticky } = gridLayout();
   const q0 = data.quarters[0];
 
   // Visual row index, so the edit popover can be positioned by calc().
@@ -280,7 +304,7 @@ function pensumGrid() {
       const collapsed = state.collapsedGroups[g.key];
       const groupSum = data.quarters.map((_, q) => g.projects.reduce((a, p) => a + cellValue(p, q), 0));
       rows.push(html`<div class="prow prow--group" style="grid-template-columns:${raw(tpl)}">
-        <button type="button" class="prow__grouphead" style="grid-column:span ${span}"
+        <button type="button" class="prow__grouphead is-frozen" style="grid-column:span ${span}"
                 data-act="toggle-group" data-val="${g.key}" aria-expanded="${aria(!collapsed)}">
           <span class="caret ${collapsed ? 'is-collapsed' : ''}" aria-hidden="true">${icons.chevronDown()}</span>
           <span class="prow__groupname">${g.label}</span>
@@ -293,17 +317,18 @@ function pensumGrid() {
       if (collapsed) return rows;
     }
     g.projects.forEach(p => {
-      rows.push(projectRow(p, tpl, rowIdx));
+      rows.push(projectRow(p, tpl, sticky, rowIdx));
       rowIdx++;
     });
     return rows;
   });
 
   return html`<section class="grid-card">
-    <div class="pgrid" style="--grid-tpl:${raw(tpl)}; --lead-span:${span}">
+    <div class="pgrid">
+     <div class="pgrid__track" style="min-width:${minWidth}px; --sticky-w:${sticky.width}px">
 
       <div class="prow prow--years" style="grid-template-columns:${raw(tpl)}">
-        <div class="prow__yearlabel" style="grid-column:span ${span}">
+        <div class="prow__yearlabel is-frozen" style="grid-column:span ${span}">
           <span>${t('Projekt')}</span>
           <span class="prow__unit">${state.unit === 'fte' ? t('Pensum in FTE') : t('Pensum in %')}</span>
         </div>
@@ -312,9 +337,9 @@ function pensumGrid() {
       </div>
 
       <div class="prow prow--head" style="grid-template-columns:${raw(tpl)}">
-        ${state.ampel && html`<span></span>`}
-        ${state.cols.id && html`<span class="pcell--text">ID</span>`}
-        <span class="pcell--text">${t('Projekt')}</span>
+        ${state.ampel && html`<span class="is-frozen" style="left:${sticky.ampel}px"></span>`}
+        ${state.cols.id && html`<span class="pcell--text is-frozen" style="left:${sticky.id}px">ID</span>`}
+        <span class="pcell--text is-frozen is-frozen-last" style="left:${sticky.title}px">${t('Projekt')}</span>
         ${state.cols.phase && html`<span class="pcell--text">${t('SIA-Phase')}</span>`}
         ${state.cols.lead && html`<span class="pcell--text">${t('Projektleitung')}</span>`}
         ${state.cols.portfolio && html`<span class="pcell--text">${t('Teilportfolio')}</span>`}
@@ -333,7 +358,7 @@ function pensumGrid() {
       <div class="pnote">${list.length} ${t('von')} ${data.projects.length} ${t('Zeilen des gesetzten Umfangs geladen')} — ${t('bei grösserem Umfang laden weitere beim Scrollen, Kopf- und Summenzeilen bleiben fixiert')}</div>
 
       <div class="prow prow--sum" style="grid-template-columns:${raw(tpl)}">
-        <div style="grid-column:span ${span}" class="prow__sumlabel">
+        <div style="grid-column:span ${span}" class="prow__sumlabel is-frozen">
           ${t('Bedarf total')}
           <button type="button" class="linkbtn" data-act="foot-details">
             ${state.footDetails ? t('Details ausblenden') : t('Details anzeigen')}
@@ -349,7 +374,7 @@ function pensumGrid() {
         ${footRow(t('Kapazität netto, nach Abwesenheiten'), tot.net, tpl, span)}`}
 
       <div class="prow prow--load" style="grid-template-columns:${raw(tpl)}">
-        <div style="grid-column:span ${span}" class="prow__sumlabel">${t('Auslastung')}</div>
+        <div style="grid-column:span ${span}" class="prow__sumlabel is-frozen">${t('Auslastung')}</div>
         ${tot.utilisation.map((pct, q) => {
           const st = loadStatus(pct);
           return html`<span class="pcell pcell--load is-${st.key} ${qBorder(q)}"
@@ -389,13 +414,13 @@ function yearHeaders() {
 
 function footRow(label, values, tpl, span) {
   return html`<div class="prow prow--foot" style="grid-template-columns:${raw(tpl)}">
-    <div style="grid-column:span ${span}" class="prow__footlabel">${label}</div>
+    <div style="grid-column:span ${span}" class="prow__footlabel is-frozen">${label}</div>
     ${values.map((v, q) => html`<span class="pcell pcell--foot ${qBorder(q)}">${fmt(v)}</span>`)}
     ${state.trend && html`<span></span>`}
   </div>`;
 }
 
-function projectRow(p, tpl, rowIdx) {
+function projectRow(p, tpl, sticky, rowIdx) {
   const lead = p.leadId ? data.peopleById[p.leadId] : null;
   const cells = projectDemand(p);
   const a = ampel(p.leadId, 0);
@@ -405,11 +430,11 @@ function projectRow(p, tpl, rowIdx) {
 
   return html`<div class="prow ${p.unassigned ? 'is-unassigned' : ''}" style="grid-template-columns:${raw(tpl)}"
       data-row="${rowIdx}">
-    ${state.ampel && html`<span class="pcell pcell--ampel">
+    ${state.ampel && html`<span class="pcell pcell--ampel is-frozen" style="left:${sticky.ampel}px">
       <span class="ampel ampel--${a.key}" role="img" aria-label="${a.title}" title="${a.title}"></span>
     </span>`}
-    ${state.cols.id && html`<span class="pcell pcell--id">${p.number}</span>`}
-    <span class="pcell pcell--title">
+    ${state.cols.id && html`<span class="pcell pcell--id is-frozen" style="left:${sticky.id}px">${p.number}</span>`}
+    <span class="pcell pcell--title is-frozen is-frozen-last" style="left:${sticky.title}px">
       <button type="button" class="prow__title" data-act="open-project" data-val="${p.id}" title="${p.title}">${p.title}</button>
     </span>
     ${state.cols.phase && html`<span class="pcell pcell--phase">
