@@ -1,11 +1,10 @@
 /* =============================================================================
-   views-schedule.js — Tab «Termine» with its three views:
-   Gantt (phase bars with a capacity band), Liste (one row per milestone)
-   and Kalender (months as columns).
+   views-schedule.js — Tab «Termine»: the bar plan, with a capacity band
+   underneath that answers the same question the Übersicht footer does.
    ============================================================================= */
 
 import {
-  data, state, t, totals, loadStatus, filteredProjects, groupProjects, milestones
+  data, state, t, totals, loadStatus, groupProjects, periods, periodValue
 } from './store.js';
 
 import {
@@ -14,22 +13,9 @@ import {
   aria
 } from './ui.js';
 
-const VIEWS = [
-  { id: 'gantt', label: 'Gantt' },
-  { id: 'liste', label: 'Liste' },
-  { id: 'kalender', label: 'Kalender' }
-];
-
-const MONTHS_DE = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
-
 
 export function renderTermine() {
-  const view = VIEWS.some(v => v.id === state.view) ? state.view : 'gantt';
-  // The list stacks down to a phone; the bar plan and the calendar do not.
-  const blocked = state.narrow && view !== 'liste';
-  const body = blocked
-    ? tooNarrow(view === 'kalender' ? 'Der Kalender' : 'Der Balkenplan')
-    : view === 'liste' ? listView() : view === 'kalender' ? calendarView() : ganttView();
+  const body = state.narrow ? tooNarrow('Der Balkenplan') : ganttView();
 
   return html`
     ${pageHeader({
@@ -41,7 +27,7 @@ export function renderTermine() {
     <div class="wrap"><div class="content">
       ${toolbar()}
       ${activeFilterRow()}
-      ${timeControls({ views: VIEWS })}
+      ${timeControls()}
       ${body}
     </div></div>`;
 }
@@ -51,112 +37,162 @@ export function renderTermine() {
    ========================================================================== */
 
 /**
- * Where today sits along the whole eight-quarter track, as a 0–1 fraction.
- * The columns flex, so the marker is placed proportionally rather than in px.
+ * Where today sits along the visible track, as a 0–1 fraction — or null once
+ * the window has been stepped past it. The columns flex, so the marker is
+ * placed proportionally rather than in pixels.
  */
-function todayFraction() {
+function todayFraction(cols) {
   const today = new Date(data.meta.today + 'T00:00:00');
   const qStart = new Date(today.getFullYear(), Math.floor(today.getMonth() / 3) * 3, 1);
   const qEnd = new Date(qStart.getFullYear(), qStart.getMonth() + 3, 1);
   const withinQuarter = (today - qStart) / (qEnd - qStart);
-  const index = data.quarterIndex[data.meta.todayQuarter] ?? 0;
-  return (index + withinQuarter) / data.quarters.length;
+  const q = data.quarterIndex[data.meta.todayQuarter] ?? 0;
+
+  const at = cols.findIndex(c => c.quarters.includes(q));
+  if (at < 0) return null;                       // the window has moved past today
+  const col = cols[at];
+  const within = (q + withinQuarter - col.quarters[0]) / col.quarters.length;
+  return (at + within) / cols.length;
 }
 
 function ganttView() {
   const groups = groupProjects();
   const tot = totals();
-  const f = todayFraction().toFixed(4);
-  const todayLeft = `calc(var(--gantt-lead) + (100% - var(--gantt-lead)) * ${f})`;
+  const cols = periods();
+  // A column only has to hold its own label: "2026" and "Q3/26" need room,
+  // "Jul" does not. A single minimum made twelve months overflow the card.
+  const minCol = { jahr: 96, quartal: 88, monat: 50 }[state.scale] ?? 88;
+  const f = todayFraction(cols);
+  const todayLeft = f === null ? null
+    : `calc(var(--gantt-lead) + (100% - var(--gantt-lead)) * ${f.toFixed(4)})`;
 
-  return html`<div class="gantt">
+  return html`<div class="gantt" style="--gantt-cols:${cols.length}; --gantt-quarter-min:${minCol}px">
     ${groups.map(g => {
       const collapsed = g.label ? state.collapsedGroups[`g:${g.key}`] : false;
       return html`<section class="gantt__group">
-        ${g.label && html`<header class="gantt__grouphead">
-          <button type="button" class="gantt__grouptoggle" data-act="toggle-group" data-val="g:${g.key}"
-                  aria-expanded="${aria(!collapsed)}" aria-label="${t('Gruppe')} ${g.label} ${t('ein- oder ausklappen')}">
+        ${g.label && html`<h2 class="pgrouphead">
+          <button type="button" class="pgrouphead__toggle" data-act="toggle-group" data-val="g:${g.key}"
+                  aria-expanded="${aria(!collapsed)}">
             <span class="caret ${collapsed ? 'is-collapsed' : ''}" aria-hidden="true">${icons.chevronDown()}</span>
-            <h2 class="gantt__groupname">${g.label}</h2>
+            <span class="pgrouphead__name">${g.label}</span>
+            <span class="count-pill">${g.projects.length}</span>
           </button>
-          <span class="count-pill" aria-label="${g.projects.length} ${t('Projekte')}">${g.projects.length}</span>
-        </header>`}
-        ${!collapsed && html`<div class="gantt__card">
-          ${ganttAxis()}
+        </h2>`}
+        ${!collapsed && html`<div class="gantt__card scrollbox">
+          <div class="gantt__scroll" data-scroll>
+          ${ganttAxis(cols)}
           <div class="gantt__body">
-            <div class="gantt__today" style="left:${raw(todayLeft)}" aria-hidden="true"></div>
-            <div class="gantt__todaybadge" style="left:${raw(todayLeft)}">${t('Heute')} ${data.meta.todayLabel}</div>
-            ${g.projects.map(ganttRow)}
+            ${todayLeft && html`<div class="gantt__today" style="left:${raw(todayLeft)}" aria-hidden="true"></div>
+              <div class="gantt__todaybadge" style="left:${raw(todayLeft)}"
+                   title="${t('Heute')}, ${data.meta.todayLabel}">${t('Heute')}</div>`}
+            ${g.projects.map(p => ganttRow(p, cols))}
+          </div>
           </div>
         </div>`}
       </section>`;
     })}
 
-    <section class="capband">
+    <section class="capband" style="--gantt-cols:${cols.length}; --gantt-quarter-min:${minCol}px">
+      <div class="capband__scroll" data-scroll>
       <div class="capband__row">
         <div class="capband__label">
           <div class="capband__title">${t('Auslastung')}</div>
-          <div class="capband__sub">${t('gegen Kapazität netto, nach Abwesenheiten')}</div>
         </div>
         <div class="capband__cells">
-          ${tot.utilisation.map((pct, q) => {
+          ${cols.map((col, i) => {
+            const pct = periodValue(tot.utilisation, col);
+            const q = col.quarters[0];
             const st = loadStatus(pct);
-            return html`<div class="capband__cell is-${st.key} ${yearBoundary(q) ? 'is-yearstart' : ''}"
-                title="${data.quarters[q].label}: ${tot.booked[q]} % ${t('gebucht auf')} ${tot.net[q]} % ${t('netto')}">
+            return html`<div class="capband__cell is-${st.key} ${bandStart(cols, i) ? 'is-yearstart' : ''}"
+                title="${col.label}: ${pct} % — ${t(st.label)} · ${tot.booked[q]} % ${t('gebucht auf')} ${tot.net[q]} % ${t('netto')}">
               <span class="capband__value">${pct} %</span>
-              <span class="capband__state">${t(st.label)}</span>
             </div>`;
           })}
         </div>
       </div>
+      </div>
     </section>
+
+    ${ganttLegend()}
   </div>`;
 }
 
-const yearBoundary = q => q === 0 || q === 2 || q === 6;
+/**
+ * The bar plan spends colour only on exceptions, so the legend only has to
+ * name those — plus the utilisation bands, which lost their words when the
+ * capacity band was reduced to figures.
+ */
+function ganttLegend() {
+  const l = data.api.print.legend;
+  return html`<div class="heatlegend">
+    <span class="heatlegend__label">${t('Legende')}</span>
+    <span class="heatlegend__item"><span class="heatlegend__swatch is-delay"></span>${t('Verzug')}</span>
+    <span class="heatlegend__item"><span class="heatlegend__swatch is-nolead"></span>${t('ohne Projektleitung')}</span>
+    <span class="heatlegend__item"><span class="diamond"></span>${t('Meilenstein')}</span>
+    <span class="heatlegend__item"><span class="diamond is-late"></span>${t('verschoben')}</span>
+    <span class="heatlegend__item"><span class="diamond is-open"></span>${t('Termin offen')}</span>
+    <span class="heatlegend__item">${t(l.thresholds)}</span>
+  </div>`;
+}
 
-function ganttAxis() {
-  const years = [];
-  let i = 0;
-  while (i < data.quarters.length) {
-    const year = data.quarters[i].year;
-    let n = 0;
-    while (i + n < data.quarters.length && data.quarters[i + n].year === year) n++;
-    years.push(html`<div class="gantt__year" style="grid-column:span ${n}">${year}</div>`);
-    i += n;
+/** The year a column sits in, and where a new one starts. */
+const bandOf = col => data.quarters[col.quarters[0]].year;
+const bandStart = (cols, i) => i === 0 || bandOf(cols[i]) !== bandOf(cols[i - 1]);
+
+function ganttAxis(cols) {
+  // At year scale the columns already are the years, so a band would repeat them.
+  const bands = [];
+  if (state.scale !== 'jahr') {
+    cols.forEach((col, i) => {
+      if (bandStart(cols, i)) bands.push({ label: bandOf(col), span: 1 });
+      else bands[bands.length - 1].span++;
+    });
   }
   return html`<header class="gantt__axis">
     <div class="gantt__axislabel">${t('Projekt')}</div>
     <div class="gantt__axiscols">
-      <div class="gantt__years">${years}</div>
+      ${bands.length ? html`<div class="gantt__years">
+        ${bands.map(b => html`<div class="gantt__year" style="grid-column:span ${b.span}">${b.label}</div>`)}
+      </div>` : ''}
       <div class="gantt__quarters">
-        ${data.quarters.map((q, n) => html`<div class="${n === 0 ? 'is-today' : ''} ${yearBoundary(n) ? 'is-yearstart' : ''}"
-          title="${q.label}">${q.short}</div>`)}
+        ${cols.map((col, i) => html`<div class="${col.isNow ? 'is-today' : ''} ${bandStart(cols, i) ? 'is-yearstart' : ''}"
+          title="${col.label}">${col.short}</div>`)}
       </div>
     </div>
   </header>`;
 }
 
-function ganttRow(p) {
+function ganttRow(p, cols) {
   const bars = p.bars ?? [];
   const delayed = bars.some(b => b.delay);
   const rail = p.unassigned ? 'is-unassigned' : delayed ? 'is-delayed' : '';
 
   return html`<div class="gantt__row ${rail}">
     <div class="gantt__rowlabel">
-      <button type="button" class="gantt__rowtitle" data-act="open-project" data-val="${p.id}">${p.title}</button>
       <span class="gantt__rowid">${p.number}</span>
+      <button type="button" class="gantt__rowtitle" data-act="open-project" data-val="${p.id}"
+              title="${p.title}">${p.title}</button>
     </div>
     <div class="gantt__track">
-      ${data.quarters.map((_, n) => html`<span class="gantt__gridline ${yearBoundary(n) ? 'is-yearstart' : ''}"
+      ${cols.map((_, n) => html`<span class="gantt__gridline ${bandStart(cols, n) ? 'is-yearstart' : ''}"
         style="grid-column:${n + 1}"></span>`)}
-      ${bars.map((b, i) => ganttBar(b, i, bars))}
-      ${bars.some(b => b.openEnd) && openEndRail(bars.find(b => b.openEnd))}
+      ${bars.map((b, i) => ganttBar(b, i, bars, cols))}
+      ${bars.some(b => b.openEnd) && openEndRail(bars.find(b => b.openEnd), cols)}
     </div>
   </div>`;
 }
 
-function ganttBar(b, i, bars) {
+/** Map a quarter range onto the visible columns; null when it falls outside. */
+function span(cols, from, to) {
+  const hits = cols
+    .map((c, i) => (c.quarters.some(q => q >= from && q < to) ? i : -1))
+    .filter(i => i >= 0);
+  return hits.length ? { from: hits[0] + 1, to: hits[hits.length - 1] + 2 } : null;
+}
+
+function ganttBar(b, i, bars, cols) {
+  const at = span(cols, b.from, b.to);
+  if (!at) return '';
   const startsChain = !bars.some((o, j) => j !== i && o.to === b.from);
   const endsChain = !bars.some((o, j) => j !== i && o.from === b.to);
   const cls = [
@@ -167,7 +203,7 @@ function ganttBar(b, i, bars) {
     b.continues ? 'is-open' : ''
   ].join(' ');
 
-  return html`<div class="${cls}" style="grid-column:${b.from + 1} / ${b.to + 1}"
+  return html`<div class="${cls}" style="grid-column:${at.from} / ${at.to}"
       title="${b.milestone ?? b.label}">
     <span class="gantt__barlabel">${b.label}</span>
     ${b.milestone && html`<span class="diamond ${b.delay ? 'is-late' : b.milestoneOpen ? 'is-open' : ''}"
@@ -176,158 +212,12 @@ function ganttBar(b, i, bars) {
   </div>`;
 }
 
-function openEndRail(b) {
-  const from = b.to + 1;
-  const to = data.quarters.length + 1;
+function openEndRail(b, cols) {
+  const at = span(cols, b.to, data.quarters.length);
+  if (!at) return '';
+  const from = at.from;
+  const to = cols.length + 1;
   return html`<span class="gantt__rail" style="grid-column:${from} / ${to}" aria-hidden="true"></span>
     <span class="gantt__railcaption" style="grid-column:${from} / ${to}"><span>${b.openEnd}</span></span>`;
 }
 
-/* =============================================================================
-   Liste — one row per milestone, grouped by planned quarter
-   ========================================================================== */
-
-const STATUS_RANK = { late: 0, pending: 1, ok: 2 };
-
-function listView() {
-  const list = milestones();
-  if (!list.length) return emptyState(t('Keine Meilensteine im gesetzten Umfang.'));
-
-  const byQuarter = new Map();
-  list.forEach(m => {
-    if (!byQuarter.has(m.plan)) byQuarter.set(m.plan, []);
-    byQuarter.get(m.plan).push(m);
-  });
-
-  return html`<div class="mslist-view">
-    ${[...byQuarter.entries()].map(([qid, rows]) => {
-      const q = data.quarters[data.quarterIndex[qid]];
-      const collapsed = state.collapsedGroups[`ms:${qid}`];
-      rows.sort((a, b) => STATUS_RANK[a.status] - STATUS_RANK[b.status] || a.code.localeCompare(b.code));
-      return html`<section class="msgroup">
-        <header class="msgroup__head">
-          <button type="button" class="msgroup__toggle" data-act="toggle-group" data-val="ms:${qid}"
-                  aria-expanded="${aria(!collapsed)}">
-            <span class="caret ${collapsed ? 'is-collapsed' : ''}" aria-hidden="true">${icons.chevronDown()}</span>
-            <h2 class="msgroup__name">${q.short} / ${q.year}</h2>
-          </button>
-          <span class="count-pill">${rows.length}</span>
-        </header>
-        ${!collapsed && html`<div class="table-card">
-          <div class="msrow msrow--head">
-            <span>${t('Meilenstein')}</span><span>${t('Projekt')}</span><span>${t('Teilphase')}</span>
-            <span>${t('Projektleitung')}</span><span>${t('Plan')}</span><span>${t('Prognose')}</span><span>${t('Status')}</span>
-          </div>
-          ${rows.map(m => html`<div class="msrow is-${m.status}">
-            <span class="msrow__ms"><strong>${m.code}</strong><span>${m.name}</span></span>
-            <span class="msrow__project">
-              <button type="button" class="linkbtn" data-act="open-project" data-val="${m.projectId}">${m.project.location}</button>
-              <span class="msrow__meta">${m.project.kind} · ${m.project.number}</span>
-            </span>
-            <span class="msrow__phase">${m.subPhase}</span>
-            <span>${m.lead ? m.lead.name : t('nicht zugewiesen')}</span>
-            <span class="msrow__date">${shortQ(m.plan)}</span>
-            <span class="msrow__date">${m.forecast ? shortQ(m.forecast) : t('offen')}</span>
-            <span class="msrow__status">${m.status !== 'ok' ? icons.warn(12) : ''}${m.statusLabel.replace('▲ ', '')}</span>
-          </div>`)}
-        </div>`}
-      </section>`;
-    })}
-  </div>`;
-}
-
-const shortQ = qid => `Q${qid.slice(5)}/${qid.slice(2, 4)}`;
-
-/* =============================================================================
-   Kalender — twelve months as columns, no row grid
-   ========================================================================== */
-
-function calendarView() {
-  const list = milestones();
-  const start = new Date(data.meta.today + 'T00:00:00');
-  start.setDate(1);
-
-  const months = Array.from({ length: 12 }, (_, i) => {
-    const d = new Date(start.getFullYear(), start.getMonth() + i, 1);
-    return {
-      key: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`,
-      label: MONTHS_DE[d.getMonth()],
-      year: d.getFullYear(),
-      isToday: i === 0,
-      cards: []
-    };
-  });
-  const byKey = Object.fromEntries(months.map(m => [m.key, m]));
-
-  list.forEach(m => {
-    const planKey = m.planDate.slice(0, 7);
-    const fcKey = m.forecastDate ? m.forecastDate.slice(0, 7) : null;
-    const moved = fcKey && fcKey !== planKey;
-
-    if (byKey[planKey]) {
-      byKey[planKey].cards.push({
-        ms: m,
-        date: m.planDate,
-        tone: moved ? 'late' : m.status === 'pending' ? 'pending' : 'ok',
-        suffix: moved ? t('verschoben') : m.status === 'pending' ? t('Auftrag hängig') : null
-      });
-    }
-    if (moved && byKey[fcKey]) {
-      byKey[fcKey].cards.push({
-        ms: m, date: m.forecastDate, tone: 'late', suffix: t('neuer Termin')
-      });
-    }
-  });
-
-  // Year band: group consecutive months by calendar year.
-  const bands = [];
-  months.forEach((m, i) => {
-    const last = bands[bands.length - 1];
-    if (last && last.year === m.year) last.span++;
-    else bands.push({ year: m.year, span: 1, first: i });
-  });
-
-  return html`<section class="cal">
-    <div class="cal__years">
-      ${bands.map(b => html`<div class="cal__year ${b.first > 0 ? 'is-boundary' : ''}"
-        style="grid-column:span ${b.span}">${b.year}</div>`)}
-    </div>
-    <div class="cal__months">
-      ${months.map(m => html`<div class="cal__month ${m.isToday ? 'is-today' : ''}">
-        <span class="cal__monthname">${m.label}</span>
-        ${m.isToday && html`<span class="cal__monthsub">${t('heute')}</span>`}
-      </div>`)}
-    </div>
-    <div class="cal__body">
-      ${months.map(m => html`<div class="cal__cell ${m.isToday ? 'is-today' : ''}">
-        ${m.cards.length
-          ? m.cards.map(c => calendarCard(c))
-          : html`<span class="cal__empty" aria-hidden="true">—</span>`}
-      </div>`)}
-    </div>
-  </section>`;
-}
-
-function calendarCard({ ms, date, tone, suffix }) {
-  return html`<button type="button" class="mscard is-${tone}" data-act="open-project" data-val="${ms.projectId}">
-    <span class="mscard__line">
-      <span class="diamond ${tone === 'late' ? 'is-late' : tone === 'pending' ? 'is-open' : ''}" aria-hidden="true"></span>
-      <span class="mscard__title">${ms.code} ${ms.name}</span>
-    </span>
-    <span class="mscard__project">${ms.project.location}</span>
-    <span class="mscard__date ${suffix ? 'has-suffix' : ''}">${deDate(date)}${suffix ? ` · ${suffix}` : ''}</span>
-  </button>`;
-}
-
-function deDate(iso) {
-  const [y, m, d] = iso.split('-');
-  return `${d}.${m}.${y}`;
-}
-
-function emptyState(text) {
-  return html`<div class="empty">
-    ${icons.info(18)}
-    <p>${text}</p>
-    <button type="button" class="linkbtn" data-act="filters-reset">${t('Alle Filter zurücksetzen')}</button>
-  </div>`;
-}

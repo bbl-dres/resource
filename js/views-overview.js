@@ -6,7 +6,7 @@ import {
   data, state, t, num, fmt, unitSuffix, fmtMio,
   cellValue, projectDemand, isEdited, personLoad, personUtilisation,
   totals, loadStatus, heatStep, ampel, filteredProjects, groupProjects,
-  activeFilters, milestones, milestoneStats, kpis
+  activeFilters, milestones, milestoneStats, kpis, periods, periodValue
 } from './store.js';
 
 import {
@@ -230,8 +230,6 @@ export function renderUebersicht() {
     })}
     <div class="wrap"><div class="content">
       ${state.narrow ? tooNarrow('Das Pensum-Raster') : html`
-        ${state.edit && html`<p class="editbanner">${icons.pencil(14)}
-          ${t('Bearbeitungsmodus aktiv — Änderungen werden protokolliert')}</p>`}
         ${toolbar()}
         ${activeFilterRow()}
         ${timeControls({})}
@@ -260,24 +258,37 @@ function gridLayout() {
   let minWidth = 0;
   const add = (track, px) => { parts.push(track); minWidth += px; };
 
-  if (c.id) add('var(--grid-col-id)', COL_W.id);
-  add(`minmax(${COL_W.title}px, 1fr)`, COL_W.title);       // Projekt
-  if (c.phase) add('var(--grid-col-phase)', COL_W.phase);
-  if (c.lead) add('var(--grid-col-lead)', COL_W.lead);
-  // The signal reports on the project lead, so it sits beside that column.
-  if (state.ampel) add('var(--grid-col-ampel)', COL_W.ampel);
-  if (c.portfolio) add(`${COL_W.portfolio}px`, COL_W.portfolio);
-  if (c.priority) add(`${COL_W.priority}px`, COL_W.priority);
-  if (c.nextMs) add(`${COL_W.nextMs}px`, COL_W.nextMs);
-  if (c.credit) add('var(--grid-col-budget)', COL_W.credit);
-  if (state.target) add('var(--grid-col-target)', COL_W.target);
-  add('repeat(8, var(--grid-quarter))', COL_W.quarter * 8);
-  if (state.trend) add('var(--grid-col-trend)', COL_W.trend);
+  /*
+   * The master data of a project stays put; only the time axis moves. So every
+   * lead column is frozen, and each needs the running offset of the ones
+   * before it.
+   */
+  const sticky = {};
+  let offset = 0;
+  const pin = (key, on, track, px) => {
+    if (!on) return;
+    sticky[key] = offset;
+    offset += px;
+    add(track, px);
+  };
 
-  // The identifying columns stay put while the quarters scroll under them.
-  const sticky = { id: 0 };
-  sticky.title = c.id ? COL_W.id : 0;
-  sticky.width = sticky.title + COL_W.title;
+  pin('id', c.id, 'var(--grid-col-id)', COL_W.id);
+  pin('title', true, `minmax(${COL_W.title}px, 1fr)`, COL_W.title);
+  pin('phase', c.phase, 'var(--grid-col-phase)', COL_W.phase);
+  pin('lead', c.lead, 'var(--grid-col-lead)', COL_W.lead);
+  // The signal reports on the project lead, so it sits beside that column.
+  pin('ampel', state.ampel, 'var(--grid-col-ampel)', COL_W.ampel);
+  pin('portfolio', c.portfolio, `${COL_W.portfolio}px`, COL_W.portfolio);
+  pin('priority', c.priority, `${COL_W.priority}px`, COL_W.priority);
+  pin('nextMs', c.nextMs, `${COL_W.nextMs}px`, COL_W.nextMs);
+  pin('credit', c.credit, 'var(--grid-col-budget)', COL_W.credit);
+  pin('target', state.target, 'var(--grid-col-target)', COL_W.target);
+  sticky.width = offset;
+  sticky.last = Object.keys(sticky).filter(k => k !== 'width').pop();
+
+  const cols = periods().length;
+  add(`repeat(${cols}, minmax(var(--grid-quarter), 1fr))`, COL_W.quarter * cols);
+  if (state.trend) add('var(--grid-col-trend)', COL_W.trend);
 
   return { tpl: parts.join(' '), minWidth, sticky };
 }
@@ -305,15 +316,14 @@ function pensumGrid() {
 
     // The header sits on the page ground above its card, exactly as the
     // Termine tab does it. It sticks to the left so it survives a scroll.
-    const head = g.label && html`<header class="pgrouphead">
+    const head = g.label && html`<h2 class="pgrouphead">
       <button type="button" class="pgrouphead__toggle"
-              data-act="toggle-group" data-val="${g.key}" aria-expanded="${aria(!collapsed)}"
-              aria-label="${t('Gruppe')} ${g.label} ${t('ein- oder ausklappen')}">
+              data-act="toggle-group" data-val="${g.key}" aria-expanded="${aria(!collapsed)}">
         <span class="caret ${collapsed ? 'is-collapsed' : ''}" aria-hidden="true">${icons.chevronDown()}</span>
-        <h2 class="pgrouphead__name">${g.label}</h2>
+        <span class="pgrouphead__name">${g.label}</span>
+        <span class="count-pill">${g.projects.length}</span>
       </button>
-      <span class="count-pill">${g.projects.length}</span>
-    </header>`;
+    </h2>`;
 
     if (collapsed) return html`<section class="pgroup">${head}</section>`;
 
@@ -330,7 +340,8 @@ function pensumGrid() {
   });
 
   return html`<section class="grid-card">
-    <div class="pgrid">
+    <div class="scrollbox">
+    <div class="pgrid" data-scroll>
      <div class="pgrid__track" style="min-width:${minWidth}px; --sticky-w:${sticky.width}px">
 
       ${body}
@@ -343,7 +354,7 @@ function pensumGrid() {
             ${state.footDetails ? t('Details ausblenden') : t('Details anzeigen')}
           </button>
         </div>
-        ${tot.demand.map((v, q) => html`<span class="pcell pcell--sum ${qBorder(q)}">${fmt(v)}</span>`)}
+        ${periods().map((period, i) => html`<span class="pcell pcell--sum ${qBorder(i)}">${fmt(periodValue(tot.demand, period))}</span>`)}
         ${state.trend && html`<span></span>`}
       </div>
 
@@ -354,11 +365,13 @@ function pensumGrid() {
 
       <div class="prow prow--load" style="grid-template-columns:${raw(tpl)}">
         <div style="grid-column:span ${span}" class="prow__sumlabel is-frozen">${t('Auslastung')}</div>
-        ${tot.utilisation.map((pct, q) => {
+        ${periods().map((period, i) => {
+          const q = period.quarters[0];
+          const pct = periodValue(tot.utilisation, period);
           const st = loadStatus(pct);
-          return html`<span class="pcell pcell--load is-${st.key} ${qBorder(q)}"
-              title="${data.quarters[q].label}: ${tot.booked[q]} % ${t('gebucht auf')} ${tot.net[q]} % ${t('netto')}">
-            <span class="pcell__pct">${pct} %</span><span class="pcell__status">${t(st.label)}</span>
+          return html`<span class="pcell pcell--load is-${st.key} ${qBorder(i)}"
+              title="${period.label}: ${pct} % — ${t(st.label)} · ${tot.booked[q]} % ${t('gebucht auf')} ${tot.net[q]} % ${t('netto')}">
+            <span class="pcell__pct">${pct} %</span>
           </span>`;
         })}
         ${state.trend && html`<span></span>`}
@@ -366,6 +379,7 @@ function pensumGrid() {
       </div>
 
       ${state.editing && editPopover()}
+    </div>
     </div>
 
     ${heatLegend()}
@@ -405,6 +419,15 @@ function sortHead(key, label, cls = '', style = '', title = '') {
   </span>`;
 }
 
+/**
+ * Pin a lead column at its running offset. Only the time axis scrolls; the
+ * master data of a project stays where it is.
+ */
+function pin(sticky, key) {
+  if (sticky[key] === undefined) return '';
+  return raw(`is-frozen ${key === sticky.last ? 'is-frozen-last' : ''}" style="left:${sticky[key]}px;`);
+}
+
 /** The year band and the column names, repeated at the top of every group card. */
 function columnHeader(tpl, sticky) {
   const q0 = data.quarters[0];
@@ -421,10 +444,10 @@ function columnHeader(tpl, sticky) {
       ${state.cols.nextMs && html`<span class="pcell--text">${t('Nächster Meilenstein')}</span>`}
       ${state.cols.credit && sortHead('credit', t('Kredit CHF'), 'pcell--num')}
       ${state.target && sortHead('target', `${t('Soll')} ${data.quarters[0].short}`, 'pcell--num')}
-      ${data.quarters.map((q, i) => sortHead(`q${i}`,
-        `${q.short}/${String(q.year).slice(2)}`,
-        `pcell--num ${i === 0 ? 'is-today' : ''} ${qBorder(i)}`, '',
-        i === 0 ? `${t('Heute')}, ${data.meta.todayLabel} — ${t('laufendes Quartal, gesperrt')}` : q.label))}
+      ${periods().map((period, i) => sortHead(`q${period.quarters[0]}`,
+        period.short,
+        `pcell--num ${period.isNow ? 'is-today' : ''} ${qBorder(i)}`, '',
+        period.isNow ? `${t('Heute')}, ${data.meta.todayLabel} — ${t('laufendes Quartal, gesperrt')}` : period.label))}
       ${state.trend && html`<span class="pcell--text">${t('Verlauf')}</span>`}
     </div>`;
 }
@@ -433,7 +456,7 @@ function columnHeader(tpl, sticky) {
 function footRow(label, values, tpl, span) {
   return html`<div class="prow prow--foot" style="grid-template-columns:${raw(tpl)}">
     <div style="grid-column:span ${span}" class="prow__footlabel is-frozen">${label}</div>
-    ${values.map((v, q) => html`<span class="pcell pcell--foot ${qBorder(q)}">${fmt(v)}</span>`)}
+    ${periods().map((period, i) => html`<span class="pcell pcell--foot ${qBorder(i)}">${fmt(periodValue(values, period))}</span>`)}
     ${state.trend && html`<span></span>`}
   </div>`;
 }
@@ -452,29 +475,34 @@ function projectRow(p, tpl, sticky, rowIdx) {
     <span class="pcell pcell--title is-frozen is-frozen-last" style="left:${sticky.title}px">
       <button type="button" class="prow__title" data-act="open-project" data-val="${p.id}" title="${p.title}">${p.title}</button>
     </span>
-    ${state.cols.phase && html`<span class="pcell pcell--phase">
+    ${state.cols.phase && html`<span class="pcell pcell--phase ${pin(sticky, 'phase')}">
       ${phase.label}
     </span>`}
-    ${state.cols.lead && html`<span class="pcell pcell--lead ${!lead ? 'is-none' : ''}">${lead ? lead.name : html`<span class="lead-open">${t('nicht zugewiesen')}</span>`}</span>`}
-    ${state.ampel && html`<span class="pcell pcell--ampel">
+    ${state.cols.lead && html`<span class="pcell pcell--lead ${pin(sticky, 'lead')} ${!lead ? 'is-none' : ''}">${state.edit
+      ? html`<button type="button" class="leadbtn" data-act="assign" data-val="${p.id}"
+          title="${t('Projektleitung zuweisen')}">${lead ? lead.name : html`<span class="lead-open">${t('nicht zugewiesen')}</span>`}</button>`
+      : (lead ? lead.name : html`<span class="lead-open">${t('nicht zugewiesen')}</span>`)}</span>`}
+    ${state.ampel && html`<span class="pcell pcell--ampel ${pin(sticky, 'ampel')}">
       <span class="ampel ampel--${a.key}" role="img" aria-label="${a.title}" title="${a.title}"></span>
     </span>`}
-    ${state.cols.portfolio && html`<span class="pcell pcell--text">${t(data.portfoliosById[p.portfolio].label)}</span>`}
-    ${state.cols.priority && html`<span class="pcell pcell--text">${t(p.priority)}</span>`}
-    ${state.cols.nextMs && html`<span class="pcell pcell--text">${nextMs ? `${nextMs.code} · ${data.quarters[data.quarterIndex[nextMs.plan]].label}` : '—'}</span>`}
-    ${state.cols.credit && html`<span class="pcell pcell--credit">${p.creditLabel}</span>`}
-    ${state.target && html`<span class="pcell pcell--target ${targetOver ? 'is-over' : ''}">${num(p.target)}${unitSuffix()}</span>`}
+    ${state.cols.portfolio && html`<span class="pcell pcell--text ${pin(sticky, 'portfolio')}">${t(data.portfoliosById[p.portfolio].label)}</span>`}
+    ${state.cols.priority && html`<span class="pcell pcell--text ${pin(sticky, 'priority')}">${t(p.priority)}</span>`}
+    ${state.cols.nextMs && html`<span class="pcell pcell--text ${pin(sticky, 'nextMs')}">${nextMs ? `${nextMs.code} · ${data.quarters[data.quarterIndex[nextMs.plan]].label}` : '—'}</span>`}
+    ${state.cols.credit && html`<span class="pcell pcell--credit ${pin(sticky, 'credit')}">${p.creditLabel}</span>`}
+    ${state.target && html`<span class="pcell pcell--target ${pin(sticky, 'target')} ${targetOver ? 'is-over' : ''}">${num(p.target)}${unitSuffix()}</span>`}
 
-    ${cells.map((v, q) => {
-      const over = lead ? personUtilisation(p.leadId, q) > 100 : false;
-      const locked = q === 0;
+    ${periods().map((period, i) => {
+      const q = period.quarters[0];
+      const v = periodValue(cells, period);
+      const over = lead ? period.quarters.some(x => personUtilisation(p.leadId, x) > 100) : false;
+      const locked = period.quarters.includes(0);
       const editing = state.editing && state.editing.projectId === p.id && state.editing.q === q;
       const label = state.hideZeros && v === 0 ? '' : num(v);
-      const description = `${p.title} · ${lead ? lead.name : t('nicht zugewiesen')}, ${data.quarters[q].label}: ${num(v)}${unitSuffix()}`
+      const description = `${p.title} · ${lead ? lead.name : t('nicht zugewiesen')}, ${period.label}: ${num(v)}${unitSuffix()}`
         + (over ? ` — ${t('Person über 100 % belegt, Überlast')}` : '')
         + (locked ? ` — ${t('laufendes Quartal, gesperrt')}` : '');
       return html`<button type="button"
-        class="pcell pcell--val heat-${heatStep(v)} ${over ? 'is-warn' : ''} ${editing ? 'is-editing' : ''} ${isEdited(p, q) ? 'is-edited' : ''} ${qBorder(q)}"
+        class="pcell pcell--val heat-${heatStep(v)} ${over ? 'is-warn' : ''} ${editing ? 'is-editing' : ''} ${isEdited(p, q) ? 'is-edited' : ''} ${qBorder(i)}"
         data-act="cell" data-val="${p.id}" data-q="${q}" data-fk="cell:${p.id}:${q}"
         aria-label="${description}" title="${description}" ${attr(!state.edit || locked, 'data-locked="1"')}>
         ${label}
@@ -482,8 +510,8 @@ function projectRow(p, tpl, sticky, rowIdx) {
     })}
 
     ${state.trend && html`<span class="pcell pcell--trend">
-      ${cells.map(v => html`<span class="spark" style="height:${v ? Math.max(8, Math.round(v / 120 * 100)) : 0}%"
-        class="${v ? '' : 'is-empty'}"></span>`)}
+      ${periods().map(period => { const v = periodValue(cells, period); return html`<span class="spark" style="height:${v ? Math.max(8, Math.round(v / 120 * 100)) : 0}%"
+        class="${v ? '' : 'is-empty'}"></span>`; })}
     </span>`}
   </div>`;
 }
@@ -565,7 +593,8 @@ export function renderModal() {
   if (!state.modal) return '';
   const body = state.modal.type === 'project' ? projectModal(state.modal)
     : state.modal.type === 'share' ? shareModal(state.modal)
-      : rebookModal(state.modal);
+      : state.modal.type === 'assign' ? assignModal(state.modal)
+        : rebookModal(state.modal);
   return html`<div class="scrim" data-act="close-modal">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" data-stop>${body}</div>
   </div>`;
@@ -575,6 +604,49 @@ export function renderModal() {
  * The URL already carries tab, view, filters, grouping, unit and search, so the
  * share dialog only has to show it and make it easy to take.
  */
+/** Give a project a lead, or hand it to somebody else. */
+function assignModal({ projectId, search = '', targetId }) {
+  const project = data.projectsById[projectId];
+  const current = project.leadId ? data.peopleById[project.leadId] : null;
+  const query = search.trim().toLowerCase();
+  const candidates = data.people.filter(x => !query || x.name.toLowerCase().includes(query));
+
+  return html`
+    <header class="modal__head">
+      <div>
+        <p class="modal__kicker">${t('Projektleitung')}</p>
+        <h2 class="modal__title" id="modal-title">${project.title}</h2>
+        <p class="modal__meta-line">${current
+          ? `${t('Aktuell')}: ${current.name} · ${personUtilisation(current.id, 0)} %`
+          : t('Aktuell nicht zugewiesen')}</p>
+      </div>
+      <button type="button" class="modal__close" data-act="close-modal" aria-label="${t('Schliessen')}">${icons.close(14)}</button>
+    </header>
+
+    <div class="rebook__to">
+      <label class="dd__searchfield">
+        ${icons.search(14)}
+        <input type="search" role="combobox" aria-expanded="true" aria-controls="assign-list"
+               data-act="assign-search" data-fk="assign-search" value="${search}"
+               placeholder="${t('Person suchen')}" aria-label="${t('Person suchen')}" autocomplete="off">
+      </label>
+      <ul class="rebook__list" id="assign-list" role="listbox" aria-label="${t('Person wählen')}">
+        ${candidates.length ? candidates.map(c => html`<li role="option" tabindex="-1"
+            aria-selected="${aria(c.id === targetId)}" class="${c.id === targetId ? 'is-on' : ''}"
+            data-act="assign-target" data-val="${c.id}">
+          <span>${c.name}</span>
+          <span class="rebook__role">${c.role} · ${personUtilisation(c.id, 0)} %</span>
+        </li>`) : html`<li class="rebook__empty">${t('Keine Person gefunden.')}</li>`}
+      </ul>
+    </div>
+
+    <footer class="modal__foot">
+      ${current && html`<button type="button" class="btn" data-act="assign-clear">${t('Zuweisung aufheben')}</button>`}
+      <button type="button" class="btn" data-act="close-modal">${t('Abbrechen')}</button>
+      <button type="button" class="btn btn--primary" data-act="assign-apply" ${attr(!targetId, 'disabled')}>${t('Zuweisen')}</button>
+    </footer>`;
+}
+
 function shareModal({ copied }) {
   const chips = activeFilters();
   return html`

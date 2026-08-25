@@ -21,10 +21,10 @@ export const data = {};
 
 const DEFAULT_STATE = {
   tab: 'start',            // start | uebersicht | termine | dashboard | verlauf | api | export
-  view: 'gantt',           // termine sub-view: gantt | liste | kalender
   sheet: 'hoch',           // print layout: hoch | quer
   lang: 'de',              // de | en
   scale: 'quartal',        // jahr | quartal | monat
+  periodOffset: 0,         // how far the visible window has been stepped
   unit: 'pct',             // pct | fte
   sort: 'projekt',         // any key in SORT_KEYS, or q0…q7 for one quarter
   sortDir: 'asc',          // asc | desc
@@ -101,11 +101,11 @@ export function readUrl() {
   const list = k => (p.get(k) || '').split(',').filter(Boolean);
   const patch = {};
   if (p.get('tab')) patch.tab = p.get('tab');
-  if (p.get('view')) patch.view = p.get('view');
   if (p.get('sheet')) patch.sheet = p.get('sheet');
   if (p.get('lang')) patch.lang = p.get('lang');
   if (p.get('unit')) patch.unit = p.get('unit');
   if (p.get('scale')) patch.scale = p.get('scale');
+  if (p.get('von')) patch.periodOffset = Number(p.get('von')) || 0;
   if (p.get('sort')) patch.sort = p.get('sort');
   if (p.get('dir')) patch.sortDir = p.get('dir');
   if (p.get('group')) patch.group = p.get('group');
@@ -124,11 +124,11 @@ export function writeUrl() {
   if (suppressUrl) return;
   const p = new URLSearchParams();
   p.set('tab', state.tab);
-  if (state.tab === 'termine') p.set('view', state.view);
   if (state.tab === 'export') p.set('sheet', state.sheet);
   if (state.lang !== 'de') p.set('lang', state.lang);
   if (state.unit !== 'pct') p.set('unit', state.unit);
   if (state.scale !== 'quartal') p.set('scale', state.scale);
+  if (state.periodOffset) p.set('von', String(state.periodOffset));
   if (state.sort !== 'projekt') p.set('sort', state.sort);
   if (state.sortDir !== 'asc') p.set('dir', state.sortDir);
   if (state.group !== 'portfolio') p.set('group', state.group);
@@ -326,6 +326,68 @@ export function filteredProjects() {
   });
 
   return sortProjects(list);
+}
+
+const MONTHS_DE = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
+
+/**
+ * The columns the grid actually shows.
+ *
+ * A pensum is a *rate*, not a total: 80 % in Q3 means 80 % of that person's
+ * time throughout Q3. So a month inside a quarter carries the same number, and
+ * a year is the average of its quarters — never their sum.
+ */
+export function periods() {
+  const qs = data.quarters;
+  const off = state.periodOffset;
+
+  if (state.scale === 'jahr') {
+    const years = [...new Set(qs.map(q => q.year))];
+    return years.map(year => {
+      const idx = qs.map((q, i) => (q.year === year ? i : -1)).filter(i => i >= 0);
+      return { id: String(year), label: String(year), short: String(year), quarters: idx, isNow: idx.includes(0) };
+    });
+  }
+
+  if (state.scale === 'monat') {
+    const out = [];
+    // Twelve months, stepped a quarter at a time.
+    const start = Math.max(0, Math.min(off, qs.length - 4));
+    for (let n = 0; n < 12; n++) {
+      const qi = start + Math.floor(n / 3);
+      if (qi >= qs.length) break;
+      const q = qs[qi];
+      const month = (Number(q.short.slice(1)) - 1) * 3 + (n % 3);
+      out.push({
+        id: `${q.year}-${month + 1}`,
+        label: `${MONTHS_DE[month]} ${q.year}`,
+        short: MONTHS_DE[month],
+        quarters: [qi],
+        isNow: qi === 0 && month === new Date(data.meta.today + 'T00:00:00').getMonth()
+      });
+    }
+    return out;
+  }
+
+  const start = Math.max(0, Math.min(off, qs.length - 1));
+  return qs.slice(start).map((q, n) => ({
+    id: q.id, label: q.label,
+    short: `${q.short}/${String(q.year).slice(2)}`,
+    quarters: [start + n], isNow: start + n === 0
+  }));
+}
+
+/** A rate over several quarters is their average, rounded. */
+export function periodValue(values, period) {
+  const picked = period.quarters.map(i => values[i]).filter(v => v != null);
+  if (!picked.length) return 0;
+  return Math.round(picked.reduce((a, b) => a + b, 0) / picked.length);
+}
+
+/** How many quarters the window can still be stepped. */
+export function canStep(dir) {
+  const max = data.quarters.length - (state.scale === 'jahr' ? data.quarters.length : 1);
+  return dir < 0 ? state.periodOffset > 0 : state.periodOffset < max;
 }
 
 /**

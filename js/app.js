@@ -49,6 +49,7 @@ function render() {
 
   document.documentElement.lang = state.lang;
   if (state.tab === 'api') mountSwagger();
+  root.querySelectorAll('[data-scroll]').forEach(syncScrollFades);
   positionMenu();
   restoreFocus(focus);
   if (Math.abs(window.scrollY - scrollY) > 1) window.scrollTo({ top: scrollY });
@@ -103,6 +104,16 @@ function focusSearch(variant) {
   });
 }
 
+/** Every app-owned change lands in the log, with both sides of it. */
+function logChange(project, field, change, value) {
+  data.changes.unshift({
+    id: `c-${project.id}-${data.changes.length}`,
+    date: data.meta.today, dateLabel: data.meta.todayLabel,
+    actor: data.meta.user.name, projectId: project.id, projectLabel: project.location,
+    field, change, value, onLanding: true
+  });
+}
+
 let toastTimer;
 function flash(message) {
   clearTimeout(toastTimer);
@@ -124,7 +135,6 @@ const actions = {
     phases: [], leads: [], portfolios: [], overloadOnly: false, search: '',
     searchOpen: { header: false, toolbar: false }
   }),
-  view: (val) => setState({ view: val, menu: null }),
   lang: (val) => setState({ lang: val, menu: null }),
 
   menu: (val, el) => {
@@ -160,7 +170,10 @@ const actions = {
   )),
   group: (val) => setState({ group: val, menu: null }),
   unit: (val) => setState({ unit: val }),
-  scale: () => flash(t('Der Prototyp zeigt Quartale; Jahr und Monat folgen.')),
+  scale: (val) => setState({ scale: val, periodOffset: 0 }),
+  period: (val) => setState(s => ({
+    periodOffset: val === 'today' ? 0 : Math.max(0, s.periodOffset + Number(val))
+  })),
 
   'my-projects': () => {
     const me = data.meta.user.personId;
@@ -259,8 +272,33 @@ const actions = {
     flash(`${amount} % ${t('umgebucht auf')} ${target.name} — ${project.location}, ${t('ab')} ${data.quarters[q].label}`);
   },
 
+  assign: (val) => setState({ modal: { type: 'assign', projectId: val, search: '', targetId: null }, editing: null }),
+  'assign-target': (val) => setState(s => ({ modal: { ...s.modal, targetId: val } })),
+  'assign-apply': () => {
+    const { projectId, targetId } = state.modal;
+    const project = data.projectsById[projectId];
+    const from = project.leadId ? data.peopleById[project.leadId] : null;
+    const to = data.peopleById[targetId];
+    project.leadId = targetId;
+    project.unassigned = false;
+    logChange(project, 'Projektleitung',
+      from ? `${from.name} → ${to.name}` : `${t('Zugewiesen an')} ${to.name}`, to.name);
+    setState({ modal: null });
+    flash(`${project.location} — ${t('Projektleitung')}: ${to.name}`);
+  },
+  'assign-clear': () => {
+    const project = data.projectsById[state.modal.projectId];
+    const from = project.leadId ? data.peopleById[project.leadId] : null;
+    project.leadId = null;
+    project.unassigned = true;
+    logChange(project, 'Projektleitung',
+      from ? `${from.name} → ${t('nicht zugewiesen')}` : t('Zuweisung aufgehoben'), t('nicht zugewiesen'));
+    setState({ modal: null });
+    flash(`${project.location} — ${t('Zuweisung aufgehoben')}`);
+  },
+
   'open-project': (val) => setState({ modal: { type: 'project', projectId: val }, menu: null, editing: null }),
-  'open-termine': (val) => setState({ tab: 'termine', view: 'gantt', modal: null, search: data.projectsById[val].location }),
+  'open-termine': (val) => setState({ tab: 'termine', modal: null, search: data.projectsById[val].location }),
 
   share: () => setState({ modal: { type: 'share', copied: false }, menu: null }),
   'share-select': (val, el) => el.select(),
@@ -319,6 +357,8 @@ root.addEventListener('input', (event) => {
     setState(s => ({ modal: { ...s.modal, amount: Math.max(0, Number(el.value) || 0) } }));
   } else if (act === 'rebook-quarters') {
     setState(s => ({ modal: { ...s.modal, quarters: Math.max(1, Number(el.value) || 1) } }));
+  } else if (act === 'assign-search') {
+    setState(s => ({ modal: { ...s.modal, search: el.value } }));
   } else if (act === 'rebook-search') {
     setState(s => ({ modal: { ...s.modal, search: el.value } }));
   } else if (act === 'rebook-reason') {
@@ -418,12 +458,27 @@ document.addEventListener('pointerdown', (event) => {
   setState({ menu: null });
 });
 
-/** The frozen columns cast a shadow only once the track is scrolled. */
-root.addEventListener('scroll', (event) => {
-  const scroller = event.target;
-  if (!scroller.classList?.contains('pgrid')) return;
+/**
+ * A horizontal scroller says so, but only when there is somewhere to go: the
+ * edge fades track the actual scroll position rather than being decoration.
+ */
+function syncScrollFades(scroller) {
+  const box = scroller.closest('.scrollbox') ?? scroller.parentElement;
+  if (!box) return;
+  const room = scroller.scrollWidth - scroller.clientWidth;
+  box.classList.toggle('has-more', room > 1 && scroller.scrollLeft < room - 1);
+  box.classList.toggle('has-less', scroller.scrollLeft > 1);
+  // The frozen columns only cast a shadow once the track has actually moved.
   scroller.firstElementChild?.classList.toggle('is-scrolled', scroller.scrollLeft > 0);
+}
+
+root.addEventListener('scroll', (event) => {
+  if (event.target.hasAttribute?.('data-scroll')) syncScrollFades(event.target);
 }, true);
+
+window.addEventListener('resize', () => {
+  root.querySelectorAll('[data-scroll]').forEach(syncScrollFades);
+});
 
 /** The edit popover is anchored in viewport space, so scrolling closes it. */
 document.addEventListener('scroll', () => {

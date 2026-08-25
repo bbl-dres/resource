@@ -38,7 +38,7 @@ running the content through Jekyll.
 | Termine | `#?tab=termine&view=gantt` | Three views of the same milestones: **Gantt** (phase bars plus a capacity band), **Liste** (one row per milestone), **Kalender** (twelve months as columns). |
 | Dashboard | `#?tab=dashboard` | The KPI strip plus aggregates over phase, person, location and budget. |
 | Verlauf | `#?tab=verlauf` | The immutable change log for app-owned fields. |
-| API | `#?tab=api` | The REST reference — five endpoint groups, the nested-JSONB project shape and the eIAM auth note. Reached from the **API** link in the footer. |
+| API | `#?tab=api` | Swagger UI over `data/openapi.json` — a real OpenAPI 3.1 document, 13 operations in five groups, with a response example per endpoint. Reached from the **API** link in the footer. |
 | Drucklayout | `#?tab=export` | The PDF export: A4 portrait and A4 landscape sheets with letterhead, fixed legend and document ID. Reached from **Exportieren → Als PDF exportieren**. |
 
 ### Interactions that actually work
@@ -60,6 +60,10 @@ running the content through Jekyll.
   *Meine Projekte*, floats selected entries to the top and scrolls at 214px. Arrow keys roam,
   `Escape` closes and hands focus back to the trigger, and panels stay inside the window.
 - **Frozen grid columns.** ID and project stay put while the quarters scroll under them.
+- **Time scale.** Jahr / Quartal / Monat with a period stepper. A pensum is a rate, so a year is
+  the average of its quarters and a month carries its quarter's figure — never a sum.
+- **Assigning a lead.** In edit mode the Projektleitung cell opens a searchable picker; every
+  assignment lands in the change log.
 - **Sortable columns.** Clicking a header sorts by it; clicking the active one flips the
   direction. The sort dropdown and the headers read the same state.
 - **Teilen** opens a dialog with the shareable URL for the current view.
@@ -132,7 +136,8 @@ Everything lives in `data/` as plain JSON.
 | `phases.json` | SIA 112 main phases and sub-phases |
 | `dashboard.json` | The one dashboard series that is not derivable (budget by year) |
 | `i18n.json` | The DE → EN dictionary |
-| `api.json` | The REST endpoints, the JSONB example, and the print letterhead and legend |
+| `api.json` | The print letterhead, legend and document metadata |
+| `openapi.json` | The OpenAPI 3.1 document Swagger UI renders |
 
 **Nothing that can be computed is stored.** Demand totals, net capacity, utilisation,
 free capacity, per-person load, budget roll-ups, milestone counts and every KPI are
@@ -151,6 +156,10 @@ its split by SIA phase, the project count per phase, and the milestone counts
 (11 gates, 8 on schedule, 1 without a date, 2 late).
 
 ---
+
+Two review documents sit alongside this one: [docs/DESIGN-REVIEW.md](docs/DESIGN-REVIEW.md) is a
+measured design and accessibility audit (contrast, greyscale legibility, density on a small
+laptop, target sizes, ARIA), and the gap analysis below.
 
 A full comparison against the mockup — what was missing, what deviates and what was fixed —
 is in [docs/GAP-ANALYSIS.md](docs/GAP-ANALYSIS.md).

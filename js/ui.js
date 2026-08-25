@@ -6,7 +6,7 @@
    ============================================================================= */
 
 import {
-  data, state, t, activeFilters, kpis, filteredProjects, sortKey
+  data, state, t, activeFilters, kpis, filteredProjects, sortKey, canStep
 } from './store.js';
 import { icon } from './icons.js';
 
@@ -252,6 +252,8 @@ export function pageHeader({ crumbs, title, actions = [], chrome = true }) {
             : html`<a class="crumbs__link" href="." data-act="home"
                 title="${t('Zur Einstiegsseite, ohne Filter')}">${t(c)}</a>`}`;
         })}
+        ${state.edit && html`<span class="editbanner">${icons.pencil(12)}
+          ${t('Bearbeitungsmodus aktiv — Änderungen werden protokolliert')}</span>`}
       </nav>
     </div>
     <div class="wrap page-header">
@@ -469,7 +471,7 @@ export function activeFilterRow() {
    Time scale + view switcher
    -------------------------------------------------------------------------- */
 
-export function timeControls({ views } = {}) {
+export function timeControls() {
   return html`<div class="timebar">
     <div class="timebar__group">
       ${segmented([
@@ -477,15 +479,15 @@ export function timeControls({ views } = {}) {
         { value: 'quartal', label: 'Quartal' },
         { value: 'monat', label: 'Monat' }
       ], state.scale, 'scale')}
-      <div class="timebar__nav">
-        <button type="button" class="btn btn--square" data-act="noop" aria-label="${t('Vorheriges Quartal')}">${icons.chevronLeft()}</button>
-        <button type="button" class="btn" data-act="noop">${t('Heute')}</button>
-        <button type="button" class="btn btn--square" data-act="noop" aria-label="${t('Nächstes Quartal')}">${icons.chevronRight()}</button>
-      </div>
     </div>
-    ${views && html`<div class="timebar__group">
-      ${segmented(views.map(v => ({ value: v.id, label: v.label })), state.view, 'view')}
-    </div>`}
+    <div class="timebar__group timebar__nav">
+      <button type="button" class="btn btn--square" data-act="period" data-val="-1"
+              ${attr(!canStep(-1), 'disabled')} aria-label="${t('Zurück')}">${icons.chevronLeft()}</button>
+      <button type="button" class="btn" data-act="period" data-val="today"
+              ${attr(state.periodOffset === 0, 'disabled')}>${t('Heute')}</button>
+      <button type="button" class="btn btn--square" data-act="period" data-val="1"
+              ${attr(!canStep(1), 'disabled')} aria-label="${t('Weiter')}">${icons.chevronRight()}</button>
+    </div>
   </div>`;
 }
 

@@ -109,9 +109,13 @@ already reports the person, and the footer row reports the quarter. The cell kee
 semibold number, and its `aria-label` still spells out *"Person über 100 % belegt, Überlast"*,
 so the non-visual channel is intact.
 
-That does leave the *visual* cue as colour alone, which is a real trade-off rather than a clean
-win. It is defensible here because the same fact is available three other ways on the same
-screen, but it is worth revisiting if the Ampel column is ever switched off by default.
+What is left in the cell is **weight plus colour**. I tried adding a red underscore so the mark
+would survive greyscale on its own; it read as clutter and was removed. So in pure black and
+white the cell-level cue is bold text alone — deliberately, because the same fact is carried
+three other ways on the same screen: the Ampel column encodes it as a **shape** (a rotated
+square for over, a circle for within), the Auslastung row spells out *Überlast / knapp / ok /
+frei* in **words**, and every cell's `aria-label` states it outright. The cell marker is an
+amplifier, not the primary channel.
 
 ### 3.3 Rows were tinted for a property of one cell ✅
 
@@ -217,14 +221,52 @@ Two responsive rules were tuned for the stated primary context rather than for a
 - The **footer sticks** and the content column has room before it, so a short screen no longer
   leaves the footer floating mid-page.
 
-## 9. Consistency ✅
+## 9. Reading the design in black and white ✅
+
+Greyscale rendering exposed a failure the colour view hid entirely: **three of the four status
+fills were within one grey level of each other** — `knapp` at 243, `ok` at 244 and `frei` at 244.
+In black and white, "97 % knapp", "90 % ok" and "69 % frei" were the same swatch.
+
+The fills now form a **luminance ramp, so severity reads as darkness**:
+
+| Status | Fill | Greyscale |
+|---|---|---|
+| Überlast | `#f5dada` | 224 |
+| knapp | `#f5eac0` | 234 |
+| ok | `#dcfbe7` | 243 |
+| frei | `#f9fafb` | 250 |
+
+Adjacent steps are 7–10 grey levels apart, which is enough to order them by eye without hue.
+Text on each fill still clears 6.3 : 1.
+
+The pensum heat ramp already worked this way (255 → 247 → 237 → 226 → 211), and the Ampel uses
+shape rather than colour alone, so both survive greyscale unchanged.
+
+## 10. Consistency ✅
 
 - The **KPI strip moved inside `.bi-grid`** as its first, full-width row, so the Dashboard is one
   grid rather than a strip plus a grid.
 - `--color-text-subtle` given a single documented meaning (non-text only).
 - Every content card now uses one elevation token; the landing entries stay flat by intent.
 
-## 10. Still open
+## 11. Built during the review
+
+Three things turned out to be missing rather than merely mis-styled, and were built:
+
+- **The time scale is real.** `Jahr` / `Quartal` / `Monat` and the period stepper were inert.
+  A pensum is a *rate*, not a total — 80 % in Q3 means 80 % of that person's time throughout
+  Q3 — so a year column is the **average** of its quarters and a month carries its quarter's
+  number unchanged. Summing would have been wrong. `Heute` returns the window to the current
+  quarter, and the window position lives in the URL.
+- **A project lead can be assigned.** Edit mode could move a pensum between people but could not
+  give an unassigned project a lead at all. The lead cell is now the place to do it, using the
+  same searchable picker as rebooking, and every assignment writes a change-log entry.
+- **The API screen is real Swagger UI** over a hand-written OpenAPI 3.1 document
+  (`data/openapi.json`), vendored offline rather than pulled from a CDN. Swagger keeps its own
+  look; the only overrides are contrast repairs — its default method badges put white text on
+  light fills, with `PATCH` landing at **1.6 : 1**.
+
+## 12. Still open
 
 - 📋 **Fewer quarters on a narrow laptop.** The wireframe's degradation order is
   *fewer quarters → hide attributes → freeze the left half*. Freezing and horizontal scrolling
