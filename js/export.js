@@ -12,7 +12,7 @@ import {
   totals, periods, periodValue, loadStatus, activeFilters
 } from './store.js';
 
-import { phaseOf } from './ui.js';
+import { phaseOf, scopeLine } from './ui.js';
 
 /* -----------------------------------------------------------------------------
    The table
@@ -71,7 +71,7 @@ export function buildTable() {
     subtitle: [
       `${data.meta.org.name} · ${data.meta.org.unit}`,
       data.meta.asOf,
-      `${list.length} ${t('von')} ${data.meta.scope.total} ${t('Bauprojekten')}`,
+      scopeLine(list.length),
       filters.length ? `${t('Filter')}: ${filters.map(f => f.label).join(', ')}` : t('ohne Filter')
     ].join(' · '),
     columns: columns(cols),

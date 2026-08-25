@@ -103,6 +103,8 @@ js/
   views-docs.js       Swagger UI mount and the PDF print layout
   export.js           the CSV and XLSX writers
 data/                 static mock data, see below
+tools/
+  generate-portfolio.js   regenerates data/ at portfolio scale (node tools/generate-portfolio.js)
 assets/
   swiss-logo-flag.svg
   icons/              Lucide icons (ISC) + icons.json manifest
@@ -140,11 +142,11 @@ Everything lives in `data/` as plain JSON.
 
 | File | Contents |
 |---|---|
-| `meta.json` | Organisation, current user, today's date, the eight quarters, locations |
-| `people.json` | Six people: contracted percentage and booked load per quarter |
+| `meta.json` | Organisation, current user, today's date, the eight quarters, the portfolios |
+| `people.json` | 46 people: contracted percentage and booked load per quarter |
 | `capacity.json` | Gross capacity, absences and externally contracted work per quarter |
-| `projects.json` | Eleven projects: phase, lead, budget, demand per quarter, target, Gantt bars |
-| `milestones.json` | Eleven gates with planned and forecast dates and status |
+| `projects.json` | 111 projects: phase, lead, budget, demand per quarter, target, Gantt bars |
+| `milestones.json` | 86 gates with planned and forecast dates and status |
 | `changes.json` | The change log |
 | `phases.json` | SIA 112 main phases and sub-phases |
 | `dashboard.json` | The one dashboard series that is not derivable (budget by year) |
@@ -156,17 +158,29 @@ Everything lives in `data/` as plain JSON.
 free capacity, per-person load, budget roll-ups, milestone counts and every KPI are
 derived in `store.js` from the files above. That is what makes an edit propagate.
 
-The figures reproduce the wireframe exactly:
+### Portfolio scale
+
+The wireframe's eleven projects are all still here, unchanged, and a hundred more
+are generated around them so the views can be judged at the size a real portfolio
+would have. What depends on the projects is derived rather than invented:
+
+- a person's booked load is the sum of the projects they lead, so an edit moves it;
+- the team is sized so that the portfolio runs at 112 % at its busiest quarter;
+- gross capacity is flat apart from one planned hire, because a team does not grow
+  to meet a falling demand curve — the utilisation curve falls out of that.
 
 ```
-demand       572  595  630  580  510  400  250  170  %
-net capacity 480  510  535  530  500  530  535  530  %
-utilisation  112  110  105   97   90   69   45   31  %
+demand       4122  4405  4830  4690  4155  3565  3145  2730  %
+net capacity 3670  3905  4065  4025  3800  4025  4065  4025  %
+utilisation   106   106   111   109   102    82    72    63  %
 ```
 
-as do the pre-budget-approval share (277 %), the committed budget (130,9 Mio.),
-its split by SIA phase, the project count per phase, and the milestone counts
-(11 gates, 8 on schedule, 1 without a date, 2 late).
+111 projects · 46 people · 4 130 % contracted · 972 Mio. CHF committed ·
+86 gates (55 on schedule, 24 late, 7 without a date) · 3 projects without a lead.
+
+Because these are derived, the wireframe's own headline figures (572 % demand,
+112 % utilisation, 130,9 Mio.) now describe only the eleven original projects, not
+the portfolio. Filter to them and they come back.
 
 ---
 
@@ -186,9 +200,12 @@ Worth reviewing — each is a one-line change if you disagree:
 1. **Grouping is applied, not decorative.** The wireframe's toolbar reads
    "Gruppieren nach: Projektleitung" while the grid renders flat. Here grouping really
    groups, and the default is **Teilportfolio** on every tab.
-2. **Teilportfolio split.** The wireframe's dashboard shows Inland 312 % and Sport 35 %;
-   those numbers do not tie to any assignment of the eleven projects. The prototype
-   derives the card from the data and lands on 310 % and 37 %.
+2. **Teilportfolio taxonomy.** The wireframe has five areas, of which *Inland* holds
+   more than half — which is a default, not a grouping. The prototype uses the BBL's
+   own building categories instead: Verwaltung, Zoll, Justiz und Polizei, Bildung und
+   Forschung, Bauten im Ausland, Kultur und Denkmäler, Sport. Seven areas, the largest
+   holding a quarter of the portfolio. The dashboard card is derived from the data
+   rather than asserted, so its figures follow.
 3. **Change-log pagination.** The wireframe shows "1 – 25 von 214 Einträgen". The
    prototype has nine real entries and says so.
 4. **Design annotations removed.** The wireframe's "Wofür / Stärke / Grenze" notes are
@@ -201,11 +218,14 @@ Worth reviewing — each is a one-line change if you disagree:
   not yet drop to six quarters on a narrow laptop.
 - **Below 900 px** the planning views show a reading path instead, as the wireframe
   prescribes. The landing page, the milestone list and the change log stay usable.
-- **`Personen über 100 %`** counts a raw load above 100, which is what the wireframe
-  shows (Sonja, Lars, Alina). The traffic light next to each row measures load against
-  the person's *contracted* percentage instead, so Paula at 90 % of 80 % also lights up.
-  The wireframe is inconsistent here; both readings are reproduced faithfully and the
-  question is open.
+- **`Personen über 100 %`** counts a raw load above 100. The traffic light next to each
+  row measures load against the person's *contracted* percentage instead, so somebody at
+  90 % of an 80 % contract also lights up. The wireframe is inconsistent here; both
+  readings are reproduced faithfully and the question is open.
+- **One lead is far above the rest.** Sonja Beispiel carries the wireframe's three
+  largest projects, which at portfolio scale puts her at 225 % against a median of 90 %.
+  That is what the data says rather than a generation artefact, and it is exactly the
+  case the view exists to surface.
 - **Rebooking** moves the whole project lead rather than splitting the allocation into
   two person-level rows. The data model does not carry per-person allocations yet — the API
   reference shows the `allocations` shape a real implementation would use.

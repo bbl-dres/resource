@@ -20,10 +20,6 @@
   "version": "Version 0.4 · Prototyp",
   "notifications": 3,
   "notificationsTitle": "3 Benachrichtigungen: MS4 verschoben · neue Überlast Sonja Beispiel · offener Bedarf ab Q1/2027",
-  "scope": {
-    "shown": 11,
-    "total": 512
-  },
   "quarters": [
     {
       "id": "2026Q3",
@@ -76,20 +72,28 @@
   ],
   "portfolios": [
     {
-      "id": "inland",
-      "label": "Inland"
-    },
-    {
-      "id": "ausland",
-      "label": "Ausland"
+      "id": "verwaltung",
+      "label": "Verwaltung"
     },
     {
       "id": "zoll",
       "label": "Zoll"
     },
     {
-      "id": "repraesentativ",
-      "label": "Repräsentative Bauten"
+      "id": "justiz",
+      "label": "Justiz und Polizei"
+    },
+    {
+      "id": "bildung",
+      "label": "Bildung und Forschung"
+    },
+    {
+      "id": "ausland",
+      "label": "Bauten im Ausland"
+    },
+    {
+      "id": "kultur",
+      "label": "Kultur und Denkmäler"
     },
     {
       "id": "sport",

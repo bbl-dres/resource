@@ -204,6 +204,8 @@ const actions = {
   'filter-lead': (val) => setState({ tab: 'uebersicht', leads: [val], menu: null }),
 
   'edit-toggle': () => setState(s => ({ edit: !s.edit, editing: null })),
+  'show-all': (val) => setState(s => ({ showAll: { ...s.showAll, [val]: !s.showAll[val] } })),
+
   'foot-details': () => setState(s => ({ footDetails: !s.footDetails })),
   'toggle-group': (val) => setState(s => ({
     collapsedGroups: { ...s.collapsedGroups, [val]: !s.collapsedGroups[val] }

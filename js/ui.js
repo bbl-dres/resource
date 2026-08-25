@@ -469,6 +469,14 @@ function leadMenuBody() {
 
 
 
+/** «111 Bauprojekte», or «31 von 111 Bauprojekten» once something is filtered. */
+export function scopeLine(shown) {
+  const total = data.projects.length;
+  return shown === total
+    ? `${total} ${t('Bauprojekte')}`
+    : `${shown} ${t('von')} ${total} ${t('Bauprojekten')}`;
+}
+
 export function activeFilterRow() {
   const chips = activeFilters();
   const shown = filteredProjects().length;
@@ -479,7 +487,7 @@ export function activeFilterRow() {
              <button type="button" class="linkbtn linkbtn--danger" data-act="filters-reset">${icons.close(12)} ${t('Alle Filter zurücksetzen')}</button>`
       : html`<span class="filterbar__label">${t('Aktive Filter:')} <span class="filterbar__none">${t('keine')}</span></span>`}
     <span class="toolbar__spacer"></span>
-    <span class="filterbar__count">${shown} ${t('von')} ${data.meta.scope.total} ${t('Bauprojekten')} · ${data.meta.org.unit}</span>
+    <span class="filterbar__count">${scopeLine(shown)}</span>
   </div>`;
 }
 

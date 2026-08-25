@@ -51,6 +51,7 @@ const DEFAULT_STATE = {
   menuSearch: '',          // filter inside the open dropdown
   modal: null,             // { type: 'project'|'rebook', ... }
   footDetails: false,
+  showAll: { attention: false, milestones: false },   // landing cards, expanded
   searchOpen: { header: false, toolbar: false },   // the two fields open independently
   collapsedGroups: {},
   toast: null,
@@ -60,7 +61,8 @@ const DEFAULT_STATE = {
 export const state = {
   ...DEFAULT_STATE,
   cols: { ...DEFAULT_STATE.cols },
-  searchOpen: { ...DEFAULT_STATE.searchOpen }
+  searchOpen: { ...DEFAULT_STATE.searchOpen },
+  showAll: { ...DEFAULT_STATE.showAll }
 };
 
 const listeners = new Set();

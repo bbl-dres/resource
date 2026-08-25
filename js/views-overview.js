@@ -64,20 +64,20 @@ export function renderLanding() {
       tone: 'danger', tab: 'uebersicht'
     },
     {
-      title: 'Personen',
-      sub: `${data.people.length} Personen · ${tot.net[0]} % Kapazität netto · ${grossCap} % brutto`,
+      title: 'Personen', count: data.people.length,
+      sub: `${tot.net[0]} % Kapazität netto · ${grossCap} % brutto`,
       metric: overPeople.length, metricLabel: 'über 100 % belegt',
       tone: 'danger', tab: 'dashboard'
     },
     {
-      title: 'Meilensteine',
-      sub: `${ms.total} Gates · ${ms.onTime} im Termin · ${ms.open} ohne Termin`,
+      title: 'Meilensteine', count: ms.total,
+      sub: `${ms.onTime} im Termin · ${ms.open} ohne Termin`,
       metric: ms.late, metricLabel: 'überfällig',
       tone: 'danger', tab: 'termine'
     },
     {
-      title: 'Projekte',
-      sub: `${data.projects.length} Projekte · ${tot.demand[0]} % Bedarf · ${tot.preCredit[0]} % vor Baukredit-Freigabe`,
+      title: 'Projekte', count: data.projects.length,
+      sub: `${tot.demand[0]} % Bedarf · ${tot.preCredit[0]} % vor Baukredit-Freigabe`,
       metric: unassigned.length, metricLabel: 'ohne Projektleitung',
       tone: 'info', tab: 'uebersicht'
     }
@@ -97,7 +97,8 @@ export function renderLanding() {
       <div class="entry-grid">
         ${cards.map(c => html`<button type="button" class="entry entry--${c.tone}" data-act="tab" data-val="${c.tab}">
           <span class="entry__head">
-            <span class="entry__title">${t(c.title)}</span>
+            <span class="entry__title">${t(c.title)}${
+              c.count ? html`<span class="count-pill">${c.count}</span>` : ''}</span>
             <span class="entry__sub">${c.sub}</span>
           </span>
           <span class="entry__foot">
@@ -117,11 +118,15 @@ export function renderLanding() {
     </div></div>`;
 }
 
+/* A card says how much there is before it says how much of it you can see. */
+const CARD_ROWS = 6;
+
 function nextMilestonesCard() {
-  const list = milestones().slice(0, 6);
+  const all = milestones();
+  const list = state.showAll.milestones ? all : all.slice(0, CARD_ROWS);
   return html`<section class="card card--span4">
     <header class="card__head">
-      <h2 class="card__title">${t('Nächste Meilensteine')}</h2>
+      <h2 class="card__title">${t('Nächste Meilensteine')}<span class="count-pill">${all.length}</span></h2>
       <p class="card__sub">12 Monate · chronologisch · ${t('öffnet Meilensteine')}</p>
     </header>
     <ul class="mslist">
@@ -137,7 +142,17 @@ function nextMilestonesCard() {
         </button>
       </li>`)}
     </ul>
+    ${moreLink('milestones', all.length)}
   </section>`;
+}
+
+/** «Alle N anzeigen», or nothing when the card is already showing them all. */
+function moreLink(key, total) {
+  if (total <= CARD_ROWS) return '';
+  const open = state.showAll[key];
+  return html`<button type="button" class="more-link" data-act="show-all" data-val="${key}">
+    ${open ? t('Weniger anzeigen') : `${t('Alle')} ${total} ${t('anzeigen')}`}
+  </button>`;
 }
 
 function attentionCard(overPeople, unassigned) {
@@ -162,13 +177,15 @@ function attentionCard(overPeople, unassigned) {
     });
   });
 
+  const list = state.showAll.attention ? rows : rows.slice(0, CARD_ROWS);
+
   return html`<section class="card card--span4">
     <header class="card__head">
-      <h2 class="card__title">${t('Handlungsbedarf')}</h2>
+      <h2 class="card__title">${t('Handlungsbedarf')}<span class="count-pill">${rows.length}</span></h2>
       <p class="card__sub">${data.quarters[0].label} · ${t('öffnet die Übersicht, auf die Person gefiltert')}</p>
     </header>
     <div class="attention">
-      ${rows.map(r => html`<button type="button" class="attention__row is-${r.severity}"
+      ${list.map(r => html`<button type="button" class="attention__row is-${r.severity}"
           data-act="${r.act}" data-val="${r.val}">
         <span class="attention__main">
           <span class="attention__name">${r.name}</span>
@@ -177,6 +194,7 @@ function attentionCard(overPeople, unassigned) {
         <span class="attention__value">${r.value}</span>
       </button>`)}
     </div>
+    ${moreLink('attention', rows.length)}
   </section>`;
 }
 
@@ -210,9 +228,9 @@ function recentChangesBlock() {
         <span class="chg__date">${c.dateLabel}</span>
       </div>`)}
     </div>
-    <div class="changes__more">
-      <button type="button" class="linkbtn" data-act="tab" data-val="verlauf">${t('Alle Änderungen anzeigen')}</button>
-    </div>
+    <button type="button" class="more-link" data-act="tab" data-val="verlauf">
+      ${t('Alle Änderungen anzeigen')}
+    </button>
   </section>`;
 }
 
@@ -500,7 +518,9 @@ function projectRow(p, tpl, sticky, cols, rowIdx) {
     ${cols.map(period => {
       const q = period.quarters[0];
       const v = periodValue(cells, period);
-      const over = lead ? period.quarters.some(x => personUtilisation(p.leadId, x) > 100) : false;
+      // The lead being stretched says nothing about a quarter this project does
+      // not run in, and a red nought is noise rather than a warning.
+      const over = lead && v > 0 && period.quarters.some(x => personUtilisation(p.leadId, x) > 100);
       const locked = period.quarters.includes(0);
       const editing = state.editing && state.editing.projectId === p.id && state.editing.q === q;
       const label = state.hideZeros && v === 0 ? '' : num(v);

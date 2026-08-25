@@ -11,7 +11,7 @@ import {
   personUtilisation, totals, loadStatus, heatStep, filteredProjects, activeFilters
 } from './store.js';
 
-import { html, raw, icons, pageHeader, exportMenu, phaseOf } from './ui.js';
+import { html, raw, icons, pageHeader, exportMenu, phaseOf, scopeLine } from './ui.js';
 
 /* =============================================================================
    API documentation
@@ -146,7 +146,7 @@ function printSheet(sheet) {
           · ${quarters[0].label} – ${quarters[quarters.length - 1].label}${sheet.id === 'hoch' ? ' · Blatt 1' : ''}</div>
       </div>
       <div class="sheet__meta">
-        <span>${t('Umfang')}: ${all.length} ${t('von')} ${data.meta.scope.total} ${t('Bauprojekten')}</span>
+        <span>${t('Umfang')}: ${scopeLine(all.length)}</span>
         <span>${t('Filter')}: ${chips.length ? chips.map(c => t(c.label)).join(', ') : t('keine')}
           · ${t('Einheit')}: ${state.unit === 'fte' ? 'FTE' : 'Pensum in %'}</span>
         <span>${cfg.classification}</span>

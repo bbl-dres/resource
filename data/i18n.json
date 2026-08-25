@@ -1,9 +1,31 @@
 {
   "languages": [
-    { "code": "de", "label": "Deutsch", "tag": "DE", "available": true },
-    { "code": "fr", "label": "Français", "tag": "FR", "available": false, "note": "folgt" },
-    { "code": "it", "label": "Italiano", "tag": "IT", "available": false, "note": "folgt" },
-    { "code": "en", "label": "English", "tag": "EN", "available": true }
+    {
+      "code": "de",
+      "label": "Deutsch",
+      "tag": "DE",
+      "available": true
+    },
+    {
+      "code": "fr",
+      "label": "Français",
+      "tag": "FR",
+      "available": false,
+      "note": "folgt"
+    },
+    {
+      "code": "it",
+      "label": "Italiano",
+      "tag": "IT",
+      "available": false,
+      "note": "folgt"
+    },
+    {
+      "code": "en",
+      "label": "English",
+      "tag": "EN",
+      "available": true
+    }
   ],
   "menuNote": "Der Prototyp übersetzt DE und EN; FR und IT folgen in der Umsetzung.",
   "en": {
@@ -163,14 +185,15 @@
     "API": "API",
     "1 Strategische Planung": "1 Strategic planning",
     "2 Vorstudien": "2 Preliminary studies",
-    "3 Projektierung": "3 Design",
     "4 Ausschreibung": "4 Tendering",
     "5 Realisierung": "5 Realisation",
     "6 Bewirtschaftung": "6 Operation",
-    "Inland": "Domestic",
-    "Ausland": "Abroad",
     "Zoll": "Customs",
-    "Repräsentative Bauten": "Representative buildings",
-    "Sport": "Sport"
+    "Sport": "Sport",
+    "Verwaltung": "Administration",
+    "Justiz und Polizei": "Justice and police",
+    "Bildung und Forschung": "Education and research",
+    "Bauten im Ausland": "Buildings abroad",
+    "Kultur und Denkmäler": "Culture and monuments"
   }
 }
