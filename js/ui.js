@@ -246,9 +246,15 @@ export function pageHeader({ crumbs, title, actions = [], chrome = true }) {
   return html`<div class="band">
     <div class="wrap page-header">
       <nav class="crumbs" aria-label="Pfad">
-        ${crumbs.map((c, i) => html`${i > 0 && html`<span aria-hidden="true">›</span>`}<span
-          class="${i === crumbs.length - 1 ? 'crumbs__current' : ''}"
-          ${attr(i === crumbs.length - 1, 'aria-current="page"')}>${t(c)}</span>`)}
+        ${crumbs.map((c, i) => {
+          const last = i === crumbs.length - 1;
+          const sep = i > 0 ? html`<span aria-hidden="true">›</span>` : '';
+          // Everything above the current level returns to the entry page, which
+          // is the application root — so it is a real href, not just a handler.
+          return html`${sep}${last
+            ? html`<span class="crumbs__current" aria-current="page">${t(c)}</span>`
+            : html`<a class="crumbs__link" href="." data-act="tab" data-val="start">${t(c)}</a>`}`;
+        })}
       </nav>
       <div class="page-header__row">
         <h1 class="page-title">${t(title)}</h1>
@@ -328,7 +334,7 @@ const COLUMNS = [
   { id: 'nextMs', label: 'Nächster Meilenstein' }
 ];
 
-export function toolbar({ attributes = true, overdue = false } = {}) {
+export function toolbar({ attributes = true } = {}) {
   const sort = SORTS.find(s => s.id === state.sort);
   const groupLabel = GROUPS.find(g => g.id === state.group).label;
 
@@ -382,11 +388,9 @@ export function toolbar({ attributes = true, overdue = false } = {}) {
 
     <span class="toolbar__sep" aria-hidden="true"></span>
 
-    ${overdue
-      ? html`<button type="button" class="btn btn--danger-toggle ${state.overdueOnly ? 'is-on' : ''}"
-          data-act="overdue-toggle" aria-pressed="${aria(state.overdueOnly)}">${t('Nur überfällige')}</button>`
-      : html`<button type="button" class="btn btn--danger-toggle ${state.overloadOnly ? 'is-on' : ''}"
-          data-act="overload-toggle" aria-pressed="${aria(state.overloadOnly)}">${t('Nur Überlast')}</button>`}
+    <button type="button" class="btn btn--danger-toggle ${state.overloadOnly ? 'is-on' : ''}"
+      data-act="overload-toggle" aria-pressed="${aria(state.overloadOnly)}">${t('Nur Überlast')}</button>
+
 
     <span class="toolbar__spacer"></span>
 
@@ -504,7 +508,9 @@ export function appFooter() {
     <span>${m.version}</span>
     <span class="shell-footer__stand">${m.asOf}</span>
     <span class="shell-footer__links">
-      ${m.footerLinks.map(l => html`<a href="${l.href}">${t(l.label)}</a>`)}
+      ${m.footerLinks.map(l => l.tab
+        ? html`<a href="#?tab=${l.tab}" data-act="tab" data-val="${l.tab}">${t(l.label)}</a>`
+        : html`<a href="${l.href}" data-act="noop">${t(l.label)}</a>`)}
     </span>
   </div></footer>`;
 }

@@ -95,13 +95,16 @@ export function renderExport() {
 function printSheet(sheet) {
   const cfg = data.api.print;
   const all = filteredProjects();
-  const perSheet = sheet.id === 'hoch' ? 6 : 6;      // what fits on one page
+  // How many rows the paper actually holds at a 26px row height.
+  const perSheet = sheet.id === 'hoch' ? 24 : 14;
   const rows = all.slice(0, perSheet);
   const rest = all.length - rows.length;
   const quarters = data.quarters.slice(0, sheet.quarters);
   const tot = totals(all);
   const chips = activeFilters();
-  const pages = Math.max(1, Math.ceil(all.length / perSheet)) + (sheet.id === 'hoch' ? 1 : 0);
+  // Portrait fits four quarters, so a longer period needs further sheets.
+  const quarterSheets = Math.ceil(data.quarters.length / sheet.quarters);
+  const pages = Math.max(1, Math.ceil(all.length / perSheet)) * quarterSheets;
 
   const cols = sheet.id === 'hoch'
     ? `64px minmax(0, 200px) 96px 92px 62px repeat(${sheet.quarters}, 54px)`
@@ -156,10 +159,12 @@ function printSheet(sheet) {
         </div>`;
       })}
 
-      ${rest > 0 && html`<div class="sheet__row sheet__row--more">
-        <span style="grid-column:span ${quarters.length + 5}">… ${rest} ${t('weitere Zeilen auf Blatt 2')}${
-          sheet.id === 'hoch' && data.quarters.length > sheet.quarters
-            ? ` · ${t('Quartale')} ${data.quarters[4].label} – ${data.quarters[7].label} ${t('auf Blatt 3')}` : ''}</span>
+      ${(rest > 0 || quarterSheets > 1) && html`<div class="sheet__row sheet__row--more">
+        <span style="grid-column:span ${quarters.length + 5}">
+          ${rest > 0 ? `… ${rest} ${t('weitere Zeilen auf dem nächsten Blatt')}` : ''}
+          ${rest > 0 && quarterSheets > 1 ? ' · ' : ''}
+          ${quarterSheets > 1 ? `${t('Quartale')} ${data.quarters[sheet.quarters].label} – ${data.quarters[data.quarters.length - 1].label} ${t('auf einem eigenen Blatt')}` : ''}
+        </span>
       </div>`}
 
       <div class="sheet__row sheet__row--sum">

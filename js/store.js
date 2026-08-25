@@ -9,7 +9,7 @@
 
 const DATA_FILES = [
   'meta', 'phases', 'people', 'capacity', 'projects',
-  'milestones', 'changes', 'dashboard', 'i18n'
+  'milestones', 'changes', 'dashboard', 'i18n', 'api'
 ];
 
 /** Raw data, populated by load(). */
@@ -20,19 +20,19 @@ export const data = {};
    -------------------------------------------------------------------------- */
 
 const DEFAULT_STATE = {
-  tab: 'start',            // start | uebersicht | termine | dashboard | verlauf
+  tab: 'start',            // start | uebersicht | termine | dashboard | verlauf | api | export
   view: 'gantt',           // termine sub-view: gantt | liste | kalender
+  sheet: 'hoch',           // print layout: hoch | quer
   lang: 'de',              // de | en
   scale: 'quartal',        // jahr | quartal | monat
   unit: 'pct',             // pct | fte
   sort: 'projekt',         // projekt | pensum | kredit
-  group: 'none',           // none | lead | phase | portfolio
+  group: 'portfolio',      // portfolio | lead | phase | none
   search: '',
   phases: [],              // selected SIA main phase ids, e.g. ['3','5']
   leads: [],               // selected person ids
   portfolios: [],          // selected portfolio ids
   overloadOnly: false,
-  overdueOnly: false,
   // column / attribute toggles
   cols: { id: true, phase: true, lead: true, credit: true, portfolio: false, priority: false, nextMs: false },
   ampel: true,
@@ -101,6 +101,7 @@ export function readUrl() {
   const patch = {};
   if (p.get('tab')) patch.tab = p.get('tab');
   if (p.get('view')) patch.view = p.get('view');
+  if (p.get('sheet')) patch.sheet = p.get('sheet');
   if (p.get('lang')) patch.lang = p.get('lang');
   if (p.get('unit')) patch.unit = p.get('unit');
   if (p.get('scale')) patch.scale = p.get('scale');
@@ -122,11 +123,12 @@ export function writeUrl() {
   const p = new URLSearchParams();
   p.set('tab', state.tab);
   if (state.tab === 'termine') p.set('view', state.view);
+  if (state.tab === 'export') p.set('sheet', state.sheet);
   if (state.lang !== 'de') p.set('lang', state.lang);
   if (state.unit !== 'pct') p.set('unit', state.unit);
   if (state.scale !== 'quartal') p.set('scale', state.scale);
   if (state.sort !== 'projekt') p.set('sort', state.sort);
-  if (state.group !== 'none') p.set('group', state.group);
+  if (state.group !== 'portfolio') p.set('group', state.group);
   if (state.search) p.set('q', state.search);
   if (state.phases.length) p.set('phase', state.phases.join(','));
   if (state.leads.length) p.set('lead', state.leads.join(','));
@@ -395,7 +397,7 @@ export function removeFilter(kind, id) {
 }
 
 export function resetFilters() {
-  setState({ phases: [], leads: [], portfolios: [], overloadOnly: false, overdueOnly: false, search: '' });
+  setState({ phases: [], leads: [], portfolios: [], overloadOnly: false, search: '' });
 }
 
 export function toggleIn(key, id) {
@@ -411,7 +413,6 @@ export function milestones() {
   const projectIds = new Set(filteredProjects().map(p => p.id));
   return data.milestones.items
     .filter(m => projectIds.has(m.projectId))
-    .filter(m => !state.overdueOnly || m.status !== 'ok')
     .map(m => {
       const project = data.projectsById[m.projectId];
       const cat = data.milestones.catalog.find(c => c.code === m.code);

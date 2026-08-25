@@ -230,6 +230,8 @@ export function renderUebersicht() {
     })}
     <div class="wrap"><div class="content">
       ${state.narrow ? tooNarrow('Das Pensum-Raster') : html`
+        ${state.edit && html`<p class="editbanner">${icons.pencil(14)}
+          ${t('Bearbeitungsmodus aktiv — Änderungen werden protokolliert')}</p>`}
         ${toolbar()}
         ${activeFilterRow()}
         ${timeControls({})}
@@ -506,7 +508,7 @@ function editPopover() {
       style="left:${Math.round(left)}px; top:${Math.round(top)}px">
     <div class="pop__kicker">${t('Pensum bearbeiten')}</div>
     <div class="pop__who">${p.title}</div>
-    <div class="pop__what">${lead ? lead.name : t('nicht zugewiesen')} · ${data.quarters[q].label}</div>
+    <div class="pop__what">${lead ? `${lead.name} · ${lead.role}` : t('nicht zugewiesen')} · ${data.quarters[q].label}</div>
 
     <div class="pop__stepper">
       <button type="button" class="pop__step" data-act="draft" data-val="-5" aria-label="${t('Pensum verringern')}">${icons.minus(15)}</button>
@@ -536,6 +538,7 @@ function editPopover() {
       <button type="button" class="btn btn--primary" data-act="apply" ${attr(over && !state.reason.trim(), 'disabled')}>${t('Übernehmen')}</button>
       <button type="button" class="btn" data-act="cancel-edit">${t('Abbrechen')}</button>
     </div>
+    <p class="pop__footnote">${t('Übernehmen schreibt den Eintrag in den Verlauf. Esc bricht ab.')}</p>
   </div>`;
 }
 
@@ -556,27 +559,61 @@ function projectModal({ projectId }) {
   const lead = p.leadId ? data.peopleById[p.leadId] : null;
   const cells = projectDemand(p);
   const phase = phaseOf(p.phase);
-  const ms = data.milestones.items
+  const q0 = data.quarters[0];
+  const nextMs = data.milestones.items
     .filter(m => m.projectId === p.id)
-    .map(m => ({ ...m, name: data.milestones.catalog.find(c => c.code === m.code)?.name }));
+    .sort((a, b) => a.planDate.localeCompare(b.planDate))[0];
+  const nextName = nextMs && data.milestones.catalog.find(c => c.code === nextMs.code)?.name;
+  const log = data.changes.filter(c => c.projectId === p.id);
+  const util = lead ? personUtilisation(lead.id, 0) : null;
+
+  // The wireframe is explicit: five facts, always the same, in this order.
+  const facts = [
+    {
+      term: 'SIA-Phase',
+      value: html`<span class="phase-dot ${phaseClass(p.phase)}"></span>${phase.label}`,
+      sub: `${t('Hauptphase')} ${phase.main}`
+    },
+    {
+      term: 'Projektleitung',
+      value: lead ? lead.name : t('— nicht zugewiesen'),
+      sub: lead ? `${t('Auslastung')} ${q0.short}: ${util > 100 ? '▲ ' : ''}${util} %` : t('Bedarf offen'),
+      tone: lead ? (util > 100 ? 'danger' : null) : 'warn'
+    },
+    {
+      term: `${t('Pensum')} ${q0.label}`,
+      value: fmt(cells[0]),
+      sub: `${t('Soll')} ${fmt(p.target)} · ${cells[0] > p.target ? t('über Soll') : t('im Soll')}`,
+      tone: cells[0] > p.target ? 'danger' : null
+    },
+    {
+      term: 'Kredit CHF',
+      value: p.creditLabel,
+      sub: p.preCredit ? t('Freigabe steht aus') : t('Kredit freigegeben')
+    },
+    {
+      term: 'Nächster Meilenstein',
+      value: nextMs ? `${nextMs.code} · ${deDate(nextMs.planDate)}` : '—',
+      sub: nextMs ? `${nextName} · ${nextMs.statusLabel.replace('▲ ', '')}` : t('kein Gate im Zeitraum'),
+      tone: nextMs && nextMs.status !== 'ok' ? 'danger' : null
+    }
+  ];
 
   return html`
     <header class="modal__head">
       <div>
-        <p class="modal__kicker">${p.number} · ${t(data.portfoliosById[p.portfolio].label)}</p>
+        <p class="modal__kicker">${p.number} · ${t(data.portfoliosById[p.portfolio].label)} · ${p.location.split(',')[0]}</p>
         <h2 class="modal__title" id="modal-title">${p.title}</h2>
       </div>
       <button type="button" class="modal__close" data-act="close-modal" aria-label="${t('Schliessen')}">${icons.close(14)}</button>
     </header>
 
-    <div class="modal__meta">
-      <div><dt>${t('SIA-Phase')}</dt><dd><span class="phase-dot ${phaseClass(p.phase)}"></span>${phase.label}</dd></div>
-      <div><dt>${t('Projektleitung')}</dt><dd class="${lead ? '' : 'is-none'}">${lead ? lead.name : t('— nicht zugewiesen')}</dd></div>
-      <div><dt>${t('Kredit CHF')}</dt><dd>${p.creditLabel}</dd></div>
-      <div><dt>${t('Priorität')}</dt><dd>${t(p.priority)}</dd></div>
-      <div><dt>${t('Bedarf')} ${data.quarters[0].label}</dt><dd>${fmt(cells[0])}</dd></div>
-      <div><dt>${t('Soll')}</dt><dd>${fmt(p.target)}</dd></div>
-    </div>
+    <dl class="facts">
+      ${facts.map(f => html`<div class="facts__row">
+        <dt>${t(f.term)}</dt>
+        <dd class="${f.tone ? 'is-' + f.tone : ''}">${f.value}<span class="facts__sub">${f.sub}</span></dd>
+      </div>`)}
+    </dl>
 
     <section class="modal__section">
       <h3>${t('Pensum je Quartal')}</h3>
@@ -588,86 +625,99 @@ function projectModal({ projectId }) {
       </div>
     </section>
 
-    <section class="modal__section">
-      <h3>${t('Meilensteine')}</h3>
-      ${ms.length ? html`<ul class="modal__ms">
-        ${ms.map(m => html`<li class="is-${m.status}">
-          <span class="modal__mscode">${m.code}</span>
-          <span class="modal__msname">${m.name}</span>
-          <span class="modal__msplan">${t('Plan')} ${m.plan.replace(/(\d{4})Q(\d)/, 'Q$2/$1')}</span>
-          <span class="modal__msstatus">${m.statusLabel}</span>
-        </li>`)}
-      </ul>` : html`<p class="modal__empty">${t('Keine Meilensteine im gesetzten Zeitraum.')}</p>`}
-    </section>
-
-    <section class="modal__section">
+    ${log.length ? html`<section class="modal__section">
       <h3>${t('Letzte Änderungen')}</h3>
-      ${(() => {
-        const rows = data.changes.filter(c => c.projectId === p.id);
-        return rows.length ? html`<ul class="modal__log">
-          ${rows.map(c => html`<li><span>${c.dateLabel}</span><span>${t(c.field)}</span><span>${c.change}</span><span>${c.value}</span></li>`)}
-        </ul>` : html`<p class="modal__empty">${t('Noch keine Änderungen protokolliert.')}</p>`;
-      })()}
-    </section>
+      <ul class="modal__log">
+        ${log.map(c => html`<li><span>${c.dateLabel}</span><span>${t(c.field)}</span><span>${c.change}</span><span>${c.value}</span></li>`)}
+      </ul>
+    </section>` : ''}
 
     <footer class="modal__foot">
+      <p class="modal__footnote">${t('Esc oder Klick ausserhalb schliesst. Kein Bearbeiten im Modal.')}</p>
       <button type="button" class="btn" data-act="open-termine" data-val="${p.id}">${t('In Termine öffnen')}</button>
-      <button type="button" class="btn btn--primary" data-act="close-modal">${t('Schliessen')}</button>
+      <button type="button" class="btn btn--primary" data-act="noop">${t('Im ePPM öffnen')}</button>
     </footer>`;
 }
 
-function rebookModal({ projectId, q, amount, targetId }) {
+function deDate(iso) {
+  const [y, m, d] = iso.split('-');
+  return `${d}.${m}.${y}`;
+}
+
+function rebookModal({ projectId, q, amount, targetId, quarters = 2, search = '', reason = '' }) {
   const p = data.projectsById[projectId];
   const from = p.leadId ? data.peopleById[p.leadId] : null;
   const quarter = data.quarters[q];
-  const candidates = data.people.filter(x => x.id !== p.leadId);
+  const query = search.trim().toLowerCase();
+  const candidates = data.people
+    .filter(x => x.id !== p.leadId)
+    .filter(x => !query || x.name.toLowerCase().includes(query));
   const target = targetId ? data.peopleById[targetId] : null;
-
-  const afterFrom = from ? Math.round(personUtilisation(from.id, q) - amount / from.employment * 100) : null;
-  const afterTo = target ? Math.round(personUtilisation(target.id, q) + amount / target.employment * 100) : null;
+  const ready = target && amount > 0 && reason.trim();
 
   return html`
     <header class="modal__head">
       <div>
-        <p class="modal__kicker">${t('Umbuchen')} · ${quarter.label}</p>
+        <p class="modal__kicker">${t('Pensum umbuchen')}</p>
         <h2 class="modal__title" id="modal-title">${p.title}</h2>
+        <p class="modal__meta-line">${t('Rolle Projektleitung')} · ${t('ab')} ${quarter.label}, ${quarters} ${t('Quartale')}</p>
       </div>
       <button type="button" class="modal__close" data-act="close-modal" aria-label="${t('Schliessen')}">${icons.close(14)}</button>
     </header>
 
-    <p class="modal__lead">${t('Ein Vorgang statt zwei Transaktionen: das Pensum wechselt die Person, die Summe im Quartal bleibt gleich.')}</p>
+    <p class="modal__lead">${t('Ein Vorgang statt zwei Transaktionen: von, an, Betrag und Zeitraum ergeben einen Verlaufseintrag mit beiden Seiten.')}</p>
 
     <div class="rebook">
-      <div class="rebook__side">
+      <div class="rebook__field">
         <span class="rebook__label">${t('Von')}</span>
-        <span class="rebook__name">${from ? from.name : t('nicht zugewiesen')}</span>
-        <span class="rebook__after">${from ? `${personUtilisation(from.id, q)} % → ${afterFrom} %` : '—'}</span>
+        <span class="rebook__readonly">${from ? from.name : t('nicht zugewiesen')}</span>
       </div>
-      <span class="rebook__arrow" aria-hidden="true">${icons.arrowRight(18)}</span>
-      <div class="rebook__side">
-        <span class="rebook__label">${t('Auf')}</span>
-        <label class="rebook__select">
-          <span class="sr-only">${t('Person wählen')}</span>
-          <select data-act="rebook-target">
-            <option value="">${t('Person wählen')} …</option>
-            ${candidates.map(c => html`<option value="${c.id}" ${attr(c.id === targetId, 'selected')}>
-              ${c.name} · ${personUtilisation(c.id, q)} %</option>`)}
-          </select>
-        </label>
-        <span class="rebook__after ${afterTo > 100 ? 'is-over' : ''}">${target ? `${personUtilisation(target.id, q)} % → ${afterTo} %` : '—'}</span>
+      <div class="rebook__field rebook__field--amount">
+        <label class="rebook__label" for="rebook-amount">${t('Pensum')}</label>
+        <span class="rebook__amount">
+          <input id="rebook-amount" type="number" min="0" max="${cellValue(p, q)}" step="5"
+                 value="${amount}" data-act="rebook-amount" data-fk="rebook-amount">
+          <span>%</span>
+        </span>
+      </div>
+      <div class="rebook__field rebook__field--quarters">
+        <label class="rebook__label" for="rebook-quarters">${t('Dauer')}</label>
+        <span class="rebook__amount">
+          <input id="rebook-quarters" type="number" min="1" max="${data.quarters.length - q}" step="1"
+                 value="${quarters}" data-act="rebook-quarters" data-fk="rebook-quarters">
+          <span>${t('Quartale')}</span>
+        </span>
       </div>
     </div>
 
-    <label class="rebook__amount">
-      <span>${t('Pensum')}</span>
-      <input type="number" min="0" max="${cellValue(p, q)}" step="5" value="${amount}" data-act="rebook-amount">
-      <span>%</span>
+    <div class="rebook__to">
+      <span class="rebook__label">${t('An')}</span>
+      <label class="dd__searchfield">
+        ${icons.search(14)}
+        <input type="search" role="combobox" aria-expanded="true" aria-controls="rebook-list"
+               data-act="rebook-search" data-fk="rebook-search" value="${search}"
+               placeholder="${t('Person suchen — Name oder Kürzel')}" aria-label="${t('Person suchen')}" autocomplete="off">
+      </label>
+      <ul class="rebook__list" id="rebook-list" role="listbox" aria-label="${t('Person wählen')}">
+        ${candidates.length ? candidates.map(c => html`<li role="option" tabindex="-1"
+            aria-selected="${aria(c.id === targetId)}" class="${c.id === targetId ? 'is-on' : ''}"
+            data-act="rebook-target" data-val="${c.id}">
+          <span>${c.name}</span><span class="rebook__role">${c.role}</span>
+        </li>`) : html`<li class="rebook__empty">${t('Keine Person gefunden.')}</li>`}
+      </ul>
+      <p class="rebook__hint">${candidates.length} ${t('von')} 34 ${t('Personen')} · ${t('weitere beim Scrollen')} · ↑ ↓ ${t('wählen')}, Enter ${t('übernimmt')}</p>
+    </div>
+
+    <label class="pop__reason rebook__reason">
+      <span class="pop__reasonlabel">${t('Begründung')}
+        <span>${t('— Pflicht bei jeder Umbuchung')}</span></span>
+      <textarea rows="2" data-act="rebook-reason" data-fk="rebook-reason"
+        placeholder="${t('Entlastung Projektleitung gemäss Beschluss Abteilungssitzung 24.08.2026.')}">${reason}</textarea>
     </label>
 
-    ${target && afterTo > 100 && html`<p class="pop__warn is-over">${target.name} ${t('wäre damit bei')} ${afterTo} % — ${afterTo - 100} % ${t('über der Anstellung.')}</p>`}
-
     <footer class="modal__foot">
+      <p class="modal__footnote">${t('Erzeugt einen Verlaufseintrag mit beiden Seiten.')}</p>
       <button type="button" class="btn" data-act="close-modal">${t('Abbrechen')}</button>
-      <button type="button" class="btn btn--primary" data-act="rebook-apply" ${attr(!target || !amount, 'disabled')}>${t('Umbuchen')}</button>
+      <button type="button" class="btn btn--primary" data-act="rebook-apply" ${attr(!ready, 'disabled')}>${t('Umbuchen')}</button>
     </footer>`;
 }

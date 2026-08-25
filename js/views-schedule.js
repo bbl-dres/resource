@@ -39,7 +39,7 @@ export function renderTermine() {
         <button type="button" class="btn" data-act="noop">${t('Teilen')}</button>`
     })}
     <div class="wrap"><div class="content">
-      ${toolbar({ overdue: true })}
+      ${toolbar()}
       ${activeFilterRow()}
       ${timeControls({ views: VIEWS })}
       ${body}
@@ -50,18 +50,24 @@ export function renderTermine() {
    Gantt
    ========================================================================== */
 
-/** How far into the current quarter today sits, as a 0–1 fraction. */
+/**
+ * Where today sits along the whole eight-quarter track, as a 0–1 fraction.
+ * The columns flex, so the marker is placed proportionally rather than in px.
+ */
 function todayFraction() {
   const today = new Date(data.meta.today + 'T00:00:00');
   const qStart = new Date(today.getFullYear(), Math.floor(today.getMonth() / 3) * 3, 1);
   const qEnd = new Date(qStart.getFullYear(), qStart.getMonth() + 3, 1);
-  return (today - qStart) / (qEnd - qStart);
+  const withinQuarter = (today - qStart) / (qEnd - qStart);
+  const index = data.quarterIndex[data.meta.todayQuarter] ?? 0;
+  return (index + withinQuarter) / data.quarters.length;
 }
 
 function ganttView() {
   const groups = groupProjects();
   const tot = totals();
-  const todayLeft = `calc(var(--gantt-lead) + ${todayFraction().toFixed(4)} * var(--grid-quarter-wide))`;
+  const f = todayFraction().toFixed(4);
+  const todayLeft = `calc(var(--gantt-lead) + (100% - var(--gantt-lead)) * ${f})`;
 
   return html`<div class="gantt">
     ${groups.map(g => {

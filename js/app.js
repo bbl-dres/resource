@@ -15,6 +15,7 @@ import { html, appHeader, appFooter, toast } from './ui.js';
 import { renderLanding, renderUebersicht, renderModal } from './views-overview.js';
 import { renderTermine } from './views-schedule.js';
 import { renderDashboard, renderVerlauf } from './views-analysis.js';
+import { renderApi, renderExport } from './views-docs.js';
 
 const root = document.getElementById('app');
 
@@ -27,7 +28,9 @@ const VIEWS = {
   uebersicht: renderUebersicht,
   termine: renderTermine,
   dashboard: renderDashboard,
-  verlauf: renderVerlauf
+  verlauf: renderVerlauf,
+  api: renderApi,
+  export: renderExport
 };
 
 function render() {
@@ -45,6 +48,7 @@ function render() {
   `);
 
   document.documentElement.lang = state.lang;
+  positionMenu();
   restoreFocus(focus);
   if (Math.abs(window.scrollY - scrollY) > 1) window.scrollTo({ top: scrollY });
   lastRenderAt = performance.now();
@@ -52,6 +56,23 @@ function render() {
 
 /** Programmatic scroll restoration must not read as a user scroll. */
 let lastRenderAt = 0;
+
+/**
+ * Keep the open menu inside the window: cap its height at the space below the
+ * trigger, and pull it back from the right edge when it would run off-screen.
+ */
+function positionMenu() {
+  const panel = root.querySelector('.dd__panel');
+  if (!panel) return;
+  panel.style.removeProperty('--dd-max-h');
+  panel.style.removeProperty('margin-left');
+
+  const box = panel.getBoundingClientRect();
+  panel.style.setProperty('--dd-max-h', `${Math.max(160, window.innerHeight - box.top - 16)}px`);
+
+  const overflowRight = box.right - (window.innerWidth - 12);
+  if (overflowRight > 0) panel.style.marginLeft = `${-Math.ceil(overflowRight)}px`;
+}
 
 function captureFocus() {
   const el = document.activeElement;
@@ -148,7 +169,6 @@ const actions = {
   'toggle-col': (val) => setState(s => ({ cols: { ...s.cols, [val]: !s.cols[val] } })),
   'toggle-flag': (val) => setState(s => ({ [val]: !s[val] })),
   'overload-toggle': () => setState(s => ({ overloadOnly: !s.overloadOnly })),
-  'overdue-toggle': () => setState(s => ({ overdueOnly: !s.overdueOnly })),
 
   'filter-remove': (val, el) => removeFilter(el.dataset.kind, val),
   'filters-reset': () => resetFilters(),
@@ -191,26 +211,50 @@ const actions = {
   rebook: () => {
     const { projectId, q } = state.editing;
     setState({
-      modal: { type: 'rebook', projectId, q, amount: cellValue(data.projectsById[projectId], q), targetId: null },
+      modal: {
+        type: 'rebook', projectId, q,
+        amount: cellValue(data.projectsById[projectId], q),
+        targetId: null, quarters: 2, search: '', reason: ''
+      },
       editing: null
     });
   },
+  'rebook-target': (val) => setState(s => ({ modal: { ...s.modal, targetId: val } })),
   'rebook-apply': () => {
-    const { projectId, q, amount, targetId } = state.modal;
+    const { projectId, q, amount, targetId, quarters, reason } = state.modal;
     const project = data.projectsById[projectId];
     const target = data.peopleById[targetId];
-    // The prototype moves the lead of this project; a real implementation
-    // would split the allocation into two person-level rows.
+    const from = project.leadId ? data.peopleById[project.leadId] : null;
+
+    // The prototype moves the lead of this project; a real implementation would
+    // split the allocation into two person-level rows — see docs/GAP-ANALYSIS.md.
     project.leadId = targetId;
+
+    // One entry carrying both sides, as the wireframe asks.
+    data.changes.unshift({
+      id: `c-${projectId}-${q}-${data.changes.length}`,
+      date: data.meta.today, dateLabel: data.meta.todayLabel,
+      actor: data.meta.user.name, projectId, projectLabel: project.location,
+      field: 'Projektleitung',
+      change: `${t('Umgebucht')}: ${from ? from.name : t('nicht zugewiesen')} → ${target.name} · ${reason.trim()}`,
+      value: `${amount} % ${t('ab')} ${data.quarters[q].label}, ${quarters} ${t('Quartale')}`,
+      onLanding: true
+    });
+
     setState({ modal: null });
-    flash(`${amount} % ${t('umgebucht auf')} ${target.name} — ${project.location}, ${data.quarters[q].label}`);
+    flash(`${amount} % ${t('umgebucht auf')} ${target.name} — ${project.location}, ${t('ab')} ${data.quarters[q].label}`);
   },
 
   'open-project': (val) => setState({ modal: { type: 'project', projectId: val }, menu: null, editing: null }),
   'open-termine': (val) => setState({ tab: 'termine', view: 'gantt', modal: null, search: data.projectsById[val].location }),
 
   'close-modal': () => setState({ modal: null }),
-  export: (val) => flash(`${t('Export')} «${val}» — ${t('im Prototyp nicht hinterlegt.')}`)
+  export: (val) => {
+    if (val === 'pdf') return setState({ tab: 'export', menu: null });
+    flash(`${t('Export')} «${val.toUpperCase()}» — ${t('im Prototyp nicht hinterlegt.')}`);
+  },
+  sheet: (val) => setState({ sheet: val }),
+  print: () => window.print()
 };
 
 /* -----------------------------------------------------------------------------
@@ -250,15 +294,29 @@ root.addEventListener('input', (event) => {
     if (Number.isFinite(n)) setState({ draft: Math.max(0, Math.min(200, n)) });
   } else if (act === 'rebook-amount') {
     setState(s => ({ modal: { ...s.modal, amount: Math.max(0, Number(el.value) || 0) } }));
+  } else if (act === 'rebook-quarters') {
+    setState(s => ({ modal: { ...s.modal, quarters: Math.max(1, Number(el.value) || 1) } }));
+  } else if (act === 'rebook-search') {
+    setState(s => ({ modal: { ...s.modal, search: el.value } }));
+  } else if (act === 'rebook-reason') {
+    setState(s => ({ modal: { ...s.modal, reason: el.value } }));
   }
 });
 
-root.addEventListener('change', (event) => {
-  const el = event.target.closest('[data-act]');
-  if (el?.dataset.act === 'rebook-target') {
-    setState(s => ({ modal: { ...s.modal, targetId: el.value || null } }));
-  }
-});
+/* -----------------------------------------------------------------------------
+   Listbox keyboard behaviour, used by the rebooking person picker.
+   -------------------------------------------------------------------------- */
+
+function moveOption(step) {
+  const list = root.querySelector('[role="listbox"]');
+  if (!list) return null;
+  const options = [...list.querySelectorAll('[role="option"]')];
+  if (!options.length) return null;
+  const here = options.findIndex(o => o === document.activeElement || o.classList.contains('is-on'));
+  const next = (here + step + options.length) % options.length;
+  options[next].focus();
+  return options[next];
+}
 
 /* -----------------------------------------------------------------------------
    Menu keyboard behaviour — the standard menu-button pattern.
@@ -309,6 +367,17 @@ document.addEventListener('keydown', (event) => {
       default: break;
     }
   }
+  // The rebooking picker follows the same contract the wireframe states.
+  const list = root.querySelector('[role="listbox"]');
+  if (list && root.contains(event.target) && event.target.closest('.rebook__to, [role="listbox"]')) {
+    if (event.key === 'ArrowDown') { event.preventDefault(); return moveOption(1); }
+    if (event.key === 'ArrowUp') { event.preventDefault(); return moveOption(-1); }
+    if (event.key === 'Enter') {
+      const option = document.activeElement?.closest('[role="option"]');
+      if (option) { event.preventDefault(); return actions['rebook-target'](option.dataset.val); }
+    }
+  }
+
   if (event.key === 'Escape' && closeOverlays()) event.preventDefault();
 
   // Enter applies the pending pensum, matching the wireframe's stated contract.

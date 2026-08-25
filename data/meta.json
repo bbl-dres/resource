@@ -107,7 +107,8 @@
     },
     {
       "label": "API",
-      "href": "#"
+      "href": "#?tab=api",
+      "tab": "api"
     }
   ]
 }
