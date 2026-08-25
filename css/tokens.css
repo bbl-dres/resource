@@ -335,7 +335,7 @@
   /* Pensum grid */
   --grid-quarter:      72px;    /* one quarter column        */
   --grid-quarter-wide: 128px;   /* gantt / calendar column   */
-  --grid-col-ampel:    36px;
+  --grid-col-ampel:    62px;
   --grid-col-id:       100px;
   --grid-col-phase:    128px;
   --grid-col-lead:     132px;

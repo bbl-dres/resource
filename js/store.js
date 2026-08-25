@@ -26,7 +26,8 @@ const DEFAULT_STATE = {
   lang: 'de',              // de | en
   scale: 'quartal',        // jahr | quartal | monat
   unit: 'pct',             // pct | fte
-  sort: 'projekt',         // projekt | pensum | kredit
+  sort: 'projekt',         // any key in SORT_KEYS, or q0…q7 for one quarter
+  sortDir: 'asc',          // asc | desc
   group: 'portfolio',      // portfolio | lead | phase | none
   search: '',
   phases: [],              // selected SIA main phase ids, e.g. ['3','5']
@@ -106,6 +107,7 @@ export function readUrl() {
   if (p.get('unit')) patch.unit = p.get('unit');
   if (p.get('scale')) patch.scale = p.get('scale');
   if (p.get('sort')) patch.sort = p.get('sort');
+  if (p.get('dir')) patch.sortDir = p.get('dir');
   if (p.get('group')) patch.group = p.get('group');
   if (p.has('q')) patch.search = p.get('q');
   if (p.has('phase')) patch.phases = list('phase');
@@ -128,6 +130,7 @@ export function writeUrl() {
   if (state.unit !== 'pct') p.set('unit', state.unit);
   if (state.scale !== 'quartal') p.set('scale', state.scale);
   if (state.sort !== 'projekt') p.set('sort', state.sort);
+  if (state.sortDir !== 'asc') p.set('dir', state.sortDir);
   if (state.group !== 'portfolio') p.set('group', state.group);
   if (state.search) p.set('q', state.search);
   if (state.phases.length) p.set('phase', state.phases.join(','));
@@ -322,12 +325,46 @@ export function filteredProjects() {
     return true;
   });
 
-  const currentPensum = p => cellValue(p, 0);
-  if (state.sort === 'pensum') list = [...list].sort((a, b) => currentPensum(b) - currentPensum(a));
-  else if (state.sort === 'kredit') list = [...list].sort((a, b) => (b.credit ?? -1) - (a.credit ?? -1));
-  else list = [...list].sort((a, b) => a.title.localeCompare(b.title, 'de'));
+  return sortProjects(list);
+}
 
-  return list;
+/**
+ * One sort key per column, so the header and the dropdown drive the same state.
+ * A quarter is addressed as q0…q7.
+ */
+export const SORT_KEYS = {
+  id:        { label: 'ID', numeric: false, value: p => p.number },
+  projekt:   { label: 'Projekt', numeric: false, value: p => p.title },
+  phase:     { label: 'SIA-Phase', numeric: false, value: p => p.phase },
+  lead:      { label: 'Projektleitung', numeric: false, value: p => (p.leadId ? data.peopleById[p.leadId].name : '\uffff') },
+  portfolio: { label: 'Teilportfolio', numeric: false, value: p => data.portfoliosById[p.portfolio].label },
+  priority:  { label: 'Priorität', numeric: true, value: p => ({ hoch: 3, mittel: 2, tief: 1 })[p.priority] ?? 0 },
+  credit:    { label: 'Kredit CHF', numeric: true, value: p => p.credit ?? -1 },
+  target:    { label: 'Soll-Pensum', numeric: true, value: p => p.target }
+};
+
+/** Resolve a sort key, including the per-quarter ones. */
+export function sortKey(key = state.sort) {
+  const q = /^q(\d+)$/.exec(key);
+  if (q) {
+    const i = Number(q[1]);
+    return { label: data.quarters[i]?.label ?? key, numeric: true, value: p => cellValue(p, i) };
+  }
+  return SORT_KEYS[key] ?? SORT_KEYS.projekt;
+}
+
+/** Numbers read high-to-low by default, names A–Z. */
+export const defaultDir = key => (sortKey(key).numeric ? 'desc' : 'asc');
+
+export function sortProjects(list) {
+  const { numeric, value } = sortKey();
+  const sign = state.sortDir === 'desc' ? -1 : 1;
+  return [...list].sort((a, b) => {
+    const x = value(a);
+    const y = value(b);
+    const cmp = numeric ? x - y : String(x).localeCompare(String(y), 'de');
+    return cmp * sign;
+  });
 }
 
 /** Group the filtered projects for the grid and the gantt. */

@@ -6,7 +6,7 @@
    ============================================================================= */
 
 import {
-  data, state, t, activeFilters, kpis, filteredProjects
+  data, state, t, activeFilters, kpis, filteredProjects, sortKey
 } from './store.js';
 import { icon } from './icons.js';
 
@@ -313,11 +313,7 @@ export function kpiStrip() {
    Toolbar — search, sort, group, filters, attributes
    -------------------------------------------------------------------------- */
 
-const SORTS = [
-  { id: 'projekt', label: 'Projekt A–Z', short: 'Projekt', hint: 'A–Z' },
-  { id: 'pensum', label: 'Pensum aktuelles Quartal', short: 'Pensum', hint: 'aktuelles Quartal' },
-  { id: 'kredit', label: 'Kredit', short: 'Kredit', hint: 'absteigend' }
-];
+const SORTS = ['projekt', 'id', 'phase', 'lead', 'credit', 'q0'];
 const GROUPS = [
   { id: 'none', label: 'Keine' },
   { id: 'lead', label: 'Projektleitung' },
@@ -335,16 +331,20 @@ const COLUMNS = [
 ];
 
 export function toolbar({ attributes = true } = {}) {
-  const sort = SORTS.find(s => s.id === state.sort);
+  const active = sortKey();
   const groupLabel = GROUPS.find(g => g.id === state.group).label;
 
   return html`<div class="toolbar">
     ${expandableSearch({ variant: 'toolbar', placeholder: 'Projekt, ID oder Person' })}
 
     ${dropdown({
-      id: 'sort', label: `${t('Sortierung')}: ${t(sort.short)}`, hint: sort.hint, width: 244,
+      id: 'sort', label: `${t('Sortierung')}: ${t(active.label)}`,
+      hint: t(state.sortDir === 'desc' ? 'absteigend' : 'aufsteigend'), width: 244,
       body: html`${menuGroupLabel(t('Sortieren nach'))}
-        ${SORTS.map(s => menuRadio(t(s.label), state.sort === s.id, 'sort', s.id))}`
+        ${SORTS.map(k => menuRadio(t(sortKey(k).label), state.sort === k, 'sort', k))}
+        ${divider()}
+        ${menuRadio(t('Aufsteigend'), state.sortDir === 'asc', 'sort-dir', 'asc')}
+        ${menuRadio(t('Absteigend'), state.sortDir === 'desc', 'sort-dir', 'desc')}`
     })}
 
     ${dropdown({

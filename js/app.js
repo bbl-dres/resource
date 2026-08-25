@@ -8,7 +8,7 @@
 
 import {
   data, state, load, subscribe, setState, syncFromUrl, closeOverlays,
-  cellValue, toggleIn, removeFilter, resetFilters, t
+  cellValue, toggleIn, removeFilter, resetFilters, defaultDir, t
 } from './store.js';
 import { loadIcons } from './icons.js';
 import { html, appHeader, appFooter, toast } from './ui.js';
@@ -143,7 +143,14 @@ const actions = {
     return searchOpen.header || searchOpen.toolbar ? { searchOpen } : { searchOpen, search: '' };
   }),
 
-  sort: (val) => setState({ sort: val, menu: null }),
+  sort: (val) => setState({ sort: val, sortDir: defaultDir(val), menu: null }),
+  'sort-dir': (val) => setState({ sortDir: val, menu: null }),
+  // A header click picks the column; clicking the active one flips direction.
+  'sort-col': (val) => setState(s => (
+    s.sort === val
+      ? { sortDir: s.sortDir === 'asc' ? 'desc' : 'asc' }
+      : { sort: val, sortDir: defaultDir(val) }
+  )),
   group: (val) => setState({ group: val, menu: null }),
   unit: (val) => setState({ unit: val }),
   scale: () => flash(t('Der Prototyp zeigt Quartale; Jahr und Monat folgen.')),
@@ -247,6 +254,15 @@ const actions = {
 
   'open-project': (val) => setState({ modal: { type: 'project', projectId: val }, menu: null, editing: null }),
   'open-termine': (val) => setState({ tab: 'termine', view: 'gantt', modal: null, search: data.projectsById[val].location }),
+
+  share: () => setState({ modal: { type: 'share', copied: false }, menu: null }),
+  'share-select': (val, el) => el.select(),
+  'share-copy': async () => {
+    try { await navigator.clipboard.writeText(location.href); }
+    catch { root.querySelector('[data-fk="share-url"]')?.select(); }
+    setState(s => ({ modal: { ...s.modal, copied: true } }));
+    setTimeout(() => { if (state.modal?.type === 'share') setState(s => ({ modal: { ...s.modal, copied: false } })); }, 2000);
+  },
 
   'close-modal': () => setState({ modal: null }),
   export: (val) => {

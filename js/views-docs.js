@@ -71,8 +71,8 @@ export function renderExport() {
       crumbs: ['Bauprojekte', 'Export'],
       title: 'PDF-Export — Drucklayout',
       chrome: false,
-      actions: html`<button type="button" class="btn" data-act="print">${icons.download(15)}${t('Drucken')}</button>
-        ${exportMenu()}`
+      actions: html`<button type="button" class="btn" data-act="tab" data-val="uebersicht">${t('Abbrechen')}</button>
+        <button type="button" class="btn btn--primary" data-act="print">${icons.download(15)}${t('Drucken')}</button>`
     })}
     <div class="wrap"><div class="content">
       <div class="sheetbar">
@@ -83,12 +83,6 @@ export function renderExport() {
         </div>
       </div>
       <div class="mount">${printSheet(sheet)}</div>
-      <div class="printnotes">
-        ${data.api.print.notes.map(n => html`<div>
-          <div class="printnotes__label">${n.label}</div>
-          <p>${n.text}</p>
-        </div>`)}
-      </div>
     </div></div>`;
 }
 

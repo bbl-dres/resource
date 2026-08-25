@@ -242,7 +242,7 @@ export function renderUebersicht() {
 /** The column template, rebuilt whenever a column is toggled. */
 /** Fixed widths in px, mirroring the layout tokens in tokens.css. */
 const COL_W = {
-  ampel: 36, id: 100, title: 220, phase: 128, lead: 132,
+  ampel: 62, id: 100, title: 220, phase: 128, lead: 132,
   portfolio: 110, priority: 90, nextMs: 150, credit: 112,
   target: 76, quarter: 72, trend: 130
 };
@@ -369,7 +369,7 @@ function pensumGrid() {
     </div>
 
     <p class="grid-legend">
-      ${t('Farblogik')}: ${t('Blau kodiert nur die Höhe des Pensums, Gelb die Zeile ohne Projektleitung, die Ampel den Zustand der Person — jede Zelle erklärt ihre Farbe im Hover.')}
+      ${t('Farblogik')}: ${t('Blau kodiert nur die Höhe des Pensums, die Ampel den Zustand der Projektleitung — jede Zelle erklärt ihre Farbe im Hover.')}
       ${t('Die Ampel bezieht sich auf das aktuelle Quartal')} ${q0.label}. ${t('Die rote Marke am Spaltenkopf ist')} «${t('Heute')}, ${data.meta.todayLabel}» — ${t('das laufende Quartal ist für Änderungen gesperrt.')}
     </p>
   </section>`;
@@ -377,6 +377,22 @@ function pensumGrid() {
 
 function qBorder(i) {
   return (i === 0 || i === 2 || i === 6) ? 'is-yearstart' : '';
+}
+
+/**
+ * A column header that sorts. Clicking the active column flips the direction,
+ * and the toolbar dropdown reads the same two pieces of state.
+ */
+function sortHead(key, label, cls = '', style = '', title = '') {
+  const active = state.sort === key;
+  return html`<span class="pcell--text ${cls} ${active ? 'is-sorted' : ''}" style="${style}">
+    <button type="button" class="sorthead" data-act="sort-col" data-val="${key}"
+            title="${title || `${t('Sortieren nach')} ${typeof label === 'string' ? label : key}`}"
+            aria-label="${t('Sortieren nach')} ${typeof label === 'string' ? label : key}">
+      <span class="sorthead__label">${label}</span>
+      <span class="sorthead__dir" aria-hidden="true">${active ? (state.sortDir === 'asc' ? '↑' : '↓') : ''}</span>
+    </button>
+  </span>`;
 }
 
 /** The year band and the column names, repeated at the top of every group card. */
@@ -393,19 +409,21 @@ function columnHeader(tpl, span, sticky) {
     </div>
 
     <div class="prow prow--head" style="grid-template-columns:${raw(tpl)}">
-      ${state.ampel && html`<span class="is-frozen" style="left:${sticky.ampel}px"></span>`}
-      ${state.cols.id && html`<span class="pcell--text is-frozen" style="left:${sticky.id}px">ID</span>`}
-      <span class="pcell--text is-frozen is-frozen-last" style="left:${sticky.title}px">${t('Projekt')}</span>
-      ${state.cols.phase && html`<span class="pcell--text">${t('SIA-Phase')}</span>`}
-      ${state.cols.lead && html`<span class="pcell--text">${t('Projektleitung')}</span>`}
-      ${state.cols.portfolio && html`<span class="pcell--text">${t('Teilportfolio')}</span>`}
-      ${state.cols.priority && html`<span class="pcell--text">${t('Priorität')}</span>`}
+      ${state.cols.id && sortHead('id', 'ID', 'is-frozen', `left:${sticky.id}px`)}
+      ${sortHead('projekt', t('Projekt'), 'is-frozen is-frozen-last', `left:${sticky.title}px`)}
+      ${state.cols.phase && sortHead('phase', t('SIA-Phase'))}
+      ${state.cols.lead && sortHead('lead', t('Projektleitung'))}
+      ${state.ampel && html`<span class="pcell--text pcell--ampelhead"
+        title="${t('Auslastung der Projektleitung im laufenden Quartal')}">${t('Ampel')}</span>`}
+      ${state.cols.portfolio && sortHead('portfolio', t('Teilportfolio'))}
+      ${state.cols.priority && sortHead('priority', t('Priorität'))}
       ${state.cols.nextMs && html`<span class="pcell--text">${t('Nächster Meilenstein')}</span>`}
-      ${state.cols.credit && html`<span class="pcell--num">${t('Kredit CHF')}</span>`}
-      ${state.target && html`<span class="pcell--num">${t('Soll')} ${q0.short}</span>`}
-      ${data.quarters.map((q, i) => html`<span class="pcell--num ${i === 0 ? 'is-today' : ''} ${qBorder(i)}"
-          title="${i === 0 ? `${t('Heute')}, ${data.meta.todayLabel} — ${t('laufendes Quartal, gesperrt')}` : q.label}">
-        ${q.short}${i === 0 ? html` · ${t('heute')}` : ''}</span>`)}
+      ${state.cols.credit && sortHead('credit', t('Kredit CHF'), 'pcell--num')}
+      ${state.target && sortHead('target', `${t('Soll')} ${q0.short}`, 'pcell--num')}
+      ${data.quarters.map((q, i) => sortHead(`q${i}`,
+        i === 0 ? `${q.short} · ${t('heute')}` : q.short,
+        `pcell--num ${i === 0 ? 'is-today' : ''} ${qBorder(i)}`, '',
+        i === 0 ? `${t('Heute')}, ${data.meta.todayLabel} — ${t('laufendes Quartal, gesperrt')}` : q.label))}
       ${state.trend && html`<span class="pcell--text">${t('Verlauf')}</span>`}
     </div>`;
 }
@@ -441,9 +459,6 @@ function projectRow(p, tpl, sticky, rowIdx) {
 
   return html`<div class="prow" style="grid-template-columns:${raw(tpl)}"
       data-row="${rowIdx}">
-    ${state.ampel && html`<span class="pcell pcell--ampel is-frozen" style="left:${sticky.ampel}px">
-      <span class="ampel ampel--${a.key}" role="img" aria-label="${a.title}" title="${a.title}"></span>
-    </span>`}
     ${state.cols.id && html`<span class="pcell pcell--id is-frozen" style="left:${sticky.id}px">${p.number}</span>`}
     <span class="pcell pcell--title is-frozen is-frozen-last" style="left:${sticky.title}px">
       <button type="button" class="prow__title" data-act="open-project" data-val="${p.id}" title="${p.title}">${p.title}</button>
