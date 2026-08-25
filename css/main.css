@@ -207,22 +207,26 @@ button, input, select, textarea { font: inherit; color: inherit; }
  * so it never promises content that is not there.
  */
 .scrollbox { position: relative; }
-.scrollbox::before,
-.scrollbox::after {
-  content: ""; position: absolute; top: 0; bottom: 0; width: 40px;
-  pointer-events: none; opacity: 0; transition: opacity .15s ease;
-  z-index: var(--z-raised);
+
+/*
+ * The time axis runs off the right edge more often than not. Rather than lay a
+ * wash over the card — which also greys the gaps between cards — the content
+ * itself dissolves at the edge: nothing is painted where there is no row, so
+ * only the rows fade. The frozen columns hold the left edge, and their shadow
+ * already says the axis passes underneath, so that side needs no fade.
+ */
+.scrollbox.has-more [data-scroll] {
+  -webkit-mask-image: var(--fade-right);
+  mask-image: var(--fade-right);
 }
-.scrollbox::after {
-  right: 0;
-  background: linear-gradient(to right, rgba(255, 255, 255, 0), var(--color-surface));
-}
-.scrollbox::before {
-  left: 0;
-  background: linear-gradient(to left, rgba(255, 255, 255, 0), var(--color-surface));
-}
-.scrollbox.has-more::after { opacity: 1; }
-.scrollbox.has-less::before { opacity: 1; }
+
+/*
+ * No scrollbar. Stepping the window with the arrows beside «Heute» is the way
+ * through time; a bar under every card only competed with them for attention.
+ * The wheel and the trackpad still work.
+ */
+[data-scroll] { scrollbar-width: none; }
+[data-scroll]::-webkit-scrollbar { width: 0; height: 0; }
 
 .gantt__scroll, .capband__scroll { overflow-x: auto; }
 .gantt__card.scrollbox { overflow: hidden; }
@@ -729,11 +733,20 @@ button, input, select, textarea { font: inherit; color: inherit; }
  */
 .is-frozen {
   position: sticky; z-index: var(--z-raised);
+  /* Full row height, or the quarters would show through above and below. */
+  align-self: stretch;
   background: var(--row-bg, var(--color-surface));
 }
+/* A summary label spans the whole lead pane, so it is both first and last. */
 .prow--sum .is-frozen, .prow--foot .is-frozen, .prow--load .is-frozen { left: 0; }
-.is-frozen-last { box-shadow: var(--shadow-frozen); }
-.pgrid__track:not(.is-scrolled) .is-frozen-last { box-shadow: none; }
+.is-frozen-last,
+.prow--sum .is-frozen, .prow--foot .is-frozen, .prow--load .is-frozen {
+  box-shadow: var(--shadow-frozen);
+}
+.pgrid__track:not(.is-scrolled) .is-frozen-last,
+.pgrid__track:not(.is-scrolled) .prow--sum .is-frozen,
+.pgrid__track:not(.is-scrolled) .prow--foot .is-frozen,
+.pgrid__track:not(.is-scrolled) .prow--load .is-frozen { box-shadow: none; }
 
 
 .prow--head {
@@ -741,7 +754,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
   border-bottom: var(--border-hairline) solid var(--color-border-strong);
   font-size: var(--text-sm); font-weight: var(--font-semibold); color: var(--color-text-secondary);
 }
-.prow--head .pcell--text { padding-left: var(--space-6); }
+.prow > .pcell:first-child,
+.prow--head > :first-child { padding-left: var(--space-6); }
 .prow--head .pcell--num { text-align: right; padding-right: var(--space-5); }
 .prow--head .pcell--num.is-today {
   background: var(--color-surface-sunken); color: var(--color-text-strong);
@@ -756,9 +770,18 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .pgroup + .pgroup { margin-top: var(--space-12); }
 /* The whole label is the toggle — a wide, forgiving target. */
 .pgrouphead {
-  position: sticky; left: 0; max-width: 520px;
+  position: sticky; left: 0;
   margin: 0; padding-bottom: var(--space-6); font-weight: inherit;
 }
+/*
+ * In the Übersicht the head lives inside the scroll track, and a sticky box can
+ * only slide within its own width — a full-width head would have nowhere to go
+ * and would scroll away with the quarters. So the head itself takes no width
+ * and the toggle inside it spills across the scrollport, whose width the
+ * scroll handler publishes as --port-w.
+ */
+.pgroup > .pgrouphead { width: 0; }
+.pgroup > .pgrouphead > .pgrouphead__toggle { width: var(--port-w, 100%); }
 .pgrouphead__toggle {
   display: flex; align-items: center; gap: var(--space-5);
   width: 100%; min-height: 32px;
@@ -767,7 +790,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 }
 .pgrouphead__toggle:hover { background: var(--color-surface-hover); }
 .pgrouphead__name {
-  flex: 1; min-width: 0; margin: 0;
+  min-width: 0; margin: 0;
   font-size: var(--text-tab); font-weight: var(--font-semibold); color: var(--color-text-strong);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
@@ -783,7 +806,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;
   line-height: var(--row-height);
 }
-.pcell--id { padding-left: var(--space-6); color: var(--color-text-muted); font-size: var(--text-sm); }
+.pcell--id { color: var(--color-text-muted); font-size: var(--text-sm); }
 .pcell--title { padding-right: var(--space-4); }
 .prow__title {
   display: block; width: 100%; border: 0; padding: 0; background: none; text-align: left;
@@ -816,7 +839,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
 }
 .pcell--target.is-over { color: var(--color-danger-fg-strong); font-weight: var(--font-semibold); }
 .pcell--ampel { justify-content: center; }
-.pcell--ampelhead { text-align: center; padding-right: 0; }
+.pcell--ampelhead { text-align: center; padding: 0; }
+.pcell--ampelhead .sorthead { justify-content: center; }
 
 .pcell--val {
   justify-content: flex-end; gap: 3px;
@@ -884,9 +908,11 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .pcell--sum, .pcell--foot { justify-content: flex-end; padding-right: var(--space-5); }
 
 .prow--load {
-  min-height: 42px; border-top: var(--border-hairline) solid var(--color-border);
+  min-height: 42px; align-items: stretch;
+  border-top: var(--border-hairline) solid var(--color-border);
   font-size: var(--text-base); font-weight: var(--font-bold);
 }
+.prow--load .prow__sumlabel { display: flex; align-items: center; }
 .pcell--load {
   align-items: center; justify-content: flex-end;
   padding-right: var(--space-5);
@@ -913,7 +939,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 /* One legend, shared by the screen and the print sheet. */
 .heatlegend {
   display: flex; align-items: center; gap: var(--space-8); flex-wrap: wrap;
-  margin-top: var(--space-4); padding: var(--space-4) var(--space-6);
+  padding: var(--space-4) var(--space-6);
   border: var(--border-hairline) solid var(--color-border); border-radius: var(--radius-md);
   font-size: var(--text-sm); color: var(--color-text-muted);
 }

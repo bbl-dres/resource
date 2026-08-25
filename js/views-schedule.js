@@ -92,7 +92,7 @@ function ganttView() {
       </section>`;
     })}
 
-    <section class="capband" style="--gantt-cols:${cols.length}; --gantt-quarter-min:${minCol}px">
+    <section class="capband scrollbox" style="--gantt-cols:${cols.length}; --gantt-quarter-min:${minCol}px">
       <div class="capband__scroll" data-scroll>
       <div class="capband__row">
         <div class="capband__label">
@@ -113,8 +113,8 @@ function ganttView() {
       </div>
     </section>
 
-    ${ganttLegend()}
-  </div>`;
+  </div>
+  ${ganttLegend()}`;
 }
 
 /**

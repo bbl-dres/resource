@@ -466,6 +466,8 @@ function syncScrollFades(scroller) {
   const box = scroller.closest('.scrollbox') ?? scroller.parentElement;
   if (!box) return;
   const room = scroller.scrollWidth - scroller.clientWidth;
+  // Group heads stick at the left edge and stretch across what is on screen.
+  scroller.firstElementChild?.style.setProperty('--port-w', `${scroller.clientWidth}px`);
   box.classList.toggle('has-more', room > 1 && scroller.scrollLeft < room - 1);
   box.classList.toggle('has-less', scroller.scrollLeft > 1);
   // The frozen columns only cast a shadow once the track has actually moved.

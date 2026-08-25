@@ -382,8 +382,8 @@ function pensumGrid() {
     </div>
     </div>
 
-    ${heatLegend()}
-  </section>`;
+  </section>
+    ${heatLegend()}`;
 }
 
 /** The same swatch legend the print sheet carries, so both read alike. */
@@ -419,31 +419,31 @@ function sortHead(key, label, cls = '', style = '', title = '') {
   </span>`;
 }
 
-/**
- * Pin a lead column at its running offset. Only the time axis scrolls; the
- * master data of a project stays where it is.
+/*
+ * Only the time axis scrolls; the master data of a project stays where it is.
+ * A pinned column therefore needs the running offset of the ones before it,
+ * which gridLayout() has already worked out.
  */
-function pin(sticky, key) {
-  if (sticky[key] === undefined) return '';
-  return raw(`is-frozen ${key === sticky.last ? 'is-frozen-last' : ''}" style="left:${sticky[key]}px;`);
-}
+const pinCls = (s, k) =>
+  (s[k] === undefined ? '' : `is-frozen ${k === s.last ? 'is-frozen-last' : ''}`);
+const pinLeft = (s, k) => (s[k] === undefined ? '' : `left:${s[k]}px`);
 
 /** The year band and the column names, repeated at the top of every group card. */
 function columnHeader(tpl, sticky) {
   const q0 = data.quarters[0];
   return html`
     <div class="prow prow--head" style="grid-template-columns:${raw(tpl)}">
-      ${state.cols.id && sortHead('id', 'ID', 'is-frozen', `left:${sticky.id}px`)}
-      ${sortHead('projekt', t('Projekt'), 'is-frozen is-frozen-last', `left:${sticky.title}px`)}
-      ${state.cols.phase && sortHead('phase', t('SIA-Phase'))}
-      ${state.cols.lead && sortHead('lead', t('Projektleitung'))}
-      ${state.ampel && html`<span class="pcell--text pcell--ampelhead"
+      ${state.cols.id && sortHead('id', 'ID', pinCls(sticky, 'id'), pinLeft(sticky, 'id'))}
+      ${sortHead('projekt', t('Projekt'), pinCls(sticky, 'title'), pinLeft(sticky, 'title'))}
+      ${state.cols.phase && sortHead('phase', t('SIA-Phase'), pinCls(sticky, 'phase'), pinLeft(sticky, 'phase'))}
+      ${state.cols.lead && sortHead('lead', t('Projektleitung'), pinCls(sticky, 'lead'), pinLeft(sticky, 'lead'))}
+      ${state.ampel && html`<span class="pcell--text pcell--ampelhead ${pinCls(sticky, 'ampel')}" style="${pinLeft(sticky, 'ampel')}"
         title="${t('Auslastung der Projektleitung im laufenden Quartal')}">${t('Ampel')}</span>`}
-      ${state.cols.portfolio && sortHead('portfolio', t('Teilportfolio'))}
-      ${state.cols.priority && sortHead('priority', t('Priorität'))}
-      ${state.cols.nextMs && html`<span class="pcell--text">${t('Nächster Meilenstein')}</span>`}
-      ${state.cols.credit && sortHead('credit', t('Kredit CHF'), 'pcell--num')}
-      ${state.target && sortHead('target', `${t('Soll')} ${data.quarters[0].short}`, 'pcell--num')}
+      ${state.cols.portfolio && sortHead('portfolio', t('Teilportfolio'), pinCls(sticky, 'portfolio'), pinLeft(sticky, 'portfolio'))}
+      ${state.cols.priority && sortHead('priority', t('Priorität'), pinCls(sticky, 'priority'), pinLeft(sticky, 'priority'))}
+      ${state.cols.nextMs && html`<span class="pcell--text ${pinCls(sticky, 'nextMs')}" style="${pinLeft(sticky, 'nextMs')}">${t('Nächster Meilenstein')}</span>`}
+      ${state.cols.credit && sortHead('credit', t('Kredit CHF'), `pcell--num ${pinCls(sticky, 'credit')}`, pinLeft(sticky, 'credit'))}
+      ${state.target && sortHead('target', `${t('Soll')} ${data.quarters[0].short}`, `pcell--num ${pinCls(sticky, 'target')}`, pinLeft(sticky, 'target'))}
       ${periods().map((period, i) => sortHead(`q${period.quarters[0]}`,
         period.short,
         `pcell--num ${period.isNow ? 'is-today' : ''} ${qBorder(i)}`, '',
@@ -471,25 +471,25 @@ function projectRow(p, tpl, sticky, rowIdx) {
 
   return html`<div class="prow" style="grid-template-columns:${raw(tpl)}"
       data-row="${rowIdx}">
-    ${state.cols.id && html`<span class="pcell pcell--id is-frozen" style="left:${sticky.id}px">${p.number}</span>`}
-    <span class="pcell pcell--title is-frozen is-frozen-last" style="left:${sticky.title}px">
+    ${state.cols.id && html`<span class="pcell pcell--id ${pinCls(sticky, 'id')}" style="${pinLeft(sticky, 'id')}">${p.number}</span>`}
+    <span class="pcell pcell--title ${pinCls(sticky, 'title')}" style="${pinLeft(sticky, 'title')}">
       <button type="button" class="prow__title" data-act="open-project" data-val="${p.id}" title="${p.title}">${p.title}</button>
     </span>
-    ${state.cols.phase && html`<span class="pcell pcell--phase ${pin(sticky, 'phase')}">
+    ${state.cols.phase && html`<span class="pcell pcell--phase ${pinCls(sticky, 'phase')}" style="${pinLeft(sticky, 'phase')}">
       ${phase.label}
     </span>`}
-    ${state.cols.lead && html`<span class="pcell pcell--lead ${pin(sticky, 'lead')} ${!lead ? 'is-none' : ''}">${state.edit
+    ${state.cols.lead && html`<span class="pcell pcell--lead ${pinCls(sticky, 'lead')} ${!lead ? 'is-none' : ''}" style="${pinLeft(sticky, 'lead')}">${state.edit
       ? html`<button type="button" class="leadbtn" data-act="assign" data-val="${p.id}"
           title="${t('Projektleitung zuweisen')}">${lead ? lead.name : html`<span class="lead-open">${t('nicht zugewiesen')}</span>`}</button>`
       : (lead ? lead.name : html`<span class="lead-open">${t('nicht zugewiesen')}</span>`)}</span>`}
-    ${state.ampel && html`<span class="pcell pcell--ampel ${pin(sticky, 'ampel')}">
+    ${state.ampel && html`<span class="pcell pcell--ampel ${pinCls(sticky, 'ampel')}" style="${pinLeft(sticky, 'ampel')}">
       <span class="ampel ampel--${a.key}" role="img" aria-label="${a.title}" title="${a.title}"></span>
     </span>`}
-    ${state.cols.portfolio && html`<span class="pcell pcell--text ${pin(sticky, 'portfolio')}">${t(data.portfoliosById[p.portfolio].label)}</span>`}
-    ${state.cols.priority && html`<span class="pcell pcell--text ${pin(sticky, 'priority')}">${t(p.priority)}</span>`}
-    ${state.cols.nextMs && html`<span class="pcell pcell--text ${pin(sticky, 'nextMs')}">${nextMs ? `${nextMs.code} · ${data.quarters[data.quarterIndex[nextMs.plan]].label}` : '—'}</span>`}
-    ${state.cols.credit && html`<span class="pcell pcell--credit ${pin(sticky, 'credit')}">${p.creditLabel}</span>`}
-    ${state.target && html`<span class="pcell pcell--target ${pin(sticky, 'target')} ${targetOver ? 'is-over' : ''}">${num(p.target)}${unitSuffix()}</span>`}
+    ${state.cols.portfolio && html`<span class="pcell pcell--text ${pinCls(sticky, 'portfolio')}" style="${pinLeft(sticky, 'portfolio')}">${t(data.portfoliosById[p.portfolio].label)}</span>`}
+    ${state.cols.priority && html`<span class="pcell pcell--text ${pinCls(sticky, 'priority')}" style="${pinLeft(sticky, 'priority')}">${t(p.priority)}</span>`}
+    ${state.cols.nextMs && html`<span class="pcell pcell--text ${pinCls(sticky, 'nextMs')}" style="${pinLeft(sticky, 'nextMs')}">${nextMs ? `${nextMs.code} · ${data.quarters[data.quarterIndex[nextMs.plan]].label}` : '—'}</span>`}
+    ${state.cols.credit && html`<span class="pcell pcell--credit ${pinCls(sticky, 'credit')}" style="${pinLeft(sticky, 'credit')}">${p.creditLabel}</span>`}
+    ${state.target && html`<span class="pcell pcell--target ${pinCls(sticky, 'target')} ${targetOver ? 'is-over' : ''}" style="${pinLeft(sticky, 'target')}">${num(p.target)}${unitSuffix()}</span>`}
 
     ${periods().map((period, i) => {
       const q = period.quarters[0];
