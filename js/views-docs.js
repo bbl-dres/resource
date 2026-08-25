@@ -18,41 +18,68 @@ import { html, raw, icons, pageHeader, exportMenu, phaseOf } from './ui.js';
    ========================================================================== */
 
 export function renderApi() {
-  const api = data.api;
   return html`
     ${pageHeader({
       crumbs: ['Bauprojekte', 'API'],
       title: 'API-Dokumentation',
       chrome: false,
-      actions: html`<button type="button" class="btn" data-act="noop">${t(api.spec)}</button>
-        <span class="version-tag">${api.version}</span>`
+      actions: html`<a class="btn" href="data/openapi.json" download="ressourcenplanung-openapi.json">
+        ${icons.download(15)}${t('OpenAPI 3.1 laden')}</a>`
     })}
     <div class="wrap"><div class="content">
-      <div class="api-grid">
-        <div class="api-col">
-          ${api.groups.map(g => html`<section class="api-card">
-            <header class="api-card__head">
-              <h2 class="api-card__title">${t(g.title)}</h2>
-              <p class="api-card__intro">${g.intro}</p>
-            </header>
-            ${g.endpoints.map(e => html`<div class="api-row">
-              <span class="method method--${e.method.toLowerCase()}">${e.method}</span>
-              <code class="api-row__path">${e.path}</code>
-              <span class="api-row__desc">${e.description}</span>
-            </div>`)}
-          </section>`)}
-        </div>
-
-        <aside class="api-col api-col--side">
-          ${api.panels.map(p => html`<section class="api-panel">
-            <h2 class="api-card__title">${t(p.title)}</h2>
-            ${p.lead && html`<p class="api-panel__lead">${p.lead}</p>`}
-            <pre class="code"><code>${p.code}</code></pre>
-            ${p.note && html`<p class="api-panel__note">${p.note}</p>`}
-          </section>`)}
-        </aside>
-      </div>
+      <div id="swagger" data-swagger></div>
     </div></div>`;
+}
+
+/**
+ * Swagger UI is a real widget, not markup: it mounts itself into the container
+ * after the view has rendered. app.js calls this once the DOM is in place.
+ */
+export function mountSwagger() {
+  const host = document.querySelector('[data-swagger]');
+  if (!host || host.dataset.mounted) return;
+  host.dataset.mounted = '1';
+
+  loadSwagger()
+    .then(() => window.SwaggerUIBundle({
+      url: 'data/openapi.json',
+      domNode: host,
+      // The spec is the documentation; the operation list is the navigation.
+      docExpansion: 'list',
+      defaultModelsExpandDepth: 0,
+      displayRequestDuration: false,
+      // Nothing is served behind this prototype, so "Try it out" would only lie.
+      supportedSubmitMethods: [],
+      presets: [window.SwaggerUIBundle.presets.apis],
+      layout: 'BaseLayout'
+    }))
+    .catch(error => {
+      host.innerHTML = '';
+      host.append(Object.assign(document.createElement('p'), {
+        className: 'empty',
+        textContent: `${t('Die API-Dokumentation konnte nicht geladen werden.')} ${error.message}`
+      }));
+    });
+}
+
+/** Load the vendored dist once, on first visit to the API tab. */
+let swaggerReady = null;
+function loadSwagger() {
+  if (swaggerReady) return swaggerReady;
+  const base = 'assets/vendor/swagger-ui/';
+  swaggerReady = new Promise((resolve, reject) => {
+    const css = document.createElement('link');
+    css.rel = 'stylesheet';
+    css.href = base + 'swagger-ui.css';
+    document.head.append(css);
+
+    const js = document.createElement('script');
+    js.src = base + 'swagger-ui-bundle.js';
+    js.onload = resolve;
+    js.onerror = () => reject(new Error('swagger-ui-bundle.js'));
+    document.head.append(js);
+  });
+  return swaggerReady;
 }
 
 /* =============================================================================

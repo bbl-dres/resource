@@ -386,7 +386,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
   display: inline-flex; align-items: center; gap: var(--space-3);
   height: var(--control-height-sm); padding: 0 var(--space-4) 0 var(--space-5);
   border-radius: var(--radius-pill);
-  background: var(--color-surface-sunken); color: var(--color-text);
+  background: var(--fill-chip); color: var(--color-text);
   font-size: var(--text-base); font-weight: var(--font-semibold);
 }
 .chip__x {
@@ -1444,64 +1444,20 @@ button, input, select, textarea { font: inherit; color: inherit; }
 }
 
 /* ==========================================================================
-   16 · API reference
+   16 · API reference — Swagger UI brings its own styles; this only frames it
    ========================================================================== */
 
-.version-tag {
-  display: inline-flex; align-items: center; height: var(--control-height-2xl);
-  padding: 0 var(--space-7);
-  border: var(--border-hairline) solid var(--color-border-strong); border-radius: var(--radius);
-  font-size: var(--text-btn); font-weight: var(--font-medium); color: var(--color-text);
-}
+#swagger { margin-inline: calc(-1 * var(--space-10)); }
+#swagger .swagger-ui .topbar,
+#swagger .swagger-ui .info hgroup.main a { display: none; }
+#swagger .swagger-ui { font-family: var(--font-sans); }
 
-.api-grid { display: grid; grid-template-columns: minmax(0, 1fr) 420px; gap: var(--space-10); align-items: start; }
-.api-col { display: flex; flex-direction: column; gap: var(--space-10); min-width: 0; }
 
-.api-card, .api-panel {
-  border-radius: var(--radius-lg); background: var(--color-surface); overflow: hidden;
-  box-shadow: var(--shadow-raised);
-}
-.api-panel { padding: var(--space-10); display: flex; flex-direction: column; gap: var(--space-6); }
-.api-card__head {
-  padding: var(--space-7) var(--space-8);
-  background: var(--color-surface-frame);
-  border-bottom: var(--border-hairline) solid var(--color-border);
-}
-.api-card__title { font-size: var(--text-tab); font-weight: var(--font-semibold); color: var(--color-text-strong); }
-.api-card__intro { margin-top: var(--space-1); font-size: var(--text-sm); color: var(--color-text-muted); }
 
-.api-row {
-  display: grid; grid-template-columns: 78px minmax(0, 340px) minmax(0, 1fr);
-  align-items: center; gap: var(--space-8);
-  padding: 11px var(--space-8);
-  border-bottom: var(--border-hairline) solid var(--color-border-subtle);
-  font-size: var(--text-base);
-}
-.api-row:last-child { border-bottom: 0; }
-.api-row__path { font-family: var(--font-mono); font-size: var(--text-sm); color: var(--color-text-strong); overflow-wrap: anywhere; }
-.api-row__desc { color: var(--color-text-secondary); line-height: var(--leading-normal); }
 
-.method {
-  justify-self: start; padding: 3px var(--space-4); border-radius: var(--radius);
-  font-family: var(--font-mono); font-size: var(--text-xs); font-weight: var(--font-bold);
-}
-.method--get    { background: var(--color-ok-bg);     color: var(--color-ok-fg); }
-.method--post   { background: var(--color-info-bg);   color: var(--color-info-fg); }
-.method--patch  { background: var(--color-warn-bg);   color: var(--color-warn-fg); }
-.method--put    { background: var(--color-warn-bg);   color: var(--color-warn-fg); }
-.method--delete { background: var(--color-danger-bg); color: var(--color-danger-fg); }
 
-.api-panel__lead, .api-panel__note {
-  font-size: var(--text-base); line-height: var(--leading-relaxed); color: var(--color-text-secondary);
-}
-.api-panel__note { font-size: var(--text-sm); }
 
-.code {
-  margin: 0; padding: var(--space-8); border-radius: var(--radius-lg);
-  background: var(--color-code-bg); color: var(--color-code-fg);
-  font-family: var(--font-mono); font-size: var(--text-sm); line-height: 1.65;
-  overflow-x: auto; white-space: pre;
-}
+
 
 /* ==========================================================================
    17 · Print layout

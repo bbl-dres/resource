@@ -249,7 +249,8 @@ export function pageHeader({ crumbs, title, actions = [], chrome = true }) {
           // is the application root — so it is a real href, not just a handler.
           return html`${sep}${last
             ? html`<span class="crumbs__current" aria-current="page">${t(c)}</span>`
-            : html`<a class="crumbs__link" href="." data-act="tab" data-val="start">${t(c)}</a>`}`;
+            : html`<a class="crumbs__link" href="." data-act="home"
+                title="${t('Zur Einstiegsseite, ohne Filter')}">${t(c)}</a>`}`;
         })}
       </nav>
     </div>
@@ -500,7 +501,8 @@ export function appFooter() {
     <span class="shell-footer__links">
       ${m.footerLinks.map(l => l.tab
         ? html`<a href="#?tab=${l.tab}" data-act="tab" data-val="${l.tab}">${t(l.label)}</a>`
-        : html`<a href="${l.href}" data-act="noop">${t(l.label)}</a>`)}
+        : html`<a href="${l.href}" target="_blank" rel="noopener noreferrer">${t(l.label)}
+            ${icons.externalLink(12)}</a>`)}
     </span>
   </div></footer>`;
 }

@@ -17,6 +17,10 @@
      ========================================================================== */
   --grey-50:  #f9fafb;
   --grey-100: #f3f4f6;
+  --line-subtle: #e3e9f3;   /* 1.18:1 — grid hairlines */
+  --line:        #ced3dd;   /* 1.45:1 — dividers and card edges */
+  --line-strong: #a4a8b0;   /* 2.30:1 — outlines that identify a control */
+  --fill-chip:   #d9dee8;   /* 1.30:1 — a chip has to read as an object */
   --grey-200: #e5e7eb;
   --grey-300: #d1d5db;
   --grey-400: #9ca3af;
@@ -65,7 +69,7 @@
      4 · PRIMITIVES — status hues
      ========================================================================== */
   --red-50:   #fef2f2;
-  --red-100:  #fee2e2;
+  --red-100:  #f5dada;   /* greyscale 224 — the darkest status fill */
   --red-200:  #fecaca;
   --red-300:  #fca5a5;
   --red-600:  #dc2626;
@@ -73,14 +77,14 @@
   --red-800:  #991b1b;
 
   --amber-50:  #fffbeb;
-  --amber-100: #fef3c7;
+  --amber-100: #f5eac0;  /* greyscale 234 */
   --amber-200: #fde68a;
   --amber-600: #d97706;
   --amber-750: #8a4a0b;
   --amber-900: #78350f;
 
   --green-50:  #f0fdf4;
-  --green-100: #dcfce7;
+  --green-100: #dcfbe7;  /* greyscale 244 */
   --green-200: #bbf7d0;
   --green-400: #4ade80;
   --green-600: #16a34a;
@@ -122,9 +126,9 @@
   /* ==========================================================================
      7 · SEMANTIC — borders
      ========================================================================== */
-  --color-border-subtle:   var(--grey-100);   /* inner grid column hairlines */
-  --color-border:          var(--grey-200);   /* default card / row divider  */
-  --color-border-strong:   var(--grey-300);   /* inputs, buttons             */
+  --color-border-subtle:   var(--line-subtle);   /* inner grid column hairlines */
+  --color-border:          var(--line);          /* default card / row divider  */
+  --color-border-strong:   var(--line-strong);   /* inputs, buttons             */
   --color-border-emphasis: var(--grey-400);   /* 1.5px marker rings          */
   --color-border-contrast: var(--grey-900);   /* open / active menu button   */
   --color-border-panel:    var(--steel-350);  /* app-frame outline           */
@@ -200,7 +204,7 @@
   --color-info-border: var(--blue-300);
   --color-info-solid:  var(--blue-600);
 
-  --color-neutral-bg:     var(--grey-100);
+  --color-neutral-bg:     var(--grey-50);   /* greyscale 251 — the lightest */
   --color-neutral-fg:     var(--grey-600);
   --color-neutral-bg-alt: var(--grey-200);
   --color-neutral-border: var(--grey-300);

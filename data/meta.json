@@ -99,11 +99,13 @@
   "footerLinks": [
     {
       "label": "Kontakt",
-      "href": "#"
+      "href": "https://www.bbl.admin.ch/de/kontakt",
+      "external": true
     },
     {
       "label": "Quellcode",
-      "href": "#"
+      "href": "https://github.com/bbl-dres/resource",
+      "external": true
     },
     {
       "label": "API",

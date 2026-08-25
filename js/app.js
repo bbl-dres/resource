@@ -15,7 +15,7 @@ import { html, appHeader, appFooter, toast } from './ui.js';
 import { renderLanding, renderUebersicht, renderModal } from './views-overview.js';
 import { renderTermine } from './views-schedule.js';
 import { renderDashboard, renderVerlauf } from './views-analysis.js';
-import { renderApi, renderExport } from './views-docs.js';
+import { renderApi, renderExport, mountSwagger } from './views-docs.js';
 
 const root = document.getElementById('app');
 
@@ -48,6 +48,7 @@ function render() {
   `);
 
   document.documentElement.lang = state.lang;
+  if (state.tab === 'api') mountSwagger();
   positionMenu();
   restoreFocus(focus);
   if (Math.abs(window.scrollY - scrollY) > 1) window.scrollTo({ top: scrollY });
@@ -117,6 +118,12 @@ const actions = {
   noop: () => flash(t('Im Prototyp nicht hinterlegt.')),
 
   tab: (val) => setState({ tab: val, menu: null, editing: null, modal: null }),
+  // The breadcrumb is a way back to a clean slate, not just to another route.
+  home: () => setState({
+    tab: 'start', menu: null, editing: null, modal: null,
+    phases: [], leads: [], portfolios: [], overloadOnly: false, search: '',
+    searchOpen: { header: false, toolbar: false }
+  }),
   view: (val) => setState({ view: val, menu: null }),
   lang: (val) => setState({ lang: val, menu: null }),
 
@@ -427,6 +434,13 @@ document.addEventListener('scroll', () => {
 
 window.addEventListener('hashchange', () => {
   syncFromUrl();
+});
+
+/** Moving between tabs is a navigation step, so it earns a history entry. */
+let lastTab = null;
+subscribe(() => {
+  if (lastTab !== null && lastTab !== state.tab) history.pushState(null, '', location.hash);
+  lastTab = state.tab;
 });
 
 /**
