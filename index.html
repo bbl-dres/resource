@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ressourcenplanung — BBL</title>
+<meta name="description" content="Prototyp der Ressourcenplanung für das Bundesamt für Bauten und Logistik BBL. Fiktive Inhalte, nur zur Demonstration.">
+<link rel="icon" href="assets/swiss-logo-flag.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+
+<a class="skip-link" href="#main">Zum Inhalt springen</a>
+
+<div id="app" class="app">
+  <div class="boot" role="status">
+    <span class="boot__spinner" aria-hidden="true"></span>
+    <span>Ressourcenplanung wird geladen …</span>
+  </div>
+</div>
+
+<noscript>
+  <div class="boot boot--error">
+    Diese Anwendung benötigt JavaScript. Der Prototyp lädt seine Daten aus statischen JSON-Dateien.
+  </div>
+</noscript>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

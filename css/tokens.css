@@ -1,0 +1,378 @@
+/* =============================================================================
+   Ressourcenplanung — Design Tokens
+   -----------------------------------------------------------------------------
+   Derived by frequency analysis from the visual mockup
+   docs/wireframes/260825_Portfolio Resource Management/
+     Ressourcenplanung Bereichsleitung.dc.html
+   Every primitive value below occurs literally in that file.
+
+   Layer 1 = primitives (raw values), Layer 2 = semantic roles (var over them).
+   Only ever reference the semantic layer from main.css.
+   ============================================================================= */
+
+:root {
+  /* ==========================================================================
+     1 · PRIMITIVES — neutral grey ramp
+     The workhorse ramp: the seven most-used colours in the whole mockup.
+     ========================================================================== */
+  --grey-50:  #f9fafb;
+  --grey-100: #f3f4f6;
+  --grey-200: #e5e7eb;
+  --grey-300: #d1d5db;
+  --grey-400: #9ca3af;
+  --grey-500: #6b7280;
+  --grey-600: #4b5563;
+  --grey-700: #374151;
+  --grey-800: #1f2937;
+  --grey-900: #111827;
+  --white:    #ffffff;
+
+  /* ==========================================================================
+     2 · PRIMITIVES — brand navy + accent blue
+     ========================================================================== */
+  --navy-900: #12213e;
+
+  --blue-50:  #eff6ff;
+  --blue-100: #dbeafe;
+  --blue-200: #c7d2fe;
+  --blue-300: #93c5fd;
+  --blue-500: #3b82f6;
+  --blue-600: #2563eb;
+  --blue-700: #1d4ed8;
+  --blue-800: #1e40af;
+
+  /* ==========================================================================
+     3 · PRIMITIVES — "steel", a second blue-shifted neutral family
+     Carries the app-frame surfaces and the pensum heat ramp.
+     Deliberately NOT folded into --grey-*.
+     ========================================================================== */
+  --steel-25:  #fafbfd;
+  --steel-50:  #f5f7fb;
+  --steel-75:  #f4f7fc;
+  --steel-100: #f0f4fa;
+  --steel-125: #eef1f6;
+  --steel-150: #edf1f7;
+  --steel-200: #e7eef8;
+  --steel-300: #d6e3f3;
+  --steel-350: #d0d5dd;
+  --steel-400: #c4d0e0;
+  --steel-450: #c2d5ec;
+  --steel-500: #9cb8de;
+
+  /* ==========================================================================
+     4 · PRIMITIVES — status hues
+     ========================================================================== */
+  --red-50:   #fef2f2;
+  --red-100:  #fee2e2;
+  --red-200:  #fecaca;
+  --red-300:  #fca5a5;
+  --red-600:  #dc2626;
+  --red-700:  #b91c1c;
+  --red-800:  #991b1b;
+
+  --amber-50:  #fffbeb;
+  --amber-100: #fef3c7;
+  --amber-200: #fde68a;
+  --amber-600: #d97706;
+  --amber-750: #8a4a0b;
+  --amber-900: #78350f;
+
+  --green-50:  #f0fdf4;
+  --green-100: #dcfce7;
+  --green-200: #bbf7d0;
+  --green-400: #4ade80;
+  --green-600: #16a34a;
+  --green-700: #15803d;
+  --green-800: #166534;
+
+  --violet-100: #ede9fe;
+  --violet-600: #7c3aed;
+  --violet-800: #5b21b6;
+
+  --cyan-100: #cffafe;
+  --cyan-600: #0891b2;
+  --cyan-800: #155e75;
+
+  /* ==========================================================================
+     5 · PRIMITIVES — alpha overlays
+     ========================================================================== */
+  --alpha-white-10: rgba(255, 255, 255, 0.10);
+  --alpha-white-12: rgba(255, 255, 255, 0.12);
+  --alpha-white-22: rgba(255, 255, 255, 0.22);
+  --alpha-white-25: rgba(255, 255, 255, 0.25);
+  --alpha-ink-28:   rgba(17, 24, 39, 0.28);
+
+  /* ==========================================================================
+     6 · SEMANTIC — text roles
+     ========================================================================== */
+  --color-text-strong:        var(--grey-900);
+  --color-text:               var(--grey-700);
+  --color-text-body:          var(--grey-800);
+  --color-text-secondary:     var(--grey-600);
+  --color-text-muted:         var(--grey-500);
+  --color-text-subtle:        var(--grey-400);
+  --color-text-inverse:       var(--white);
+  --color-text-on-brand:      var(--white);
+  --color-text-on-brand-mute: var(--blue-200);
+  --color-text-link:          var(--blue-700);
+  --color-text-link-hover:    var(--navy-900);
+
+  /* ==========================================================================
+     7 · SEMANTIC — borders
+     ========================================================================== */
+  --color-border-subtle:   var(--grey-100);   /* inner grid column hairlines */
+  --color-border:          var(--grey-200);   /* default card / row divider  */
+  --color-border-strong:   var(--grey-300);   /* inputs, buttons             */
+  --color-border-emphasis: var(--grey-400);   /* 1.5px marker rings          */
+  --color-border-contrast: var(--grey-900);   /* open / active menu button   */
+  --color-border-panel:    var(--steel-350);  /* app-frame outline           */
+  --color-border-accent:   var(--blue-600);   /* focused search field        */
+
+  /* ==========================================================================
+     8 · SEMANTIC — surfaces
+     ========================================================================== */
+  --color-page-bg:          var(--steel-125);
+  --color-surface:          var(--white);
+  --color-surface-alt:      var(--grey-50);
+  --color-surface-sunken:   var(--grey-100);
+  --color-surface-hover:    var(--steel-100);
+  --color-surface-selected: var(--blue-50);
+  --color-surface-frame:    var(--steel-50);   /* app frame + table header   */
+  --color-surface-group:    var(--steel-25);   /* group rows, no-value cell  */
+  --color-scrim:            var(--alpha-ink-28);
+
+  /* ==========================================================================
+     9 · SEMANTIC — brand shell + accent
+     Note: "on" states in this design are dark neutral, not blue.
+     ========================================================================== */
+  --color-brand:                       var(--navy-900);
+  --color-brand-fg:                    var(--white);
+  --color-brand-fg-muted:              var(--blue-200);
+  --color-brand-control-bg:            var(--alpha-white-10);
+  --color-brand-control-bg-strong:     var(--alpha-white-12);
+  --color-brand-control-border:        var(--alpha-white-22);
+  --color-brand-control-border-strong: var(--alpha-white-25);
+
+  --color-accent:        var(--blue-600);
+  --color-accent-fg:     var(--white);
+  --color-accent-hover:  var(--blue-700);
+  --color-accent-subtle: var(--blue-50);
+
+  --color-toggle-on:      var(--grey-900);
+  --color-toggle-on-fg:   var(--white);
+  --color-toggle-off:     var(--grey-300);
+  --color-toggle-knob:    var(--white);
+  --color-toggle-edit-on: var(--green-400);   /* the "Bearbeiten" switch only */
+
+  /* ==========================================================================
+     10 · SEMANTIC — status pairs
+     Capacity logic: > 100 % danger · >= 95 % warn · >= 80 % ok · else neutral
+     ========================================================================== */
+  --color-danger-bg:            var(--red-100);
+  --color-danger-fg:            var(--red-800);
+  --color-danger-fg-strong:     var(--red-700);
+  --color-danger-border:        var(--red-300);
+  --color-danger-solid:         var(--red-600);
+  --color-danger-bg-subtle:     var(--red-50);
+  --color-danger-border-subtle: var(--red-200);
+
+  --color-warn-bg:        var(--amber-100);
+  --color-warn-fg:        var(--amber-900);
+  --color-warn-fg-alt:    var(--amber-750);
+  --color-warn-border:    var(--amber-200);
+  --color-warn-solid:     var(--amber-600);
+  --color-warn-bg-subtle: var(--amber-50);    /* "ohne Projektleitung" row   */
+
+  --color-ok-bg:        var(--green-100);
+  --color-ok-fg:        var(--green-800);
+  --color-ok-fg-alt:    var(--green-700);
+  --color-ok-border:    var(--green-200);
+  --color-ok-solid:     var(--green-600);
+  --color-ok-bg-subtle: var(--green-50);
+
+  --color-info-bg:     var(--blue-100);
+  --color-info-fg:     var(--blue-800);
+  --color-info-border: var(--blue-300);
+  --color-info-solid:  var(--blue-600);
+
+  --color-neutral-bg:     var(--grey-100);
+  --color-neutral-fg:     var(--grey-600);
+  --color-neutral-bg-alt: var(--grey-200);
+  --color-neutral-border: var(--grey-300);
+  --color-neutral-solid:  var(--grey-400);
+
+  --color-na-bg: var(--steel-25);
+  --color-na-fg: var(--grey-400);
+
+  /* ==========================================================================
+     11 · SIA 112 phase families — bg / fg / dot
+     1 Strategische Planung · 2 Vorstudien · 3 Projektierung
+     4 Ausschreibung · 5 Realisierung · 6 Bewirtschaftung
+     ========================================================================== */
+  --phase-1-bg: var(--grey-100);   --phase-1-fg: var(--grey-700);   --phase-1-dot: var(--grey-400);
+  --phase-2-bg: var(--blue-100);   --phase-2-fg: var(--blue-800);   --phase-2-dot: var(--blue-500);
+  --phase-3-bg: var(--green-100);  --phase-3-fg: var(--green-800);  --phase-3-dot: var(--green-600);
+  --phase-4-bg: var(--amber-100);  --phase-4-fg: var(--amber-900);  --phase-4-dot: var(--amber-600);
+  --phase-5-bg: var(--violet-100); --phase-5-fg: var(--violet-800); --phase-5-dot: var(--violet-600);
+  --phase-6-bg: var(--cyan-100);   --phase-6-fg: var(--cyan-800);   --phase-6-dot: var(--cyan-600);
+
+  /* ==========================================================================
+     12 · Pensum heat ramp — blue only encodes the SIZE of a pensum
+     0 % · 1–39 % · 40–79 % · 80–119 % · >= 120 %, plus no-value and negative
+     ========================================================================== */
+  --heat-0-bg:    var(--white);      --heat-0-fg:    var(--grey-400);
+  --heat-1-bg:    var(--steel-75);   --heat-1-fg:    var(--grey-800);
+  --heat-2-bg:    var(--steel-200);  --heat-2-fg:    var(--grey-800);
+  --heat-3-bg:    var(--steel-300);  --heat-3-fg:    var(--grey-900);
+  --heat-4-bg:    var(--steel-450);  --heat-4-fg:    var(--grey-900);
+  --heat-null-bg: var(--steel-25);   --heat-null-fg: var(--grey-400);
+  --heat-neg-bg:  var(--red-100);    --heat-neg-fg:  var(--red-800);
+
+  --spark-bar:       var(--steel-500);
+  --spark-bar-empty: var(--grey-200);
+
+  /* Hatched fills: a delayed bar, and a bar with no project lead */
+  --pattern-delay:   repeating-linear-gradient(135deg, #fca5a5 0 5px, #fef2f2 5px 10px);
+  --pattern-no-lead: repeating-linear-gradient(135deg, #fde68a 0 5px, #fffbeb 5px 10px);
+
+  /* ==========================================================================
+     13 · Typography
+     ========================================================================== */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+               "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+
+  --text-2xl:  24px;   /* page title                       */
+  --text-xl:   22px;   /* KPI value, section heading       */
+  --text-lg:   18px;   /* stepper glyph, strong numeric    */
+  --text-card: 17px;   /* card heading                     */
+  --text-sub:  16px;   /* sub-section heading              */
+  --text-tab:  15px;   /* tab labels, list item titles     */
+  --text-btn:  14px;   /* button labels                    */
+  --text-base: 13px;   /* DEFAULT body / table cell        */
+  --text-sm:   12px;   /* secondary text, table header     */
+  --text-xs:   11px;   /* badges, captions                 */
+  --text-2xs:  10px;   /* notification count, tiny tag     */
+
+  --font-regular:  400;
+  --font-medium:   500;
+  --font-semibold: 600;
+  --font-bold:     700;
+
+  --leading-tight:   1.2;
+  --leading-snug:    1.3;
+  --leading-compact: 1.4;
+  --leading-normal:  1.5;
+  --leading-relaxed: 1.55;
+
+  --tracking-h1: -0.02em;
+  --tracking-h2: -0.015em;
+  --tracking-h3: -0.01em;
+
+  /* ==========================================================================
+     14 · Spacing
+     ========================================================================== */
+  --space-1:  2px;
+  --space-2:  4px;
+  --space-3:  6px;
+  --space-4:  8px;
+  --space-5:  10px;   /* the default gap */
+  --space-6:  12px;
+  --space-7:  14px;
+  --space-8:  16px;
+  --space-9:  18px;
+  --space-10: 20px;
+  --space-11: 24px;
+  --space-12: 28px;
+  --space-13: 32px;
+
+  /* ==========================================================================
+     15 · Radii
+     ========================================================================== */
+  --radius-xs:   1px;
+  --radius-sm:   3px;
+  --radius-md:   4px;
+  --radius-menu: 5px;
+  --radius:      6px;    /* DEFAULT — buttons, inputs, badges */
+  --radius-lg:   8px;    /* cards, popovers                   */
+  --radius-xl:   10px;
+  --radius-2xl:  12px;   /* app frame                         */
+  --radius-pill: 9999px;
+
+  /* ==========================================================================
+     16 · Borders, elevation, focus
+     ========================================================================== */
+  --border-hairline: 1px;
+  --border-control:  1.5px;
+  --border-emphasis: 2px;
+  --border-accent:   3px;
+
+  --shadow-menu:  0 20px 25px -5px rgba(0, 0, 0, 0.18);
+  --shadow-menu-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.18),
+                    0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  --shadow-card:  0 8px 24px rgba(0, 0, 0, 0.14);
+  --shadow-modal: 0 24px 48px rgba(0, 0, 0, 0.18);
+
+  --rail-danger: inset 3px 0 0 var(--red-600);
+  --rail-warn:   inset 3px 0 0 var(--amber-600);
+  --rail-accent: inset 3px 0 0 var(--blue-600);
+
+  --focus-ring:        3px solid var(--blue-500);
+  --focus-ring-offset: 2px;
+  --ring-cell-edit:    inset 0 0 0 2px var(--blue-600);
+
+  /* ==========================================================================
+     17 · Layout metrics
+     ========================================================================== */
+  --layout-width:    1440px;   /* the design width          */
+  --shell-pad-x:     28px;
+  --header-height:   60px;
+  --tabbar-height:   40px;
+
+  /* Pensum grid */
+  --grid-quarter:      72px;    /* one quarter column        */
+  --grid-quarter-wide: 128px;   /* gantt / calendar column   */
+  --grid-col-ampel:    36px;
+  --grid-col-id:       100px;
+  --grid-col-phase:    128px;
+  --grid-col-lead:     132px;
+  --grid-col-budget:   112px;
+  --grid-col-target:   76px;
+  --grid-col-trend:    130px;
+  --grid-pane-left:    360px;   /* gantt project column      */
+
+  /* Rows and controls */
+  --row-height:         38px;
+  --row-height-compact: 32px;
+  --row-height-header:  34px;
+  --row-height-sum:     34px;
+  --row-height-list:    48px;
+  --bar-height:         26px;
+
+  --control-height-sm: 26px;
+  --control-height-md: 30px;
+  --control-height:    32px;
+  --control-height-lg: 34px;
+  --control-height-xl: 36px;
+  --control-height-2xl: 38px;
+  --control-height-3xl: 40px;
+
+  --switch-width:  34px;
+  --switch-height: 19px;
+  --switch-knob:   15px;
+  --avatar-size:   32px;
+  --dot-size:      10px;
+
+  /* ==========================================================================
+     18 · Stacking order
+     ========================================================================== */
+  --z-base:    1;
+  --z-raised:  2;
+  --z-sticky:  5;
+  --z-label:   6;
+  --z-editing: 20;
+  --z-popover: 70;
+  --z-scrim:   79;
+  --z-modal:   80;
+  --z-toast:   90;
+}

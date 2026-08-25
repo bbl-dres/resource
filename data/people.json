@@ -1,0 +1,8 @@
+[
+  { "id": "sonja",  "name": "Sonja Beispiel",  "initials": "SB", "shortName": "Sonja B.",  "role": "Projektleitung",     "employment": 100, "baseLoad": [118, 118, 108,  95,  75,  55,  30,  20] },
+  { "id": "lars",   "name": "Lars Muster",     "initials": "LM", "shortName": "Lars M.",   "role": "Projektleitung",     "employment": 100, "baseLoad": [115, 118, 108, 100,  85,  65,  40,  25] },
+  { "id": "alina",  "name": "Alina Beispiel",  "initials": "AB", "shortName": "Alina B.",  "role": "Projektleitung",     "employment": 100, "baseLoad": [104,  98, 105,  85,  70,  50,  25,  15] },
+  { "id": "tobias", "name": "Tobias Muster",   "initials": "TM", "shortName": "Tobias M.", "role": "Projektentwicklung", "employment": 100, "baseLoad": [ 92, 105, 112, 105,  95,  80,  60,  45] },
+  { "id": "paula",  "name": "Paula Beispiel",  "initials": "PB", "shortName": "Paula B.",  "role": "Projektentwicklung", "employment":  80, "baseLoad": [ 90,  95,  94,  94,  85,  75,  60,  44] },
+  { "id": "nadia",  "name": "Nadia Muster",    "initials": "NM", "shortName": "Nadia M.",  "role": "Bauleitung",         "employment":  60, "baseLoad": [ 60,  75,  87,  92,  95,  92,  62,  42] }
+]

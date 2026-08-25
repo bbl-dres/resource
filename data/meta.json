@@ -1,0 +1,45 @@
+{
+  "org": {
+    "name": "Bundesamt für Bauten und Logistik BBL",
+    "app": "Ressourcenplanung",
+    "unit": "Abteilung Projektmanagement"
+  },
+  "prototypeNotice": "Prototyp, fiktive Inhalte — nur zur Demonstration",
+  "user": {
+    "initials": "MB",
+    "name": "Max Beispiel",
+    "role": "Leitung Projektmanagement",
+    "signedIn": true
+  },
+  "today": "2026-08-25",
+  "todayLabel": "25.08.2026",
+  "todayQuarter": "2026Q3",
+  "asOf": "Stand 25.08.2026, 07:15",
+  "lastVisit": "21.08.2026",
+  "version": "Version 0.4 · Prototyp",
+  "notifications": 3,
+  "notificationsTitle": "3 Benachrichtigungen: MS4 verschoben · neue Überlast Sonja Beispiel · offener Bedarf ab Q1/2027",
+  "scope": { "shown": 11, "total": 512 },
+  "quarters": [
+    { "id": "2026Q3", "label": "Q3/2026", "short": "Q3", "year": 2026 },
+    { "id": "2026Q4", "label": "Q4/2026", "short": "Q4", "year": 2026 },
+    { "id": "2027Q1", "label": "Q1/2027", "short": "Q1", "year": 2027 },
+    { "id": "2027Q2", "label": "Q2/2027", "short": "Q2", "year": 2027 },
+    { "id": "2027Q3", "label": "Q3/2027", "short": "Q3", "year": 2027 },
+    { "id": "2027Q4", "label": "Q4/2027", "short": "Q4", "year": 2027 },
+    { "id": "2028Q1", "label": "Q1/2028", "short": "Q1", "year": 2028 },
+    { "id": "2028Q2", "label": "Q2/2028", "short": "Q2", "year": 2028 }
+  ],
+  "portfolios": [
+    { "id": "inland", "label": "Inland" },
+    { "id": "ausland", "label": "Ausland" },
+    { "id": "zoll", "label": "Zoll" },
+    { "id": "repraesentativ", "label": "Repräsentative Bauten" },
+    { "id": "sport", "label": "Sport" }
+  ],
+  "footerLinks": [
+    { "label": "Kontakt", "href": "#" },
+    { "label": "Quellcode", "href": "#" },
+    { "label": "API", "href": "#" }
+  ]
+}
