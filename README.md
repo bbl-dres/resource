@@ -36,7 +36,7 @@ running the content through Jekyll.
 | Einstieg (landing) | `#?tab=start` | What is due today: KPI entries, next milestones, who is overbooked, utilisation by quarter, recent changes. Every card leads into a tab. |
 | Übersicht | `#?tab=uebersicht` | The pensum grid: projects × eight quarters, with a capacity footer. Switch on **Bearbeiten** to edit a cell. |
 | Termine | `#?tab=termine&view=gantt` | Three views of the same milestones: **Gantt** (phase bars plus a capacity band), **Liste** (one row per milestone), **Kalender** (twelve months as columns). |
-| Dashboard | `#?tab=dashboard` | Aggregates over phase, person, location and budget. |
+| Dashboard | `#?tab=dashboard` | The KPI strip plus aggregates over phase, person, location and budget. |
 | Verlauf | `#?tab=verlauf` | The immutable change log for app-owned fields. |
 | API | `#?tab=api` | The REST reference — five endpoint groups, the nested-JSONB project shape and the eIAM auth note. Reached from the **API** link in the footer. |
 | Drucklayout | `#?tab=export` | The PDF export: A4 portrait and A4 landscape sheets with letterhead, fixed legend and document ID. Reached from **Exportieren → Als PDF exportieren**. |
@@ -59,7 +59,10 @@ running the content through Jekyll.
 - **Menus that behave like menus.** The project-lead menu filters as you type, offers
   *Meine Projekte*, floats selected entries to the top and scrolls at 214px. Arrow keys roam,
   `Escape` closes and hands focus back to the trigger, and panels stay inside the window.
-- **Frozen grid columns.** Signal, ID and project stay put while the quarters scroll under them.
+- **Frozen grid columns.** ID and project stay put while the quarters scroll under them.
+- **Sortable columns.** Clicking a header sorts by it; clicking the active one flips the
+  direction. The sort dropdown and the headers read the same state.
+- **Teilen** opens a dialog with the shareable URL for the current view.
 - **DE / EN.** The language menu translates the interface live. FR and IT are listed as pending,
   exactly as the wireframe specifies.
 - **URL state.** Tab, view, filters, grouping, sorting, unit and search live in the hash, so any

@@ -76,7 +76,6 @@ export function renderExport() {
     })}
     <div class="wrap"><div class="content">
       <div class="sheetbar">
-        <p class="sheetbar__lead">${t('Plankopf und Legende sind fest, Umfang und Filter kommen aus der Ansicht.')}</p>
         <div class="segmented">
           ${SHEETS.map(s => html`<button type="button" class="${s.id === sheet.id ? 'is-on' : ''}"
             aria-pressed="${s.id === sheet.id}" data-act="sheet" data-val="${s.id}">${t(s.label)}</button>`)}

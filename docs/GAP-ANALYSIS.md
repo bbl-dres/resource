@@ -255,7 +255,36 @@ These were already recorded in the README and remain accurate:
 - **Change-log count** reflects the nine real entries rather than the mockup's `von 214`. ➖ kept.
 - **Design annotations** (`Wofür / Stärke / Grenze`) removed as review commentary. ➖ kept.
 
-## 6. Still open
+## 6. Visual restructure
+
+A separate pass, driven by review rather than by the mockup: the prototype carried three
+changes of ground (white header band, grey body, white cards), which read as clutter.
+
+**New ground rules.** Navy chrome, then one white strip that answers *where am I*, then a grey
+canvas on which **every white box is content**. Three grounds, one meaning each.
+
+- The breadcrumb became its own thin white sub-header; the title, tabs and toolbar moved onto
+  the grey. The toolbar lost its card entirely — its controls are already bordered pills.
+- Buttons are transparent until hovered; only the primary action carries a fill.
+- Content cards traded their 1px border for a soft two-layer shadow (the `--shadow-raised` token).
+  The landing entry cards stay flat, since four large lifted boxes in a row read as noise.
+- **The KPI strip moved into the Dashboard**, first position. It had been repeating on every
+  tab, which is where most of the perceived clutter came from.
+
+**Grid groups now match the Termine tab.** Each group is a label on the page ground with its own
+card below, and each card repeats the column header so a group is readable on its own. Per-group
+sums were dropped — they belong in the PDF report, not on screen.
+
+**Other decluttering in the same pass:** the row-loading note, the SIA phase dots and the prose
+colour explanation are gone; the last is replaced by the same swatch legend the print sheet
+carries, so screen and paper read alike. A missing project lead no longer tints the whole row
+amber — it marks the one field that is actually open.
+
+**New affordances:** column headers sort, sharing state with the sort dropdown (clicking the
+active column flips direction); *Teilen* opens a dialog with the shareable URL; the Ampel column
+carries a label and sits beside the project lead it reports on; the print layout has a way back.
+
+## 7. Still open
 
 - 📋 **Sticky grid columns.** Below ~1280px the pensum grid scrolls horizontally but the left
   text columns do not freeze. The wireframe's degradation order is

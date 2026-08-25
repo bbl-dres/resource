@@ -10,7 +10,7 @@ import {
 
 import {
   html, raw, icons, pageHeader, editToggle, exportMenu, toolbar, activeFilterRow,
-  timeControls, tooNarrow, phaseClass,
+  timeControls, tooNarrow,
   aria
 } from './ui.js';
 
@@ -77,7 +77,7 @@ function ganttView() {
           <button type="button" class="gantt__grouptoggle" data-act="toggle-group" data-val="g:${g.key}"
                   aria-expanded="${aria(!collapsed)}" aria-label="${t('Gruppe')} ${g.label} ${t('ein- oder ausklappen')}">
             <span class="caret ${collapsed ? 'is-collapsed' : ''}" aria-hidden="true">${icons.chevronDown()}</span>
-            <span class="gantt__groupname">${g.label}</span>
+            <h2 class="gantt__groupname">${g.label}</h2>
           </button>
           <span class="count-pill" aria-label="${g.projects.length} ${t('Projekte')}">${g.projects.length}</span>
         </header>`}
@@ -161,7 +161,7 @@ function ganttBar(b, i, bars) {
   const endsChain = !bars.some((o, j) => j !== i && o.from === b.to);
   const cls = [
     'gantt__bar',
-    b.delay ? 'is-delay' : b.unassigned ? 'is-unassigned' : `is-phase ${phaseClass(b.phase)}`,
+    b.delay ? 'is-delay' : b.unassigned ? 'is-unassigned' : 'is-phase',
     startsChain ? 'is-first' : '',
     endsChain && !b.continues ? 'is-last' : '',
     b.continues ? 'is-open' : ''
@@ -209,7 +209,7 @@ function listView() {
           <button type="button" class="msgroup__toggle" data-act="toggle-group" data-val="ms:${qid}"
                   aria-expanded="${aria(!collapsed)}">
             <span class="caret ${collapsed ? 'is-collapsed' : ''}" aria-hidden="true">${icons.chevronDown()}</span>
-            <span class="msgroup__name">${q.short} / ${q.year}</span>
+            <h2 class="msgroup__name">${q.short} / ${q.year}</h2>
           </button>
           <span class="count-pill">${rows.length}</span>
         </header>

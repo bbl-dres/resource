@@ -310,7 +310,7 @@ function pensumGrid() {
               data-act="toggle-group" data-val="${g.key}" aria-expanded="${aria(!collapsed)}"
               aria-label="${t('Gruppe')} ${g.label} ${t('ein- oder ausklappen')}">
         <span class="caret ${collapsed ? 'is-collapsed' : ''}" aria-hidden="true">${icons.chevronDown()}</span>
-        <span class="pgrouphead__name">${g.label}</span>
+        <h2 class="pgrouphead__name">${g.label}</h2>
       </button>
       <span class="count-pill">${g.projects.length}</span>
     </header>`;
@@ -325,7 +325,7 @@ function pensumGrid() {
     // Each card repeats the column header, the same way a Gantt group card
     // repeats its axis — a group has to be readable on its own.
     return html`<section class="pgroup">${head}
-      <div class="pblock">${columnHeader(tpl, span, sticky)}${rows}</div>
+      <div class="pblock">${columnHeader(tpl, sticky)}${rows}</div>
     </section>`;
   });
 
@@ -406,18 +406,9 @@ function sortHead(key, label, cls = '', style = '', title = '') {
 }
 
 /** The year band and the column names, repeated at the top of every group card. */
-function columnHeader(tpl, span, sticky) {
+function columnHeader(tpl, sticky) {
   const q0 = data.quarters[0];
   return html`
-    <div class="prow prow--years" style="grid-template-columns:${raw(tpl)}">
-      <div class="prow__yearlabel is-frozen" style="grid-column:span ${span}">
-        <span>${t('Projekt')}</span>
-        <span class="prow__unit">${state.unit === 'fte' ? t('Pensum in FTE') : t('Pensum in %')}</span>
-      </div>
-      ${yearHeaders()}
-      ${state.trend && html`<span></span>`}
-    </div>
-
     <div class="prow prow--head" style="grid-template-columns:${raw(tpl)}">
       ${state.cols.id && sortHead('id', 'ID', 'is-frozen', `left:${sticky.id}px`)}
       ${sortHead('projekt', t('Projekt'), 'is-frozen is-frozen-last', `left:${sticky.title}px`)}
@@ -429,27 +420,15 @@ function columnHeader(tpl, span, sticky) {
       ${state.cols.priority && sortHead('priority', t('Priorität'))}
       ${state.cols.nextMs && html`<span class="pcell--text">${t('Nächster Meilenstein')}</span>`}
       ${state.cols.credit && sortHead('credit', t('Kredit CHF'), 'pcell--num')}
-      ${state.target && sortHead('target', `${t('Soll')} ${q0.short}`, 'pcell--num')}
+      ${state.target && sortHead('target', `${t('Soll')} ${data.quarters[0].short}`, 'pcell--num')}
       ${data.quarters.map((q, i) => sortHead(`q${i}`,
-        q.short,
+        `${q.short}/${String(q.year).slice(2)}`,
         `pcell--num ${i === 0 ? 'is-today' : ''} ${qBorder(i)}`, '',
         i === 0 ? `${t('Heute')}, ${data.meta.todayLabel} — ${t('laufendes Quartal, gesperrt')}` : q.label))}
       ${state.trend && html`<span class="pcell--text">${t('Verlauf')}</span>`}
     </div>`;
 }
 
-function yearHeaders() {
-  const spans = [];
-  let i = 0;
-  while (i < data.quarters.length) {
-    const year = data.quarters[i].year;
-    let n = 0;
-    while (i + n < data.quarters.length && data.quarters[i + n].year === year) n++;
-    spans.push(html`<div class="prow__year" style="grid-column:span ${n}">${year}</div>`);
-    i += n;
-  }
-  return spans;
-}
 
 function footRow(label, values, tpl, span) {
   return html`<div class="prow prow--foot" style="grid-template-columns:${raw(tpl)}">
@@ -498,7 +477,7 @@ function projectRow(p, tpl, sticky, rowIdx) {
         class="pcell pcell--val heat-${heatStep(v)} ${over ? 'is-warn' : ''} ${editing ? 'is-editing' : ''} ${isEdited(p, q) ? 'is-edited' : ''} ${qBorder(q)}"
         data-act="cell" data-val="${p.id}" data-q="${q}" data-fk="cell:${p.id}:${q}"
         aria-label="${description}" title="${description}" ${attr(!state.edit || locked, 'data-locked="1"')}>
-        ${over && v > 0 ? html`<span class="pcell__warn">${icons.warn(11)}</span>` : ''}${label}
+        ${label}
       </button>`;
     })}
 
@@ -575,7 +554,6 @@ function editPopover() {
       <button type="button" class="btn btn--primary" data-act="apply" ${attr(over && !state.reason.trim(), 'disabled')}>${t('Übernehmen')}</button>
       <button type="button" class="btn" data-act="cancel-edit">${t('Abbrechen')}</button>
     </div>
-    <p class="pop__footnote">${t('Übernehmen schreibt den Eintrag in den Verlauf. Esc bricht ab.')}</p>
   </div>`;
 }
 
@@ -628,7 +606,6 @@ function shareModal({ copied }) {
     </dl>
 
     <footer class="modal__foot">
-      <p class="modal__footnote">${t('Der Prototyp speichert nichts — der Link beschreibt nur die Ansicht.')}</p>
       <button type="button" class="btn btn--primary" data-act="close-modal">${t('Schliessen')}</button>
     </footer>`;
 }
@@ -718,7 +695,6 @@ function projectModal({ projectId }) {
     </section>` : ''}
 
     <footer class="modal__foot">
-      <p class="modal__footnote">${t('Esc oder Klick ausserhalb schliesst. Kein Bearbeiten im Modal.')}</p>
       <button type="button" class="btn" data-act="open-termine" data-val="${p.id}">${t('In Termine öffnen')}</button>
       <button type="button" class="btn btn--primary" data-act="noop">${t('Im ePPM öffnen')}</button>
     </footer>`;
@@ -790,7 +766,6 @@ function rebookModal({ projectId, q, amount, targetId, quarters = 2, search = ''
           <span>${c.name}</span><span class="rebook__role">${c.role}</span>
         </li>`) : html`<li class="rebook__empty">${t('Keine Person gefunden.')}</li>`}
       </ul>
-      <p class="rebook__hint">${candidates.length} ${t('von')} 34 ${t('Personen')} · ${t('weitere beim Scrollen')} · ↑ ↓ ${t('wählen')}, Enter ${t('übernimmt')}</p>
     </div>
 
     <label class="pop__reason rebook__reason">
@@ -801,7 +776,6 @@ function rebookModal({ projectId, q, amount, targetId, quarters = 2, search = ''
     </label>
 
     <footer class="modal__foot">
-      <p class="modal__footnote">${t('Erzeugt einen Verlaufseintrag mit beiden Seiten.')}</p>
       <button type="button" class="btn" data-act="close-modal">${t('Abbrechen')}</button>
       <button type="button" class="btn btn--primary" data-act="rebook-apply" ${attr(!ready, 'disabled')}>${t('Umbuchen')}</button>
     </footer>`;

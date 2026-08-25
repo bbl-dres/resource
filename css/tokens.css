@@ -21,6 +21,7 @@
   --grey-300: #d1d5db;
   --grey-400: #9ca3af;
   --grey-500: #6b7280;
+  --grey-550: #636b7a;   /* the lightest grey that clears AA on white and on the page ground */
   --grey-600: #4b5563;
   --grey-700: #374151;
   --grey-800: #1f2937;
@@ -53,6 +54,7 @@
   --steel-125: #eef1f6;
   --steel-150: #edf1f7;
   --steel-200: #e7eef8;
+  --steel-250: #dbe3f5;
   --steel-300: #d6e3f3;
   --steel-350: #d0d5dd;
   --steel-400: #c4d0e0;
@@ -109,8 +111,8 @@
   --color-text:               var(--grey-700);
   --color-text-body:          var(--grey-800);
   --color-text-secondary:     var(--grey-600);
-  --color-text-muted:         var(--grey-500);
-  --color-text-subtle:        var(--grey-400);
+  --color-text-muted:         var(--grey-550);   /* 5.4:1 on white, 4.7:1 on the page ground */
+  --color-text-subtle:        var(--grey-400);   /* NON-TEXT ONLY — 2.5:1, for disabled glyphs and empty markers */
   --color-text-inverse:       var(--white);
   --color-text-on-brand:      var(--white);
   --color-text-on-brand-mute: var(--blue-200);
@@ -140,6 +142,9 @@
   --color-surface-frame:    var(--steel-50);   /* app frame + table header   */
   --color-surface-group:    var(--steel-25);   /* group rows, no-value cell  */
   --color-scrim:            var(--alpha-ink-28);
+  --color-code-bg:          #0f172a;         /* the one dark surface in the app */
+  --color-code-fg:          var(--steel-250);
+  --color-paper-mount:      #e9edf3;         /* the desk the print sheet lies on */
 
   /* ==========================================================================
      9 · SEMANTIC — brand shell + accent
@@ -220,13 +225,16 @@
      12 · Pensum heat ramp — blue only encodes the SIZE of a pensum
      0 % · 1–39 % · 40–79 % · 80–119 % · >= 120 %, plus no-value and negative
      ========================================================================== */
-  --heat-0-bg:    var(--white);      --heat-0-fg:    var(--grey-400);
+  --heat-0-bg:    var(--white);      --heat-0-fg:    var(--color-text-muted);
   --heat-1-bg:    var(--steel-75);   --heat-1-fg:    var(--grey-800);
   --heat-2-bg:    var(--steel-200);  --heat-2-fg:    var(--grey-800);
   --heat-3-bg:    var(--steel-300);  --heat-3-fg:    var(--grey-900);
   --heat-4-bg:    var(--steel-450);  --heat-4-fg:    var(--grey-900);
-  --heat-null-bg: var(--steel-25);   --heat-null-fg: var(--grey-400);
+  --heat-null-bg: var(--steel-25);   --heat-null-fg: var(--color-text-muted);
   --heat-neg-bg:  var(--red-100);    --heat-neg-fg:  var(--red-800);
+
+  --color-bar-bg:     var(--steel-150);
+  --color-bar-border: var(--steel-400);
 
   --spark-bar:       var(--steel-500);
   --spark-bar-empty: var(--grey-200);
@@ -314,6 +322,7 @@
   /* Content cards sit on the page ground with a soft lift instead of a border. */
   --shadow-raised: 0 1px 2px rgba(16, 24, 40, 0.04), 0 4px 12px rgba(16, 24, 40, 0.06);
   --shadow-raised-hover: 0 1px 2px rgba(16, 24, 40, 0.05), 0 8px 20px rgba(16, 24, 40, 0.09);
+  --shadow-frozen: 8px 0 8px -8px rgba(17, 24, 39, 0.22);   /* the frozen column edge */
   --shadow-modal: 0 24px 48px rgba(0, 0, 0, 0.18);
 
   --rail-danger: inset 3px 0 0 var(--red-600);

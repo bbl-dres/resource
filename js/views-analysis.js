@@ -27,10 +27,10 @@ export function renderDashboard() {
         <button type="button" class="btn" data-act="share">${icons.share(14)}${t('Teilen')}</button>`
     })}
     <div class="wrap"><div class="content">
-      ${kpiStrip()}
       ${toolbar()}
       ${activeFilterRow()}
       <div class="bi-grid">
+        ${kpiStrip()}
         ${utilisationCard()}
         ${phaseCountCard()}
         ${personCard()}
@@ -58,7 +58,6 @@ function biCard(id, title, subtitle, body, { full = false } = {}) {
         ${open && html`<div class="dd__panel dd__panel--right" role="menu" style="width:212px">
           ${menu.items.map(label => html`<button type="button" class="dd__item" role="menuitem"
             data-act="export" data-val="${id}">${t(label)}</button>`)}
-          <p class="dd__note">${t(menu.note)}</p>
         </div>`}
       </div>
     </header>
@@ -211,7 +210,6 @@ export function renderVerlauf() {
         </div>`) : html`<div class="log log--empty">${t('Keine Einträge im gesetzten Umfang.')}</div>`}
         <div class="log__foot">
           <span>1 – ${rows.length} ${t('von')} ${rows.length} ${t('Einträgen')}</span>
-          <span class="log__rule">${t('Nur app-eigene Felder — Pensum, Begründung, Termin, Projektleitung, Abwesenheiten.')}</span>
         </div>
       </section>
     </div></div>`;

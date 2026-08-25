@@ -157,9 +157,6 @@ export function segmented(options, value, act) {
   </div>`;
 }
 
-export function menuNote(text) {
-  return html`<p class="dd__note">${text}</p>`;
-}
 
 export function divider() { return html`<div class="dd__divider"></div>`; }
 
@@ -204,7 +201,6 @@ export function appHeader() {
               <span>${l.label} <span class="dd__meta">${l.tag}</span></span>
               ${state.lang === l.code ? html`<span class="dd__check">${icons.check()}</span>` : l.note ? html`<span class="dd__meta">${l.note}</span>` : ''}
             </button>`)}
-            ${menuNote(data.i18n.menuNote)}
           </div>`}
         </div>
 
@@ -285,16 +281,18 @@ export function exportMenu() {
       <button type="button" class="dd__item" role="menuitem" data-act="export" data-val="pdf">
         <span>${t('Als PDF exportieren')}</span><span class="dd__meta">${t('Drucklayout')}</span>
       </button>
-      ${menuNote(t('Der Export übernimmt Ansicht, Filter, Zeitraum und Einheit.'))}
     </div>`}
   </div>`;
 }
 
 export function tabBar() {
-  return html`<div class="tabs" role="tablist">
-    ${TABS.map(tab => html`<button type="button" role="tab" class="tabs__tab ${state.tab === tab.id ? 'is-active' : ''}"
-      aria-selected="${aria(state.tab === tab.id)}" data-act="tab" data-val="${tab.id}">${t(tab.label)}</button>`)}
-  </div>`;
+  return html`<nav class="tabs" aria-label="${t('Ansichten')}">
+    ${TABS.map(tab => {
+      const current = state.tab === tab.id;
+      return html`<a class="tabs__tab ${current ? 'is-active' : ''}" href="#?tab=${tab.id}"
+        ${attr(current, 'aria-current="page"')} data-act="tab" data-val="${tab.id}">${t(tab.label)}</a>`;
+    })}
+  </nav>`;
 }
 
 export function kpiStrip() {
@@ -447,7 +445,7 @@ function leadMenuBody() {
         ? [...selected, ...rest].map(e => menuTick(e.name, state.leads.includes(e.id), 'toggle-lead', e.id))
         : html`<p class="dd__empty">${t('Keine Person gefunden.')}</p>`}
     </div>
-    ${menuNote(`${matches.length} ${t('von')} 34 ${t('Personen')} · ${t('weitere beim Scrollen')}`)}`;
+`;
 }
 
 
@@ -558,10 +556,6 @@ export function phaseOf(subCode) {
   return data.phases.sub[subCode];
 }
 
-export function phaseClass(subCode) {
-  const p = data.phases.sub[subCode];
-  return p ? `phase-${p.main}` : 'phase-1';
-}
 
 
 /** Shown where a view needs more width than the window offers. */
