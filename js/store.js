@@ -26,19 +26,21 @@ export const data = {};
  */
 export const VOCAB = {
   tab:     ['start', 'overview', 'schedule', 'dashboard', 'history', 'api', 'export'],
-  sheet:   ['portrait', 'landscape'],
   lang:    ['de', 'en', 'fr', 'it'],
   scale:   ['year', 'quarter', 'month'],
   unit:    ['pct', 'fte'],
   sortDir: ['asc', 'desc'],
   group:   ['portfolio', 'lead', 'phase', 'none'],
   bi:      ['general', 'people'],
-  report:  ['demand', 'schedule']
+  report:  ['demand', 'schedule'],
+  paper:   ['a4', 'a3'],
+  sheet:   ['portrait', 'landscape']
 };
 
 const DEFAULT_STATE = {
   tab: 'start',
-  sheet: 'portrait',
+  paper: 'a4',             // ISO size, see VOCAB.paper
+  sheet: 'portrait',       // orientation, see VOCAB.sheet
   report: 'demand',        // which printed report, see VOCAB.report
   lang: 'de',
   scale: 'quarter',
@@ -149,6 +151,7 @@ export function writeUrl() {
   const p = new URLSearchParams();
   p.set('tab', state.tab);
   if (state.tab === 'export') p.set('sheet', state.sheet);
+  if (state.tab === 'export' && state.paper !== 'a4') p.set('paper', state.paper);
   if (state.tab === 'export' && state.report !== 'demand') p.set('report', state.report);
   if (state.lang !== 'de') p.set('lang', state.lang);
   if (state.unit !== 'pct') p.set('unit', state.unit);
@@ -498,6 +501,20 @@ export function periodValue(values, period) {
   const picked = period.quarters.map(i => values[i]).filter(v => v != null);
   if (!picked.length) return 0;
   return Math.round(picked.reduce((a, b) => a + b, 0) / picked.length);
+}
+
+/**
+ * Is there time outside the visible window, and on which side? The arrows move
+ * the window and the card scrolls inside it; both hide periods, and the reader
+ * is owed the same signal either way.
+ *
+ * Returned as an attribute fragment so a card can carry it without the view
+ * having to spell the two flags out.
+ */
+export function windowEdges(cols = periods()) {
+  const first = cols[0]?.quarters[0] ?? 0;
+  const last = cols.at(-1)?.quarters.at(-1) ?? 0;
+  return { before: first > 0, after: last < data.quarters.length - 1 };
 }
 
 /** How many quarters the window can still be stepped. */

@@ -14,6 +14,7 @@ import {
 
 import {
   html, raw, attr, icons, pageHeader, exportMenu, toolbar, activeFilterRow, noResults,
+  dropdown, menuRadio,
   scopeLine, AMPEL_STATES, legendBlock, legendItem, yearRule
 } from './ui.js';
 import { visibleColumns } from './columns.js';
@@ -98,10 +99,28 @@ function loadSwagger() {
  * with the sheet rendered, the space left under the table is 65 px at the
  * tightest, so neither format can spill onto the paper's margin.
  */
-const SHEETS = [
-  { id: 'portrait', label: 'A4 hoch', caption: 'Übersicht als PDF, A4 hoch', quarters: 4 },
-  { id: 'landscape', label: 'A4 quer', caption: 'Acht Quartale auf einem Blatt', quarters: 8 }
+/*
+ * Two questions, not one: which sheet of paper, and which way round. The row
+ * budgets follow the height, and the number of quarters follows the width —
+ * that is the whole difference between a format and its neighbour.
+ */
+const PAPERS = [
+  { id: 'a4', label: 'A4' },
+  { id: 'a3', label: 'A3' }
 ];
+
+const ORIENTATIONS = [
+  { id: 'portrait', label: 'Hoch' },
+  { id: 'landscape', label: 'Quer' }
+];
+
+/* quarters per sheet, and the row budget per report, measured against the page */
+const FORMATS = {
+  'a4-portrait':  { quarters: 4, rows: { demand: 31, schedule: 28 } },
+  'a4-landscape': { quarters: 8, rows: { demand: 18, schedule: 16 } },
+  'a3-portrait':  { quarters: 8, rows: { demand: 46, schedule: 42 } },
+  'a3-landscape': { quarters: 12, rows: { demand: 31, schedule: 28 } }
+};
 
 /*
  * Two reports off the same press. They share the letterhead, the scope line,
@@ -109,17 +128,13 @@ const SHEETS = [
  * a run of numbers, or a bar over the same quarters.
  */
 const REPORTS = [
-  // `rows` is a budget in row-heights per format — the bar plan's rows are
-  // taller than the number table's, so it holds fewer of them.
-  { id: 'demand', label: 'Übersicht', sub: 'Pensum je Projekt und Quartal',
-    rows: { portrait: 31, landscape: 18 } },
-  { id: 'schedule', label: 'Termine', sub: 'Phasen und Meilensteine je Projekt',
-    rows: { portrait: 28, landscape: 16 } }
+  { id: 'demand', label: 'Übersicht', sub: 'Pensum je Projekt und Quartal' },
+  { id: 'schedule', label: 'Termine', sub: 'Phasen und Meilensteine je Projekt' }
 ];
 
 export function renderExport() {
-  const sheet = SHEETS.find(s => s.id === state.sheet) ?? SHEETS[0];
   const report = REPORTS.find(r => r.id === state.report) ?? REPORTS[0];
+  const sheet = format();
   return html`
     ${pageHeader({
       crumbs: ['Bauprojekte', 'Export'],
@@ -136,9 +151,15 @@ export function renderExport() {
           ${REPORTS.map(r => html`<button type="button" class="${r.id === report.id ? 'is-on' : ''}"
             aria-pressed="${r.id === report.id}" data-act="report" data-val="${r.id}">${t(r.label)}</button>`)}
         </div>
-        <div class="segmented">
-          ${SHEETS.map(s => html`<button type="button" class="${s.id === sheet.id ? 'is-on' : ''}"
-            aria-pressed="${s.id === sheet.id}" data-act="sheet" data-val="${s.id}">${t(s.label)}</button>`)}
+        <div class="sheetbar__paper">
+          ${dropdown({
+            id: 'paper', label: `${t('Format')}: ${state.paper.toUpperCase()}`, width: 180,
+            body: html`${PAPERS.map(p => menuRadio(p.label, state.paper === p.id, 'paper', p.id))}`
+          })}
+          <div class="segmented">
+            ${ORIENTATIONS.map(o => html`<button type="button" class="${o.id === state.sheet ? 'is-on' : ''}"
+              aria-pressed="${o.id === state.sheet}" data-act="sheet" data-val="${o.id}">${t(o.label)}</button>`)}
+          </div>
         </div>
       </div>
       ${filteredProjects().length
@@ -173,21 +194,26 @@ function sheetRows() {
  * Break the stream into pages. A heading never ends a page, and a group that
  * runs over one carries its heading to the top of the next.
  */
-const ROW_COST = { group: 2.9, sum: 1, project: 1 };   /* heading + gap + column head */
-const rowCost = row => row.cost ?? ROW_COST[row.kind];
-const costOf = page => page.reduce((a, r) => a + rowCost(r), 0);
+/*
+ * What a row costs in the page budget. A group heading carries a gap and a
+ * repeated column head; on the bar plan that head is shorter, so it costs less.
+ */
+const ROW_COST = { group: 2.9, sum: 1, project: 1 };
+const SCHEDULE_COST = { ...ROW_COST, group: 1.9, sum: 0 };
+const rowCost = (row, cost = ROW_COST) => row.cost ?? cost[row.kind];
+const costOf = (page, cost) => page.reduce((a, r) => a + rowCost(r, cost), 0);
 
-function paginate(rows, perPage) {
+function paginate(rows, perPage, costs = ROW_COST) {
   const pages = [];
   let page = [];
   let group = null;
 
   for (const row of rows) {
     if (row.kind === 'group') group = row;
-    const cost = costOf(page);
+    const cost = costOf(page, costs);
     // A heading on the last line of a page belongs to the next one.
-    const orphan = row.kind === 'group' && cost + ROW_COST.group > perPage;
-    if (cost + rowCost(row) > perPage || orphan) {
+    const orphan = row.kind === 'group' && cost + costs.group > perPage;
+    if (cost + rowCost(row, costs) > perPage || orphan) {
       pages.push(page);
       page = group && row.kind === 'project' ? [{ ...group, continued: true }] : [];
     }
@@ -208,16 +234,23 @@ function paginate(rows, perPage) {
   return pages.length ? pages : [[]];
 }
 
+/** The chosen sheet of paper, the way round it is, and what fits on it. */
+function format() {
+  const key = `${state.paper}-${state.sheet}`;
+  return { id: key, paper: state.paper, orientation: state.sheet, ...FORMATS[key] };
+}
+
 function printSheets(sheet, report) {
   const all = filteredProjects();
-  const perSheet = report.rows[sheet.id];
+  const perSheet = sheet.rows[report.id];
   const blocks = [];
   for (let from = 0; from < data.quarters.length; from += sheet.quarters) {
     blocks.push(data.quarters.slice(from, from + sheet.quarters).map((_, i) => from + i));
   }
   // Every row is now one line high, so the page budget is a plain row count and
   // switching attributes on can no longer push a sheet past the paper.
-  const pages = paginate(sheetRows(), perSheet);
+  const pages = paginate(sheetRows(), perSheet,
+    report.id === 'schedule' ? SCHEDULE_COST : ROW_COST);
   const total = blocks.length * pages.length + 1;   // + the method sheet
 
   let page = 0;
@@ -262,7 +295,7 @@ const GLOSSARY = [
 
 function methodSheet(sheet, { page, total }) {
   const cfg = data.print;
-  return html`<article class="sheet sheet--${sheet.id} sheet--method">
+  return html`<article class="sheet sheet--${sheet.paper} sheet--${sheet.orientation} sheet--method">
     <header class="sheet__head">
       <div class="sheet__sender">
         <img src="assets/swiss-logo-flag.svg" alt="" width="24" height="26">
@@ -305,7 +338,7 @@ function methodSheet(sheet, { page, total }) {
  * attributes are on at once, so the sheet never grows past the page.
  */
 function sheetColumns(sheet) {
-  const wide = sheet.id === 'landscape';
+  const wide = sheet.orientation === 'landscape';
   return visibleColumns(state).map(c => ({
     key: c.key,
     // The sheet has room for the longer name where the grid header does not.
@@ -406,10 +439,13 @@ const demandLegend = (cfg) => legendBlock([
 ], 'legend--sheet');
 
 /** The column header, repeated wherever the reader needs it again. */
+/** True where a quarter opens a year, the way markYears() does it on screen. */
+const yearBreak = (quarters, i) => (i === 0 || quarters[i].year !== quarters[i - 1].year ? 'is-yearstart' : '');
+
 function columnHead(lead, quarters) {
   return html`<div class="sheet__row sheet__row--head">
     ${lead.map(c => html`<span class="${c.cls ?? ''}">${c.label}</span>`)}
-    ${quarters.map(q => html`<span class="sheet__num">${q.short}/${String(q.year).slice(2)}</span>`)}
+    ${quarters.map((q, i) => html`<span class="sheet__num ${yearBreak(quarters, i)}">${q.short}/${String(q.year).slice(2)}</span>`)}
   </div>`;
 }
 
@@ -426,13 +462,13 @@ function printSheet(sheet, report, { rows, all, block, page, total, last }) {
   const cols = schedule
     ? `var(--grid-col-id) minmax(0, 1fr)`
     : lead.map(c => (c.flex ? `minmax(${c.w}px, 1fr)` : `minmax(0, ${c.w}px)`))
-      .join(' ') + ` repeat(${block.length}, ${sheet.id === 'portrait' ? 54 : 50}px)`;
+      .join(' ') + ` repeat(${block.length}, ${sheet.orientation === 'portrait' ? 54 : 50}px)`;
 
   const span = lead.length;
-  const numbers = (values, cls = '') => block.map(q =>
-    html`<span class="sheet__num ${cls}">${num(values[q])}</span>`);
+  const numbers = (values, cls = '') => block.map((q, i) =>
+    html`<span class="sheet__num ${cls} ${yearBreak(quarters, i)}">${num(values[q])}</span>`);
 
-  return html`<article class="sheet sheet--${sheet.id}" style="--sheet-cols:${raw(cols)}">
+  return html`<article class="sheet sheet--${sheet.paper} sheet--${sheet.orientation}" style="--sheet-cols:${raw(cols)}">
     <header class="sheet__head">
       <div class="sheet__sender">
         <img src="assets/swiss-logo-flag.svg" alt="" width="24" height="26">
@@ -468,7 +504,7 @@ function printSheet(sheet, report, { rows, all, block, page, total, last }) {
           const values = block.map(q => row.projects.reduce((a, p) => a + projectDemand(p)[q], 0));
           return html`<div class="sheet__row sheet__row--groupsum">
             <span style="grid-column:span ${span}">${t('Summe')} ${t(row.label)}</span>
-            ${values.map(v => html`<span class="sheet__num">${num(v)}</span>`)}
+            ${values.map((v, i) => html`<span class="sheet__num ${yearBreak(quarters, i)}">${num(v)}</span>`)}
           </div>`;
         }
 
@@ -478,9 +514,9 @@ function printSheet(sheet, report, { rows, all, block, page, total, last }) {
         return html`<div class="sheet__row ${p.leadId ? '' : 'is-unassigned'}">
           ${lead.map(c => html`<span class="${c.key === 'title' ? 'sheet__project' : `sheet__lead ${c.cls ?? ''}`}"
             >${sheetCell(c, p)}</span>`)}
-          ${block.map(q => {
+          ${block.map((q, i) => {
             const over = who && personUtilisation(p.leadId, q) > 100;
-            return html`<span class="sheet__cell heat-${heatStep(cells[q])}">${over && cells[q] > 0 ? '▲ ' : ''}${cells[q] ? num(cells[q]) : '–'}</span>`;
+            return html`<span class="sheet__cell heat-${heatStep(cells[q])} ${yearBreak(quarters, i)}">${over && cells[q] > 0 ? '▲ ' : ''}${cells[q] ? num(cells[q]) : '–'}</span>`;
           })}
         </div>`;
       })}
@@ -499,7 +535,7 @@ function printSheet(sheet, report, { rows, all, block, page, total, last }) {
       </div>
       <div class="sheet__row sheet__row--load">
         <span style="grid-column:span ${span}">${t('Auslastung')}</span>
-        ${block.map(q => html`<span class="sheet__num is-${loadStatus(tot.utilisation[q]).key}">${tot.utilisation[q]} %</span>`)}
+        ${block.map((q, i) => html`<span class="sheet__num is-${loadStatus(tot.utilisation[q]).key} ${yearBreak(quarters, i)}">${tot.utilisation[q]} %</span>`)}
       </div>` : continuation(block.length + 5)}`}
     </div>
 

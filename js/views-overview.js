@@ -6,7 +6,7 @@ import {
   data, state, t, num, fmt, unitSuffix, fmtMio,
   cellValue, projectDemand, isEdited, personLoad, personUtilisation,
   totals, loadStatus, heatStep, ampel, filteredProjects, groupProjects,
-  activeFilters, milestones, milestoneStats, kpis, periods, periodValue, phaseOf
+  activeFilters, milestones, milestoneStats, kpis, periods, periodValue, phaseOf, windowEdges
 } from './store.js';
 
 import {
@@ -430,7 +430,9 @@ function pensumGrid() {
  * the content and left the window.
  */
 function card(rows, { minWidth, sticky, cls = '' }) {
-  return html`<div class="pblock scrollbox ${cls}" style="--sticky-w:${sticky.width}px">
+  const edge = windowEdges();
+  return html`<div class="pblock scrollbox ${cls}" style="--sticky-w:${sticky.width}px"
+      ${attr(edge.before, 'data-before')} ${attr(edge.after, 'data-after')}>
     <div class="pgrid ${state.edit ? 'pgrid--edit' : ''}" data-scroll>
       <div class="pgrid__track" style="min-width:${minWidth}px">${rows}</div>
     </div>

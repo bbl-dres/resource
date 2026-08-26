@@ -256,4 +256,40 @@ Leitspalten 781 px breit sind und die des Balkenplans 347 px. Will man den
 gleichen Umschaltpunkt, müsste der Balkenplan dieselben Stammdatenspalten
 zeigen; das wäre eine Erweiterung, keine Korrektur.
 
+---
+
+## Nachtrag — die Kantenschatten sagen jetzt eine Sache
+
+Sie hingen an zwei verschiedenen Bedingungen: links an `scrollLeft > 0`, rechts
+am verbleibenden Pixelraum. Damit meinten sie «die Karte ist verschoben» — nicht
+«hier liegt Zeit ausserhalb des Fensters». Wer mit den Pfeilen neben «Heute»
+weiterblätterte, bekam links keinen Schatten, obwohl Quartale verborgen waren.
+
+Jetzt bedeutet eine Kante genau eines: **auf dieser Seite liegt Zeitachse
+ausserhalb des Bildes.** Zwei Wege führen dorthin — die Karte ist gescrollt oder
+das Fenster wurde gesteppt —, und der Lesende muss nicht wissen, welcher.
+
+Die Ansicht sagt, was das Fenster verbirgt:
+
+```js
+export function windowEdges(cols = periods()) {
+  const first = cols[0]?.quarters[0] ?? 0;
+  const last = cols.at(-1)?.quarters.at(-1) ?? 0;
+  return { before: first > 0, after: last < data.quarters.length - 1 };
+}
+```
+
+Der Scroll-Handler ergänzt, was nur das DOM weiss, und beide landen in derselben
+Klasse. Aus `is-scrolled` und `has-more` wurde `has-less` und `has-more` — zwei
+Klassen mit je einer Bedeutung statt zweier mit gemischten.
+
+Nachgemessen, Übersicht und Termine gleich:
+
+| | linke Kante | rechte Kante |
+|---|---|---|
+| Quartal, Fenster am Anfang | aus | aus |
+| Quartal, Fenster 2 Schritte weiter (`scrollLeft = 0`) | **an** | aus |
+| Monat, Fenster am Anfang | aus | **an** |
+| Monat, letztes Fenster, ganz nach rechts gescrollt | an | **aus** |
+
 Alle Prüfläufe grün: `flow.js`, `audit.js`, `resp.js`, `robust.js`.

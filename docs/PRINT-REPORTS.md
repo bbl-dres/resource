@@ -46,10 +46,8 @@ Der Rahmen blieb, wo er war; nur die Tabelle verzweigt:
 
 ```js
 const REPORTS = [
-  { id: 'demand',   label: 'Übersicht', sub: 'Pensum je Projekt und Quartal',
-    rows: { portrait: 31, landscape: 18 } },
-  { id: 'schedule', label: 'Termine',   sub: 'Phasen und Meilensteine je Projekt',
-    rows: { portrait: 28, landscape: 16 } }
+  { id: 'demand',   label: 'Übersicht', sub: 'Pensum je Projekt und Quartal' },
+  { id: 'schedule', label: 'Termine',   sub: 'Phasen und Meilensteine je Projekt' }
 ];
 ```
 
@@ -59,8 +57,7 @@ können; nur die Breite der Leitspalten und die Zeilenhöhe sind Papierwerte.
 `quarterPeriods()` im Store liefert dafür die Spalten eines beliebigen
 Quartalsblocks — die Blätter arbeiten in Blöcken, nicht im gescrollten Fenster.
 
-`rows` ist ein Budget in Zeilenhöhen und **je Bericht und Format verschieden**,
-weil eine Balkenzeile höher ist als eine Zahlenzeile.
+Das Seitenbudget hängt am Format, nicht am Bericht — siehe unten.
 
 ---
 
@@ -98,11 +95,14 @@ auf, ohne es zu überschreiten.
 darunter. Es nennt jetzt, was herauskommt, und in welcher Form:
 
 ```
-Daten          CSV      Semikolon, UTF-8
-               Excel    .xlsx
-Drucklayout    Übersicht   Pensum je Quartal
-               Termine     Balkenplan
+Daten          CSV
+               Excel
+Drucklayout    Übersicht
+               Termine
 ```
+
+Die Gruppenüberschrift sagt bereits, worum es geht; eine Beschreibung je Zeile
+daneben wäre eine dritte Ebene für vier Einträge.
 
 **Die globale Suche im Seitenkopf ist entfallen.** Ein Suchfeld im Kopf
 verspricht eine Ergebnisseite über alle Portfolios; die gibt es nicht, und das
@@ -110,6 +110,40 @@ Feld schrieb in dieselbe Abfrage wie das Feld in der Werkzeugleiste. Zwei
 Eingänge, ein Ziel, eine irreführende Zusage. Geblieben ist das Feld dort, wo
 die Auswahl auch wirkt. Damit fiel die Variantenlogik weg: `searchOpen` ist ein
 Schalter statt zweier, und acht Regeln im Stylesheet sind verschwunden.
+
+---
+
+## Papierformat und Ausrichtung sind zwei Fragen
+
+Der eine Regler «A4 hoch / A4 quer» mischte zwei Achsen: die ISO-Grösse und die
+Drehung. Getrennt hat das nur Sinn, wenn es mehr als eine Grösse gibt — und A3
+quer ist für einen Balkenplan an der Wand ein echtes Format, kein Vorrat.
+
+Jetzt: ein Aufklappmenü für die Grösse, ein Schalter für die Drehung, beide
+nebeneinander rechts im Blattbalken. Vier Kombinationen, jede mit eigenem
+Seitenbudget:
+
+| Format | Quartale je Blatt | Zeilen Übersicht / Termine |
+|---|---|---|
+| A4 hoch | 4 | 31 / 28 |
+| A4 quer | 8 | 18 / 16 |
+| A3 hoch | 8 | 46 / 42 |
+| A3 quer | 12 | 31 / 28 |
+
+A3 quer ist genau so hoch wie A4 hoch, also fasst es dieselbe Zeilenzahl — die
+zusätzliche Breite geht in die Zeitachse. A2 und A0 wären eine Zeile Geometrie
+und ein eingemessenes Budget mehr.
+
+**Ein zweites Kostenmodell** kam dabei heraus: eine Gruppenüberschrift kostet auf
+dem Balkenplan weniger als auf dem Zahlenblatt, weil ihre wiederholte Kopfzeile
+niedriger ist. Mit `SCHEDULE_COST.group = 1.9` statt 2.9 fiel die tote Fläche auf
+vollen Blättern deutlich:
+
+| | vorher | nachher |
+|---|---|---|
+| Termine A4 hoch | 703 px | **391 px** |
+| Termine A4 quer | 268 px | **126 px** |
+| Termine A3 hoch | 579 px | **262 px** |
 
 ---
 

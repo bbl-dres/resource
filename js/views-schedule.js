@@ -4,12 +4,12 @@
    ============================================================================= */
 
 import {
-  data, state, t, totals, loadStatus, groupProjects, periods, periodValue
+  data, state, t, totals, loadStatus, groupProjects, periods, periodValue, windowEdges
 } from './store.js';
 
 import {
   html, raw, icons, pageHeader, pageActions, toolbar, activeFilterRow,
-  timeControls, noResults, legendBlock, legendItem, yearRule, sortableHead
+  timeControls, noResults, legendBlock, legendItem, yearRule, sortableHead, attr
 } from './ui.js';
 
 
@@ -66,6 +66,7 @@ function ganttView() {
   const groups = groupProjects();
   const tot = totals();
   const cols = periods();
+  const edge = windowEdges(cols);
   const f = todayFraction(cols);
   // A share of the time axis, not of the card: the marker lives in an overlay
   // that starts where the frozen column ends, so it can never run underneath it.
@@ -83,7 +84,8 @@ function ganttView() {
             <span class="count-pill">${g.projects.length}</span>
           </button>
         </h2>`}
-        ${!collapsed && html`<div class="gantt__card scrollbox">
+        ${!collapsed && html`<div class="gantt__card scrollbox"
+          ${attr(edge.before, 'data-before')} ${attr(edge.after, 'data-after')}>
           <div class="gantt__scroll" data-scroll>
           ${ganttAxis(cols)}
           <div class="gantt__body">
@@ -99,7 +101,8 @@ function ganttView() {
       </section>`;
     })}
 
-    <section class="capband scrollbox" style="--gantt-cols:${cols.length}">
+    <section class="capband scrollbox" style="--gantt-cols:${cols.length}"
+      ${attr(edge.before, 'data-before')} ${attr(edge.after, 'data-after')}>
       <div class="capband__scroll" data-scroll>
       <div class="capband__row">
         <div class="capband__label">

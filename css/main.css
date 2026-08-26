@@ -386,7 +386,7 @@ h1, h2, h3,
 
 .btn--icon { padding: 0 var(--space-5); color: var(--color-text-secondary); }
 .btn--square { width: var(--control-height); height: var(--control-height); padding: 0; justify-content: center; }
-.toolbar .btn, .timebar .btn { height: var(--control-height-lg); }
+.toolbar .btn, .timebar .btn, .sheetbar .btn { height: var(--control-height-lg); }
 .timebar .btn--square { width: var(--control-height); height: var(--control-height); }
 
 /*
@@ -855,7 +855,7 @@ h1, h2, h3,
 .pblock { --frozen-w: var(--sticky-w); }
 .gantt__card, .capband { --frozen-w: var(--gantt-lead); }
 
-.is-scrolled::after { opacity: 1; }
+.has-less::after { opacity: 1; }
 .has-more::before { opacity: 1; }
 
 .prow--head {
@@ -1206,7 +1206,7 @@ h1, h2, h3,
 }
 .modal__kicker { font-size: var(--text-sm); font-weight: var(--font-semibold); color: var(--color-text-muted); }
 .modal__title {
-  margin-top: var(--space-2); font-size: var(--text-xl); font-weight: var(--font-semibold);
+  margin-top: var(--space-4); font-size: var(--text-xl); font-weight: var(--font-semibold);
   color: var(--color-text-strong); letter-spacing: var(--tracking-h3);
 }
 .modal__close {
@@ -1776,6 +1776,9 @@ h1, h2, h3,
   display: flex; align-items: center; justify-content: space-between;
   gap: var(--space-8); flex-wrap: wrap;
 }
+/* Which sheet of paper and which way round are one decision, so they sit
+   together rather than being spread across the bar. */
+.sheetbar__paper { display: flex; align-items: center; gap: var(--space-5); }
 
 .mount {
   display: flex; justify-content: center; padding: 0;
@@ -1799,6 +1802,9 @@ h1, h2, h3,
   display: flex; flex-direction: column; align-items: safe center; gap: var(--space-12);
 }
 .sheet--portrait { width: 800px; min-height: 1131px; padding: 28px 32px; }
+/* A3 is A4 turned once: the long side becomes the short side of the next size. */
+.sheet--a3.sheet--portrait { width: 1131px; min-height: 1600px; }
+.sheet--a3.sheet--landscape { width: 1600px; min-height: 1131px; }
 
 /*
  * The bar plan on paper. Same markup as the screen, at paper density: a row is
@@ -1901,6 +1907,9 @@ h1, h2, h3,
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 6px;
 }
 .sheet__num { text-align: right; padding-right: 6px; font-variant-numeric: tabular-nums; }
+.sheet__cell.is-yearstart, .sheet__num.is-yearstart {
+  border-left: var(--border-hairline) solid var(--color-text-secondary);
+}
 .sheet__cell {
   height: 26px; display: flex; align-items: center; justify-content: flex-end;
   padding-right: 6px; border-left: var(--border-hairline) solid var(--color-border-subtle);

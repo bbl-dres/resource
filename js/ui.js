@@ -351,25 +351,23 @@ export function editToggle() {
   </button>`;
 }
 
-/** One row of the export menu: what it produces, and in what shape. */
-const exportItem = (val, label, meta) => html`<button type="button" class="dd__item"
-    role="menuitem" data-act="export" data-val="${val}">
-  <span>${label}</span><span class="dd__meta">${meta}</span>
-</button>`;
+/** One row of the export menu. The group label above it says the rest. */
+const exportItem = (val, label) => html`<button type="button" class="dd__item"
+    role="menuitem" data-act="export" data-val="${val}">${label}</button>`;
 
 export function exportMenu() {
   const open = state.menu === 'export';
   return html`<div class="dd">
     <button type="button" class="btn ${open ? 'is-open' : ''}" data-act="menu" data-val="export"
             aria-expanded="${open}" aria-haspopup="menu">${t('Exportieren')}${icons.chevronDown()}</button>
-    ${open && html`<div class="dd__panel dd__panel--right" role="menu" style="width:236px">
+    ${open && html`<div class="dd__panel dd__panel--right" role="menu" style="width:190px">
       ${menuGroupLabel(t('Daten'))}
-      ${exportItem('csv', 'CSV', 'Semikolon, UTF-8')}
-      ${exportItem('xlsx', 'Excel', '.xlsx')}
+      ${exportItem('csv', 'CSV')}
+      ${exportItem('xlsx', 'Excel')}
       ${divider()}
       ${menuGroupLabel(t('Drucklayout'))}
-      ${exportItem('pdf-demand', t('Übersicht'), t('Pensum je Quartal'))}
-      ${exportItem('pdf-schedule', t('Termine'), t('Balkenplan'))}
+      ${exportItem('pdf-demand', t('Übersicht'))}
+      ${exportItem('pdf-schedule', t('Termine'))}
     </div>`}
   </div>`;
 }

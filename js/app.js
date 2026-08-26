@@ -431,6 +431,7 @@ const actions = {
   }),
 
   sheet: (val) => setState({ sheet: val }),
+  paper: (val) => setState({ paper: val, menu: null }),
   report: (val) => setState({ report: val }),
   print: () => window.print()
 };
@@ -614,16 +615,19 @@ document.addEventListener('pointerdown', (event) => {
 });
 
 /**
- * A horizontal scroller says so, but only when there is somewhere to go: the
- * edge fades and the frozen pane's shadow track the actual scroll position
- * rather than being decoration. Both are drawn by the card around the scroller.
+ * An edge shadow means one thing: there is more of the time axis out of view on
+ * that side. It can be out of view for two reasons — the card is scrolled, or
+ * the arrows beside «Heute» moved the window — and the reader should not have
+ * to know which. The view says what the window hides; this adds what only the
+ * DOM knows.
  */
 function syncScrollFades(scroller) {
   const card = scroller.closest('.scrollbox') ?? scroller.parentElement;
   if (!card) return;
   const room = scroller.scrollWidth - scroller.clientWidth;
-  card.classList.toggle('has-more', room > 1 && scroller.scrollLeft < room - 1);
-  card.classList.toggle('is-scrolled', scroller.scrollLeft > 0);
+  card.classList.toggle('has-less', scroller.scrollLeft > 1 || card.hasAttribute('data-before'));
+  card.classList.toggle('has-more',
+    (room > 1 && scroller.scrollLeft < room - 1) || card.hasAttribute('data-after'));
 }
 
 /**

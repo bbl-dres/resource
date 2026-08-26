@@ -6,13 +6,13 @@
 import {
   data, state, t, fmtMio, totals, loadStatus, cellValue,
   personLoad, personUtilisation, filteredProjects,
-  periods, heatStep, personRows, sortPersonRows
+  periods, heatStep, personRows, sortPersonRows, windowEdges
 } from './store.js';
 
 import {
   html, raw, icons, pageHeader, pageActions, toolbar, activeFilterRow,
   columnChart, barList, kpiStrip, segmented,
-  tokenPx, tone, yearRule, pinCls, pinLeft, sortableHead
+  tokenPx, tone, yearRule, pinCls, pinLeft, sortableHead, attr
 } from './ui.js';
 
 /* =============================================================================
@@ -96,6 +96,7 @@ const personHead = (key, label, sticky, cls = '') => sortableHead({
 
 function personSection() {
   const cols = periods();
+  const edge = windowEdges(cols);
   const { tpl, minWidth, sticky } = personLayout(cols);
   const rows = sortPersonRows(personRows());
   // The one figure this table alone can give: how many people are over their
@@ -107,7 +108,7 @@ function personSection() {
       style="${pinLeft(sticky, key)}">${body}</span>`;
 
   return html`<section class="grid-card">
-    <div class="scrollbox">
+    <div class="scrollbox" ${attr(edge.before, 'data-before')} ${attr(edge.after, 'data-after')}>
     <div class="pgrid" data-scroll>
       <div class="pgrid__track" style="min-width:${minWidth}px; --sticky-w:${sticky.width}px">
         <div class="pblock">
