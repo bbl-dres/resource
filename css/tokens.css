@@ -295,6 +295,24 @@
   /* ==========================================================================
      16 · Borders, elevation, focus
      ========================================================================== */
+  /* ==========================================================================
+     Motion
+     --------------------------------------------------------------------------
+     Two durations carry the whole app: one for a control answering a pointer,
+     one for something entering or leaving the page. A third would be a guess.
+     The reduced-motion block at the end of main.css overrides all of them.
+     ========================================================================== */
+  --dur-fast:  .12s;   /* a control answers: hover, press, toggle, caret     */
+  --dur:       .16s;   /* something enters or leaves: toast, search, banner  */
+  --dur-spin:  .7s;    /* the boot spinner, the only continuous motion       */
+  --ease:      ease;
+  --ease-out:  ease-out;
+  --ease-in:   ease-in;
+
+  /* The WCAG 2.2 minimum for a pointer target. Named because it is a rule the
+     design has to keep, not a measurement someone picked. */
+  --target-min: 24px;
+
   --border-hairline: 1px;
   --border-control:  1.5px;
   --border-emphasis: 2px;
@@ -334,13 +352,17 @@
 
   /* Pensum grid */
   --grid-quarter:      72px;    /* one quarter column        */
-  --grid-col-ampel:    62px;
-  --grid-col-id:       62px;
-  --grid-col-phase:    128px;
-  --grid-col-lead:     132px;
-  --grid-col-budget:   112px;
-  --grid-col-target:   76px;
-  --grid-col-trend:    130px;
+  --grid-col-ampel:     62px;
+  --grid-col-id:        62px;
+  --grid-col-title:     285px;   /* the floor; the column takes the slack */
+  --grid-col-phase:     128px;
+  --grid-col-lead:      132px;
+  --grid-col-portfolio: 110px;
+  --grid-col-priority:  90px;
+  --grid-col-nextms:    150px;
+  --grid-col-credit:    112px;
+  --grid-col-target:    76px;
+  --grid-col-trend:     130px;
   --grid-pane-left:    360px;   /* gantt project column      */
 
   /* Rows and controls */
@@ -359,6 +381,31 @@
   --switch-height: 19px;
   --switch-knob:   15px;
   --avatar-size:   32px;
+  /* ==========================================================================
+     Paper
+     --------------------------------------------------------------------------
+     The printed sheet is its own design at absolute sizes, because a page is a
+     fixed physical thing and does not scale with the viewport. Naming the
+     scale keeps it reviewable next to the screen one.
+     ========================================================================== */
+  --sheet-text:    10px;     /* column heads, footnotes, continuation note   */
+  --sheet-meta:    10.5px;   /* document metadata line                       */
+  --sheet-lead:    11px;     /* sender block and subtitle                    */
+  --sheet-title:   16px;     /* the document title                           */
+  --color-paper:   var(--white);
+
+  /* The HTTP method badges of the embedded Swagger UI. They are not part of the
+     app palette — they are the widget's own colours, darkened until the white
+     text on them clears AA. Named so the contrast decision stays reviewable. */
+  --method-get:    #1b6ca8;   /* 4.87:1 on white text */
+  --method-post:   #1f7a4d;   /* 4.62:1 */
+  --method-patch:  #14707c;   /* 4.55:1 */
+  --method-put:    #9a5b12;   /* 4.63:1 */
+  --method-delete: #a12b2b;   /* 6.83:1 */
+  --method-neutral: var(--grey-600);
+  --method-auth:   #1f6f43;   /* the authorise button, on white */
+  --shadow-sheet:  0 8px 24px rgba(0, 0, 0, 0.14);
+
   --dot-size:      10px;
 
   /* ==========================================================================

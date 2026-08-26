@@ -38,7 +38,7 @@ running the content through Jekyll.
 | Termine | `#?tab=termine` | The bar plan: phase bars, milestone diamonds and a today line, with the same capacity band the Übersicht carries in its footer. Same time scale and period stepper as the Übersicht. |
 | Dashboard | `#?tab=dashboard&bi=…` | The KPI strip, then two sections: **Allgemein** (utilisation and free capacity over time, project count by phase, demand by portfolio, committed credit by year and by phase) and **Personen** (utilisation per person and quarter as a grid, sortable, with a peak column and a per-quarter count of people over their contract). |
 | Verlauf | `#?tab=verlauf` | The immutable change log for app-owned fields. |
-| API | `#?tab=api` | Swagger UI over `data/openapi.json` — a real OpenAPI 3.1 document, 13 operations in five groups, with a response example per endpoint. Reached from the **API** link in the footer. |
+| API | `#?tab=api` | Swagger UI over `data/openapi.json` — a real OpenAPI 3.1 document: 42 operations in nine groups covering full CRUD, with `ETag`/`If-Match` concurrency, `Idempotency-Key` on creates and RFC 9457 problem details. Reached from the **API** link in the footer. |
 | Drucklayout | `#?tab=export` | The PDF export, every page of it: A4 portrait carries four quarters and 24 rows per sheet, landscape all eight quarters and 14 rows. 111 projects come out as 10 portrait sheets or 8 landscape ones, each with letterhead, legend, document ID and «Blatt x von y»; the totals close each quarter block. The **Attribute** menu applies here too: any of the ten grid columns can be added to the sheet, and the pagination re-measures itself so a title that wraps to two lines never pushes a sheet past the page. Reached from **Exportieren → Als PDF exportieren**. |
 
 ### Interactions that actually work
@@ -156,7 +156,7 @@ Everything lives in `data/` as plain JSON.
 | `dashboard.json` | The one dashboard series that is not derivable (budget by year) |
 | `i18n.json` | 297 German source strings, each with its EN, FR and IT translation |
 | `print.json` | The print letterhead, legend and document metadata |
-| `openapi.json` | The OpenAPI 3.1 document Swagger UI renders |
+| `openapi.json` | The OpenAPI 3.1 document Swagger UI renders — 20 paths, 42 operations |
 
 **Nothing that can be computed is stored.** Demand totals, net capacity, utilisation,
 free capacity, per-person load, budget roll-ups, milestone counts and every KPI are

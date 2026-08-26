@@ -2,90 +2,368 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Ressourcenplanung API",
-    "version": "1.0.0",
+    "version": "2.0.0",
     "summary": "Kapazitäts- und Pensumplanung für Bauprojekte des BBL.",
-    "description": "SAP ePPM führt den Golden Record. Diese API spiegelt Stammdaten, Phasen, Kredite und Termine **lesend** und besitzt selbst nur, was in ePPM nicht existiert: Pensum-Zuteilungen je Person und Quartal, Soll-Werte, Abwesenheiten, Begründungen und Freigaben.\n\nAlle Inhalte in den Beispielen sind fiktiv.",
-    "contact": { "name": "Bundesamt für Bauten und Logistik BBL" },
-    "license": { "name": "MIT", "identifier": "MIT" }
+    "description": "SAP ePPM führt den Golden Record für Stammdaten, Phasen, Kredite und Termine. Diese API hält davon eine lokale, planbare Projektion und ist selbst System of Record für alles, was in ePPM nicht existiert: Pensum-Zuteilungen je Person und Quartal, Soll-Werte, Abwesenheiten, Begründungen und Freigaben.\n\n**Schreiben.** Änderungen an gespiegelten Feldern werden lokal geführt und als Rückschreibauftrag an ePPM eingereiht; `sync_state` sagt, wo ein Datensatz dabei steht. Planungsdaten schreibt die API unmittelbar.\n\n**Nebenläufigkeit.** Jede Einzelressource liefert ein `ETag`. Schreibende Zugriffe darauf verlangen `If-Match`; ohne den Kopf antwortet die API mit 428, bei veralteter Version mit 412. `POST` nimmt einen `Idempotency-Key` entgegen.\n\n**Fehler.** Alle Fehlerantworten folgen RFC 9457 (`application/problem+json`).\n\nAlle Inhalte in den Beispielen sind fiktiv.",
+    "contact": {
+      "name": "Bundesamt für Bauten und Logistik BBL"
+    },
+    "license": {
+      "name": "MIT",
+      "identifier": "MIT"
+    }
   },
   "servers": [
-    { "url": "https://ressourcenplanung.bbl.admin.ch/api/v1", "description": "Produktion" },
-    { "url": "https://ressourcenplanung-test.bbl.admin.ch/api/v1", "description": "Abnahme" }
+    {
+      "url": "https://ressourcenplanung.bbl.admin.ch/api/v1",
+      "description": "Produktion"
+    },
+    {
+      "url": "https://ressourcenplanung-test.bbl.admin.ch/api/v1",
+      "description": "Abnahme"
+    }
   ],
-  "security": [{ "eiam": [] }],
+  "security": [
+    {
+      "eiam": []
+    }
+  ],
   "tags": [
-    { "name": "Projekte", "description": "Stammdaten gespiegelt aus SAP ePPM, lesend. Planungsdaten in verschachtelten JSONB-Feldern." },
-    { "name": "Kapazität", "description": "Personen, Anstellungsgrade und Abwesenheiten. App-eigen, sofern HR keine Schnittstelle liefert." },
-    { "name": "Meilensteine", "description": "Termine gespiegelt aus ePPM. Verschiebungen laufen als Antrag, nicht als Schreibzugriff." },
-    { "name": "Verlauf und Export", "description": "Protokoll und Ausgabeformate." },
-    { "name": "Benutzer", "description": "Kein eigenes Benutzerverwaltungs-CRUD. Identität und Rollen kommen aus eIAM." }
+    {
+      "name": "Projekte",
+      "description": "Bauprojekte. Stammdaten aus SAP ePPM gespiegelt, lokal ergänzbar; Planungsdaten in verschachtelten JSONB-Feldern."
+    },
+    {
+      "name": "Pensen",
+      "description": "Zuteilungen je Person und Quartal. App-eigen, voll schreibbar — der Kern dieser API."
+    },
+    {
+      "name": "Meilensteine",
+      "description": "Termine aus ePPM. Lokal anlegbar und pflegbar; eine Verschiebung eines gespiegelten Gates läuft als Antrag."
+    },
+    {
+      "name": "Personen",
+      "description": "Mitarbeitende und Anstellungsgrade. App-eigen, solange HR keine Schnittstelle liefert."
+    },
+    {
+      "name": "Abwesenheiten",
+      "description": "Ferien, Militärdienst, Weiterbildung. Mindern die Nettokapazität."
+    },
+    {
+      "name": "Kapazität",
+      "description": "Abgeleitete Sichten auf Bedarf, Kapazität und Auslastung. Nur lesend — es gibt hier nichts zu schreiben, was nicht anderswo entsteht."
+    },
+    {
+      "name": "Teilportfolios",
+      "description": "Gebäudekategorien des BBL. Referenzdaten, gepflegt vom Portfoliomanagement."
+    },
+    {
+      "name": "Verlauf und Export",
+      "description": "Protokoll und Ausgabeformate. Das Protokoll ist append-only."
+    },
+    {
+      "name": "Benutzer",
+      "description": "Kein eigenes Benutzerverwaltungs-CRUD. Identität und Rollen kommen aus eIAM."
+    }
   ],
   "paths": {
     "/projects": {
       "get": {
-        "tags": ["Projekte"],
+        "tags": [
+          "Projekte"
+        ],
         "summary": "Projekte auflisten",
         "description": "Liste, gefiltert über phase, lead, location, quarter_from, quarter_to. Paginiert.",
         "operationId": "listProjects",
         "parameters": [
-          { "name": "phase", "in": "query", "description": "SIA-Hauptphase, mehrfach erlaubt.", "schema": { "type": "array", "items": { "type": "string", "enum": ["1", "2", "3", "4", "5", "6"] } }, "example": ["3", "5"] },
-          { "name": "lead", "in": "query", "description": "Kürzel der Projektleitung, mehrfach erlaubt.", "schema": { "type": "array", "items": { "type": "string" } }, "example": ["sonja.beispiel"] },
-          { "name": "location", "in": "query", "description": "Teilportfolio.", "schema": { "type": "string", "enum": ["inland", "ausland", "zoll", "repraesentativ", "sport"] } },
-          { "name": "quarter_from", "in": "query", "schema": { "$ref": "#/components/schemas/Quarter" }, "example": "2026Q3" },
-          { "name": "quarter_to", "in": "query", "schema": { "$ref": "#/components/schemas/Quarter" }, "example": "2028Q2" },
-          { "name": "page", "in": "query", "schema": { "type": "integer", "minimum": 1, "default": 1 } },
-          { "name": "per_page", "in": "query", "schema": { "type": "integer", "minimum": 1, "maximum": 200, "default": 50 } }
+          {
+            "name": "phase",
+            "in": "query",
+            "description": "SIA-Hauptphase, mehrfach erlaubt.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6"
+                ]
+              }
+            },
+            "example": [
+              "3",
+              "5"
+            ]
+          },
+          {
+            "name": "lead",
+            "in": "query",
+            "description": "Kürzel der Projektleitung, mehrfach erlaubt.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "example": [
+              "sonja.beispiel"
+            ]
+          },
+          {
+            "name": "location",
+            "in": "query",
+            "description": "Teilportfolio.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "verwaltung",
+                "zoll",
+                "justiz",
+                "bildung",
+                "ausland",
+                "kultur",
+                "sport"
+              ]
+            }
+          },
+          {
+            "name": "quarter_from",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/Quarter"
+            },
+            "example": "2026Q3"
+          },
+          {
+            "name": "quarter_to",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/Quarter"
+            },
+            "example": "2028Q2"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "default": 50
+            }
+          }
         ],
         "responses": {
           "200": {
             "description": "Seite der gefilterten Projekte.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ProjectPage" },
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectPage"
+                },
                 "example": {
                   "data": [
-                    { "id": 8640100051, "number": "…0051", "title": "Musterlingen, Ahornweg 4+6, Instandsetzung", "phase": "32", "lead": "sonja.beispiel", "location": "inland", "priority": "hoch", "budget_chf": 3050000, "pre_credit": true, "source": "eppm", "synced_at": "2026-08-25T05:15:00Z" },
-                    { "id": 8640100012, "number": "…0012", "title": "Beispielstadt, Place de l’Avenir 10, Unterhalt", "phase": "52", "lead": "alina.beispiel", "location": "inland", "priority": "hoch", "budget_chf": 36300000, "pre_credit": false, "source": "eppm", "synced_at": "2026-08-25T05:15:00Z" }
+                    {
+                      "id": 8640100051,
+                      "number": "…0051",
+                      "title": "Musterlingen, Ahornweg 4+6, Instandsetzung",
+                      "phase": "32",
+                      "lead": "sonja.beispiel",
+                      "location": "verwaltung",
+                      "priority": "hoch",
+                      "budget_chf": 3050000,
+                      "pre_credit": true,
+                      "source": "eppm",
+                      "synced_at": "2026-08-25T05:15:00Z"
+                    },
+                    {
+                      "id": 8640100012,
+                      "number": "…0012",
+                      "title": "Beispielstadt, Place de l’Avenir 10, Unterhalt",
+                      "phase": "52",
+                      "lead": "alina.beispiel",
+                      "location": "verwaltung",
+                      "priority": "hoch",
+                      "budget_chf": 36300000,
+                      "pre_credit": false,
+                      "source": "eppm",
+                      "synced_at": "2026-08-25T05:15:00Z"
+                    }
                   ],
-                  "meta": { "page": 1, "per_page": 50, "total": 11, "scope_total": 512 }
+                  "meta": {
+                    "page": 1,
+                    "per_page": 50,
+                    "total": 11,
+                    "scope_total": 512
+                  }
                 }
               }
             }
           },
-          "401": { "$ref": "#/components/responses/Unauthorized" }
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Projekte"
+        ],
+        "summary": "Projekt anlegen",
+        "description": "Legt ein Projekt lokal an. Es erhält `sync_state: local_ahead`, bis ePPM es übernommen hat.",
+        "operationId": "createProject",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectWrite"
+              },
+              "example": {
+                "title": "Musterlingen, Ahornweg 4+6, Instandsetzung",
+                "phase": "32",
+                "location": "verwaltung",
+                "lead": "sonja.beispiel",
+                "priority": "hoch",
+                "budget_chf": 3050000,
+                "pre_credit": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Angelegt.",
+            "headers": {
+              "Location": {
+                "description": "URL der neuen Ressource.",
+                "schema": {
+                  "type": "string",
+                  "format": "uri-reference"
+                },
+                "example": "/projects/51"
+              },
+              "ETag": {
+                "description": "Fassung dieser Ressource.",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "W/\"pr51-17\""
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Project"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
         }
       }
     },
     "/projects/{id}": {
       "get": {
-        "tags": ["Projekte"],
+        "tags": [
+          "Projekte"
+        ],
         "summary": "Ein Projekt lesen",
         "description": "Ein Projekt mit allocations, milestones und targets als verschachtelte Objekte.",
         "operationId": "getProject",
-        "parameters": [{ "$ref": "#/components/parameters/ProjectId" }],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Das Projekt mit seinen Planungsdaten.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/Project" },
+                "schema": {
+                  "$ref": "#/components/schemas/Project"
+                },
                 "example": {
                   "id": 8640100051,
                   "number": "…0051",
                   "title": "Musterlingen, Ahornweg 4+6, Instandsetzung",
                   "phase": "32",
                   "lead": "sonja.beispiel",
-                  "location": "inland",
+                  "location": "verwaltung",
                   "priority": "hoch",
                   "budget_chf": 3050000,
                   "pre_credit": true,
                   "allocations": [
-                    { "person": "sonja.beispiel", "role": "projektleitung", "quarter": "2026Q3", "pensum_pct": 50 },
-                    { "person": "nadia.muster", "role": "bauleitung", "quarter": "2026Q3", "pensum_pct": 40 }
+                    {
+                      "person": "sonja.beispiel",
+                      "role": "projektleitung",
+                      "quarter": "2026Q3",
+                      "pensum_pct": 50
+                    },
+                    {
+                      "person": "nadia.muster",
+                      "role": "bauleitung",
+                      "quarter": "2026Q3",
+                      "pensum_pct": 40
+                    }
                   ],
-                  "targets": [{ "quarter": "2026Q3", "pensum_pct": 80 }],
+                  "targets": [
+                    {
+                      "quarter": "2026Q3",
+                      "pensum_pct": 80
+                    }
+                  ],
                   "milestones": [
-                    { "code": "MS4", "name": "Baukredit bewilligt", "sub_phase": "33", "plan_date": "2027-06-15", "forecast_date": "2027-06-15", "status": "on_track" }
+                    {
+                      "code": "MS4",
+                      "name": "Baukredit bewilligt",
+                      "sub_phase": "33",
+                      "plan_date": "2027-06-15",
+                      "forecast_date": "2027-06-15",
+                      "status": "on_track"
+                    }
                   ],
                   "source": "eppm",
                   "synced_at": "2026-08-25T05:15:00Z"
@@ -93,24 +371,371 @@
               }
             }
           },
-          "404": { "$ref": "#/components/responses/NotFound" }
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
         }
-      }
-    },
-    "/projects/{id}/allocations": {
-      "patch": {
-        "tags": ["Projekte"],
-        "summary": "Pensum setzen",
-        "description": "Pensum je Person und Quartal setzen. Verlangt `reason`, sobald die Person damit über ihren Anstellungsgrad kommt. Das laufende Quartal ist gesperrt.",
-        "operationId": "patchAllocations",
-        "parameters": [{ "$ref": "#/components/parameters/ProjectId" }],
+      },
+      "put": {
+        "tags": [
+          "Projekte"
+        ],
+        "summary": "Projekt ersetzen",
+        "description": "Setzt alle schreibbaren Felder. Fehlende Felder werden zurückgesetzt — für Teiländerungen PATCH verwenden.",
+        "operationId": "replaceProject",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          },
+          {
+            "$ref": "#/components/parameters/IfMatch"
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/AllocationPatch" },
+              "schema": {
+                "$ref": "#/components/schemas/ProjectWrite"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Ersetzt.",
+            "headers": {
+              "ETag": {
+                "description": "Fassung dieser Ressource.",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "W/\"pr51-17\""
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Project"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "412": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "428": {
+            "$ref": "#/components/responses/PreconditionRequired"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Projekte"
+        ],
+        "summary": "Projekt teilweise ändern",
+        "description": "Ändert nur die gesendeten Felder.",
+        "operationId": "updateProject",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          },
+          {
+            "$ref": "#/components/parameters/IfMatch"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectPatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Geändert.",
+            "headers": {
+              "ETag": {
+                "description": "Fassung dieser Ressource.",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "W/\"pr51-17\""
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Project"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "412": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "428": {
+            "$ref": "#/components/responses/PreconditionRequired"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Projekte"
+        ],
+        "summary": "Projekt löschen",
+        "description": "Nur zulässig, solange keine Pensen gebucht sind. Gespiegelte Projekte werden lokal ausgeblendet, nicht in ePPM gelöscht.",
+        "operationId": "deleteProject",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          },
+          {
+            "$ref": "#/components/parameters/IfMatch"
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/NoContent"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "412": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "428": {
+            "$ref": "#/components/responses/PreconditionRequired"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        }
+      }
+    },
+    "/projects/{id}/allocations": {
+      "get": {
+        "tags": [
+          "Pensen"
+        ],
+        "summary": "Pensen eines Projekts auflisten",
+        "description": "Alle Zuteilungen des Projekts, aufsteigend nach Quartal.",
+        "operationId": "listAllocations",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Erfolg.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Allocation"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Pensen"
+        ],
+        "summary": "Pensum anlegen",
+        "description": "Legt eine einzelne Zuteilung an. Besteht für Person und Quartal bereits eine, antwortet die API mit 409 — dann PUT verwenden.",
+        "operationId": "createAllocation",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AllocationWrite"
+              },
               "example": {
-                "allocations": [{ "person": "sonja.beispiel", "role": "projektleitung", "quarter": "2027Q1", "pensum_pct": 85 }],
+                "person": "sonja.beispiel",
+                "role": "projektleitung",
+                "quarter": "2027Q1",
+                "pensum_pct": 60
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Angelegt.",
+            "headers": {
+              "Location": {
+                "description": "URL der neuen Ressource.",
+                "schema": {
+                  "type": "string",
+                  "format": "uri-reference"
+                },
+                "example": "/projects/51/allocations/2027Q1"
+              },
+              "ETag": {
+                "description": "Fassung dieser Ressource.",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "W/\"pr51-17\""
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Allocation"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Pensen"
+        ],
+        "summary": "Pensum setzen",
+        "description": "Pensum je Person und Quartal setzen. Verlangt `reason`, sobald die Person damit über ihren Anstellungsgrad kommt. Das laufende Quartal ist gesperrt.",
+        "operationId": "patchAllocations",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AllocationPatch"
+              },
+              "example": {
+                "allocations": [
+                  {
+                    "person": "sonja.beispiel",
+                    "role": "projektleitung",
+                    "quarter": "2027Q1",
+                    "pensum_pct": 85
+                  }
+                ],
                 "reason": "Bauleitung Etappe 2 vorgezogen, Freigabe Abteilungsleitung liegt vor."
               }
             }
@@ -123,165 +748,812 @@
               "application/json": {
                 "example": {
                   "id": 8640100051,
-                  "allocations": [{ "person": "sonja.beispiel", "role": "projektleitung", "quarter": "2027Q1", "pensum_pct": 85 }],
-                  "history_entry": { "id": "c-8640100051-2027Q1-1", "field": "pensum", "value": "80 % → 85 %", "actor": "sonja.beispiel", "at": "2026-08-25T07:15:00Z" }
+                  "allocations": [
+                    {
+                      "person": "sonja.beispiel",
+                      "role": "projektleitung",
+                      "quarter": "2027Q1",
+                      "pensum_pct": 85
+                    }
+                  ],
+                  "history_entry": {
+                    "id": "c-8640100051-2027Q1-1",
+                    "field": "pensum",
+                    "value": "80 % → 85 %",
+                    "actor": "sonja.beispiel",
+                    "at": "2026-08-25T07:15:00Z"
+                  }
                 }
               }
             }
           },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
           "422": {
             "description": "Begründung fehlt, oder das Quartal ist gesperrt.",
             "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/Error" },
-                "example": { "error": "reason_required", "message": "Sonja Beispiel wäre damit bei 118 % — Begründung ist Pflicht bei Überlast.", "field": "reason" }
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                },
+                "example": {
+                  "error": "reason_required",
+                  "message": "Sonja Beispiel wäre damit bei 118 % — Begründung ist Pflicht bei Überlast.",
+                  "field": "reason"
+                }
               }
             }
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        }
+      }
+    },
+    "/projects/{id}/allocations/{quarter}": {
+      "get": {
+        "tags": [
+          "Pensen"
+        ],
+        "summary": "Pensum eines Quartals lesen",
+        "operationId": "getAllocation",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          },
+          {
+            "$ref": "#/components/parameters/QuarterPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Erfolg.",
+            "headers": {
+              "ETag": {
+                "description": "Fassung dieser Ressource.",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "W/\"pr51-17\""
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Allocation"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Pensen"
+        ],
+        "summary": "Pensum eines Quartals setzen",
+        "description": "Legt an oder überschreibt. Der Weg, den die Übersicht beim Bearbeiten einer Zelle geht.",
+        "operationId": "setAllocation",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          },
+          {
+            "$ref": "#/components/parameters/QuarterPath"
+          },
+          {
+            "$ref": "#/components/parameters/IfMatch"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AllocationValue"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Gesetzt.",
+            "headers": {
+              "ETag": {
+                "description": "Fassung dieser Ressource.",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "W/\"pr51-17\""
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Allocation"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "412": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "428": {
+            "$ref": "#/components/responses/PreconditionRequired"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Pensen"
+        ],
+        "summary": "Pensum eines Quartals entfernen",
+        "description": "Entfernt die Zuteilung. Das laufende Quartal ist gesperrt und antwortet mit 409.",
+        "operationId": "deleteAllocation",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          },
+          {
+            "$ref": "#/components/parameters/QuarterPath"
+          },
+          {
+            "$ref": "#/components/parameters/IfMatch"
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/NoContent"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "412": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "428": {
+            "$ref": "#/components/responses/PreconditionRequired"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        }
+      }
+    },
+    "/projects/{id}/target": {
+      "get": {
+        "tags": [
+          "Pensen"
+        ],
+        "summary": "Soll-Pensum lesen",
+        "description": "Das vereinbarte Pensum im laufenden Quartal, gegen das der geplante Bedarf gelesen wird.",
+        "operationId": "getTarget",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Erfolg.",
+            "headers": {
+              "ETag": {
+                "description": "Fassung dieser Ressource.",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "W/\"pr51-17\""
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Target"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Pensen"
+        ],
+        "summary": "Soll-Pensum setzen",
+        "operationId": "setTarget",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          },
+          {
+            "$ref": "#/components/parameters/IfMatch"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TargetWrite"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Gesetzt.",
+            "headers": {
+              "ETag": {
+                "description": "Fassung dieser Ressource.",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "W/\"pr51-17\""
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Target"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "412": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "428": {
+            "$ref": "#/components/responses/PreconditionRequired"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Pensen"
+        ],
+        "summary": "Soll-Pensum aufheben",
+        "description": "Danach wird für dieses Projekt kein Soll mehr ausgewiesen.",
+        "operationId": "deleteTarget",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          },
+          {
+            "$ref": "#/components/parameters/IfMatch"
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/NoContent"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "412": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "428": {
+            "$ref": "#/components/responses/PreconditionRequired"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
           }
         }
       }
     },
     "/projects/{id}/history": {
       "get": {
-        "tags": ["Projekte"],
+        "tags": [
+          "Projekte"
+        ],
         "summary": "Protokoll eines Projekts",
         "description": "Änderungsprotokoll dieses Projekts, unveränderlich.",
         "operationId": "getProjectHistory",
-        "parameters": [{ "$ref": "#/components/parameters/ProjectId" }],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Einträge, neueste zuerst.",
             "content": {
               "application/json": {
-                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/HistoryEntry" } },
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/HistoryEntry"
+                  }
+                },
                 "example": [
-                  { "id": "c1", "at": "2026-08-21T09:12:00Z", "actor": "lars.muster", "field": "pensum", "change": "Bauleitung Etappe 2 vorgezogen", "value": "30 % → 35 %" },
-                  { "id": "c2", "at": "2026-08-21T09:13:00Z", "actor": "lars.muster", "field": "begruendung", "change": "Überlast Q3/2026 freigegeben", "value": "erfasst" }
+                  {
+                    "id": "c1",
+                    "at": "2026-08-21T09:12:00Z",
+                    "actor": "lars.muster",
+                    "field": "pensum",
+                    "change": "Bauleitung Etappe 2 vorgezogen",
+                    "value": "30 % → 35 %"
+                  },
+                  {
+                    "id": "c2",
+                    "at": "2026-08-21T09:13:00Z",
+                    "actor": "lars.muster",
+                    "field": "begruendung",
+                    "change": "Überlast Q3/2026 freigegeben",
+                    "value": "erfasst"
+                  }
                 ]
               }
             }
-          }
-        }
-      }
-    },
-    "/capacity": {
-      "get": {
-        "tags": ["Kapazität"],
-        "summary": "Kapazität je Quartal",
-        "description": "Netto-Kapazität je Quartal, aggregiert über die gefilterte Menge. Netto = brutto minus Abwesenheiten.",
-        "operationId": "getCapacity",
-        "parameters": [
-          { "name": "quarter_from", "in": "query", "schema": { "$ref": "#/components/schemas/Quarter" }, "example": "2026Q3" },
-          { "name": "quarter_to", "in": "query", "schema": { "$ref": "#/components/schemas/Quarter" }, "example": "2028Q2" }
-        ],
-        "responses": {
-          "200": {
-            "description": "Kapazität, Bedarf und Auslastung je Quartal.",
-            "content": {
-              "application/json": {
-                "example": {
-                  "quarters": ["2026Q3", "2026Q4", "2027Q1", "2027Q2", "2027Q3", "2027Q4", "2028Q1", "2028Q2"],
-                  "gross_pct": [540, 540, 560, 560, 560, 560, 560, 560],
-                  "absence_pct": [60, 30, 25, 30, 60, 30, 25, 30],
-                  "net_pct": [480, 510, 535, 530, 500, 530, 535, 530],
-                  "demand_pct": [572, 595, 630, 580, 510, 400, 250, 170],
-                  "external_pct": [35, 35, 70, 65, 60, 35, 10, 5],
-                  "utilisation_pct": [112, 110, 105, 97, 90, 69, 45, 31],
-                  "status": ["ueberlast", "ueberlast", "ueberlast", "knapp", "ok", "frei", "frei", "frei"]
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/capacity/people": {
-      "get": {
-        "tags": ["Kapazität"],
-        "summary": "Auslastung je Person",
-        "description": "Auslastung je Person und Quartal, inklusive Anstellungsgrad.",
-        "operationId": "getCapacityPeople",
-        "responses": {
-          "200": {
-            "description": "Personen der eigenen Abteilung mit ihrer Belegung.",
-            "content": {
-              "application/json": {
-                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/PersonCapacity" } },
-                "example": [
-                  { "person": "sonja.beispiel", "name": "Sonja Beispiel", "role": "projektleitung", "employment_pct": 100, "load_pct": [118, 118, 108, 95, 75, 55, 30, 20] },
-                  { "person": "paula.beispiel", "name": "Paula Beispiel", "role": "projektentwicklung", "employment_pct": 80, "load_pct": [90, 95, 94, 94, 85, 75, 60, 44] }
-                ]
-              }
-            }
-          }
-        }
-      }
-    },
-    "/capacity/absences/{person_id}": {
-      "patch": {
-        "tags": ["Kapazität"],
-        "summary": "Abwesenheiten erfassen",
-        "description": "Abwesenheiten je Quartal erfassen. App-eigen, solange HR keine Schnittstelle liefert.",
-        "operationId": "patchAbsences",
-        "parameters": [
-          { "name": "person_id", "in": "path", "required": true, "schema": { "type": "string" }, "example": "sonja.beispiel" }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "example": { "absences": [{ "quarter": "2026Q3", "pct": 60, "note": "Sommerpause" }] }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Die Person mit ihren erfassten Abwesenheiten.",
-            "content": { "application/json": { "example": { "person": "sonja.beispiel", "absences": [{ "quarter": "2026Q3", "pct": 60 }] } } }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
           }
         }
       }
     },
     "/milestones": {
       "get": {
-        "tags": ["Meilensteine"],
+        "tags": [
+          "Meilensteine"
+        ],
         "summary": "Meilensteine auflisten",
         "description": "Gates mit plan_date, forecast_date und status. Filter wie bei Projekten.",
         "operationId": "listMilestones",
         "parameters": [
-          { "name": "status", "in": "query", "schema": { "type": "string", "enum": ["on_track", "late", "pending"] } },
-          { "name": "quarter_from", "in": "query", "schema": { "$ref": "#/components/schemas/Quarter" } }
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "on_track",
+                "late",
+                "pending"
+              ]
+            }
+          },
+          {
+            "name": "quarter_from",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/Quarter"
+            }
+          }
         ],
         "responses": {
           "200": {
             "description": "Gates, nach Plan-Termin sortiert.",
             "content": {
               "application/json": {
-                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Milestone" } },
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Milestone"
+                  }
+                },
                 "example": [
-                  { "id": "ms-44-5", "project_id": 8640100044, "code": "MS5", "name": "Vergabe erfolgt", "sub_phase": "41", "plan_date": "2026-10-15", "forecast_date": "2026-10-15", "status": "on_track" },
-                  { "id": "ms-06-3", "project_id": 8640100006, "code": "MS3", "name": "Vorprojekt genehmigt", "sub_phase": "31", "plan_date": "2026-11-30", "forecast_date": "2027-02-15", "status": "late" }
+                  {
+                    "id": "ms-44-5",
+                    "project_id": 8640100044,
+                    "code": "MS5",
+                    "name": "Vergabe erfolgt",
+                    "sub_phase": "41",
+                    "plan_date": "2026-10-15",
+                    "forecast_date": "2026-10-15",
+                    "status": "on_track"
+                  },
+                  {
+                    "id": "ms-06-3",
+                    "project_id": 8640100006,
+                    "code": "MS3",
+                    "name": "Vorprojekt genehmigt",
+                    "sub_phase": "31",
+                    "plan_date": "2026-11-30",
+                    "forecast_date": "2027-02-15",
+                    "status": "late"
+                  }
                 ]
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Meilensteine"
+        ],
+        "summary": "Meilenstein anlegen",
+        "description": "Für Gates, die in ePPM noch nicht geführt sind.",
+        "operationId": "createMilestone",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MilestoneWrite"
+              },
+              "example": {
+                "project_id": 51,
+                "code": "MS4",
+                "name": "Baukredit-Freigabe",
+                "sub_phase": "33",
+                "plan_date": "2027-05-14"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Angelegt.",
+            "headers": {
+              "Location": {
+                "description": "URL der neuen Ressource.",
+                "schema": {
+                  "type": "string",
+                  "format": "uri-reference"
+                },
+                "example": "/milestones/ms-0051-4"
+              },
+              "ETag": {
+                "description": "Fassung dieser Ressource.",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "W/\"pr51-17\""
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Milestone"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        }
+      }
+    },
+    "/milestones/{id}": {
+      "get": {
+        "tags": [
+          "Meilensteine"
+        ],
+        "summary": "Meilenstein lesen",
+        "operationId": "getMilestone",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/MilestoneId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Erfolg.",
+            "headers": {
+              "ETag": {
+                "description": "Fassung dieser Ressource.",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "W/\"pr51-17\""
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Milestone"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Meilensteine"
+        ],
+        "summary": "Meilenstein ändern",
+        "description": "Bei einem gespiegelten Gate ist `plan_date` gesperrt — dafür gibt es den Verschiebungsantrag. Prognose, Name und Status sind lokal pflegbar.",
+        "operationId": "updateMilestone",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/MilestoneId"
+          },
+          {
+            "$ref": "#/components/parameters/IfMatch"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MilestonePatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Geändert.",
+            "headers": {
+              "ETag": {
+                "description": "Fassung dieser Ressource.",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "W/\"pr51-17\""
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Milestone"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "412": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "428": {
+            "$ref": "#/components/responses/PreconditionRequired"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Meilensteine"
+        ],
+        "summary": "Meilenstein löschen",
+        "description": "Nur lokal angelegte Gates. Gespiegelte antworten mit 409.",
+        "operationId": "deleteMilestone",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/MilestoneId"
+          },
+          {
+            "$ref": "#/components/parameters/IfMatch"
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/NoContent"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "412": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "428": {
+            "$ref": "#/components/responses/PreconditionRequired"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
           }
         }
       }
     },
     "/milestones/{id}/reschedule-request": {
       "post": {
-        "tags": ["Meilensteine"],
+        "tags": [
+          "Meilensteine"
+        ],
         "summary": "Verschiebung beantragen",
         "description": "Antrag auf Verschiebung mit Begründung. Die App schreibt Termine **nicht** — ePPM führt sie. Die Antwort enthält eine `request_id`.",
         "operationId": "requestReschedule",
         "parameters": [
-          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" }, "example": "ms-06-3" }
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "ms-06-3"
+          }
         ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
-              "example": { "proposed_date": "2027-02-15", "reason": "Verzug durch Statikprüfung." }
+              "example": {
+                "proposed_date": "2027-02-15",
+                "reason": "Verzug durch Statikprüfung."
+              }
             }
           }
         },
@@ -290,23 +1562,1161 @@
             "description": "Antrag entgegengenommen und an ePPM weitergeleitet.",
             "content": {
               "application/json": {
-                "example": { "request_id": "RR-2026-0825-07", "status": "pending", "milestone_id": "ms-06-3", "proposed_date": "2027-02-15" }
+                "example": {
+                  "request_id": "RR-2026-0825-07",
+                  "status": "pending",
+                  "milestone_id": "ms-06-3",
+                  "proposed_date": "2027-02-15"
+                }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        }
+      }
+    },
+    "/people": {
+      "get": {
+        "tags": [
+          "Personen"
+        ],
+        "summary": "Personen der Abteilung",
+        "description": "Personen der eigenen Abteilung für Filter und Zuweisung. Lesend.",
+        "operationId": "listPeople",
+        "responses": {
+          "200": {
+            "description": "Personen mit Rolle und Anstellungsgrad.",
+            "content": {
+              "application/json": {
+                "example": [
+                  {
+                    "person": "sonja.beispiel",
+                    "name": "Sonja Beispiel",
+                    "role": "projektleitung",
+                    "employment_pct": 100
+                  },
+                  {
+                    "person": "nadia.muster",
+                    "name": "Nadia Muster",
+                    "role": "bauleitung",
+                    "employment_pct": 60
+                  }
+                ]
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Personen"
+        ],
+        "summary": "Person anlegen",
+        "operationId": "createPerson",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PersonWrite"
+              },
+              "example": {
+                "name": "Corina Musterli",
+                "role": "projektleitung",
+                "unit": "Abteilung Projektmanagement",
+                "employment_pct": 80
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Angelegt.",
+            "headers": {
+              "Location": {
+                "description": "URL der neuen Ressource.",
+                "schema": {
+                  "type": "string",
+                  "format": "uri-reference"
+                },
+                "example": "/people/corina.musterli"
+              },
+              "ETag": {
+                "description": "Fassung dieser Ressource.",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "W/\"pr51-17\""
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Person"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        }
+      }
+    },
+    "/people/{person_id}": {
+      "get": {
+        "tags": [
+          "Personen"
+        ],
+        "summary": "Person lesen",
+        "operationId": "getPerson",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PersonId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Erfolg.",
+            "headers": {
+              "ETag": {
+                "description": "Fassung dieser Ressource.",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "W/\"pr51-17\""
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Person"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Personen"
+        ],
+        "summary": "Person ändern",
+        "description": "Ein gesenkter Anstellungsgrad kann bestehende Buchungen über 100 % bringen; die API antwortet dann mit 422 und nennt die betroffenen Quartale.",
+        "operationId": "updatePerson",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PersonId"
+          },
+          {
+            "$ref": "#/components/parameters/IfMatch"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PersonPatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Geändert.",
+            "headers": {
+              "ETag": {
+                "description": "Fassung dieser Ressource.",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "W/\"pr51-17\""
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Person"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "412": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "428": {
+            "$ref": "#/components/responses/PreconditionRequired"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Personen"
+        ],
+        "summary": "Person löschen",
+        "description": "Nur ohne offene Buchungen. Ausgetretene Personen werden sonst über `active: false` stillgelegt.",
+        "operationId": "deletePerson",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PersonId"
+          },
+          {
+            "$ref": "#/components/parameters/IfMatch"
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/NoContent"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "412": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "428": {
+            "$ref": "#/components/responses/PreconditionRequired"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        }
+      }
+    },
+    "/people/{person_id}/absences": {
+      "get": {
+        "tags": [
+          "Abwesenheiten"
+        ],
+        "summary": "Abwesenheiten auflisten",
+        "operationId": "listAbsences",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PersonId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Erfolg.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Absence"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Abwesenheiten"
+        ],
+        "summary": "Abwesenheit erfassen",
+        "operationId": "createAbsence",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PersonId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AbsenceWrite"
+              },
+              "example": {
+                "kind": "militaerdienst",
+                "from": "2027-03-01",
+                "to": "2027-03-21",
+                "pct": 100
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Angelegt.",
+            "headers": {
+              "Location": {
+                "description": "URL der neuen Ressource.",
+                "schema": {
+                  "type": "string",
+                  "format": "uri-reference"
+                },
+                "example": "/people/sonja.beispiel/absences/ab-118"
+              },
+              "ETag": {
+                "description": "Fassung dieser Ressource.",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "W/\"pr51-17\""
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Absence"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        }
+      }
+    },
+    "/people/{person_id}/absences/{absence_id}": {
+      "get": {
+        "tags": [
+          "Abwesenheiten"
+        ],
+        "summary": "Abwesenheit lesen",
+        "operationId": "getAbsence",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PersonId"
+          },
+          {
+            "$ref": "#/components/parameters/AbsenceId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Erfolg.",
+            "headers": {
+              "ETag": {
+                "description": "Fassung dieser Ressource.",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "W/\"pr51-17\""
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Absence"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Abwesenheiten"
+        ],
+        "summary": "Abwesenheit ändern",
+        "operationId": "updateAbsence",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PersonId"
+          },
+          {
+            "$ref": "#/components/parameters/AbsenceId"
+          },
+          {
+            "$ref": "#/components/parameters/IfMatch"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AbsencePatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Geändert.",
+            "headers": {
+              "ETag": {
+                "description": "Fassung dieser Ressource.",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "W/\"pr51-17\""
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Absence"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "412": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "428": {
+            "$ref": "#/components/responses/PreconditionRequired"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Abwesenheiten"
+        ],
+        "summary": "Abwesenheit löschen",
+        "operationId": "deleteAbsence",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PersonId"
+          },
+          {
+            "$ref": "#/components/parameters/AbsenceId"
+          },
+          {
+            "$ref": "#/components/parameters/IfMatch"
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/NoContent"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "412": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "428": {
+            "$ref": "#/components/responses/PreconditionRequired"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        }
+      }
+    },
+    "/capacity": {
+      "get": {
+        "tags": [
+          "Kapazität"
+        ],
+        "summary": "Kapazität je Quartal",
+        "description": "Netto-Kapazität je Quartal, aggregiert über die gefilterte Menge. Netto = brutto minus Abwesenheiten.",
+        "operationId": "getCapacity",
+        "parameters": [
+          {
+            "name": "quarter_from",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/Quarter"
+            },
+            "example": "2026Q3"
+          },
+          {
+            "name": "quarter_to",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/Quarter"
+            },
+            "example": "2028Q2"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Kapazität, Bedarf und Auslastung je Quartal.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "quarters": [
+                    "2026Q3",
+                    "2026Q4",
+                    "2027Q1",
+                    "2027Q2",
+                    "2027Q3",
+                    "2027Q4",
+                    "2028Q1",
+                    "2028Q2"
+                  ],
+                  "gross_pct": [
+                    540,
+                    540,
+                    560,
+                    560,
+                    560,
+                    560,
+                    560,
+                    560
+                  ],
+                  "absence_pct": [
+                    60,
+                    30,
+                    25,
+                    30,
+                    60,
+                    30,
+                    25,
+                    30
+                  ],
+                  "net_pct": [
+                    480,
+                    510,
+                    535,
+                    530,
+                    500,
+                    530,
+                    535,
+                    530
+                  ],
+                  "demand_pct": [
+                    572,
+                    595,
+                    630,
+                    580,
+                    510,
+                    400,
+                    250,
+                    170
+                  ],
+                  "external_pct": [
+                    35,
+                    35,
+                    70,
+                    65,
+                    60,
+                    35,
+                    10,
+                    5
+                  ],
+                  "utilisation_pct": [
+                    112,
+                    110,
+                    105,
+                    97,
+                    90,
+                    69,
+                    45,
+                    31
+                  ],
+                  "status": [
+                    "ueberlast",
+                    "ueberlast",
+                    "ueberlast",
+                    "knapp",
+                    "ok",
+                    "frei",
+                    "frei",
+                    "frei"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        }
+      }
+    },
+    "/capacity/people": {
+      "get": {
+        "tags": [
+          "Kapazität"
+        ],
+        "summary": "Auslastung je Person",
+        "description": "Auslastung je Person und Quartal, inklusive Anstellungsgrad.",
+        "operationId": "getCapacityPeople",
+        "responses": {
+          "200": {
+            "description": "Personen der eigenen Abteilung mit ihrer Belegung.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PersonCapacity"
+                  }
+                },
+                "example": [
+                  {
+                    "person": "sonja.beispiel",
+                    "name": "Sonja Beispiel",
+                    "role": "projektleitung",
+                    "employment_pct": 100,
+                    "load_pct": [
+                      118,
+                      118,
+                      108,
+                      95,
+                      75,
+                      55,
+                      30,
+                      20
+                    ]
+                  },
+                  {
+                    "person": "paula.beispiel",
+                    "name": "Paula Beispiel",
+                    "role": "projektentwicklung",
+                    "employment_pct": 80,
+                    "load_pct": [
+                      90,
+                      95,
+                      94,
+                      94,
+                      85,
+                      75,
+                      60,
+                      44
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        }
+      }
+    },
+    "/portfolios": {
+      "get": {
+        "tags": [
+          "Teilportfolios"
+        ],
+        "summary": "Teilportfolios auflisten",
+        "description": "Referenzdaten mit Projektzahl je Kategorie.",
+        "operationId": "listPortfolios",
+        "parameters": [
+          {
+            "name": "active",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Nur aktive Kategorien."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Erfolg.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Portfolio"
+                  }
+                },
+                "example": [
+                  {
+                    "id": "verwaltung",
+                    "label": "Verwaltung",
+                    "active": true,
+                    "project_count": 28
+                  },
+                  {
+                    "id": "zoll",
+                    "label": "Zoll",
+                    "active": true,
+                    "project_count": 19
+                  }
+                ]
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Teilportfolios"
+        ],
+        "summary": "Teilportfolio anlegen",
+        "description": "Rolle `admin`.",
+        "operationId": "createPortfolio",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PortfolioWrite"
+              },
+              "example": {
+                "id": "asyl",
+                "label": "Asylzentren"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Angelegt.",
+            "headers": {
+              "Location": {
+                "description": "URL der neuen Ressource.",
+                "schema": {
+                  "type": "string",
+                  "format": "uri-reference"
+                },
+                "example": "/portfolios/asyl"
+              },
+              "ETag": {
+                "description": "Fassung dieser Ressource.",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "W/\"pr51-17\""
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Portfolio"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        }
+      }
+    },
+    "/portfolios/{key}": {
+      "get": {
+        "tags": [
+          "Teilportfolios"
+        ],
+        "summary": "Teilportfolio lesen",
+        "operationId": "getPortfolio",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PortfolioKey"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Erfolg.",
+            "headers": {
+              "ETag": {
+                "description": "Fassung dieser Ressource.",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "W/\"pr51-17\""
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Portfolio"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Teilportfolios"
+        ],
+        "summary": "Teilportfolio ändern",
+        "description": "Rolle `admin`. Der Schlüssel selbst ist unveränderlich.",
+        "operationId": "updatePortfolio",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PortfolioKey"
+          },
+          {
+            "$ref": "#/components/parameters/IfMatch"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PortfolioPatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Geändert.",
+            "headers": {
+              "ETag": {
+                "description": "Fassung dieser Ressource.",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "W/\"pr51-17\""
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Portfolio"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "412": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "428": {
+            "$ref": "#/components/responses/PreconditionRequired"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Teilportfolios"
+        ],
+        "summary": "Teilportfolio löschen",
+        "description": "Nur ohne zugeordnete Projekte. Sonst über `active: false` stilllegen.",
+        "operationId": "deletePortfolio",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PortfolioKey"
+          },
+          {
+            "$ref": "#/components/parameters/IfMatch"
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/NoContent"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "412": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "428": {
+            "$ref": "#/components/responses/PreconditionRequired"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
           }
         }
       }
     },
     "/history": {
       "get": {
-        "tags": ["Verlauf und Export"],
+        "tags": [
+          "Verlauf und Export"
+        ],
         "summary": "Protokoll",
         "description": "Alle Änderungen, paginiert, filterbar nach field, person, project, period. Nur app-eigene Felder erscheinen hier.",
         "operationId": "listHistory",
         "parameters": [
-          { "name": "field", "in": "query", "schema": { "type": "string", "enum": ["pensum", "begruendung", "termin", "projektleitung", "abwesenheiten"] } },
-          { "name": "person", "in": "query", "schema": { "type": "string" } },
-          { "name": "project", "in": "query", "schema": { "type": "integer", "format": "int64" } }
+          {
+            "name": "field",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "pensum",
+                "begruendung",
+                "termin",
+                "projektleitung",
+                "abwesenheiten"
+              ]
+            }
+          },
+          {
+            "name": "person",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "project",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
         ],
         "responses": {
           "200": {
@@ -315,26 +2725,89 @@
               "application/json": {
                 "example": {
                   "data": [
-                    { "id": "c1", "at": "2026-08-21T09:12:00Z", "actor": "lars.muster", "project_id": 8640100051, "field": "pensum", "change": "Bauleitung Etappe 2 vorgezogen", "value": "30 % → 35 %" }
+                    {
+                      "id": "c1",
+                      "at": "2026-08-21T09:12:00Z",
+                      "actor": "lars.muster",
+                      "project_id": 8640100051,
+                      "field": "pensum",
+                      "change": "Bauleitung Etappe 2 vorgezogen",
+                      "value": "30 % → 35 %"
+                    }
                   ],
-                  "meta": { "page": 1, "per_page": 25, "total": 9 }
+                  "meta": {
+                    "page": 1,
+                    "per_page": 25,
+                    "total": 9
+                  }
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
           }
         }
       }
     },
     "/export": {
       "get": {
-        "tags": ["Verlauf und Export"],
+        "tags": [
+          "Verlauf und Export"
+        ],
         "summary": "Ansicht exportieren",
         "description": "CSV, XLSX oder PDF der aktuellen Auswahl. Der Export übernimmt Ansicht, Filter, Zeitraum und Einheit; das PDF trägt Plankopf, feste Legende und Dokument-ID.",
         "operationId": "exportView",
         "parameters": [
-          { "name": "format", "in": "query", "required": true, "schema": { "type": "string", "enum": ["csv", "xlsx", "pdf"] }, "example": "pdf" },
-          { "name": "view", "in": "query", "schema": { "type": "string", "enum": ["uebersicht", "termine", "dashboard", "verlauf"] }, "example": "uebersicht" },
-          { "name": "unit", "in": "query", "schema": { "type": "string", "enum": ["pct", "fte"], "default": "pct" } }
+          {
+            "name": "format",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "csv",
+                "xlsx",
+                "pdf"
+              ]
+            },
+            "example": "pdf"
+          },
+          {
+            "name": "view",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "uebersicht",
+                "termine",
+                "dashboard",
+                "verlauf"
+              ]
+            },
+            "example": "uebersicht"
+          },
+          {
+            "name": "unit",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "pct",
+                "fte"
+              ],
+              "default": "pct"
+            }
+          }
         ],
         "responses": {
           "200": {
@@ -345,15 +2818,37 @@
               "application/pdf": {}
             },
             "headers": {
-              "X-Document-Id": { "description": "Zitierfähige Dokument-ID des Exports.", "schema": { "type": "string", "examples": ["RP-2026-0825-01"] } }
+              "X-Document-Id": {
+                "description": "Zitierfähige Dokument-ID des Exports.",
+                "schema": {
+                  "type": "string",
+                  "examples": [
+                    "RP-2026-0825-01"
+                  ]
+                }
+              }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
           }
         }
       }
     },
     "/me": {
       "get": {
-        "tags": ["Benutzer"],
+        "tags": [
+          "Benutzer"
+        ],
         "summary": "Angemeldete Person",
         "description": "Angemeldete Person, Rollen und zugängliche Abteilungen. Abgeleitet aus dem eIAM-Token, nie aus einem Parameter.",
         "operationId": "getMe",
@@ -362,30 +2857,31 @@
             "description": "Identität und Berechtigung.",
             "content": {
               "application/json": {
-                "example": { "person": "sonja.beispiel", "name": "Sonja Beispiel", "roles": ["read", "plan"], "departments": ["projektmanagement"] }
+                "example": {
+                  "person": "sonja.beispiel",
+                  "name": "Sonja Beispiel",
+                  "roles": [
+                    "read",
+                    "plan"
+                  ],
+                  "departments": [
+                    "projektmanagement"
+                  ]
+                }
               }
             }
-          }
-        }
-      }
-    },
-    "/people": {
-      "get": {
-        "tags": ["Benutzer"],
-        "summary": "Personen der Abteilung",
-        "description": "Personen der eigenen Abteilung für Filter und Zuweisung. Lesend.",
-        "operationId": "listPeople",
-        "responses": {
-          "200": {
-            "description": "Personen mit Rolle und Anstellungsgrad.",
-            "content": {
-              "application/json": {
-                "example": [
-                  { "person": "sonja.beispiel", "name": "Sonja Beispiel", "role": "projektleitung", "employment_pct": 100 },
-                  { "person": "nadia.muster", "name": "Nadia Muster", "role": "bauleitung", "employment_pct": 60 }
-                ]
-              }
-            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
           }
         }
       }
@@ -402,20 +2898,243 @@
     },
     "parameters": {
       "ProjectId": {
-        "name": "id", "in": "path", "required": true,
+        "name": "id",
+        "in": "path",
+        "required": true,
         "description": "Bauprojekt-ID aus ePPM.",
-        "schema": { "type": "integer", "format": "int64" },
+        "schema": {
+          "type": "integer",
+          "format": "int64"
+        },
         "example": 8640100051
+      },
+      "PersonId": {
+        "name": "person_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "example": "sonja.beispiel"
+      },
+      "MilestoneId": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "example": "ms-0051-4"
+      },
+      "AbsenceId": {
+        "name": "absence_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "PortfolioKey": {
+        "name": "key",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "enum": [
+            "verwaltung",
+            "zoll",
+            "justiz",
+            "bildung",
+            "ausland",
+            "kultur",
+            "sport"
+          ]
+        },
+        "example": "zoll"
+      },
+      "QuarterPath": {
+        "name": "quarter",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/Quarter"
+        },
+        "example": "2027Q1"
+      },
+      "IfMatch": {
+        "name": "If-Match",
+        "in": "header",
+        "required": true,
+        "description": "ETag der zuletzt gelesenen Fassung. Verhindert, dass zwei Personen dieselbe Zeile überschreiben.",
+        "schema": {
+          "type": "string"
+        },
+        "example": "W/\"pr51-17\""
+      },
+      "IdempotencyKey": {
+        "name": "Idempotency-Key",
+        "in": "header",
+        "required": false,
+        "description": "Beliebiger Schlüssel des Aufrufers. Ein Wiederholungsaufruf mit demselben Schlüssel legt nichts zweites an.",
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
       }
     },
     "responses": {
+      "BadRequest": {
+        "description": "Anfrage nicht lesbar",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            },
+            "example": {
+              "type": "about:blank",
+              "title": "Anfrage nicht lesbar",
+              "status": 400,
+              "detail": "Der Rumpf ist kein gültiges JSON."
+            }
+          }
+        }
+      },
       "Unauthorized": {
-        "description": "Kein oder ungültiges eIAM-Token.",
-        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" }, "example": { "error": "unauthorized", "message": "Bearer-Token fehlt oder ist abgelaufen." } } }
+        "description": "Nicht angemeldet",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            },
+            "example": {
+              "type": "about:blank",
+              "title": "Nicht angemeldet",
+              "status": 401,
+              "detail": "Bearer-Token fehlt oder ist abgelaufen."
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "Keine Berechtigung",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            },
+            "example": {
+              "type": "about:blank",
+              "title": "Keine Berechtigung",
+              "status": 403,
+              "detail": "Die Rolle `read` darf nicht schreiben."
+            }
+          }
+        }
       },
       "NotFound": {
-        "description": "Nicht gefunden oder ausserhalb der eigenen Abteilung.",
-        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" }, "example": { "error": "not_found", "message": "Bauprojekt 8640100051 ist in dieser Abteilung nicht sichtbar." } } }
+        "description": "Nicht gefunden",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            },
+            "example": {
+              "type": "about:blank",
+              "title": "Nicht gefunden",
+              "status": 404,
+              "detail": "Nicht vorhanden oder ausserhalb der eigenen Abteilung."
+            }
+          }
+        }
+      },
+      "Conflict": {
+        "description": "Konflikt",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            },
+            "example": {
+              "type": "https://ressourcenplanung.bbl.admin.ch/probs/belegt",
+              "title": "Konflikt",
+              "status": 409,
+              "detail": "Das Projekt trägt noch Pensen; erst umbuchen, dann löschen."
+            }
+          }
+        }
+      },
+      "PreconditionFailed": {
+        "description": "Fassung veraltet",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            },
+            "example": {
+              "type": "about:blank",
+              "title": "Fassung veraltet",
+              "status": 412,
+              "detail": "Der Datensatz wurde inzwischen geändert. Neu lesen und erneut senden."
+            }
+          }
+        }
+      },
+      "UnprocessableEntity": {
+        "description": "Fachlich unzulässig",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            },
+            "example": {
+              "type": "https://ressourcenplanung.bbl.admin.ch/probs/ueberlast",
+              "title": "Fachlich unzulässig",
+              "status": 422,
+              "detail": "Corina Musterli käme in 2027Q1 auf 145 % ihres Anstellungsgrades.",
+              "errors": [
+                {
+                  "pointer": "/reason",
+                  "detail": "Begründung ist Pflicht, sobald eine Person über 100 % kommt."
+                }
+              ]
+            }
+          }
+        }
+      },
+      "PreconditionRequired": {
+        "description": "If-Match fehlt",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            },
+            "example": {
+              "type": "about:blank",
+              "title": "If-Match fehlt",
+              "status": 428,
+              "detail": "Schreibende Zugriffe auf eine Einzelressource verlangen If-Match."
+            }
+          }
+        }
+      },
+      "TooManyRequests": {
+        "description": "Zu viele Anfragen",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            },
+            "example": {
+              "type": "about:blank",
+              "title": "Zu viele Anfragen",
+              "status": 429,
+              "detail": "Mehr als 600 Anfragen pro Minute und Token."
+            }
+          }
+        }
+      },
+      "NoContent": {
+        "description": "Gelöscht. Kein Rumpf."
       }
     },
     "schemas": {
@@ -423,114 +3142,1092 @@
         "type": "string",
         "pattern": "^[0-9]{4}Q[1-4]$",
         "description": "Quartal als `JJJJQn`.",
-        "examples": ["2026Q3"]
+        "examples": [
+          "2026Q3"
+        ]
       },
       "Project": {
         "type": "object",
         "description": "allocations, targets und milestones sind JSONB — sie ändern sich mit der Planung und brauchen keine eigene Tabelle pro Quartal. Was aus ePPM kommt, trägt source und synced_at.",
-        "required": ["id", "title", "phase", "location"],
+        "required": [
+          "id",
+          "title",
+          "phase",
+          "location"
+        ],
         "properties": {
-          "id": { "type": "integer", "format": "int64" },
-          "number": { "type": "string", "description": "Verkürzte Anzeige-ID." },
-          "title": { "type": "string" },
-          "phase": { "type": "string", "description": "SIA-112-Teilphase.", "examples": ["32"] },
-          "lead": { "type": ["string", "null"], "description": "Kürzel der Projektleitung, null wenn offen." },
-          "location": { "type": "string", "enum": ["inland", "ausland", "zoll", "repraesentativ", "sport"] },
-          "priority": { "type": "string", "enum": ["hoch", "mittel", "tief"] },
-          "budget_chf": { "type": ["integer", "null"], "description": "Gebundener Kredit, null solange offen." },
-          "pre_credit": { "type": "boolean", "description": "Bedarf steht vor der Baukredit-Freigabe und ist damit Prognose." },
-          "allocations": { "type": "array", "items": { "$ref": "#/components/schemas/Allocation" } },
-          "targets": { "type": "array", "items": { "$ref": "#/components/schemas/Target" } },
-          "milestones": { "type": "array", "items": { "$ref": "#/components/schemas/Milestone" } },
-          "source": { "type": "string", "enum": ["eppm", "app"] },
-          "synced_at": { "type": "string", "format": "date-time" }
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "number": {
+            "type": "string",
+            "description": "Verkürzte Anzeige-ID."
+          },
+          "title": {
+            "type": "string"
+          },
+          "phase": {
+            "type": "string",
+            "description": "SIA-112-Teilphase.",
+            "examples": [
+              "32"
+            ]
+          },
+          "lead": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Kürzel der Projektleitung, null wenn offen."
+          },
+          "location": {
+            "type": "string",
+            "enum": [
+              "verwaltung",
+              "zoll",
+              "justiz",
+              "bildung",
+              "ausland",
+              "kultur",
+              "sport"
+            ],
+            "description": "Teilportfolio, Schlüssel aus /portfolios."
+          },
+          "priority": {
+            "type": "string",
+            "enum": [
+              "hoch",
+              "mittel",
+              "tief"
+            ]
+          },
+          "budget_chf": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Gebundener Kredit, null solange offen."
+          },
+          "pre_credit": {
+            "type": "boolean",
+            "description": "Bedarf steht vor der Baukredit-Freigabe und ist damit Prognose."
+          },
+          "allocations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Allocation"
+            }
+          },
+          "targets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Target"
+            }
+          },
+          "milestones": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Milestone"
+            }
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "eppm",
+              "app"
+            ]
+          },
+          "synced_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "sync_state": {
+            "$ref": "#/components/schemas/SyncState"
+          },
+          "etag": {
+            "type": "string",
+            "description": "Version dieser Ressource, gespiegelt aus dem ETag-Kopf.",
+            "readOnly": true
+          }
         }
       },
       "Allocation": {
         "type": "object",
         "description": "Ein Pensum einer Person auf einem Projekt in einem Quartal.",
-        "required": ["person", "quarter", "pensum_pct"],
+        "required": [
+          "person",
+          "quarter",
+          "pensum_pct"
+        ],
         "properties": {
-          "person": { "type": "string" },
-          "role": { "type": "string", "enum": ["projektleitung", "projektentwicklung", "bauleitung"] },
-          "quarter": { "$ref": "#/components/schemas/Quarter" },
-          "pensum_pct": { "type": "integer", "minimum": 0, "maximum": 200 }
+          "person": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "projektleitung",
+              "projektentwicklung",
+              "bauleitung"
+            ]
+          },
+          "quarter": {
+            "$ref": "#/components/schemas/Quarter"
+          },
+          "pensum_pct": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 200
+          }
         }
       },
       "Target": {
         "type": "object",
-        "required": ["quarter", "pensum_pct"],
+        "required": [
+          "quarter",
+          "pensum_pct"
+        ],
         "properties": {
-          "quarter": { "$ref": "#/components/schemas/Quarter" },
-          "pensum_pct": { "type": "integer", "minimum": 0 }
+          "quarter": {
+            "$ref": "#/components/schemas/Quarter"
+          },
+          "pensum_pct": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "reason": {
+            "type": "string"
+          }
         }
       },
       "Milestone": {
         "type": "object",
-        "required": ["code", "plan_date", "status"],
+        "required": [
+          "code",
+          "plan_date",
+          "status"
+        ],
         "properties": {
-          "id": { "type": "string" },
-          "project_id": { "type": "integer", "format": "int64" },
-          "code": { "type": "string", "examples": ["MS4"] },
-          "name": { "type": "string" },
-          "sub_phase": { "type": "string" },
-          "plan_date": { "type": "string", "format": "date" },
-          "forecast_date": { "type": ["string", "null"], "format": "date", "description": "null, solange kein Termin steht." },
-          "status": { "type": "string", "enum": ["on_track", "late", "pending"] }
+          "id": {
+            "type": "string"
+          },
+          "project_id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "code": {
+            "type": "string",
+            "examples": [
+              "MS4"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "sub_phase": {
+            "type": "string"
+          },
+          "plan_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "forecast_date": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date",
+            "description": "null, solange kein Termin steht."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "on_track",
+              "late",
+              "pending"
+            ]
+          },
+          "etag": {
+            "type": "string",
+            "readOnly": true
+          },
+          "sync_state": {
+            "$ref": "#/components/schemas/SyncState"
+          }
         }
       },
       "PersonCapacity": {
         "type": "object",
         "properties": {
-          "person": { "type": "string" },
-          "name": { "type": "string" },
-          "role": { "type": "string" },
-          "employment_pct": { "type": "integer", "description": "Anstellungsgrad." },
-          "load_pct": { "type": "array", "items": { "type": "integer" }, "description": "Belegung je Quartal, in derselben Reihenfolge wie /capacity." }
+          "person": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "employment_pct": {
+            "type": "integer",
+            "description": "Anstellungsgrad."
+          },
+          "load_pct": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "description": "Belegung je Quartal, in derselben Reihenfolge wie /capacity."
+          },
+          "id": {
+            "type": "string",
+            "description": "Kürzel, zugleich Schlüssel."
+          }
         }
       },
       "HistoryEntry": {
         "type": "object",
         "properties": {
-          "id": { "type": "string" },
-          "at": { "type": "string", "format": "date-time" },
-          "actor": { "type": "string" },
-          "project_id": { "type": ["integer", "null"], "format": "int64" },
-          "field": { "type": "string", "enum": ["pensum", "begruendung", "termin", "projektleitung", "abwesenheiten"] },
-          "change": { "type": "string" },
-          "value": { "type": "string" }
+          "id": {
+            "type": "string"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "actor": {
+            "type": "string"
+          },
+          "project_id": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64"
+          },
+          "field": {
+            "type": "string",
+            "enum": [
+              "pensum",
+              "begruendung",
+              "termin",
+              "projektleitung",
+              "abwesenheiten"
+            ]
+          },
+          "change": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
         }
       },
       "AllocationPatch": {
         "type": "object",
-        "required": ["allocations"],
+        "required": [
+          "allocations"
+        ],
         "properties": {
-          "allocations": { "type": "array", "items": { "$ref": "#/components/schemas/Allocation" } },
-          "reason": { "type": "string", "description": "Pflicht, sobald eine Person damit über ihren Anstellungsgrad kommt." }
+          "allocations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Allocation"
+            }
+          },
+          "reason": {
+            "type": "string",
+            "description": "Pflicht, sobald eine Person damit über ihren Anstellungsgrad kommt."
+          }
         }
       },
       "ProjectPage": {
         "type": "object",
         "properties": {
-          "data": { "type": "array", "items": { "$ref": "#/components/schemas/Project" } },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Project"
+            }
+          },
           "meta": {
             "type": "object",
             "properties": {
-              "page": { "type": "integer" },
-              "per_page": { "type": "integer" },
-              "total": { "type": "integer" },
-              "scope_total": { "type": "integer", "description": "Bauprojekte insgesamt, vor der Filterung." }
+              "page": {
+                "type": "integer"
+              },
+              "per_page": {
+                "type": "integer"
+              },
+              "total": {
+                "type": "integer"
+              },
+              "scope_total": {
+                "type": "integer",
+                "description": "Bauprojekte insgesamt, vor der Filterung."
+              }
             }
           }
         }
       },
-      "Error": {
+      "Problem": {
         "type": "object",
-        "required": ["error", "message"],
+        "description": "Fehlerobjekt nach RFC 9457.",
+        "required": [
+          "type",
+          "title",
+          "status"
+        ],
         "properties": {
-          "error": { "type": "string" },
-          "message": { "type": "string" },
-          "field": { "type": "string" }
+          "type": {
+            "type": "string",
+            "format": "uri",
+            "examples": [
+              "https://ressourcenplanung.bbl.admin.ch/probs/ueberlast"
+            ]
+          },
+          "title": {
+            "type": "string",
+            "description": "Kurzform, sprachunabhängig stabil."
+          },
+          "status": {
+            "type": "integer"
+          },
+          "detail": {
+            "type": "string",
+            "description": "Erklärung für diesen einen Fall."
+          },
+          "instance": {
+            "type": "string",
+            "format": "uri-reference"
+          },
+          "errors": {
+            "type": "array",
+            "description": "Feldweise Verletzungen, nur bei 422.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "pointer": {
+                  "type": "string",
+                  "description": "JSON-Pointer auf das Feld.",
+                  "examples": [
+                    "/pensum_pct"
+                  ]
+                },
+                "detail": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "SyncState": {
+        "type": "string",
+        "description": "Stand der Rückschreibung an ePPM.",
+        "enum": [
+          "synced",
+          "local_ahead",
+          "queued",
+          "conflict"
+        ]
+      },
+      "ProjectWrite": {
+        "type": "object",
+        "description": "Schreibbare Felder eines Projekts. Was aus ePPM stammt, wird lokal geführt und zurückgeschrieben.",
+        "required": [
+          "title",
+          "phase",
+          "location"
+        ],
+        "properties": {
+          "number": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 160
+          },
+          "location_text": {
+            "type": "string",
+            "description": "Ort und Adresse als Klartext."
+          },
+          "kind": {
+            "type": "string",
+            "examples": [
+              "Instandsetzung"
+            ]
+          },
+          "phase": {
+            "type": "string",
+            "pattern": "^[1-6][1-9]$",
+            "description": "SIA-112-Teilphase.",
+            "examples": [
+              "32"
+            ]
+          },
+          "lead": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Kürzel der Projektleitung, null wenn offen."
+          },
+          "location": {
+            "type": "string",
+            "enum": [
+              "verwaltung",
+              "zoll",
+              "justiz",
+              "bildung",
+              "ausland",
+              "kultur",
+              "sport"
+            ]
+          },
+          "priority": {
+            "type": "string",
+            "enum": [
+              "hoch",
+              "mittel",
+              "tief"
+            ]
+          },
+          "pre_credit": {
+            "type": "boolean",
+            "description": "true, solange die Baukredit-Freigabe aussteht."
+          },
+          "budget_chf": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0,
+            "description": "Gebundener Kredit in Franken, null solange offen."
+          }
+        }
+      },
+      "ProjectPatch": {
+        "type": "object",
+        "description": "Teilaktualisierung. Nur die gesendeten Felder ändern sich; ein Feld auf null setzt es zurück, sofern es nullable ist.",
+        "minProperties": 1,
+        "properties": {
+          "number": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 160
+          },
+          "location_text": {
+            "type": "string",
+            "description": "Ort und Adresse als Klartext."
+          },
+          "kind": {
+            "type": "string",
+            "examples": [
+              "Instandsetzung"
+            ]
+          },
+          "phase": {
+            "type": "string",
+            "pattern": "^[1-6][1-9]$",
+            "description": "SIA-112-Teilphase.",
+            "examples": [
+              "32"
+            ]
+          },
+          "lead": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Kürzel der Projektleitung, null wenn offen."
+          },
+          "location": {
+            "type": "string",
+            "enum": [
+              "verwaltung",
+              "zoll",
+              "justiz",
+              "bildung",
+              "ausland",
+              "kultur",
+              "sport"
+            ]
+          },
+          "priority": {
+            "type": "string",
+            "enum": [
+              "hoch",
+              "mittel",
+              "tief"
+            ]
+          },
+          "pre_credit": {
+            "type": "boolean",
+            "description": "true, solange die Baukredit-Freigabe aussteht."
+          },
+          "budget_chf": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0,
+            "description": "Gebundener Kredit in Franken, null solange offen."
+          }
+        }
+      },
+      "Person": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "employment_pct"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "examples": [
+              "sonja.beispiel"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "projektleitung",
+              "projektentwicklung",
+              "bauleitung"
+            ]
+          },
+          "unit": {
+            "type": "string",
+            "description": "Organisationseinheit.",
+            "examples": [
+              "Abteilung Projektmanagement"
+            ]
+          },
+          "employment_pct": {
+            "type": "integer",
+            "minimum": 10,
+            "maximum": 100,
+            "description": "Anstellungsgrad."
+          },
+          "active": {
+            "type": "boolean",
+            "default": true
+          },
+          "etag": {
+            "type": "string",
+            "readOnly": true
+          }
+        }
+      },
+      "PersonWrite": {
+        "type": "object",
+        "required": [
+          "name",
+          "employment_pct"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Kürzel. Wird bei POST vergeben, wenn es fehlt."
+          },
+          "name": {
+            "type": "string",
+            "minLength": 2
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "projektleitung",
+              "projektentwicklung",
+              "bauleitung"
+            ]
+          },
+          "unit": {
+            "type": "string"
+          },
+          "employment_pct": {
+            "type": "integer",
+            "minimum": 10,
+            "maximum": 100
+          },
+          "active": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PersonPatch": {
+        "type": "object",
+        "minProperties": 1,
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Kürzel. Wird bei POST vergeben, wenn es fehlt."
+          },
+          "name": {
+            "type": "string",
+            "minLength": 2
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "projektleitung",
+              "projektentwicklung",
+              "bauleitung"
+            ]
+          },
+          "unit": {
+            "type": "string"
+          },
+          "employment_pct": {
+            "type": "integer",
+            "minimum": 10,
+            "maximum": 100
+          },
+          "active": {
+            "type": "boolean"
+          }
+        }
+      },
+      "Absence": {
+        "type": "object",
+        "required": [
+          "id",
+          "person",
+          "kind",
+          "from",
+          "to"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "person": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "ferien",
+              "militaerdienst",
+              "weiterbildung",
+              "mutterschaft",
+              "unbezahlt",
+              "krankheit"
+            ]
+          },
+          "from": {
+            "type": "string",
+            "format": "date"
+          },
+          "to": {
+            "type": "string",
+            "format": "date"
+          },
+          "pct": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 100,
+            "description": "Anteil der Abwesenheit; 50 bei halbtägiger."
+          },
+          "note": {
+            "type": "string"
+          },
+          "etag": {
+            "type": "string",
+            "readOnly": true
+          }
+        }
+      },
+      "AbsenceWrite": {
+        "type": "object",
+        "required": [
+          "kind",
+          "from",
+          "to"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "ferien",
+              "militaerdienst",
+              "weiterbildung",
+              "mutterschaft",
+              "unbezahlt",
+              "krankheit"
+            ]
+          },
+          "from": {
+            "type": "string",
+            "format": "date"
+          },
+          "to": {
+            "type": "string",
+            "format": "date"
+          },
+          "pct": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 100
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "AbsencePatch": {
+        "type": "object",
+        "minProperties": 1,
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "ferien",
+              "militaerdienst",
+              "weiterbildung",
+              "mutterschaft",
+              "unbezahlt",
+              "krankheit"
+            ]
+          },
+          "from": {
+            "type": "string",
+            "format": "date"
+          },
+          "to": {
+            "type": "string",
+            "format": "date"
+          },
+          "pct": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 100
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "MilestoneWrite": {
+        "type": "object",
+        "required": [
+          "project_id",
+          "code",
+          "plan_date"
+        ],
+        "properties": {
+          "project_id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "code": {
+            "type": "string",
+            "examples": [
+              "MS4"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "sub_phase": {
+            "type": "string",
+            "examples": [
+              "33"
+            ]
+          },
+          "plan_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "forecast_date": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "on_track",
+              "late",
+              "pending"
+            ]
+          }
+        }
+      },
+      "MilestonePatch": {
+        "type": "object",
+        "minProperties": 1,
+        "properties": {
+          "project_id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "code": {
+            "type": "string",
+            "examples": [
+              "MS4"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "sub_phase": {
+            "type": "string",
+            "examples": [
+              "33"
+            ]
+          },
+          "plan_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "forecast_date": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "on_track",
+              "late",
+              "pending"
+            ]
+          }
+        }
+      },
+      "AllocationWrite": {
+        "type": "object",
+        "required": [
+          "person",
+          "quarter",
+          "pensum_pct"
+        ],
+        "properties": {
+          "person": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "projektleitung",
+              "projektentwicklung",
+              "bauleitung"
+            ]
+          },
+          "quarter": {
+            "$ref": "#/components/schemas/Quarter"
+          },
+          "pensum_pct": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 200
+          },
+          "reason": {
+            "type": "string",
+            "description": "Pflicht, sobald die Person damit über ihren Anstellungsgrad kommt."
+          }
+        }
+      },
+      "AllocationValue": {
+        "type": "object",
+        "required": [
+          "pensum_pct"
+        ],
+        "properties": {
+          "person": {
+            "type": "string",
+            "description": "Weglassen, um die Projektleitung des Projekts zu buchen."
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "projektleitung",
+              "projektentwicklung",
+              "bauleitung"
+            ]
+          },
+          "pensum_pct": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 200
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "TargetWrite": {
+        "type": "object",
+        "required": [
+          "pensum_pct"
+        ],
+        "properties": {
+          "pensum_pct": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 200
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "Portfolio": {
+        "type": "object",
+        "required": [
+          "id",
+          "label"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "enum": [
+              "verwaltung",
+              "zoll",
+              "justiz",
+              "bildung",
+              "ausland",
+              "kultur",
+              "sport"
+            ]
+          },
+          "label": {
+            "type": "string",
+            "examples": [
+              "Kultur und Denkmäler"
+            ]
+          },
+          "label_fr": {
+            "type": "string"
+          },
+          "label_it": {
+            "type": "string"
+          },
+          "active": {
+            "type": "boolean",
+            "default": true
+          },
+          "project_count": {
+            "type": "integer",
+            "readOnly": true
+          },
+          "etag": {
+            "type": "string",
+            "readOnly": true
+          }
+        }
+      },
+      "PortfolioWrite": {
+        "type": "object",
+        "required": [
+          "id",
+          "label"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{2,31}$"
+          },
+          "label": {
+            "type": "string"
+          },
+          "label_fr": {
+            "type": "string"
+          },
+          "label_it": {
+            "type": "string"
+          },
+          "active": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PortfolioPatch": {
+        "type": "object",
+        "minProperties": 1,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{2,31}$"
+          },
+          "label": {
+            "type": "string"
+          },
+          "label_fr": {
+            "type": "string"
+          },
+          "label_it": {
+            "type": "string"
+          },
+          "active": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PersonPage": {
+        "type": "object",
+        "required": [
+          "items",
+          "total"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Person"
+            }
+          },
+          "total": {
+            "type": "integer"
+          },
+          "page": {
+            "type": "integer"
+          },
+          "page_size": {
+            "type": "integer"
+          }
+        }
+      },
+      "MilestonePage": {
+        "type": "object",
+        "required": [
+          "items",
+          "total"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Milestone"
+            }
+          },
+          "total": {
+            "type": "integer"
+          },
+          "page": {
+            "type": "integer"
+          },
+          "page_size": {
+            "type": "integer"
+          }
         }
       }
     }

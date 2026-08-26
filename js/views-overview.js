@@ -279,11 +279,22 @@ export function renderUebersicht() {
  * 35px of content while 99 of 111 titles were clipped — and it is always the
  * Massnahme at the end that goes.
  */
-const COL_W = {
-  ampel: 62, id: 62, title: 285, phase: 128, lead: 132,
-  portfolio: 110, priority: 90, nextMs: 150, credit: 112,
-  target: 76, quarter: 72, trend: 130
-};
+/*
+ * The grid template and the frozen-column offsets have to agree to the pixel,
+ * so they may not be two lists of numbers. Both come from the tokens: read
+ * once at first use, because a stylesheet does not change under us.
+ */
+const COL_KEYS = ['ampel', 'id', 'title', 'phase', 'lead', 'portfolio',
+  'priority', 'nextMs', 'credit', 'target', 'quarter', 'trend'];
+let widths = null;
+function colWidths() {
+  if (widths) return widths;
+  const css = getComputedStyle(document.documentElement);
+  const read = name => parseInt(css.getPropertyValue(name), 10);
+  widths = Object.fromEntries(COL_KEYS.map(k =>
+    [k, read(k === 'quarter' ? '--grid-quarter' : `--grid-col-${k.toLowerCase()}`)]));
+  return widths;
+}
 
 /**
  * One description of the column layout for the whole grid.
@@ -294,6 +305,7 @@ const COL_W = {
  */
 function gridLayout() {
   const c = state.cols;
+  const COL_W = colWidths();
   const parts = [];
   let minWidth = 0;
   const add = (track, px) => { parts.push(track); minWidth += px; };
@@ -312,23 +324,23 @@ function gridLayout() {
     add(track, px);
   };
 
-  pin('id', c.id, 'var(--grid-col-id)', COL_W.id);
+  pin('id', c.id, `${COL_W.id}px`, COL_W.id);
   pin('title', true, `minmax(${COL_W.title}px, 1fr)`, COL_W.title);
-  pin('phase', c.phase, 'var(--grid-col-phase)', COL_W.phase);
-  pin('lead', c.lead, 'var(--grid-col-lead)', COL_W.lead);
+  pin('phase', c.phase, `${COL_W.phase}px`, COL_W.phase);
+  pin('lead', c.lead, `${COL_W.lead}px`, COL_W.lead);
   // The signal reports on the project lead, so it sits beside that column.
-  pin('ampel', state.ampel, 'var(--grid-col-ampel)', COL_W.ampel);
+  pin('ampel', state.ampel, `${COL_W.ampel}px`, COL_W.ampel);
   pin('portfolio', c.portfolio, `${COL_W.portfolio}px`, COL_W.portfolio);
   pin('priority', c.priority, `${COL_W.priority}px`, COL_W.priority);
   pin('nextMs', c.nextMs, `${COL_W.nextMs}px`, COL_W.nextMs);
-  pin('credit', c.credit, 'var(--grid-col-budget)', COL_W.credit);
-  pin('target', state.target, 'var(--grid-col-target)', COL_W.target);
+  pin('credit', c.credit, `${COL_W.credit}px`, COL_W.credit);
+  pin('target', state.target, `${COL_W.target}px`, COL_W.target);
   sticky.width = offset;
   sticky.last = Object.keys(sticky).filter(k => k !== 'width').pop();
 
   const cols = periods().length;
-  add(`repeat(${cols}, minmax(var(--grid-quarter), 1fr))`, COL_W.quarter * cols);
-  if (state.trend) add('var(--grid-col-trend)', COL_W.trend);
+  add(`repeat(${cols}, minmax(${COL_W.quarter}px, 1fr))`, COL_W.quarter * cols);
+  if (state.trend) add(`${COL_W.trend}px`, COL_W.trend);
 
   return { tpl: parts.join(' '), minWidth, sticky };
 }
