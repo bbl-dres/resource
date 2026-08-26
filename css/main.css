@@ -67,7 +67,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 
 /* Numbers are tabular everywhere — a system rule, not an option. */
 .kpi__value, .pcell, .capband__value, .barlist__value, .colchart__val,
-.log__date, .chg__date, .log__value, .sorthead__label,
+.log__date, .chg__date, .log__value, .sorthead__label, .capband__cell,
 .entry__metric, .minigrid__v { font-variant-numeric: tabular-nums; }
 
 /* ==========================================================================
@@ -190,13 +190,17 @@ button, input, select, textarea { font: inherit; color: inherit; }
 }
 .xsearch:not(.is-open) { width: var(--control-height-lg); justify-content: center; padding: 0; position: relative; }
 .xsearch:not(.is-open):hover { background: var(--color-surface); }
-.xsearch.is-open { background: var(--color-surface); }
+/*
+ * No entrance animation. A render replaces every node, so an animation on the
+ * open field restarted on each debounced keystroke — the field pumped between
+ * 134px and 250px about three times a second while typing. Animations here have
+ * to be driven by a class that outlives the render, the way .is-leaving is.
+ */
 .xsearch.is-open {
   width: 250px; padding-inline: var(--space-4); gap: var(--space-3); cursor: text;
+  background: var(--color-surface);
   border-color: var(--color-border-accent);
-  animation: xsearch-open var(--dur) var(--ease-out);
 }
-@keyframes xsearch-open { from { width: var(--control-height-lg); } }
 
 .xsearch input {
   flex: 1; min-width: 0; border: 0; background: none; outline: none;
@@ -214,11 +218,6 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .xsearch__dot {
   position: absolute; top: 6px; right: 6px; width: 6px; height: 6px;
   border-radius: var(--radius-pill); background: var(--color-accent);
-}
-
-/* On the navy bar the field borrows the header control treatment. */
-  border-color: var(--color-brand-control-border);
-  background: var(--color-brand-control-bg); color: var(--color-brand-fg-muted);
 }
 
 /* body and #app both stretch so the footer can sit at the bottom of a short page. */
@@ -387,17 +386,24 @@ h1, h2, h3,
 .btn--icon { padding: 0 var(--space-5); color: var(--color-text-secondary); }
 .btn--square { width: var(--control-height); height: var(--control-height); padding: 0; justify-content: center; }
 .toolbar .btn, .timebar .btn, .sheetbar .btn { height: var(--control-height-lg); }
-.timebar .btn--square { width: var(--control-height); height: var(--control-height); }
+.timebar .btn--square { width: var(--control-height-lg); height: var(--control-height-lg); }
 
 /*
  * A press has to register visually. With a full re-render on every click, a
  * click landing on a slow frame otherwise gave no confirmation at all.
+ *
+ * The extra :is() carries one class of specificity, so a later :hover written
+ * at the same weight no longer wins on source order — seven of these ten had
+ * silently stopped responding to a press.
  */
-.btn:active, .iconbtn:active, .dd__item:active, .tabs__tab:active,
-.segmented button:active, .more-link:active, .mslist__btn:active,
-.chartlink:active, .pgrouphead__toggle:active,
-.sheetbar button:active { background: var(--color-surface-sunken); }
+:is(.btn, .iconbtn, .dd__item, .tabs__tab, .segmented button, .more-link,
+    .mslist__btn, .chartlink, .pgrouphead__toggle, .sheetbar button):active:active {
+  background: var(--color-surface-sunken);
+}
 .entry:active { box-shadow: none; }
+
+/* A chosen control still answers the pointer; without this it read as dead. */
+.btn--toggle.is-on:hover, .segmented button.is-on:hover { filter: brightness(1.12); }
 
 .btn--toggle.is-on {
   background: var(--color-toggle-on); border-color: var(--color-toggle-on);
@@ -471,6 +477,12 @@ h1, h2, h3,
   background: var(--fill-chip); color: var(--color-text);
   font-size: var(--text-base); font-weight: var(--font-semibold);
 }
+/* The glyph stays small; the hit area is the one the design system requires. */
+.chip__x, .xsearch__close {
+  min-width: var(--target-min); min-height: var(--target-min);
+  display: inline-flex; align-items: center; justify-content: center;
+}
+
 .chip__x {
   display: inline-flex; border: 0; padding: 0; background: none;
   color: var(--color-text-muted); cursor: pointer;
@@ -633,7 +645,7 @@ h1, h2, h3,
 /* Says what the window could not hold. A statement of fact, not a warning. */
 .dropped-note {
   display: flex; align-items: center; gap: var(--space-4);
-  margin: 0 0 var(--space-6);
+  margin: 0;
   font-size: var(--text-sm); color: var(--color-text-muted);
 }
 .dropped-note .icon { flex: 0 0 auto; }
@@ -755,7 +767,7 @@ h1, h2, h3,
   align-items: center; gap: var(--space-6);
   min-height: var(--row-height-list); padding: var(--space-4) var(--space-8);
   border-top: var(--border-hairline) solid var(--color-border);
-  font-size: var(--text-btn);
+  font-size: var(--text-base);
 }
 .chg--head {
   min-height: 40px; border-top: 0; background: var(--color-surface-frame);
@@ -788,7 +800,7 @@ h1, h2, h3,
   box-shadow: var(--shadow-raised);
   overflow: hidden;
 }
-.pblock + .pgroup, .pgroup + .pblock { margin-top: var(--space-12); }
+.pblock + .pgroup, .pgroup + .pblock { margin-top: var(--space-13); }
 .pblock > .prow:first-child { border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
 .pblock > .prow:last-child { border-radius: 0 0 var(--radius-lg) var(--radius-lg); border-bottom: 0; }
 .pblock > .prow:first-child > :last-child { border-top-right-radius: var(--radius-lg); }
@@ -879,7 +891,7 @@ h1, h2, h3,
 .prow--head .pcell--num.is-today,
 .gantt__quarters .is-today {
   background: var(--color-surface-sunken); color: var(--color-text-strong);
-  font-weight: var(--font-bold); box-shadow: inset 0 2px 0 var(--color-brand);
+  box-shadow: inset 0 2px 0 var(--color-brand);
 }
 
 /*
@@ -887,7 +899,7 @@ h1, h2, h3,
  * the rows in a card below it. The header sticks left so a horizontal scroll
  * never takes the label with it.
  */
-.pgroup + .pgroup { margin-top: var(--space-12); }   /* matches .gantt's gap */
+.pgroup + .pgroup { margin-top: var(--space-13); }   /* matches .gantt's gap */
 /* The whole label is the toggle — a wide, forgiving target. */
 .pgrouphead { margin: 0; padding-bottom: var(--space-6); font-weight: inherit; }
 .pgrouphead__toggle {
@@ -1074,8 +1086,13 @@ h1, h2, h3,
 .pcell--load.is-neutral { background: var(--color-neutral-bg); color: var(--color-neutral-fg); }
 
 /* Column headers that sort. The arrow only shows on the active column. */
+/*
+ * No gap by default: the direction glyph is always in the markup but empty on
+ * every unsorted column, and a flex gap is charged for an empty child — every
+ * right-aligned heading sat 4px left of the numbers it labels.
+ */
 .sorthead {
-  display: flex; align-items: center; gap: var(--space-2);
+  display: flex; align-items: center;
   width: 100%; height: 100%; min-width: 0;
   border: 0; padding: 0; background: none; cursor: pointer;
   font: inherit; color: inherit; text-align: inherit;
@@ -1083,17 +1100,12 @@ h1, h2, h3,
 .pcell--num .sorthead { justify-content: flex-end; }
 .sorthead__label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sorthead__dir { flex: 0 0 auto; color: var(--color-accent); font-size: var(--text-xs); }
+.sorthead__dir:not(:empty) { margin-left: var(--space-2); }
 .sorthead:hover .sorthead__label { color: var(--color-text-strong); text-decoration: underline; text-underline-offset: 3px; }
 .prow--head .is-sorted { color: var(--color-text-strong); }
 
 /* One legend, shared by the screen and the print sheet. */
 /* A view with nothing in it explains itself and offers the way back. */
-.empty {
-  display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-5);
-  padding: var(--space-13) var(--space-11);
-  border: var(--border-hairline) dashed var(--color-border-strong);
-  border-radius: var(--radius-lg); background: var(--color-surface);
-}
 .empty__title { margin: 0; font-size: var(--text-sub); font-weight: var(--font-semibold); color: var(--color-text-strong); }
 .empty__text { margin: 0; font-size: var(--text-base); color: var(--color-text-muted); }
 .empty .btn { margin-top: var(--space-3); }
@@ -1587,7 +1599,7 @@ h1, h2, h3,
   background: var(--color-surface-frame);
 }
 .capband__label { display: flex; align-items: center; padding-left: var(--space-6); }
-.capband__title { font-size: var(--text-base); font-weight: var(--font-bold); color: var(--color-text-strong); }
+.capband__title { font-size: var(--text-base); font-weight: var(--font-semibold); color: var(--color-text-strong); }
 .capband__cells { display: grid; grid-template-columns: repeat(var(--gantt-cols, 8), minmax(0, 1fr)); }
 .capband__cell {
   display: flex; align-items: center; justify-content: flex-end;
@@ -1704,10 +1716,14 @@ h1, h2, h3,
 .log:hover:not(.log--head) { background: var(--color-surface-hover); }
 .log--empty { display: block; padding: var(--space-11); text-align: center; color: var(--color-text-muted); }
 .log__date { color: var(--color-text-secondary); }
-.log__project { min-width: 0; }
+.log__project { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .log__project .linkbtn { font-weight: var(--font-regular); text-align: left; }
 .log__change { color: var(--color-text-secondary); }
 .log__value { font-weight: var(--font-semibold); color: var(--color-text-strong); }
+/* The size menu and the arrows answer the same question, so they sit together. */
+.log__pager { display: flex; align-items: center; gap: var(--space-5); }
+.log__pageno { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
 .log__foot {
   display: flex; align-items: center; justify-content: space-between; gap: var(--space-8);
   flex-wrap: wrap; padding: var(--space-6) var(--space-8);
@@ -1780,10 +1796,6 @@ h1, h2, h3,
    together rather than being spread across the bar. */
 .sheetbar__paper { display: flex; align-items: center; gap: var(--space-5); }
 
-.mount {
-  display: flex; justify-content: center; padding: 0;
-  overflow-x: auto;
-}
 
 .sheet {
   /* Paper is white by definition, so this one stays literal. */
@@ -1800,6 +1812,7 @@ h1, h2, h3,
  */
 .mount {
   display: flex; flex-direction: column; align-items: safe center; gap: var(--space-12);
+  overflow-x: auto;
 }
 .sheet--portrait { width: 800px; min-height: 1131px; padding: 28px 32px; }
 /* A3 is A4 turned once: the long side becomes the short side of the next size. */
@@ -1858,7 +1871,7 @@ h1, h2, h3,
   font-size: var(--sheet-lead); font-weight: var(--font-semibold);
 }
 .sheet__gantt .sheet__grouphead:first-child { margin-top: 0; }
-.sheet--landscape { width: 1100px; min-height: 778px; padding: 30px 34px; }
+.sheet--landscape { width: 1100px; min-height: 778px; padding: 28px 32px; }
 
 .sheet__head {
   display: flex; align-items: flex-start; justify-content: space-between; gap: 20px;
@@ -1997,7 +2010,7 @@ h1, h2, h3,
 .empty {
   display: flex; flex-direction: column; align-items: center; gap: var(--space-5);
   padding: var(--space-13); text-align: center;
-  border: 1px dashed var(--color-border-strong); border-radius: var(--radius-lg);
+  border: var(--border-hairline) dashed var(--color-border-strong); border-radius: var(--radius-lg);
   background: var(--color-surface); color: var(--color-text-muted);
 }
 
@@ -2007,11 +2020,10 @@ h1, h2, h3,
   padding: var(--space-5) var(--space-8);
   border-radius: var(--radius); background: var(--color-text-strong); color: var(--color-text-inverse);
   font-size: var(--text-base); box-shadow: var(--shadow-modal);
-  animation: toast-in var(--dur) var(--ease-out);
 }
+/* Class-driven, so it survives a re-render and plays exactly once. */
 .toast.is-leaving { animation: toast-out var(--dur) var(--ease-in) forwards; }
 @keyframes toast-out { to { opacity: 0; transform: translate(-50%, 8px); } }
-@keyframes toast-in { from { opacity: 0; transform: translate(-50%, 8px); } }
 
 /* ==========================================================================
    17 · Responsive

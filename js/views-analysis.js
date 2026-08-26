@@ -6,13 +6,13 @@
 import {
   data, state, t, fmtMio, totals, loadStatus, cellValue,
   personLoad, personUtilisation, filteredProjects,
-  periods, heatStep, personRows, sortPersonRows, windowEdges
+  periods, heatStep, personRows, sortPersonRows, windowEdges, pageOf, chartTone
 } from './store.js';
 
 import {
   html, raw, icons, pageHeader, pageActions, toolbar, activeFilterRow,
   columnChart, barList, kpiStrip, segmented,
-  tokenPx, tone, yearRule, pinCls, pinLeft, sortableHead, attr
+  tokenPx, yearRule, pinCls, pinLeft, sortableHead, attr, dropdown, menuRadio
 } from './ui.js';
 
 /* =============================================================================
@@ -190,7 +190,7 @@ function utilisationCard() {
     value: tot.utilisation[i],
     label: `${tot.utilisation[i]} %`,
     axis: `${q.short}/${String(q.year).slice(2)}`,
-    tone: tone(tot.utilisation[i]),
+    tone: chartTone(tot.utilisation[i]),
     title: `${q.label} — ${t(loadStatus(tot.utilisation[i]).label)}`
   }));
 
@@ -201,7 +201,7 @@ function utilisationCard() {
       value: v > 0 ? v : null,
       label: v > 0 ? `${v} %` : '—',
       axis: `${q.short}/${String(q.year).slice(2)}`,
-      tone: v > 0 ? 'ok' : 'defizit',
+      tone: v > 0 ? 'ok' : 'deficit',
       title: v > 0 ? `${q.label}: ${v} % ${t('frei')}` : `${q.label}: ${Math.abs(v)} % ${t('Defizit')}`
     };
   });
@@ -294,7 +294,7 @@ function creditPhaseCard() {
    ========================================================================== */
 
 export function renderHistory() {
-  const rows = visibleChanges();
+  const page = pageOf(visibleChanges());
 
   return html`
     ${pageHeader({
@@ -311,7 +311,7 @@ export function renderHistory() {
           <span>${t('Datum')}</span><span>${t('Person')}</span><span>${t('Projekt')}</span>
           <span>${t('Feld')}</span><span>${t('Änderung')}</span><span>${t('Wert')}</span>
         </div>
-        ${rows.length ? rows.map((c, i) => html`<div class="log ${i % 2 === 1 ? 'is-zebra' : ''}">
+        ${page.rows.length ? page.rows.map((c, i) => html`<div class="log ${i % 2 === 1 ? 'is-zebra' : ''}">
           <span class="log__date">${c.dateLabel}</span>
           <span>${c.actor}</span>
           <span class="log__project">${c.projectId
@@ -321,11 +321,31 @@ export function renderHistory() {
           <span class="log__change">${t(c.change)}</span>
           <span class="log__value">${t(c.value)}</span>
         </div>`) : html`<div class="log log--empty">${t('Keine Einträge im gesetzten Umfang.')}</div>`}
-        <div class="log__foot">
-          <span>1 – ${rows.length} ${t('von')} ${rows.length} ${t('Einträgen')}</span>
-        </div>
+        ${logFoot(page)}
       </section>
     </div></div>`;
+}
+
+/**
+ * How much of the log is on screen, and the way to the rest. The size menu and
+ * the arrows sit together because they answer the same question.
+ */
+function logFoot({ page, pages, from, rows, total }) {
+  return html`<div class="log__foot">
+    <span>${total ? `${from + 1} – ${from + rows.length}` : '0'} ${t('von')} ${total} ${t('Einträgen')}</span>
+    <div class="log__pager">
+      ${dropdown({
+        id: 'pagesize', label: `${state.pageSize} ${t('pro Seite')}`, width: 170, align: 'right',
+        body: html`${['25', '50', '100'].map(n =>
+          menuRadio(`${n} ${t('pro Seite')}`, state.pageSize === n, 'page-size', n))}`
+      })}
+      <button type="button" class="btn btn--square" data-act="page" data-val="-1"
+              ${attr(page <= 1, 'disabled')} aria-label="${t('Vorherige Seite')}">${icons.chevronLeft()}</button>
+      <span class="log__pageno">${t('Seite')} ${page} ${t('von')} ${pages}</span>
+      <button type="button" class="btn btn--square" data-act="page" data-val="1"
+              ${attr(page >= pages, 'disabled')} aria-label="${t('Nächste Seite')}">${icons.chevronRight()}</button>
+    </div>
+  </div>`;
 }
 
 /**

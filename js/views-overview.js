@@ -6,14 +6,15 @@ import {
   data, state, t, num, fmt, unitSuffix, fmtMio,
   cellValue, projectDemand, isEdited, personLoad, personUtilisation,
   totals, loadStatus, heatStep, ampel, filteredProjects, groupProjects,
-  activeFilters, milestones, milestoneStats, kpis, periods, periodValue, phaseOf, windowEdges
+  activeFilters, milestones, milestoneStats, kpis, periods, periodValue, phaseOf, windowEdges,
+  chartTone
 } from './store.js';
 
 import {
   html, raw, icons, pageHeader, pageActions, toolbar, activeFilterRow,
   timeControls, columnChart, noResults, ampelLegend,
   legendBlock, legendItem, attr,
-  tokenPx, tone, yearRule, pinCls, pinLeft, sortableHead
+  tokenPx, yearRule, pinCls, pinLeft, sortableHead
 } from './ui.js';
 
 import { fittingColumns, column } from './columns.js';
@@ -33,7 +34,7 @@ function utilisationChartRows() {
     value: tot.utilisation[i],
     label: String(tot.utilisation[i]),
     axis: `${q.short}/${String(q.year).slice(2)}`,
-    tone: tone(tot.utilisation[i]),
+    tone: chartTone(tot.utilisation[i]),
     title: `${q.label}: ${tot.utilisation[i]} % — ${loadStatus(tot.utilisation[i]).label}`
   }));
 }

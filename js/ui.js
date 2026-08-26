@@ -121,14 +121,6 @@ export function tokenPx(name) {
   return pxCache.get(name);
 }
 
-/** Tone for a utilisation percentage — the same four words in every view. */
-export function tone(pct) {
-  if (pct >= 100) return 'overload';
-  if (pct >= 95) return 'tight';
-  if (pct >= 85) return 'ok';
-  return 'free';
-}
-
 /** The rule that separates one year from the next, drawn on its first column. */
 export const yearRule = period => (period.yearStart ? 'is-yearstart' : '');
 

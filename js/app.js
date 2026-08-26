@@ -433,6 +433,8 @@ const actions = {
   sheet: (val) => setState({ sheet: val }),
   paper: (val) => setState({ paper: val, menu: null }),
   report: (val) => setState({ report: val }),
+  page: (val) => setState(s => ({ page: Math.max(1, s.page + Number(val)) })),
+  'page-size': (val) => setState({ pageSize: val, page: 1, menu: null }),
   print: () => window.print()
 };
 

@@ -951,6 +951,11 @@
       "fr": "Prochains jalons",
       "it": "Prossimi traguardi"
     },
+    "Nächste Seite": {
+      "en": "Next page",
+      "fr": "Page suivante",
+      "it": "Pagina successiva"
+    },
     "Nächster Meilenstein": {
       "en": "Next milestone",
       "fr": "Prochain jalon",
@@ -1116,6 +1121,11 @@
       "fr": "Priorité",
       "it": "Priorità"
     },
+    "pro Seite": {
+      "en": "per page",
+      "fr": "par page",
+      "it": "per pagina"
+    },
     "Prognose": {
       "en": "Forecast",
       "fr": "Prévision",
@@ -1215,6 +1225,11 @@
       "en": "since your last visit",
       "fr": "depuis votre dernière visite",
       "it": "dall'ultima visita"
+    },
+    "Seite": {
+      "en": "Page",
+      "fr": "Page",
+      "it": "Pagina"
     },
     "SIA 112": {
       "en": "SIA 112",
@@ -1435,6 +1450,11 @@
       "en": "From",
       "fr": "De",
       "it": "Da"
+    },
+    "Vorherige Seite": {
+      "en": "Previous page",
+      "fr": "Page précédente",
+      "it": "Pagina precedente"
     },
     "Vorprojekt genehmigt": {
       "en": "Preliminary design approved",

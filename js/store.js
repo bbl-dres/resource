@@ -34,7 +34,8 @@ export const VOCAB = {
   bi:      ['general', 'people'],
   report:  ['demand', 'schedule'],
   paper:   ['a4', 'a3'],
-  sheet:   ['portrait', 'landscape']
+  sheet:   ['portrait', 'landscape'],
+  pageSize: ['25', '50', '100']
 };
 
 const DEFAULT_STATE = {
@@ -72,6 +73,8 @@ const DEFAULT_STATE = {
   modal: null,             // { type: 'project'|'rebook', ... }
   footDetails: false,
   bi: 'general',           // dashboard section, see VOCAB.bi
+  page: 1,                 // change log, 1-based
+  pageSize: '25',          // see VOCAB.pageSize
   pSort: 'peak',           // person table: name | role | employment | projects | peak | q0…q7
   pDir: 'desc',
   showAll: { attention: false, milestones: false },   // landing cards, expanded
@@ -135,6 +138,7 @@ export function readUrl() {
   }
   if (isSortKey(p.get('sort'))) patch.sort = p.get('sort');
   if (p.get('from')) patch.periodOffset = Math.max(0, Number(p.get('from')) || 0);
+  if (p.get('page')) patch.page = Math.max(1, Number(p.get('page')) || 1);
   if (p.has('q')) patch.search = p.get('q');
   if (p.has('phase')) patch.phases = list('phase');
   if (p.has('lead')) patch.leads = list('lead');
@@ -161,6 +165,8 @@ export function writeUrl() {
   if (state.sortDir !== 'asc') p.set('dir', state.sortDir);
   if (state.group !== 'portfolio') p.set('group', state.group);
   if (state.tab === 'dashboard' && state.bi !== 'general') p.set('bi', state.bi);
+  if (state.tab === 'history' && state.page > 1) p.set('page', String(state.page));
+  if (state.tab === 'history' && state.pageSize !== '25') p.set('pageSize', state.pageSize);
   if (state.search) p.set('q', state.search);
   if (state.phases.length) p.set('phase', state.phases.join(','));
   if (state.leads.length) p.set('lead', state.leads.join(','));
@@ -339,6 +345,14 @@ export function loadStatus(pct) {
   if (pct >= 80) return { key: 'ok', label: 'ok' };
   return { key: 'neutral', label: 'frei' };
 }
+
+/*
+ * The column charts name the same four bands differently. Derived rather than
+ * spelled out: a second list of thresholds had already drifted — it called 82 %
+ * «frei» while the table beside it, and the printed legend, called it «ok».
+ */
+const CHART_TONE = { danger: 'overload', warn: 'tight', ok: 'ok', neutral: 'free' };
+export const chartTone = pct => CHART_TONE[loadStatus(pct).key];
 
 /** Heat step for a pensum value — blue encodes size only, never status. */
 export function heatStep(v) {
@@ -662,6 +676,20 @@ export function milestones() {
       };
     })
     .sort((a, b) => a.planDate.localeCompare(b.planDate) || a.code.localeCompare(b.code));
+}
+
+/**
+ * One page of a list, and what a footer needs to describe it.
+ *
+ * The page is clamped rather than reset: a filter that shortens the list would
+ * otherwise leave the reader on an empty page with nothing to say why.
+ */
+export function pageOf(rows) {
+  const size = Number(state.pageSize);
+  const pages = Math.max(1, Math.ceil(rows.length / size));
+  const page = Math.min(Math.max(1, state.page), pages);
+  const from = (page - 1) * size;
+  return { rows: rows.slice(from, from + size), page, pages, from, total: rows.length };
 }
 
 export function milestoneStats() {
