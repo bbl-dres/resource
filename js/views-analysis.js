@@ -327,8 +327,8 @@ export function renderVerlauf() {
             ? html`<button type="button" class="linkbtn" data-act="open-project" data-val="${c.projectId}">${c.projectLabel}</button>`
             : c.projectLabel}</span>
           <span><span class="fieldtag">${t(c.field)}</span></span>
-          <span class="log__change">${c.change}</span>
-          <span class="log__value">${c.value}</span>
+          <span class="log__change">${t(c.change)}</span>
+          <span class="log__value">${t(c.value)}</span>
         </div>`) : html`<div class="log log--empty">${t('Keine Einträge im gesetzten Umfang.')}</div>`}
         <div class="log__foot">
           <span>1 – ${rows.length} ${t('von')} ${rows.length} ${t('Einträgen')}</span>

@@ -171,7 +171,7 @@ function attentionCard(overPeople, unassigned) {
       severity: 'warn',
       name: shortName(p),
       context: `${t('keine Projektleitung')} · ${t('ab')} ${data.quarters[start]?.label ?? '—'}`,
-      value: `${Math.max(...projectDemand(p))} % ${t('offen')}`,
+      value: `${Math.max(...projectDemand(p))} %`,
       act: 'filter-lead', val: 'none'
     });
   });
@@ -198,16 +198,17 @@ function attentionCard(overPeople, unassigned) {
       <h2 class="card__title">${t('Handlungsbedarf')}<span class="count-pill">${rows.length}</span></h2>
       <p class="card__sub">${data.quarters[0].label} · ${t('öffnet die Übersicht, auf die Person gefiltert')}</p>
     </header>
-    <div class="attention">
-      ${list.map(r => html`<button type="button" class="attention__row is-${r.severity}"
-          data-act="${r.act}" data-val="${r.val}">
-        <span class="attention__main">
-          <span class="attention__name">${r.name}</span>
-          <span class="attention__ctx">${r.context}</span>
-        </span>
-        <span class="attention__value">${r.value}</span>
-      </button>`)}
-    </div>
+    <ul class="mslist mslist--metric">
+      ${list.map(r => html`<li class="mslist__row is-${r.severity}">
+        <button type="button" class="mslist__btn" data-act="${r.act}" data-val="${r.val}">
+          <span class="mslist__q">${r.value}</span>
+          <span>
+            <span class="mslist__title">${r.name}</span>
+            <span class="mslist__meta">${r.context}</span>
+          </span>
+        </button>
+      </li>`)}
+    </ul>
     ${moreLink('attention', rows.length)}
   </section>`;
 }
@@ -374,9 +375,11 @@ function pensumGrid() {
       return row;
     });
     // Each card repeats the column header, the same way a Gantt group card
-    // repeats its axis — a group has to be readable on its own.
+    // repeats its axis — a group has to be readable on its own. It closes with
+    // its own sum for the same reason, and because the printed report already
+    // does exactly that.
     return html`<section class="pgroup">${head}
-      <div class="pblock">${columnHeader(tpl, sticky, cols)}${rows}</div>
+      <div class="pblock">${columnHeader(tpl, sticky, cols)}${rows}${groupSum(g, tpl, span, cols)}</div>
     </section>`;
   });
 
@@ -503,6 +506,21 @@ function columnHeader(tpl, sticky, cols) {
 }
 
 
+/**
+ * A group closes with its own demand. Without it the only total in the table
+ * is the one at the very bottom, which answers a question about the whole
+ * selection when the reader is looking at one person or one portfolio.
+ */
+function groupSum(g, tpl, span, cols) {
+  if (!g.label) return '';
+  const values = data.quarters.map((_, q) => g.projects.reduce((a, p) => a + cellValue(p, q), 0));
+  return html`<div class="prow prow--sum prow--groupsum" style="grid-template-columns:${raw(tpl)}">
+    <div style="grid-column:span ${span}" class="prow__sumlabel is-frozen">${t('Summe')} ${g.label}</div>
+    ${cols.map(period => html`<span class="pcell pcell--sum ${yearRule(period)}">${fmt(periodValue(values, period))}</span>`)}
+    ${state.trend && html`<span></span>`}
+  </div>`;
+}
+
 function footRow(label, values, tpl, span, cols) {
   return html`<div class="prow prow--foot" style="grid-template-columns:${raw(tpl)}">
     <div style="grid-column:span ${span}" class="prow__footlabel is-frozen">${label}</div>
@@ -526,7 +544,7 @@ function projectRow(p, tpl, sticky, cols, rowIdx) {
       <button type="button" class="prow__title" data-act="open-project" data-val="${p.id}" title="${p.title}">${p.title}</button>
     </span>
     ${state.cols.phase && html`<span class="pcell pcell--phase ${pinCls(sticky, 'phase')}" style="${pinLeft(sticky, 'phase')}">
-      ${phase.label}
+      ${t(phase.label)}
     </span>`}
     ${state.cols.lead && html`<span class="pcell pcell--lead ${pinCls(sticky, 'lead')} ${!lead ? 'is-none' : ''}" style="${pinLeft(sticky, 'lead')}">${state.edit
       ? html`<button type="button" class="leadbtn" data-act="assign" data-val="${p.id}"
@@ -538,7 +556,7 @@ function projectRow(p, tpl, sticky, cols, rowIdx) {
     ${state.cols.portfolio && html`<span class="pcell pcell--text ${pinCls(sticky, 'portfolio')}" style="${pinLeft(sticky, 'portfolio')}">${t(data.portfoliosById[p.portfolio].label)}</span>`}
     ${state.cols.priority && html`<span class="pcell pcell--text ${pinCls(sticky, 'priority')}" style="${pinLeft(sticky, 'priority')}">${t(p.priority)}</span>`}
     ${state.cols.nextMs && html`<span class="pcell pcell--text ${pinCls(sticky, 'nextMs')}" style="${pinLeft(sticky, 'nextMs')}">${nextMs ? `${nextMs.code} · ${data.quarters[data.quarterIndex[nextMs.plan]].label}` : '—'}</span>`}
-    ${state.cols.credit && html`<span class="pcell pcell--credit ${pinCls(sticky, 'credit')}" style="${pinLeft(sticky, 'credit')}">${p.creditLabel}</span>`}
+    ${state.cols.credit && html`<span class="pcell pcell--credit ${pinCls(sticky, 'credit')}" style="${pinLeft(sticky, 'credit')}">${t(p.creditLabel)}</span>`}
     ${state.target && html`<span class="pcell pcell--target ${pinCls(sticky, 'target')} ${targetOver ? 'is-over' : ''}" style="${pinLeft(sticky, 'target')}">${num(p.target)}${unitSuffix()}</span>`}
 
     ${cols.map(period => {
@@ -573,7 +591,9 @@ function projectRow(p, tpl, sticky, cols, rowIdx) {
    -------------------------------------------------------------------------- */
 
 const POP_WIDTH = 308;
-const POP_HEIGHT = 340;
+/* The tallest the popover gets — the case with no lead, where the notice wraps
+   to three lines. Sized for the worst case so the flip never clips it. */
+const POP_HEIGHT = 400;
 
 export function editPopover() {
   const { projectId, q, anchor } = state.editing;
@@ -585,11 +605,6 @@ export function editPopover() {
   const newUtil = lead ? Math.round(newLoad / lead.employment * 100) : null;
   const over = newUtil != null && newUtil > 100;
 
-  const warn = lead === null
-    ? t('Keine Projektleitung zugewiesen — das Pensum kann noch auf keine Person gebucht werden.')
-    : over
-      ? `${lead.name} ${t('wäre damit bei')} ${newUtil} % — ${newUtil - 100} % ${t('über der Anstellung.')}`
-      : `${lead.name} ${t('wäre damit bei')} ${newUtil} % — ${t('innerhalb der Anstellung.')}`;
 
   // The popover is anchored to the cell in viewport space so no scroll
   // container can clip it, and flips above the row when space runs out.
@@ -617,7 +632,8 @@ export function editPopover() {
       <button type="button" class="pop__step" data-act="draft" data-val="5" aria-label="${t('Pensum erhöhen')}">${icons.plus(15)}</button>
     </div>
 
-    <p class="pop__warn ${over ? 'is-over' : lead ? 'is-ok' : 'is-none'}">${warn}</p>
+    ${lead === null && html`<p class="pop__warn is-none">${t(
+      'Keine Projektleitung zugewiesen — das Pensum kann noch auf keine Person gebucht werden.')}</p>`}
 
     <label class="pop__reason">
       <span class="pop__reasonlabel">${t('Begründung')}

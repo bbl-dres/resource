@@ -44,7 +44,7 @@ function projectCells(p, cols) {
   const row = {
     id: p.number.replace('…', ''),
     title: p.title,
-    phase: phaseOf(p.phase).label,
+    phase: t(phaseOf(p.phase).label),
     lead: lead ? lead.name : t('nicht zugewiesen'),
     ampel: t(ampel(p.leadId, 0).word),
     portfolio: t(data.portfoliosById[p.portfolio].label),

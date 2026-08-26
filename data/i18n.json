@@ -10,15 +10,13 @@
       "code": "fr",
       "label": "Français",
       "tag": "FR",
-      "available": false,
-      "note": "folgt"
+      "available": true
     },
     {
       "code": "it",
       "label": "Italiano",
       "tag": "IT",
-      "available": false,
-      "note": "folgt"
+      "available": true
     },
     {
       "code": "en",
@@ -27,173 +25,1491 @@
       "available": true
     }
   ],
-  "menuNote": "Der Prototyp übersetzt DE und EN; FR und IT folgen in der Umsetzung.",
-  "en": {
-    "Ressourcenplanung": "Resource planning",
-    "Bauprojekte": "Construction projects",
-    "Portfolio": "Portfolio",
-    "Ressourcen": "Resources",
-    "Meilensteine": "Milestones",
-    "Meilenstein": "Milestone",
-    "Übersicht": "Overview",
-    "Projekte": "Projects",
-    "Termine": "Schedule",
-    "Dashboard": "Dashboard",
-    "Verlauf": "History",
-    "Einstieg": "Start",
-    "Zur Planung": "Go to planning",
-    "Exportieren": "Export",
-    "Als CSV exportieren": "Export as CSV",
-    "Als Excel exportieren": "Export as Excel",
-    "Als PDF exportieren": "Export as PDF",
-    "Drucklayout": "Print layout",
-    "Der Export übernimmt Ansicht, Filter, Zeitraum und Einheit.": "The export keeps view, filters, period and unit.",
-    "Teilen": "Share",
-    "Link teilen": "Share link",
-    "Export mit den aktuell gesetzten Filtern": "Export with the filters currently set",
-    "Szenario": "Scenario",
-    "Bedarf erfassen": "Add demand",
-    "Projekt, ID oder Person suchen": "Search project, ID, person",
-    "Projekt, ID oder Person": "Project, ID or person",
-    "Suche": "Search",
-    "Suchfeld öffnen": "Open search field",
-    "Anmelden": "Sign in",
-    "Abmelden": "Sign out",
-    "Angemeldet": "Signed in",
-    "Sprache": "Language",
-    "Sprache wählen": "Choose language",
-    "SIA-Phase": "SIA phase",
-    "SIA 112 Phasen": "SIA 112 phases",
-    "SIA 112 · Mehrfachauswahl": "SIA 112 · multiple choice",
-    "Mehrfachauswahl · Ausgewählte oben": "Multiple choice · selected on top",
-    "Mehrfachauswahl · Bedarf Q3/2026": "Multiple choice · demand Q3/2026",
-    "Projektleitung": "Project lead",
-    "keine Projektleitung": "no project lead",
-    "nicht zugewiesen": "unassigned",
-    "— nicht zugewiesen": "— unassigned",
-    "Teilportfolio": "Location",
-    "Priorität": "Priority",
-    "Priorität hoch": "Priority high",
-    "hoch": "high",
-    "mittel": "medium",
-    "tief": "low",
-    "Aktive Filter:": "Active filters:",
-    "3 Projektierung": "3 Design",
-    "Alle Filter zurücksetzen": "Reset all filters",
-    "Alle": "All",
-    "Keine": "None",
-    "Person suchen": "Search person",
-    "Meine Projekte": "My projects",
-    "Nur Überlast": "Overload only",
-    "Nur überfällige": "Overdue only",
-    "Freie Kapazität finden": "Find free capacity",
-    "Sortieren nach": "Sort by",
-    "Sortierung: Projekt": "Sort: project",
-    "Projekt A–Z": "Project A–Z",
-    "Pensum aktuelles Quartal": "Pensum current quarter",
-    "Gruppieren nach": "Group by",
-    "Gruppieren nach: Projektleitung": "Group by: project lead",
-    "SIA-Hauptphase": "SIA main phase",
-    "Keine Gruppierung": "No grouping",
-    "Attribute": "Attributes",
-    "Attribute und Einheit": "Attributes and unit",
-    "Einheit": "Unit",
-    "Spalten": "Columns",
-    "Ampel Auslastung": "Utilisation signal",
-    "Soll-Pensum": "Target pensum",
-    "Nullwerte ausblenden": "Hide zero values",
-    "Nächster Meilenstein": "Next milestone",
-    "Plan": "Plan",
-    "Ist": "Actual",
-    "Prognose": "Forecast",
-    "Abweichung": "Variance",
-    "Status": "Status",
-    "Zeitraster": "Time scale",
-    "Jahr": "Year",
-    "Quartal": "Quarter",
-    "Monat": "Month",
-    "Heute": "Today",
-    "Gantt": "Gantt",
-    "Liste": "List",
-    "Kalender": "Calendar",
-    "Kapazität Q3/2026": "Capacity Q3/2026",
-    "Interne Kapazität Q3/2026": "Internal capacity Q3/2026",
-    "6 Personen, 2 Teilzeit": "6 people, 2 part-time",
-    "Bedarf Q3/2026": "Project demand Q3/2026",
-    "über 11 Projekte": "across 11 projects",
-    "Personen über 100 %": "People above 100 %",
-    "Personen": "People",
-    "Person": "Person",
-    "Nicht zugewiesener Bedarf": "Unassigned demand",
-    "Freie Kapazität ab Q4/2027": "Free capacity from Q4/2027",
-    "Gebundene Kredite CHF": "Committed budget CHF",
-    "Kredit": "Budget",
-    "Kredit CHF": "Budget CHF",
-    "Projekt": "Project",
-    "Bezeichnung": "Description",
-    "Pensum": "Pensum",
-    "Pensum in %": "Pensum in %",
-    "Pensum in FTE": "Pensum in FTE",
-    "Bedarf total": "Total demand",
-    "davon extern beauftragt": "of which not booked on people",
-    "davon vor Baukredit-Freigabe": "of which before budget approval",
-    "Kapazität netto, nach Abwesenheiten": "Net capacity, after absences",
-    "Auslastung": "Utilisation",
-    "Auslastung nach Quartal": "Utilisation by quarter",
-    "Auslastung nach Person": "Utilisation by person",
-    "Freie Kapazität nach Quartal": "Free capacity by quarter",
-    "Anzahl Projekte nach SIA-Phase": "Project count by SIA phase",
-    "Bedarf nach Teilportfolio": "Demand by location",
-    "Kredit nach Jahr": "Budget by year",
-    "Kredit nach SIA-Phase": "Budget by SIA phase",
-    "Überlast": "Overload",
-    "knapp": "tight",
-    "ok": "ok",
-    "voll": "full",
-    "frei": "free",
-    "Bearbeiten": "Edit",
-    "Pensum bearbeiten": "Edit pensum",
-    "Pensum erhöhen": "Increase pensum",
-    "Pensum verringern": "Decrease pensum",
-    "Übernehmen": "Apply",
-    "Abbrechen": "Cancel",
-    "Prüfen": "Review",
-    "Schliessen": "Close",
-    "An andere Person umbuchen": "Rebook to another person",
-    "Umbuchen": "Rebook",
-    "Begründung": "Reason",
-    "— Pflicht bei Überlast": "— required for overload",
-    "Bauleitung Etappe 2 vorgezogen, Freigabe Abteilungsleitung liegt vor.": "Site management stage 2 brought forward, division head approval on file.",
-    "Details anzeigen": "Show details",
-    "Details ausblenden": "Hide details",
-    "Handlungsbedarf": "Needs attention",
-    "Nächste Meilensteine": "Upcoming milestones",
-    "Letzte Änderungen": "Recent changes",
-    "Alle Änderungen anzeigen": "Show all changes",
-    "Änderung": "Change",
-    "Wert": "Value",
-    "Feld": "Field",
-    "Datum": "Date",
-    "Geändert": "Changed",
-    "Termin gehalten": "On schedule",
-    "Prototyp, fiktive Inhalte — nur zur Demonstration": "Prototype, fictional content — for demonstration only",
-    "Benachrichtigungen": "Notifications",
-    "Vorheriges Quartal": "Previous quarter",
-    "Nächstes Quartal": "Next quarter",
-    "Kontakt": "Contact",
-    "Quellcode": "Source code",
-    "API": "API",
-    "1 Strategische Planung": "1 Strategic planning",
-    "2 Vorstudien": "2 Preliminary studies",
-    "4 Ausschreibung": "4 Tendering",
-    "5 Realisierung": "5 Realisation",
-    "6 Bewirtschaftung": "6 Operation",
-    "Zoll": "Customs",
-    "Sport": "Sport",
-    "Verwaltung": "Administration",
-    "Justiz und Polizei": "Justice and police",
-    "Bildung und Forschung": "Education and research",
-    "Bauten im Ausland": "Buildings abroad",
-    "Kultur und Denkmäler": "Culture and monuments"
+  "terms": {
+    "— nicht zugewiesen": {
+      "en": "— unassigned",
+      "fr": "— non attribué",
+      "it": "— non assegnato"
+    },
+    "— optional": {
+      "en": "— optional",
+      "fr": "— facultatif",
+      "it": "— facoltativo"
+    },
+    "— Pflicht bei jeder Umbuchung": {
+      "en": "— required for every reallocation",
+      "fr": "— obligatoire pour toute réaffectation",
+      "it": "— obbligatorio per ogni riassegnazione"
+    },
+    "— Pflicht bei Überlast": {
+      "en": "— required when over capacity",
+      "fr": "— obligatoire en cas de surcharge",
+      "it": "— obbligatorio in caso di sovraccarico"
+    },
+    "▲ Projektleitung über 100 % im Quartal": {
+      "en": "▲ Project lead over 100 % in the quarter",
+      "fr": "▲ Direction de projet à plus de 100 % dans le trimestre",
+      "it": "▲ Direzione del progetto oltre il 100 % nel trimestre"
+    },
+    "1 Strategische Planung": {
+      "en": "1 Strategic planning",
+      "fr": "1 Planification stratégique",
+      "it": "1 Pianificazione strategica"
+    },
+    "11 Strat. Planung": {
+      "en": "11 Strategic planning",
+      "fr": "11 Planif. stratégique",
+      "it": "11 Pian. strategica"
+    },
+    "2 Vorstudien": {
+      "en": "2 Preliminary studies",
+      "fr": "2 Études préliminaires",
+      "it": "2 Studi preliminari"
+    },
+    "21 Machbarkeit": {
+      "en": "21 Feasibility",
+      "fr": "21 Faisabilité",
+      "it": "21 Fattibilità"
+    },
+    "22 Auswahlverfahren": {
+      "en": "22 Selection procedure",
+      "fr": "22 Procédure de sélection",
+      "it": "22 Procedura di selezione"
+    },
+    "3 Projektierung": {
+      "en": "3 Design",
+      "fr": "3 Étude du projet",
+      "it": "3 Progettazione"
+    },
+    "31 Vorprojekt": {
+      "en": "31 Preliminary design",
+      "fr": "31 Avant-projet",
+      "it": "31 Progetto preliminare"
+    },
+    "32 Bauprojekt": {
+      "en": "32 Building project",
+      "fr": "32 Projet de l'ouvrage",
+      "it": "32 Progetto dell'opera"
+    },
+    "33 Bewilligungsverf.": {
+      "en": "33 Approval procedure",
+      "fr": "33 Procédure d'autorisation",
+      "it": "33 Procedura di autorizzazione"
+    },
+    "4 Ausschreibung": {
+      "en": "4 Tendering",
+      "fr": "4 Appel d'offres",
+      "it": "4 Appalto"
+    },
+    "40 – 79 %": {
+      "en": "40 – 79 %",
+      "fr": "40 – 79 %",
+      "it": "40 – 79 %"
+    },
+    "41 Ausschreibung": {
+      "en": "41 Tendering",
+      "fr": "41 Appel d'offres",
+      "it": "41 Appalto"
+    },
+    "5 Realisierung": {
+      "en": "5 Construction",
+      "fr": "5 Réalisation",
+      "it": "5 Realizzazione"
+    },
+    "51 Ausführungsproj.": {
+      "en": "51 Detailed design",
+      "fr": "51 Projet d'exécution",
+      "it": "51 Progetto esecutivo"
+    },
+    "52 Ausführung": {
+      "en": "52 Construction",
+      "fr": "52 Exécution",
+      "it": "52 Esecuzione"
+    },
+    "53 Inbetriebnahme": {
+      "en": "53 Commissioning",
+      "fr": "53 Mise en service",
+      "it": "53 Messa in esercizio"
+    },
+    "6 Bewirtschaftung": {
+      "en": "6 Operation",
+      "fr": "6 Exploitation",
+      "it": "6 Gestione"
+    },
+    "61 Betrieb": {
+      "en": "61 Operation",
+      "fr": "61 Exploitation",
+      "it": "61 Esercizio"
+    },
+    "62 Überwachung": {
+      "en": "62 Monitoring",
+      "fr": "62 Surveillance",
+      "it": "62 Sorveglianza"
+    },
+    "63 Erhaltung": {
+      "en": "63 Maintenance",
+      "fr": "63 Maintenance",
+      "it": "63 Manutenzione"
+    },
+    "80 – 119 %": {
+      "en": "80 – 119 %",
+      "fr": "80 – 119 %",
+      "it": "80 – 119 %"
+    },
+    "ab": {
+      "en": "from",
+      "fr": "dès",
+      "it": "da"
+    },
+    "ab 120 %": {
+      "en": "120 % and above",
+      "fr": "dès 120 %",
+      "it": "dal 120 %"
+    },
+    "Abbrechen": {
+      "en": "Cancel",
+      "fr": "Annuler",
+      "it": "Annulla"
+    },
+    "Abmelden": {
+      "en": "Sign out",
+      "fr": "Se déconnecter",
+      "it": "Disconnetti"
+    },
+    "Abnahme, Inbetriebsetzung": {
+      "en": "Acceptance, commissioning",
+      "fr": "Réception, mise en service",
+      "it": "Collaudo, messa in esercizio"
+    },
+    "Absteigend": {
+      "en": "Descending",
+      "fr": "Décroissant",
+      "it": "Decrescente"
+    },
+    "Abwesenheiten": {
+      "en": "Absences",
+      "fr": "Absences",
+      "it": "Assenze"
+    },
+    "Aktive Filter:": {
+      "en": "Active filters:",
+      "fr": "Filtres actifs :",
+      "it": "Filtri attivi:"
+    },
+    "Aktuell": {
+      "en": "Current",
+      "fr": "Actuellement",
+      "it": "Attualmente"
+    },
+    "Aktuell nicht zugewiesen": {
+      "en": "Currently unassigned",
+      "fr": "Actuellement non attribué",
+      "it": "Attualmente non assegnato"
+    },
+    "Alle": {
+      "en": "All",
+      "fr": "Tous",
+      "it": "Tutti"
+    },
+    "Alle Änderungen anzeigen": {
+      "en": "Show all changes",
+      "fr": "Afficher toutes les modifications",
+      "it": "Mostra tutte le modifiche"
+    },
+    "Alle Filter zurücksetzen": {
+      "en": "Reset all filters",
+      "fr": "Réinitialiser les filtres",
+      "it": "Reimposta tutti i filtri"
+    },
+    "Allgemein": {
+      "en": "General",
+      "fr": "Général",
+      "it": "Generale"
+    },
+    "Als CSV exportieren": {
+      "en": "Export as CSV",
+      "fr": "Exporter en CSV",
+      "it": "Esporta come CSV"
+    },
+    "Als Excel exportieren": {
+      "en": "Export as Excel",
+      "fr": "Exporter en Excel",
+      "it": "Esporta come Excel"
+    },
+    "Als PDF exportieren": {
+      "en": "Export as PDF",
+      "fr": "Exporter en PDF",
+      "it": "Esporta come PDF"
+    },
+    "Ampel": {
+      "en": "Status light",
+      "fr": "Feu",
+      "it": "Semaforo"
+    },
+    "An": {
+      "en": "To",
+      "fr": "À",
+      "it": "A"
+    },
+    "An andere Person umbuchen": {
+      "en": "Reallocate to another person",
+      "fr": "Réaffecter à une autre personne",
+      "it": "Riassegnare a un'altra persona"
+    },
+    "Änderung": {
+      "en": "Change",
+      "fr": "Modification",
+      "it": "Modifica"
+    },
+    "Angemeldet": {
+      "en": "Signed in",
+      "fr": "Connecté",
+      "it": "Connesso"
+    },
+    "Ansichten": {
+      "en": "Views",
+      "fr": "Vues",
+      "it": "Viste"
+    },
+    "Anst.": {
+      "en": "Empl.",
+      "fr": "Taux",
+      "it": "Grado"
+    },
+    "Anstellung": {
+      "en": "contract",
+      "fr": "taux d'activité",
+      "it": "grado di occupazione"
+    },
+    "Anzahl Projekte nach SIA-Phase": {
+      "en": "Project count by SIA phase",
+      "fr": "Nombre de projets par phase SIA",
+      "it": "Numero di progetti per fase SIA"
+    },
+    "anzeigen": {
+      "en": "show",
+      "fr": "afficher",
+      "it": "mostra"
+    },
+    "API": {
+      "en": "API",
+      "fr": "API",
+      "it": "API"
+    },
+    "Attribute": {
+      "en": "Attributes",
+      "fr": "Attributs",
+      "it": "Attributi"
+    },
+    "Aufsteigend": {
+      "en": "Ascending",
+      "fr": "Croissant",
+      "it": "Crescente"
+    },
+    "Auslastung": {
+      "en": "Utilisation",
+      "fr": "Taux de charge",
+      "it": "Grado di utilizzo"
+    },
+    "Auslastung der Projektleitung im laufenden Quartal": {
+      "en": "Project lead utilisation in the current quarter",
+      "fr": "Taux de charge de la direction de projet au trimestre en cours",
+      "it": "Grado di utilizzo della direzione del progetto nel trimestre corrente"
+    },
+    "Auslastung nach Person": {
+      "en": "Utilisation by person",
+      "fr": "Taux de charge par personne",
+      "it": "Grado di utilizzo per persona"
+    },
+    "Auslastung nach Quartal": {
+      "en": "Utilisation by quarter",
+      "fr": "Taux de charge par trimestre",
+      "it": "Grado di utilizzo per trimestre"
+    },
+    "Auslastung: Überlast über 100 · knapp 95 – 100 · ok 80 – 94 · frei darunter": {
+      "en": "Utilisation: over capacity above 100 · tight 95 – 100 · ok 80 – 94 · free below",
+      "fr": "Taux de charge : surcharge au-dessus de 100 · juste 95 – 100 · ok 80 – 94 · libre en dessous",
+      "it": "Grado di utilizzo: sovraccarico oltre 100 · al limite 95 – 100 · ok 80 – 94 · libero sotto"
+    },
+    "Auswahl": {
+      "en": "Selection",
+      "fr": "Sélection",
+      "it": "Selezione"
+    },
+    "Balken": {
+      "en": "Bars",
+      "fr": "Barres",
+      "it": "Barre"
+    },
+    "Balken gegen die eigene Anstellung": {
+      "en": "Bars against each person's own contract",
+      "fr": "Barres rapportées au taux d'activité",
+      "it": "Barre rapportate al grado di occupazione"
+    },
+    "Baukredit bewilligt": {
+      "en": "Construction credit granted",
+      "fr": "Crédit de construction accordé",
+      "it": "Credito di costruzione concesso"
+    },
+    "Baukredit-Freigabe": {
+      "en": "Construction credit release",
+      "fr": "Libération du crédit de construction",
+      "it": "Sblocco del credito di costruzione"
+    },
+    "Bauleitung Etappe 2 vorgezogen, Freigabe Abteilungsleitung liegt vor.": {
+      "en": "Site management for stage 2 brought forward; division approval on file.",
+      "fr": "Direction des travaux de l'étape 2 avancée ; accord de la division obtenu.",
+      "it": "Direzione lavori della tappa 2 anticipata; approvazione della divisione acquisita."
+    },
+    "Bauprojekte": {
+      "en": "Construction projects",
+      "fr": "Projets de construction",
+      "it": "Progetti di costruzione"
+    },
+    "Bauprojekten": {
+      "en": "construction projects",
+      "fr": "projets de construction",
+      "it": "progetti di costruzione"
+    },
+    "Bauten im Ausland": {
+      "en": "Buildings abroad",
+      "fr": "Bâtiments à l'étranger",
+      "it": "Edifici all'estero"
+    },
+    "Bearbeiten": {
+      "en": "Edit",
+      "fr": "Modifier",
+      "it": "Modifica"
+    },
+    "Bearbeitungsmodus aktiv — Änderungen werden protokolliert": {
+      "en": "Edit mode active — changes are logged",
+      "fr": "Mode édition actif — les modifications sont journalisées",
+      "it": "Modalità modifica attiva — le modifiche vengono registrate"
+    },
+    "Bedarf": {
+      "en": "Demand",
+      "fr": "Besoin",
+      "it": "Fabbisogno"
+    },
+    "Bedarf gegen Kapazität netto": {
+      "en": "Demand against net capacity",
+      "fr": "Besoin rapporté à la capacité nette",
+      "it": "Fabbisogno rapportato alla capacità netta"
+    },
+    "Bedarf nach Teilportfolio": {
+      "en": "Demand by sub-portfolio",
+      "fr": "Besoin par sous-portefeuille",
+      "it": "Fabbisogno per sottoportafoglio"
+    },
+    "Bedarf offen": {
+      "en": "Demand open",
+      "fr": "Besoin ouvert",
+      "it": "Fabbisogno aperto"
+    },
+    "Bedarf total": {
+      "en": "Total demand",
+      "fr": "Besoin total",
+      "it": "Fabbisogno totale"
+    },
+    "Bedürfnis freigegeben": {
+      "en": "Need approved",
+      "fr": "Besoin validé",
+      "it": "Fabbisogno approvato"
+    },
+    "Begriffe": {
+      "en": "Glossary",
+      "fr": "Glossaire",
+      "it": "Glossario"
+    },
+    "Begründung": {
+      "en": "Reason",
+      "fr": "Justification",
+      "it": "Motivazione"
+    },
+    "Benachrichtigungen": {
+      "en": "Notifications",
+      "fr": "Notifications",
+      "it": "Notifiche"
+    },
+    "Bereich Bauten": {
+      "en": "Construction division",
+      "fr": "Domaine Constructions",
+      "it": "Settore Costruzioni"
+    },
+    "Bildung und Forschung": {
+      "en": "Education and research",
+      "fr": "Formation et recherche",
+      "it": "Formazione e ricerca"
+    },
+    "bis 39 %": {
+      "en": "up to 39 %",
+      "fr": "jusqu'à 39 %",
+      "it": "fino al 39 %"
+    },
+    "Blatt": {
+      "en": "Sheet",
+      "fr": "Feuille",
+      "it": "Foglio"
+    },
+    "braucht mehr Breite, als dieses Fenster bietet.": {
+      "en": "needs more width than this window offers.",
+      "fr": "a besoin de plus de largeur que cette fenêtre.",
+      "it": "necessita di più larghezza di quanta ne offra questa finestra."
+    },
+    "Bundesamt für Bauten und Logistik BBL": {
+      "en": "Federal Office for Buildings and Logistics FOBL",
+      "fr": "Office fédéral des constructions et de la logistique OFCL",
+      "it": "Ufficio federale delle costruzioni e della logistica UFCL"
+    },
+    "Das laufende Quartal ist für Änderungen gesperrt.": {
+      "en": "The current quarter is locked for changes.",
+      "fr": "Le trimestre en cours est verrouillé.",
+      "it": "Il trimestre corrente è bloccato per le modifiche."
+    },
+    "Dashboard": {
+      "en": "Dashboard",
+      "fr": "Tableau de bord",
+      "it": "Cruscotto"
+    },
+    "Dashboard ansehen": {
+      "en": "View dashboard",
+      "fr": "Voir le tableau de bord",
+      "it": "Vedi il cruscotto"
+    },
+    "Datenstand ePPM": {
+      "en": "ePPM data as of",
+      "fr": "État des données ePPM",
+      "it": "Stato dati ePPM"
+    },
+    "Datum": {
+      "en": "Date",
+      "fr": "Date",
+      "it": "Data"
+    },
+    "Dauer": {
+      "en": "Duration",
+      "fr": "Durée",
+      "it": "Durata"
+    },
+    "davon extern beauftragt": {
+      "en": "of which contracted externally",
+      "fr": "dont mandaté à l'externe",
+      "it": "di cui affidato all'esterno"
+    },
+    "davon vor Baukredit-Freigabe": {
+      "en": "of which before construction credit release",
+      "fr": "dont avant libération du crédit de construction",
+      "it": "di cui prima dello sblocco del credito di costruzione"
+    },
+    "Defizit": {
+      "en": "Deficit",
+      "fr": "Déficit",
+      "it": "Deficit"
+    },
+    "der Anstellung": {
+      "en": "of contract",
+      "fr": "du taux d'activité",
+      "it": "del grado di occupazione"
+    },
+    "Details anzeigen": {
+      "en": "Show details",
+      "fr": "Afficher les détails",
+      "it": "Mostra dettagli"
+    },
+    "Details ausblenden": {
+      "en": "Hide details",
+      "fr": "Masquer les détails",
+      "it": "Nascondi dettagli"
+    },
+    "Die aktiven Filter schliessen alle": {
+      "en": "The active filters exclude all",
+      "fr": "Les filtres actifs excluent les",
+      "it": "I filtri attivi escludono tutti i"
+    },
+    "Die API-Dokumentation konnte nicht geladen werden.": {
+      "en": "The API reference could not be loaded.",
+      "fr": "La documentation de l'API n'a pas pu être chargée.",
+      "it": "Non è stato possibile caricare la documentazione dell'API."
+    },
+    "Diese Ansicht teilen": {
+      "en": "Share this view",
+      "fr": "Partager cette vue",
+      "it": "Condividi questa vista"
+    },
+    "Drucken": {
+      "en": "Print",
+      "fr": "Imprimer",
+      "it": "Stampa"
+    },
+    "Drucklayout": {
+      "en": "Print layout",
+      "fr": "Mise en page d'impression",
+      "it": "Layout di stampa"
+    },
+    "durch": {
+      "en": "by",
+      "fr": "par",
+      "it": "da"
+    },
+    "Ein Vorgang statt zwei Transaktionen: von, an, Betrag und Zeitraum ergeben einen Verlaufseintrag mit beiden Seiten.": {
+      "en": "One operation instead of two transactions: from, to, amount and period make a single log entry carrying both sides.",
+      "fr": "Une opération au lieu de deux transactions : de, à, montant et période forment une seule entrée d'historique portant les deux côtés.",
+      "it": "Un'unica operazione invece di due transazioni: da, a, importo e periodo formano una sola voce di cronologia con entrambi i lati."
+    },
+    "Einheit": {
+      "en": "Unit",
+      "fr": "Unité",
+      "it": "Unità"
+    },
+    "Einstieg": {
+      "en": "Start",
+      "fr": "Accueil",
+      "it": "Inizio"
+    },
+    "Einträgen": {
+      "en": "entries",
+      "fr": "entrées",
+      "it": "voci"
+    },
+    "Entlastung Projektleitung gemäss Beschluss Abteilungssitzung 24.08.2026.": {
+      "en": "Relief for the project lead per division meeting decision of 24.08.2026.",
+      "fr": "Décharge de la direction de projet selon décision de la séance de division du 24.08.2026.",
+      "it": "Sgravio della direzione del progetto secondo decisione della riunione di divisione del 24.08.2026."
+    },
+    "Erstellt am": {
+      "en": "Created on",
+      "fr": "Créé le",
+      "it": "Creato il"
+    },
+    "Export fehlgeschlagen.": {
+      "en": "Export failed.",
+      "fr": "Échec de l'exportation.",
+      "it": "Esportazione non riuscita."
+    },
+    "Export mit den aktuell gesetzten Filtern": {
+      "en": "Export with the filters currently set",
+      "fr": "Exportation avec les filtres actuels",
+      "it": "Esportazione con i filtri attuali"
+    },
+    "Exportieren": {
+      "en": "Export",
+      "fr": "Exporter",
+      "it": "Esporta"
+    },
+    "Extern beauftragt": {
+      "en": "Contracted externally",
+      "fr": "Mandaté à l'externe",
+      "it": "Affidato all'esterno"
+    },
+    "Feld": {
+      "en": "Field",
+      "fr": "Champ",
+      "it": "Campo"
+    },
+    "Filter": {
+      "en": "Filter",
+      "fr": "Filtre",
+      "it": "Filtro"
+    },
+    "Filter entfernen": {
+      "en": "Remove filter",
+      "fr": "Retirer le filtre",
+      "it": "Rimuovi filtro"
+    },
+    "Fortsetzung": {
+      "en": "continued",
+      "fr": "suite",
+      "it": "continua"
+    },
+    "Fortsetzung auf dem nächsten Blatt": {
+      "en": "Continued on the next sheet",
+      "fr": "Suite sur la feuille suivante",
+      "it": "Continua sul foglio seguente"
+    },
+    "frei": {
+      "en": "free",
+      "fr": "libre",
+      "it": "libero"
+    },
+    "Freie Kapazität nach Quartal": {
+      "en": "Free capacity by quarter",
+      "fr": "Capacité libre par trimestre",
+      "it": "Capacità libera per trimestre"
+    },
+    "Freigabe steht aus": {
+      "en": "Release pending",
+      "fr": "Libération en attente",
+      "it": "Sblocco in sospeso"
+    },
+    "Geändert": {
+      "en": "Changed",
+      "fr": "Modifié",
+      "it": "Modificato"
+    },
+    "gebucht auf": {
+      "en": "booked against",
+      "fr": "imputé sur",
+      "it": "imputato su"
+    },
+    "gebundene Mittel": {
+      "en": "committed funds",
+      "fr": "fonds engagés",
+      "it": "fondi vincolati"
+    },
+    "Gebundene Mittel nach Jahr der Realisierung": {
+      "en": "Committed funds by year of construction",
+      "fr": "Fonds engagés par année de réalisation",
+      "it": "Fondi vincolati per anno di realizzazione"
+    },
+    "Gesamt": {
+      "en": "Total",
+      "fr": "Total",
+      "it": "Totale"
+    },
+    "Gesamtportfolio": {
+      "en": "Whole portfolio",
+      "fr": "Portefeuille global",
+      "it": "Portafoglio complessivo"
+    },
+    "Gruppieren nach": {
+      "en": "Group by",
+      "fr": "Grouper par",
+      "it": "Raggruppa per"
+    },
+    "Handlungsbedarf": {
+      "en": "Needs action",
+      "fr": "Action requise",
+      "it": "Interventi necessari"
+    },
+    "Hauptphase": {
+      "en": "Main phase",
+      "fr": "Phase principale",
+      "it": "Fase principale"
+    },
+    "heruntergeladen": {
+      "en": "downloaded",
+      "fr": "téléchargé",
+      "it": "scaricato"
+    },
+    "Heute": {
+      "en": "Today",
+      "fr": "Aujourd'hui",
+      "it": "Oggi"
+    },
+    "hoch": {
+      "en": "high",
+      "fr": "élevée",
+      "it": "alta"
+    },
+    "Im ePPM öffnen": {
+      "en": "Open in ePPM",
+      "fr": "Ouvrir dans ePPM",
+      "it": "Apri in ePPM"
+    },
+    "im gesetzten Umfang": {
+      "en": "in the current scope",
+      "fr": "dans le périmètre défini",
+      "it": "nell'ambito definito"
+    },
+    "Im Prototyp nicht hinterlegt.": {
+      "en": "Not implemented in the prototype.",
+      "fr": "Non implémenté dans le prototype.",
+      "it": "Non implementato nel prototipo."
+    },
+    "im Rahmen": {
+      "en": "within limits",
+      "fr": "dans les limites",
+      "it": "entro i limiti"
+    },
+    "im Soll": {
+      "en": "on target",
+      "fr": "conforme",
+      "it": "in linea"
+    },
+    "In Termine öffnen": {
+      "en": "Open in Schedule",
+      "fr": "Ouvrir dans Échéances",
+      "it": "Apri in Scadenze"
+    },
+    "innerhalb der Anstellung.": {
+      "en": "within the contract.",
+      "fr": "dans les limites du taux d'activité.",
+      "it": "entro il grado di occupazione."
+    },
+    "Jahr": {
+      "en": "Year",
+      "fr": "Année",
+      "it": "Anno"
+    },
+    "Justiz und Polizei": {
+      "en": "Justice and police",
+      "fr": "Justice et police",
+      "it": "Giustizia e polizia"
+    },
+    "Kapazität": {
+      "en": "Capacity",
+      "fr": "Capacité",
+      "it": "Capacità"
+    },
+    "Kapazität netto": {
+      "en": "Net capacity",
+      "fr": "Capacité nette",
+      "it": "Capacità netta"
+    },
+    "Kapazität netto minus gebuchtem Bedarf": {
+      "en": "Net capacity minus booked demand",
+      "fr": "Capacité nette moins besoin imputé",
+      "it": "Capacità netta meno fabbisogno imputato"
+    },
+    "Kapazität netto, nach Abwesenheiten": {
+      "en": "Net capacity, after absences",
+      "fr": "Capacité nette, après absences",
+      "it": "Capacità netta, dopo le assenze"
+    },
+    "Karte exportieren oder teilen": {
+      "en": "Export or share card",
+      "fr": "Exporter ou partager la carte",
+      "it": "Esporta o condividi la scheda"
+    },
+    "kein Gate im Zeitraum": {
+      "en": "no gate in this period",
+      "fr": "aucun jalon dans la période",
+      "it": "nessun traguardo nel periodo"
+    },
+    "keine": {
+      "en": "none",
+      "fr": "aucun",
+      "it": "nessuno"
+    },
+    "Keine": {
+      "en": "No",
+      "fr": "Aucun",
+      "it": "Nessun"
+    },
+    "Keine Einträge im gesetzten Umfang.": {
+      "en": "No entries in the current scope.",
+      "fr": "Aucune entrée dans le périmètre défini.",
+      "it": "Nessuna voce nell'ambito definito."
+    },
+    "Keine Person gefunden.": {
+      "en": "No person found.",
+      "fr": "Aucune personne trouvée.",
+      "it": "Nessuna persona trovata."
+    },
+    "keine Projektleitung": {
+      "en": "no project lead",
+      "fr": "pas de direction de projet",
+      "it": "nessuna direzione del progetto"
+    },
+    "Keine Projektleitung zugewiesen — das Pensum kann noch auf keine Person gebucht werden.": {
+      "en": "No project lead assigned — the workload cannot yet be booked to anyone.",
+      "fr": "Aucune direction de projet attribuée — la charge ne peut encore être imputée à personne.",
+      "it": "Nessuna direzione del progetto assegnata — il carico non può ancora essere imputato."
+    },
+    "Klassifizierung: intern": {
+      "en": "Classification: internal",
+      "fr": "Classification : interne",
+      "it": "Classificazione: interno"
+    },
+    "knapp": {
+      "en": "tight",
+      "fr": "juste",
+      "it": "al limite"
+    },
+    "Kontakt": {
+      "en": "Contact",
+      "fr": "Contact",
+      "it": "Contatto"
+    },
+    "Kopiert": {
+      "en": "Copied",
+      "fr": "Copié",
+      "it": "Copiato"
+    },
+    "Kredit": {
+      "en": "Credit",
+      "fr": "Crédit",
+      "it": "Credito"
+    },
+    "Kredit CHF": {
+      "en": "Credit CHF",
+      "fr": "Crédit CHF",
+      "it": "Credito CHF"
+    },
+    "Kredit freigegeben": {
+      "en": "Credit released",
+      "fr": "Crédit libéré",
+      "it": "Credito sbloccato"
+    },
+    "Kredit nach Jahr": {
+      "en": "Credit by year",
+      "fr": "Crédit par année",
+      "it": "Credito per anno"
+    },
+    "Kredit nach SIA-Phase": {
+      "en": "Credit by SIA phase",
+      "fr": "Crédit par phase SIA",
+      "it": "Credito per fase SIA"
+    },
+    "Kultur und Denkmäler": {
+      "en": "Culture and monuments",
+      "fr": "Culture et monuments",
+      "it": "Cultura e monumenti"
+    },
+    "laufendes Quartal, gesperrt": {
+      "en": "current quarter, locked",
+      "fr": "trimestre en cours, verrouillé",
+      "it": "trimestre corrente, bloccato"
+    },
+    "läuft weiter": {
+      "en": "continues",
+      "fr": "se poursuit",
+      "it": "prosegue"
+    },
+    "Letzte Änderungen": {
+      "en": "Recent changes",
+      "fr": "Dernières modifications",
+      "it": "Ultime modifiche"
+    },
+    "Link": {
+      "en": "Link",
+      "fr": "Lien",
+      "it": "Link"
+    },
+    "Link kopieren": {
+      "en": "Copy link",
+      "fr": "Copier le lien",
+      "it": "Copia link"
+    },
+    "Link teilen": {
+      "en": "Share link",
+      "fr": "Partager le lien",
+      "it": "Condividi il link"
+    },
+    "Machbarkeit bestätigt": {
+      "en": "Feasibility confirmed",
+      "fr": "Faisabilité confirmée",
+      "it": "Fattibilità confermata"
+    },
+    "Markierung": {
+      "en": "Marking",
+      "fr": "Marquage",
+      "it": "Contrassegno"
+    },
+    "Mehrfachauswahl": {
+      "en": "Multiple selection",
+      "fr": "Sélection multiple",
+      "it": "Selezione multipla"
+    },
+    "Mehrfachauswahl · Ausgewählte oben": {
+      "en": "Multiple selection · selected first",
+      "fr": "Sélection multiple · sélectionnés en tête",
+      "it": "Selezione multipla · selezionati in cima"
+    },
+    "Meilenstein": {
+      "en": "Milestone",
+      "fr": "Jalon",
+      "it": "Traguardo"
+    },
+    "Meilenstein / Gate": {
+      "en": "Milestone / gate",
+      "fr": "Jalon / gate",
+      "it": "Traguardo / gate"
+    },
+    "Methodik": {
+      "en": "Method",
+      "fr": "Méthode",
+      "it": "Metodo"
+    },
+    "Methodik und Begriffe": {
+      "en": "Method and glossary",
+      "fr": "Méthode et glossaire",
+      "it": "Metodo e glossario"
+    },
+    "Mio. CHF": {
+      "en": "m CHF",
+      "fr": "mio CHF",
+      "it": "mio CHF"
+    },
+    "Mir zugewiesen": {
+      "en": "Assigned to me",
+      "fr": "Qui me sont attribués",
+      "it": "Assegnati a me"
+    },
+    "mittel": {
+      "en": "medium",
+      "fr": "moyenne",
+      "it": "media"
+    },
+    "Monat": {
+      "en": "Month",
+      "fr": "Mois",
+      "it": "Mese"
+    },
+    "Nächste Meilensteine": {
+      "en": "Next milestones",
+      "fr": "Prochains jalons",
+      "it": "Prossimi traguardi"
+    },
+    "Nächster Meilenstein": {
+      "en": "Next milestone",
+      "fr": "Prochain jalon",
+      "it": "Prossimo traguardo"
+    },
+    "netto": {
+      "en": "net",
+      "fr": "net",
+      "it": "netto"
+    },
+    "nicht zugewiesen": {
+      "en": "unassigned",
+      "fr": "non attribué",
+      "it": "non assegnato"
+    },
+    "Nullwerte ausblenden": {
+      "en": "Hide zeros",
+      "fr": "Masquer les zéros",
+      "it": "Nascondi gli zeri"
+    },
+    "Nur Überlast": {
+      "en": "Over capacity only",
+      "fr": "Surcharge uniquement",
+      "it": "Solo sovraccarico"
+    },
+    "offen": {
+      "en": "open",
+      "fr": "ouvert",
+      "it": "aperto"
+    },
+    "öffnet die Übersicht": {
+      "en": "opens the overview",
+      "fr": "ouvre la vue d'ensemble",
+      "it": "apre la panoramica"
+    },
+    "öffnet die Übersicht, auf die Person gefiltert": {
+      "en": "opens the overview filtered to that person",
+      "fr": "ouvre la vue d'ensemble filtrée sur la personne",
+      "it": "apre la panoramica filtrata sulla persona"
+    },
+    "öffnet Meilensteine": {
+      "en": "opens milestones",
+      "fr": "ouvre les jalons",
+      "it": "apre i traguardi"
+    },
+    "ohne Filter": {
+      "en": "no filters",
+      "fr": "sans filtre",
+      "it": "senza filtri"
+    },
+    "ohne Projektleitung": {
+      "en": "no project lead",
+      "fr": "sans direction de projet",
+      "it": "senza direzione del progetto"
+    },
+    "ok": {
+      "en": "ok",
+      "fr": "ok",
+      "it": "ok"
+    },
+    "Pensum": {
+      "en": "Workload",
+      "fr": "Charge",
+      "it": "Carico"
+    },
+    "Pensum bearbeiten": {
+      "en": "Edit workload",
+      "fr": "Modifier la charge",
+      "it": "Modifica carico"
+    },
+    "Pensum erhöhen": {
+      "en": "Increase workload",
+      "fr": "Augmenter la charge",
+      "it": "Aumenta il carico"
+    },
+    "Pensum in %": {
+      "en": "Workload in %",
+      "fr": "Charge en %",
+      "it": "Carico in %"
+    },
+    "Pensum in dieser Phase": {
+      "en": "Workload in this phase",
+      "fr": "Charge dans cette phase",
+      "it": "Carico in questa fase"
+    },
+    "Pensum in FTE": {
+      "en": "Workload in FTE",
+      "fr": "Charge en EPT",
+      "it": "Carico in ETP"
+    },
+    "Pensum je Projekt und Quartal": {
+      "en": "Workload by project and quarter",
+      "fr": "Charge par projet et par trimestre",
+      "it": "Carico per progetto e trimestre"
+    },
+    "Pensum je Quartal": {
+      "en": "Workload by quarter",
+      "fr": "Charge par trimestre",
+      "it": "Carico per trimestre"
+    },
+    "Pensum übernommen": {
+      "en": "Workload applied",
+      "fr": "Charge appliquée",
+      "it": "Carico applicato"
+    },
+    "Pensum umbuchen": {
+      "en": "Reallocate workload",
+      "fr": "Réaffecter la charge",
+      "it": "Riassegna il carico"
+    },
+    "Pensum verringern": {
+      "en": "Decrease workload",
+      "fr": "Réduire la charge",
+      "it": "Riduci il carico"
+    },
+    "Person": {
+      "en": "Person",
+      "fr": "Personne",
+      "it": "Persona"
+    },
+    "Person suchen": {
+      "en": "Search person",
+      "fr": "Rechercher une personne",
+      "it": "Cerca persona"
+    },
+    "Person suchen — Name oder Kürzel": {
+      "en": "Search person — name or initials",
+      "fr": "Rechercher une personne — nom ou initiales",
+      "it": "Cerca persona — nome o sigla"
+    },
+    "Person über 100 % belegt, Überlast": {
+      "en": "Person booked over 100 %, over capacity",
+      "fr": "Personne occupée à plus de 100 %, surcharge",
+      "it": "Persona impegnata oltre il 100 %, sovraccarico"
+    },
+    "Person wählen": {
+      "en": "Choose person",
+      "fr": "Choisir une personne",
+      "it": "Scegli una persona"
+    },
+    "Personen": {
+      "en": "People",
+      "fr": "Personnes",
+      "it": "Persone"
+    },
+    "Personen über 100 %": {
+      "en": "People over 100 %",
+      "fr": "Personnes à plus de 100 %",
+      "it": "Persone oltre il 100 %"
+    },
+    "Phase": {
+      "en": "Phase",
+      "fr": "Phase",
+      "it": "Fase"
+    },
+    "Plantermin": {
+      "en": "Planned date",
+      "fr": "Date planifiée",
+      "it": "Data pianificata"
+    },
+    "Priorität": {
+      "en": "Priority",
+      "fr": "Priorité",
+      "it": "Priorità"
+    },
+    "Prognose": {
+      "en": "Forecast",
+      "fr": "Prévision",
+      "it": "Previsione"
+    },
+    "Proj.": {
+      "en": "Proj.",
+      "fr": "Proj.",
+      "it": "Prog."
+    },
+    "Projekt": {
+      "en": "Project",
+      "fr": "Projet",
+      "it": "Progetto"
+    },
+    "Projekt öffnen": {
+      "en": "Open project",
+      "fr": "Ouvrir le projet",
+      "it": "Apri progetto"
+    },
+    "Projekte": {
+      "en": "Projects",
+      "fr": "Projets",
+      "it": "Progetti"
+    },
+    "Projekte aus.": {
+      "en": "projects.",
+      "fr": "projets.",
+      "it": "progetti."
+    },
+    "Projekte im gesetzten Umfang": {
+      "en": "projects in the current scope",
+      "fr": "projets dans le périmètre défini",
+      "it": "progetti nell'ambito definito"
+    },
+    "Projektleitung": {
+      "en": "Project lead",
+      "fr": "Direction de projet",
+      "it": "Direzione del progetto"
+    },
+    "Projektleitung über 100 % im Quartal": {
+      "en": "Project lead over 100 % in the quarter",
+      "fr": "Direction de projet à plus de 100 % dans le trimestre",
+      "it": "Direzione del progetto oltre il 100 % nel trimestre"
+    },
+    "Projektleitung zuweisen": {
+      "en": "Assign project lead",
+      "fr": "Attribuer la direction de projet",
+      "it": "Assegna la direzione del progetto"
+    },
+    "Prototyp, fiktive Inhalte — nur zur Demonstration": {
+      "en": "Prototype, fictional content — for demonstration only",
+      "fr": "Prototype, contenu fictif — à des fins de démonstration",
+      "it": "Prototipo, contenuti fittizi — solo a scopo dimostrativo"
+    },
+    "Quartal": {
+      "en": "quarter",
+      "fr": "trimestre",
+      "it": "trimestre"
+    },
+    "Quartale": {
+      "en": "quarters",
+      "fr": "trimestres",
+      "it": "trimestri"
+    },
+    "Quellcode": {
+      "en": "Source code",
+      "fr": "Code source",
+      "it": "Codice sorgente"
+    },
+    "Ressourcenplanung": {
+      "en": "Resource planning",
+      "fr": "Planification des ressources",
+      "it": "Pianificazione delle risorse"
+    },
+    "Ressourcenplanung — Übersicht": {
+      "en": "Resource planning — overview",
+      "fr": "Planification des ressources — vue d'ensemble",
+      "it": "Pianificazione delle risorse — panoramica"
+    },
+    "Rolle": {
+      "en": "Role",
+      "fr": "Rôle",
+      "it": "Ruolo"
+    },
+    "Schliessen": {
+      "en": "Close",
+      "fr": "Fermer",
+      "it": "Chiudi"
+    },
+    "Schweizerische Bundesverwaltung": {
+      "en": "Swiss Federal Administration",
+      "fr": "Administration fédérale suisse",
+      "it": "Amministrazione federale svizzera"
+    },
+    "seit letztem Besuch": {
+      "en": "since your last visit",
+      "fr": "depuis votre dernière visite",
+      "it": "dall'ultima visita"
+    },
+    "SIA 112": {
+      "en": "SIA 112",
+      "fr": "SIA 112",
+      "it": "SIA 112"
+    },
+    "SIA 112 · Mehrfachauswahl": {
+      "en": "SIA 112 · multiple selection",
+      "fr": "SIA 112 · sélection multiple",
+      "it": "SIA 112 · selezione multipla"
+    },
+    "SIA-Phase": {
+      "en": "SIA phase",
+      "fr": "Phase SIA",
+      "it": "Fase SIA"
+    },
+    "SIA-Teilphase": {
+      "en": "SIA sub-phase",
+      "fr": "Sous-phase SIA",
+      "it": "Sottofase SIA"
+    },
+    "Soll": {
+      "en": "Target",
+      "fr": "Prévu",
+      "it": "Previsto"
+    },
+    "Soll-Pensum": {
+      "en": "Target workload",
+      "fr": "Charge prévue",
+      "it": "Carico previsto"
+    },
+    "Sortieren nach": {
+      "en": "Sort by",
+      "fr": "Trier par",
+      "it": "Ordina per"
+    },
+    "Sortierung": {
+      "en": "Sorting",
+      "fr": "Tri",
+      "it": "Ordinamento"
+    },
+    "Spalten": {
+      "en": "Columns",
+      "fr": "Colonnes",
+      "it": "Colonne"
+    },
+    "Spitze": {
+      "en": "Peak",
+      "fr": "Pointe",
+      "it": "Picco"
+    },
+    "Sport": {
+      "en": "Sport",
+      "fr": "Sport",
+      "it": "Sport"
+    },
+    "Sprache wählen": {
+      "en": "Choose language",
+      "fr": "Choisir la langue",
+      "it": "Scegli la lingua"
+    },
+    "Suche schliessen": {
+      "en": "Close search",
+      "fr": "Fermer la recherche",
+      "it": "Chiudi la ricerca"
+    },
+    "Suchfeld öffnen": {
+      "en": "Open search field",
+      "fr": "Ouvrir le champ de recherche",
+      "it": "Apri il campo di ricerca"
+    },
+    "Summe": {
+      "en": "Total",
+      "fr": "Total",
+      "it": "Totale"
+    },
+    "Teilen": {
+      "en": "Share",
+      "fr": "Partager",
+      "it": "Condividi"
+    },
+    "Teilportfolio": {
+      "en": "Sub-portfolio",
+      "fr": "Sous-portefeuille",
+      "it": "Sottoportafoglio"
+    },
+    "Termin": {
+      "en": "Date",
+      "fr": "Date",
+      "it": "Data"
+    },
+    "Termin gehalten": {
+      "en": "On schedule",
+      "fr": "Délai tenu",
+      "it": "Scadenza rispettata"
+    },
+    "Termin offen": {
+      "en": "Date open",
+      "fr": "Date ouverte",
+      "it": "Data aperta"
+    },
+    "Termine": {
+      "en": "Schedule",
+      "fr": "Échéances",
+      "it": "Scadenze"
+    },
+    "tief": {
+      "en": "low",
+      "fr": "faible",
+      "it": "bassa"
+    },
+    "über der Anstellung": {
+      "en": "above contract",
+      "fr": "au-dessus du taux d'activité",
+      "it": "oltre il grado di occupazione"
+    },
+    "über der Anstellung.": {
+      "en": "above contract.",
+      "fr": "au-dessus du taux d'activité.",
+      "it": "oltre il grado di occupazione."
+    },
+    "über Soll": {
+      "en": "above target",
+      "fr": "au-dessus du prévu",
+      "it": "oltre il previsto"
+    },
+    "Übergabe Bewirtschaftung": {
+      "en": "Handover to operations",
+      "fr": "Remise à l'exploitation",
+      "it": "Consegna alla gestione"
+    },
+    "Überlast": {
+      "en": "Over capacity",
+      "fr": "Surcharge",
+      "it": "Sovraccarico"
+    },
+    "Übernehmen": {
+      "en": "Apply",
+      "fr": "Appliquer",
+      "it": "Applica"
+    },
+    "Übersicht": {
+      "en": "Overview",
+      "fr": "Vue d'ensemble",
+      "it": "Panoramica"
+    },
+    "Übersicht auf diese Person filtern": {
+      "en": "Filter the overview to this person",
+      "fr": "Filtrer la vue d'ensemble sur cette personne",
+      "it": "Filtra la panoramica su questa persona"
+    },
+    "Umbuchen": {
+      "en": "Reallocate",
+      "fr": "Réaffecter",
+      "it": "Riassegna"
+    },
+    "Umfang": {
+      "en": "Scope",
+      "fr": "Périmètre",
+      "it": "Ambito"
+    },
+    "Umgebucht": {
+      "en": "Reallocated",
+      "fr": "Réaffecté",
+      "it": "Riassegnato"
+    },
+    "umgebucht auf": {
+      "en": "reallocated to",
+      "fr": "réaffecté à",
+      "it": "riassegnato a"
+    },
+    "Unter 900 px ist Planung nicht sinnvoll. Einstiegsseite, Dashboard und Verlauf sind als Lesesicht verfügbar.": {
+      "en": "Below 900 px planning is not workable. The entry page, dashboard and history remain available as a reading view.",
+      "fr": "En dessous de 900 px, la planification n'est pas praticable. La page d'accueil, le tableau de bord et l'historique restent disponibles en lecture.",
+      "it": "Sotto i 900 px la pianificazione non è praticabile. Pagina iniziale, cruscotto e cronologia restano disponibili in sola lettura."
+    },
+    "Vergabe erfolgt": {
+      "en": "Contract awarded",
+      "fr": "Adjudication effectuée",
+      "it": "Aggiudicazione effettuata"
+    },
+    "Verlauf": {
+      "en": "History",
+      "fr": "Historique",
+      "it": "Cronologia"
+    },
+    "Verlauf ansehen": {
+      "en": "View history",
+      "fr": "Voir l'historique",
+      "it": "Vedi la cronologia"
+    },
+    "verschoben": {
+      "en": "postponed",
+      "fr": "reporté",
+      "it": "rinviato"
+    },
+    "Verwaltung": {
+      "en": "Administration",
+      "fr": "Administration",
+      "it": "Amministrazione"
+    },
+    "Verzug": {
+      "en": "Delay",
+      "fr": "Retard",
+      "it": "Ritardo"
+    },
+    "von": {
+      "en": "of",
+      "fr": "sur",
+      "it": "di"
+    },
+    "Von": {
+      "en": "From",
+      "fr": "De",
+      "it": "Da"
+    },
+    "Vorprojekt genehmigt": {
+      "en": "Preliminary design approved",
+      "fr": "Avant-projet approuvé",
+      "it": "Progetto preliminare approvato"
+    },
+    "wäre damit bei": {
+      "en": "would then be at",
+      "fr": "serait alors à",
+      "it": "sarebbe quindi a"
+    },
+    "Weiter": {
+      "en": "Continue",
+      "fr": "Continuer",
+      "it": "Avanti"
+    },
+    "Weniger anzeigen": {
+      "en": "Show less",
+      "fr": "Afficher moins",
+      "it": "Mostra meno"
+    },
+    "Wert": {
+      "en": "Value",
+      "fr": "Valeur",
+      "it": "Valore"
+    },
+    "Wie die Zahlen dieses Berichts entstehen": {
+      "en": "How the figures in this report are derived",
+      "fr": "Comment les chiffres de ce rapport sont établis",
+      "it": "Come nascono le cifre di questo rapporto"
+    },
+    "Zeitraum": {
+      "en": "Period",
+      "fr": "Période",
+      "it": "Periodo"
+    },
+    "Zoll": {
+      "en": "Customs",
+      "fr": "Douane",
+      "it": "Dogana"
+    },
+    "Zugewiesen an": {
+      "en": "Assigned to",
+      "fr": "Attribué à",
+      "it": "Assegnato a"
+    },
+    "Zur Einstiegsseite": {
+      "en": "To the entry page",
+      "fr": "Vers la page d'accueil",
+      "it": "Alla pagina iniziale"
+    },
+    "Zur Einstiegsseite, ohne Filter": {
+      "en": "To the entry page, without filters",
+      "fr": "Vers la page d'accueil, sans filtre",
+      "it": "Alla pagina iniziale, senza filtri"
+    },
+    "Zur Planung": {
+      "en": "To planning",
+      "fr": "Vers la planification",
+      "it": "Alla pianificazione"
+    },
+    "Zurück": {
+      "en": "Back",
+      "fr": "Retour",
+      "it": "Indietro"
+    },
+    "Zuweisen": {
+      "en": "Assign",
+      "fr": "Attribuer",
+      "it": "Assegna"
+    },
+    "Zuweisung aufgehoben": {
+      "en": "Assignment removed",
+      "fr": "Attribution retirée",
+      "it": "Assegnazione revocata"
+    },
+    "Zuweisung aufheben": {
+      "en": "Remove assignment",
+      "fr": "Retirer l'attribution",
+      "it": "Revoca assegnazione"
+    }
   }
 }

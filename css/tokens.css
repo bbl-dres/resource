@@ -280,15 +280,17 @@
   /* ==========================================================================
      15 · Radii
      ========================================================================== */
-  --radius-xs:   1px;
-  --radius-sm:   3px;
-  --radius-md:   4px;
-  --radius-menu: 5px;
-  --radius:      6px;    /* DEFAULT — buttons, inputs, badges */
-  --radius-lg:   8px;    /* cards, popovers                   */
-  --radius-xl:   10px;
-  --radius-2xl:  12px;   /* app frame                         */
-  --radius-pill: 9999px;
+  /*
+   * A radius says what kind of thing something is, not how big it is: a mark
+   * inside a control, a control, a surface, or a thing that is round by
+   * nature. Four steps carry that. A fifth would only be a variant of one of
+   * them, and a variant reads as an inconsistency rather than a decision.
+   */
+  --radius-xs:   2px;    /* hairline detail — focus ring, sparkline, Ampel tip */
+  --radius-sm:   3px;    /* a mark inside a control — tickbox, track, bar     */
+  --radius:      6px;    /* controls — buttons, inputs, tabs, menu items      */
+  --radius-lg:   8px;    /* surfaces — cards, panels, popovers, modals        */
+  --radius-pill: 9999px; /* round by nature — avatars, badges, switches       */
 
   /* ==========================================================================
      16 · Borders, elevation, focus

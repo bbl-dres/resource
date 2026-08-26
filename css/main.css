@@ -37,7 +37,7 @@ a:hover { color: var(--color-text-link-hover); }
 
 button, input, select, textarea { font: inherit; color: inherit; }
 
-:focus-visible { outline: var(--focus-ring); outline-offset: var(--focus-ring-offset); border-radius: 2px; }
+:focus-visible { outline: var(--focus-ring); outline-offset: var(--focus-ring-offset); border-radius: var(--radius-xs); }
 /*
  * These sit inside something with overflow:hidden, which ate the whole 5px ring
  * box — .prow__title lost it entirely. Drawn inside, it survives the clip.
@@ -68,8 +68,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 /* Numbers are tabular everywhere — a system rule, not an option. */
 .kpi__value, .pcell, .capband__value, .barlist__value, .colchart__val,
 .log__date, .chg__date, .log__value, .sorthead__label, .gantt__year,
-.entry__metric, .minigrid__v,
-.attention__value { font-variant-numeric: tabular-nums; }
+.entry__metric, .minigrid__v { font-variant-numeric: tabular-nums; }
 
 /* ==========================================================================
    2 · Boot / error states
@@ -416,7 +415,7 @@ h1, h2, h3,
  */
 .btn:active, .iconbtn:active, .dd__item:active, .tabs__tab:active,
 .segmented button:active, .more-link:active, .mslist__btn:active,
-.attention__row:active, .chartlink:active, .pgrouphead__toggle:active,
+.chartlink:active, .pgrouphead__toggle:active,
 .sheetbar button:active { background: var(--color-surface-sunken); }
 .entry:active { box-shadow: none; }
 
@@ -534,7 +533,7 @@ h1, h2, h3,
 .dd__item {
   display: flex; align-items: center; gap: var(--space-5);
   width: 100%; min-height: var(--control-height); padding: var(--space-3) var(--space-5);
-  border: 0; border-radius: var(--radius-menu);
+  border: 0; border-radius: var(--radius);
   background: transparent; color: var(--color-text);
   font-size: var(--text-base); text-align: left; cursor: pointer;
 }
@@ -610,7 +609,7 @@ h1, h2, h3,
  * peers they read as four unrelated bars and cost 20px of a 800px laptop.
  */
 .toolbar + .filterbar, .filterbar + .timebar, .toolbar + .timebar,
-.filterbar + .sheetbar, .toolbar + .sheetbar { margin-top: calc(var(--space-3) - var(--space-8)); }
+.filterbar + .sheetbar, .toolbar + .sheetbar { margin-top: calc(var(--space-5) - var(--space-8)); }
 
 .toolbar {
   display: flex; align-items: center; gap: var(--space-4);
@@ -638,8 +637,13 @@ h1, h2, h3,
 .toolbar__sep { width: 1px; height: var(--space-11); background: var(--color-border); }
 .toolbar__spacer { flex: 1; }
 
+/*
+ * A text row between two rows of controls. The min-height keeps it from
+ * reading as a caption pressed against the bar above it.
+ */
 .filterbar {
   display: flex; align-items: center; gap: var(--space-5); flex-wrap: wrap;
+  min-height: var(--control-height);
   font-size: var(--text-base); color: var(--color-text-muted);
 }
 .filterbar__label { flex: 0 0 auto; }
@@ -735,22 +739,10 @@ h1, h2, h3,
 .mslist__meta { display: block; margin-top: var(--space-1); font-size: var(--text-sm); color: var(--color-text-muted); }
 .mslist__row.is-late .mslist__q, .mslist__row.is-late .mslist__meta { color: var(--color-danger-fg); }
 
-.attention { display: flex; flex-direction: column; gap: var(--space-4); }
-.attention__row {
-  display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-6);
-  width: 100%; padding: 11px var(--space-6); text-align: left;
-  border: var(--border-hairline) solid var(--color-border); border-radius: var(--radius);
-  background: var(--color-surface); cursor: pointer;
-}
-.attention__row.is-danger { box-shadow: var(--rail-danger); }
-.attention__row.is-warn { box-shadow: var(--rail-warn); }
-.attention__row:hover { background: var(--color-surface-hover); }
-.attention__main { min-width: 0; }
-.attention__name { display: block; font-size: var(--text-base); font-weight: var(--font-semibold); color: var(--color-text-strong); }
-.attention__ctx { display: block; margin-top: var(--space-1); font-size: var(--text-xs); color: var(--color-text-muted); }
-.attention__value { flex: 0 0 auto; font-size: var(--text-base); font-weight: var(--font-semibold); }
-.attention__row.is-danger .attention__value { color: var(--color-danger-fg-strong); }
-.attention__row.is-warn .attention__value { color: var(--color-warn-fg-alt); }
+/* The metric takes the stamp column, so both cards scan down one left rail. */
+.mslist--metric .mslist__q { text-align: right; font-variant-numeric: tabular-nums; }
+.mslist__row.is-danger .mslist__q { color: var(--color-danger-fg); }
+.mslist__row.is-warn .mslist__q { color: var(--color-warn-fg-alt); }
 
 .changes { display: flex; flex-direction: column; gap: var(--space-7); }
 .changes__title {
@@ -809,6 +801,8 @@ h1, h2, h3,
 .pblock + .pgroup, .pgroup + .pblock { margin-top: var(--space-12); }
 .pblock > .prow:first-child { border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
 .pblock > .prow:last-child { border-radius: 0 0 var(--radius-lg) var(--radius-lg); border-bottom: 0; }
+.pblock > .prow:first-child > :last-child { border-top-right-radius: var(--radius-lg); }
+.pblock > .prow:last-child > :last-child { border-bottom-right-radius: var(--radius-lg); }
 
 .pgrid { position: relative; overflow-x: auto; padding: 3px; margin: -3px; }
 
@@ -985,7 +979,7 @@ h1, h2, h3,
 .heat-4    { background: var(--heat-4-bg);    color: var(--heat-4-fg); }
 
 .pcell--trend { display: flex; align-items: flex-end; gap: 2px; height: 20px; padding: 0 var(--space-5); border-left: var(--border-hairline) solid var(--color-border); }
-.spark { flex: 1; min-height: 2px; border-radius: 1px; background: var(--spark-bar); }
+.spark { flex: 1; min-height: 2px; border-radius: var(--radius-xs); background: var(--spark-bar); }
 .spark[style*="height:0%"], .spark.is-empty { background: var(--spark-bar-empty); height: 2px; }
 
 .ampel {
@@ -1016,6 +1010,16 @@ h1, h2, h3,
   font-size: var(--text-base); font-weight: var(--font-semibold); color: var(--color-text-strong);
 }
 .prow--foot { min-height: 30px; font-size: var(--text-sm); color: var(--color-text-secondary); }
+/*
+ * A group sum closes its own card, so it must not read as loudly as the total
+ * that closes the table. Same structure, one step quieter, and no rule above
+ * it — the row is inside the card, not a footer under it.
+ */
+.prow--groupsum {
+  min-height: var(--row-height);
+  border-top: var(--border-hairline) solid var(--color-border);
+  font-weight: var(--font-semibold); color: var(--color-text-secondary);
+}
 .prow__sumlabel, .prow__footlabel {
   display: flex; align-items: center; gap: var(--space-5); padding-left: var(--space-6);
 }
@@ -1076,7 +1080,7 @@ h1, h2, h3,
 .legend {
   display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-5) var(--space-10);
   margin: 0; padding: var(--space-5) var(--space-7);
-  border: var(--border-hairline) solid var(--color-border); border-radius: var(--radius-md);
+  border: var(--border-hairline) solid var(--color-border); border-radius: var(--radius-lg);
   font-size: var(--text-sm); color: var(--color-text-muted);
 }
 /* Each label stays with the marks it names, whatever the row wraps to. */
@@ -1100,7 +1104,7 @@ h1, h2, h3,
   position: fixed; z-index: var(--z-modal); width: 308px;
   padding: var(--space-7);
   border: var(--border-hairline) solid var(--color-border-emphasis);
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-lg);
   background: var(--color-surface); box-shadow: var(--shadow-modal);
 }
 .pop__kicker { font-size: var(--text-sm); font-weight: var(--font-semibold); color: var(--color-text-muted); }
@@ -1166,7 +1170,7 @@ h1, h2, h3,
 }
 .modal {
   width: min(760px, 100%);
-  border-radius: var(--radius-2xl); background: var(--color-surface);
+  border-radius: var(--radius-lg); background: var(--color-surface);
   box-shadow: var(--shadow-modal); overflow: hidden;
 }
 .modal__head {
@@ -1423,9 +1427,9 @@ h1, h2, h3,
 .gantt__bar:active { filter: brightness(.92); }
 .gantt__bar:focus-visible { outline-offset: -3px; }
 
-.gantt__bar.is-first { border-left: var(--border-hairline) solid var(--color-bar-border); border-radius: var(--radius-md) 0 0 var(--radius-md); }
-.gantt__bar.is-last { border-radius: 0 var(--radius-md) var(--radius-md) 0; }
-.gantt__bar.is-first.is-last { border-radius: var(--radius-md); }
+.gantt__bar.is-first { border-left: var(--border-hairline) solid var(--color-bar-border); border-radius: var(--radius-sm) 0 0 var(--radius-sm); }
+.gantt__bar.is-last { border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+.gantt__bar.is-first.is-last { border-radius: var(--radius-sm); }
 .gantt__barlabel { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .gantt__bar.is-delay {
@@ -1730,12 +1734,11 @@ h1, h2, h3,
  */
 /* Only the title wraps; the rest clip, so no column can spill into the next. */
 .sheet__lead { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.sheet__mark { display: flex; align-items: center; justify-content: center; }
+.sheet__mark { display: flex; align-items: center; justify-content: center; overflow: visible; }
 
 .sheet__project {
   font-weight: var(--font-semibold); padding-right: var(--space-3);
-  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-  overflow: hidden; line-height: 1.25;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .sheet__muted {
   color: var(--color-text-secondary);

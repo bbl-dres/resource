@@ -98,8 +98,8 @@ function loadSwagger() {
  * A group heading costs 1.6 rows, because it carries a gap above it.
  */
 const SHEETS = [
-  { id: 'hoch', label: 'A4 hoch', caption: 'Übersicht als PDF, A4 hoch', quarters: 4, rows: 31 },
-  { id: 'quer', label: 'A4 quer', caption: 'Acht Quartale auf einem Blatt', quarters: 8, rows: 19 }
+  { id: 'hoch', label: 'A4 hoch', caption: 'Übersicht als PDF, A4 hoch', quarters: 4, rows: 34 },
+  { id: 'quer', label: 'A4 quer', caption: 'Acht Quartale auf einem Blatt', quarters: 8, rows: 21 }
 ];
 
 export function renderExport() {
@@ -139,15 +139,11 @@ export function renderExport() {
  * toolbar puts a heading before each group and a sum after it — the per-group
  * figures the grid leaves out because they belong on paper.
  */
-function sheetRows(titleChars) {
+function sheetRows() {
   const rows = [];
   for (const group of groupProjects()) {
     if (group.label) rows.push({ kind: 'group', label: group.label, count: group.projects.length });
-    group.projects.forEach(p => rows.push({
-      kind: 'project', p,
-      // A wrapped title costs 27.5px against a 22px row, not a whole second one.
-      cost: p.title.length > titleChars ? 1.3 : 1
-    }));
+    group.projects.forEach(p => rows.push({ kind: 'project', p }));
     if (group.label) rows.push({ kind: 'sum', label: group.label, projects: group.projects });
   }
   return rows;
@@ -199,19 +195,9 @@ function printSheets(sheet) {
   for (let from = 0; from < data.quarters.length; from += sheet.quarters) {
     blocks.push(data.quarters.slice(from, from + sheet.quarters).map((_, i) => from + i));
   }
-  /*
-   * How much of a title fits on one line depends on how many attributes are
-   * switched on, so the page budget has to be told — otherwise turning on four
-   * columns silently pushes every sheet past the paper.
-   */
-  const lead = sheetColumns(sheet);
-  const inner = (sheet.id === 'hoch' ? 800 - 64 : 1100 - 68);
-  const quarterW = sheet.id === 'hoch' ? 54 : 50;
-  const fixed = lead.filter(c => !c.flex).reduce((a, c) => a + c.w, 0);
-  const titleW = inner - fixed - sheet.quarters * quarterW;
-  const titleChars = Math.max(12, Math.floor(titleW / 5.4));
-
-  const pages = paginate(sheetRows(titleChars), perSheet);
+  // Every row is now one line high, so the page budget is a plain row count and
+  // switching attributes on can no longer push a sheet past the paper.
+  const pages = paginate(sheetRows(), perSheet);
   const total = blocks.length * pages.length + 1;   // + the method sheet
 
   let page = 0;
@@ -260,7 +246,7 @@ function methodSheet(sheet, { page, total }) {
     <header class="sheet__head">
       <div class="sheet__sender">
         <img src="assets/swiss-logo-flag.svg" alt="" width="24" height="26">
-        <div>${cfg.sender.map((line, i) => html`<span class="${i === 2 ? 'is-muted' : ''}">${line}</span>`)}</div>
+        <div>${cfg.sender.map((line, i) => html`<span class="${i === 2 ? 'is-muted' : ''}">${t(line)}</span>`)}</div>
       </div>
       <div class="sheet__titles">
         <div class="sheet__title">${t('Methodik und Begriffe')}</div>
@@ -268,7 +254,7 @@ function methodSheet(sheet, { page, total }) {
       </div>
       <div class="sheet__meta">
         <span>${t('Datenstand ePPM')}: ${cfg.syncedAt}</span>
-        <span>${cfg.classification}</span>
+        <span>${t(cfg.classification)}</span>
       </div>
     </header>
 
@@ -324,7 +310,7 @@ function sheetCell(col, p, lead) {
   switch (col.key) {
     case 'id': return p.number;
     case 'title': return p.title;
-    case 'phase': return phaseOf(p.phase).label;
+    case 'phase': return t(phaseOf(p.phase).label);
     case 'lead': return lead ? lead.name : t('nicht zugewiesen');
     case 'ampel': {
       const a = ampel(p.leadId, 0);
@@ -336,7 +322,7 @@ function sheetCell(col, p, lead) {
       const ms = data.milestones.items.find(m => m.projectId === p.id);
       return ms ? `${ms.code} · ${data.quarters[data.quarterIndex[ms.plan]].label}` : '—';
     }
-    case 'credit': return p.creditLabel;
+    case 'credit': return t(p.creditLabel);
     case 'target': return `${num(p.target)}${unitSuffix()}`;
     default: return '';
   }
@@ -369,7 +355,7 @@ function printSheet(sheet, { rows, all, block, page, total, last }) {
     <header class="sheet__head">
       <div class="sheet__sender">
         <img src="assets/swiss-logo-flag.svg" alt="" width="24" height="26">
-        <div>${cfg.sender.map((line, i) => html`<span class="${i === 2 ? 'is-muted' : ''}">${line}</span>`)}</div>
+        <div>${cfg.sender.map((line, i) => html`<span class="${i === 2 ? 'is-muted' : ''}">${t(line)}</span>`)}</div>
       </div>
       <div class="sheet__titles">
         <div class="sheet__title">${t(cfg.title)}</div>
@@ -380,7 +366,7 @@ function printSheet(sheet, { rows, all, block, page, total, last }) {
         <span>${t('Umfang')}: ${scopeLine(all.length)}</span>
         <span>${t('Filter')}: ${chips.length ? chips.map(c => t(c.label)).join(', ') : t('keine')}
           · ${t('Einheit')}: ${state.unit === 'fte' ? 'FTE' : 'Pensum in %'}</span>
-        <span>${cfg.classification}</span>
+        <span>${t(cfg.classification)}</span>
       </div>
     </header>
 
@@ -451,7 +437,7 @@ function printSheet(sheet, { rows, all, block, page, total, last }) {
       },
       {
         label: 'Markierung',
-        items: html`<span class="legend__item">${cfg.legend.marker}</span>
+        items: html`<span class="legend__item">${t(cfg.legend.marker)}</span>
           ${legendItem(html`<span class="legend__swatch is-nolead"></span>`, cfg.legend.noLead)}`
       },
       { label: 'Auslastung', items: html`${t(cfg.legend.thresholds).replace(/^Auslastung:\s*/, '')}` }

@@ -183,9 +183,15 @@ export async function load() {
    i18n — the mockup translates by looking up the German string.
    -------------------------------------------------------------------------- */
 
+/*
+ * The German string is the key and its own source; the file stores one entry
+ * per term with every target beside it, so a translator never holds four files
+ * open at once. An untranslated term falls back to the German rather than to a
+ * blank or a key.
+ */
 export function t(de) {
   if (state.lang === 'de' || !data.i18n) return de;
-  return data.i18n[state.lang]?.[de] ?? de;
+  return data.i18n.terms?.[de]?.[state.lang] ?? de;
 }
 
 /* -----------------------------------------------------------------------------
@@ -485,12 +491,12 @@ export function groupProjects(list = filteredProjects()) {
   };
   const labelOf = key => {
     if (state.group === 'lead') {
-      return key === 'none' ? '(nicht zugewiesen)' : data.peopleById[key].name;
+      return key === 'none' ? `(${t('nicht zugewiesen')})` : data.peopleById[key].name;
     }
     if (state.group === 'phase') {
-      return data.phases.main.find(m => m.id === key)?.label ?? key;
+      return t(data.phases.main.find(m => m.id === key)?.label ?? key);
     }
-    return data.portfoliosById[key]?.label ?? key;
+    return t(data.portfoliosById[key]?.label ?? key);
   };
 
   const buckets = new Map();

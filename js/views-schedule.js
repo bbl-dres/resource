@@ -208,8 +208,8 @@ function ganttBar(b, i, bars, cols, p) {
 
   return html`<button type="button" class="${cls}" style="grid-column:${at.from} / ${at.to}"
       data-act="open-phase" data-val="${p.id}:${b.from}"
-      title="${b.milestone ?? b.label}" aria-label="${p.title}: ${b.label}">
-    <span class="gantt__barlabel">${b.label}</span>
+      title="${t(b.milestone ?? b.label)}" aria-label="${p.title}: ${t(b.label)}">
+    <span class="gantt__barlabel">${t(b.label)}</span>
     ${b.continues && html`<span class="gantt__more" aria-hidden="true">${icons.chevronRight(13)}</span>`}
   </button>`;
 }

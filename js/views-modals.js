@@ -114,7 +114,7 @@ function milestoneModal({ milestoneId }) {
 
   const facts = [
     { term: 'Projekt', value: p.title, sub: `${p.number} · ${t(data.portfoliosById[p.portfolio].label)}` },
-    { term: 'SIA-Teilphase', value: phaseOf(m.subPhase).label },
+    { term: 'SIA-Teilphase', value: t(phaseOf(m.subPhase).label) },
     { term: 'Plantermin', value: `${planQ.label} · ${deDate(m.planDate)}` },
     {
       term: 'Prognose',
@@ -212,7 +212,7 @@ function projectModal({ projectId }) {
   const facts = [
     {
       term: 'SIA-Phase',
-      value: phase.label,
+      value: t(phase.label),
       sub: `${t('Hauptphase')} ${phase.main}`
     },
     {
@@ -229,7 +229,7 @@ function projectModal({ projectId }) {
     },
     {
       term: 'Kredit CHF',
-      value: p.creditLabel,
+      value: t(p.creditLabel),
       sub: p.preCredit ? t('Freigabe steht aus') : t('Kredit freigegeben')
     },
     {

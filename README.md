@@ -80,8 +80,9 @@ running the content through Jekyll.
   filters, grouping, sorting and time scale. The CSV is semicolon-separated with a UTF-8 BOM so
   Excel opens it natively in a de-CH locale; the `.xlsx` is a real workbook with number formats,
   column widths and the same frozen pane, written without a library.
-- **DE / EN.** The language menu translates the interface live. FR and IT are listed as pending,
-  exactly as the wireframe specifies.
+- **Four languages.** The language menu translates the interface live into English, French and
+  Italian. The dictionary is keyed by the German source string, so one entry carries all three
+  translations side by side and a translation team reads it without touching the code.
 - **URL state.** Tab, view, filters, grouping, sorting, unit and search live in the hash, so any
   view is shareable and the back button behaves.
 
@@ -149,11 +150,11 @@ Everything lives in `data/` as plain JSON.
 | `people.json` | 46 people: contracted percentage and booked load per quarter |
 | `capacity.json` | Gross capacity, absences and externally contracted work per quarter |
 | `projects.json` | 111 projects: phase, lead, budget, demand per quarter, target, Gantt bars |
-| `milestones.json` | 86 gates with planned and forecast dates and status |
+| `milestones.json` | 189 gates with planned and forecast dates and status |
 | `changes.json` | The change log — 9 hand-written entries plus 240 generated over the ten weeks before today |
 | `phases.json` | SIA 112 main phases and sub-phases |
 | `dashboard.json` | The one dashboard series that is not derivable (budget by year) |
-| `i18n.json` | The DE → EN dictionary |
+| `i18n.json` | 297 German source strings, each with its EN, FR and IT translation |
 | `print.json` | The print letterhead, legend and document metadata |
 | `openapi.json` | The OpenAPI 3.1 document Swagger UI renders |
 
@@ -179,7 +180,7 @@ utilisation   106   106   111   109   102    82    72    63  %
 ```
 
 111 projects · 46 people · 4 130 % contracted · 972 Mio. CHF committed ·
-86 gates (55 on schedule, 24 late, 7 without a date) · 3 projects without a lead.
+189 gates (130 on schedule, 51 late, 8 without a date) · 3 projects without a lead.
 
 Because these are derived, the wireframe's own headline figures (572 % demand,
 112 % utilisation, 130,9 Mio.) now describe only the eleven original projects, not
