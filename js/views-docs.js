@@ -445,7 +445,7 @@ const yearBreak = (quarters, i) => (i === 0 || quarters[i].year !== quarters[i -
 function columnHead(lead, quarters) {
   return html`<div class="sheet__row sheet__row--head">
     ${lead.map(c => html`<span class="${c.cls ?? ''}">${c.label}</span>`)}
-    ${quarters.map((q, i) => html`<span class="sheet__num ${yearBreak(quarters, i)}">${q.short}/${String(q.year).slice(2)}</span>`)}
+    ${quarters.map((q, i) => html`<span class="sheet__num sheet__period ${yearBreak(quarters, i)}">${q.short}/${String(q.year).slice(2)}</span>`)}
   </div>`;
 }
 
@@ -466,7 +466,7 @@ function printSheet(sheet, report, { rows, all, block, page, total, last }) {
 
   const span = lead.length;
   const numbers = (values, cls = '') => block.map((q, i) =>
-    html`<span class="sheet__num ${cls} ${yearBreak(quarters, i)}">${num(values[q])}</span>`);
+    html`<span class="sheet__num sheet__period ${cls} ${yearBreak(quarters, i)}">${num(values[q])}</span>`);
 
   return html`<article class="sheet sheet--${sheet.paper} sheet--${sheet.orientation}" style="--sheet-cols:${raw(cols)}">
     <header class="sheet__head">
@@ -504,7 +504,7 @@ function printSheet(sheet, report, { rows, all, block, page, total, last }) {
           const values = block.map(q => row.projects.reduce((a, p) => a + projectDemand(p)[q], 0));
           return html`<div class="sheet__row sheet__row--groupsum">
             <span style="grid-column:span ${span}">${t('Summe')} ${t(row.label)}</span>
-            ${values.map((v, i) => html`<span class="sheet__num ${yearBreak(quarters, i)}">${num(v)}</span>`)}
+            ${values.map((v, i) => html`<span class="sheet__num sheet__period ${yearBreak(quarters, i)}">${num(v)}</span>`)}
           </div>`;
         }
 
@@ -535,7 +535,7 @@ function printSheet(sheet, report, { rows, all, block, page, total, last }) {
       </div>
       <div class="sheet__row sheet__row--load">
         <span style="grid-column:span ${span}">${t('Auslastung')}</span>
-        ${block.map((q, i) => html`<span class="sheet__num is-${loadStatus(tot.utilisation[q]).key} ${yearBreak(quarters, i)}">${tot.utilisation[q]} %</span>`)}
+        ${block.map((q, i) => html`<span class="sheet__num sheet__period is-${loadStatus(tot.utilisation[q]).key} ${yearBreak(quarters, i)}">${tot.utilisation[q]} %</span>`)}
       </div>` : continuation(block.length + 5)}`}
     </div>
 

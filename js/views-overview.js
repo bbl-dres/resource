@@ -521,7 +521,7 @@ function columnHeader(tpl, sticky, cols) {
         return sortHead(col.sort, headLabel(col), pin(sticky, col.key, extra));
       })}
       ${cols.map(period => sortHead(`q${period.quarters[0]}`, period.short, {
-        cls: `pcell--num ${period.isNow ? 'is-today' : ''} ${yearRule(period)}`,
+        cls: `pcell--num pcell--period ${period.isNow ? 'is-today' : ''} ${yearRule(period)}`,
         title: period.isNow
           ? `${t('Heute')}, ${data.meta.todayLabel} — ${t('laufendes Quartal, gesperrt')}`
           : period.label

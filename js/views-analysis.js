@@ -119,7 +119,7 @@ function personSection() {
             ${personHead('projects', t('Proj.'), sticky, 'pcell--num')}
             ${personHead('peak', t('Spitze'), sticky, 'pcell--num')}
             ${cols.map((col, i) => personHead(`q${i}`, col.short,
-              sticky, `pcell--num ${col.isNow ? 'is-today' : ''} ${yearRule(col)}`))}
+              sticky, `pcell--num pcell--period ${col.isNow ? 'is-today' : ''} ${yearRule(col)}`))}
           </div>
 
           ${rows.map(r => html`<div class="prow" style="grid-template-columns:${raw(tpl)}">

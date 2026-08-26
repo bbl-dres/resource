@@ -906,6 +906,14 @@ h1, h2, h3,
  */
 .prow--head .pcell--num { text-align: right; padding-right: var(--space-5); }
 /*
+ * The time axis is centred, in both grids and in every row that spans it. A
+ * quarter column is a slot, not a number column: the label names the whole
+ * column, and the bar plan beside it has always centred its own. --num keeps
+ * meaning «a number in the master data» — Kredit CHF and Soll stay flush right,
+ * where their digits line up against each other.
+ */
+.prow--head .pcell--period { text-align: center; padding-right: 0; }
+/*
  * The current period, marked the same way in both grids and in the same colour
  * as the today line in the bar plan: now is a position, not a problem. Not on
  * paper — a printed sheet carries its date in the letterhead, and a
@@ -995,8 +1003,8 @@ h1, h2, h3,
  * means projecting down from the heading. There the rules stay.
  */
 .pcell--val {
-  justify-content: flex-end; gap: 3px;
-  height: var(--row-height); padding: 0 var(--space-5) 0 0;
+  justify-content: center; gap: 3px;
+  height: var(--row-height); padding: 0 var(--space-3);
   border: 0;
   font-weight: var(--font-regular); cursor: default;
 }
@@ -1085,7 +1093,7 @@ h1, h2, h3,
 .prow__sumlabel .linkbtn { font-size: var(--text-sm); }
 /* Full row height, or the year rule reads as a tick with air above and below. */
 .pcell--sum, .pcell--foot, .pcell--load { align-self: stretch; }
-.pcell--sum, .pcell--foot { justify-content: flex-end; padding-right: var(--space-5); }
+.pcell--sum, .pcell--foot { justify-content: center; padding-inline: var(--space-3); }
 
 /*
  * 700 is reserved for over-capacity — the comment above .pcell--val.is-warn
@@ -1099,8 +1107,8 @@ h1, h2, h3,
 }
 .prow--load .prow__sumlabel { display: flex; align-items: center; }
 .pcell--load {
-  align-items: center; justify-content: flex-end;
-  padding-right: var(--space-5);
+  align-items: center; justify-content: center;
+  padding-inline: var(--space-3);
   background: var(--color-neutral-bg); color: var(--color-neutral-fg);
 }
 .pcell--load.is-danger  { background: var(--color-danger-bg); color: var(--color-danger-fg); }
@@ -1121,6 +1129,7 @@ h1, h2, h3,
   font: inherit; color: inherit; text-align: inherit;
 }
 .pcell--num .sorthead { justify-content: flex-end; }
+.pcell--period .sorthead { justify-content: center; }
 .sorthead__label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sorthead__dir { flex: 0 0 auto; color: var(--color-accent); font-size: var(--text-xs); }
 .sorthead__dir:not(:empty) { margin-left: var(--space-2); }
@@ -1625,8 +1634,8 @@ h1, h2, h3,
 .capband__title { font-size: var(--text-base); font-weight: var(--font-semibold); color: var(--color-text-strong); }
 .capband__cells { display: grid; grid-template-columns: repeat(var(--gantt-cols, 8), minmax(0, 1fr)); }
 .capband__cell {
-  display: flex; align-items: center; justify-content: flex-end;
-  padding-right: var(--space-5);
+  display: flex; align-items: center; justify-content: center;
+  padding-inline: var(--space-3);
   background: var(--color-neutral-bg); color: var(--color-neutral-fg);
 }
 .capband__cell.is-yearstart { border-left: var(--border-hairline) solid var(--color-border); }
@@ -1951,12 +1960,14 @@ h1, h2, h3,
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 6px;
 }
 .sheet__num { text-align: right; padding-right: 6px; font-variant-numeric: tabular-nums; }
+/* Same rule as on screen: the time axis is centred, the master data is not. */
+.sheet__period { text-align: center; padding-right: 0; }
 .sheet__cell.is-yearstart, .sheet__num.is-yearstart {
   border-left: var(--border-hairline) solid var(--color-text-secondary);
 }
 .sheet__cell {
-  height: 26px; display: flex; align-items: center; justify-content: flex-end;
-  padding-right: 6px; border-left: var(--border-hairline) solid var(--color-border-subtle);
+  height: 26px; display: flex; align-items: center; justify-content: center;
+  padding-inline: 4px; border-left: var(--border-hairline) solid var(--color-border-subtle);
   font-variant-numeric: tabular-nums;
 }
 .sheet__row.is-unassigned { box-shadow: var(--rail-warn); }
