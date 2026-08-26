@@ -239,6 +239,9 @@ function sheetRows() {
  * along; the pensum sheet was charging 2.9 for something costing 2.3, which is
  * why an A0 poster broke into two pages with 111 projects that fit on one.
  */
+/* The width at which the longest project name sets in full at sheet size. */
+const SHEET_TITLE_MAX = 320;
+
 const ROW_COST = { group: 2.3, sum: 0.85, project: 1 };
 const SCHEDULE_COST = { ...ROW_COST, group: 1.95, sum: 0 };
 const rowCost = (row, cost = ROW_COST) => row.cost ?? cost[row.kind];
@@ -502,12 +505,18 @@ function printSheet(sheet, report, { rows, all, block, page, total, last }) {
   const schedule = report.id === 'schedule';
   const lead = sheetColumns(sheet);
 
-  // The bar plan needs only the two identifying columns; the rest of the width
-  // is the time axis, which it draws itself.
+  /*
+   * Every column has a ceiling, and the table is only as wide as its columns
+   * need. Left to stretch, the project name took every spare pixel: on an A0
+   * poster it ran past 3000px while the figures beside it stayed at 50. A sheet
+   * wider than the table keeps the difference as margin — readability first,
+   * and the surplus is filled by more quarters, not by fatter ones.
+   */
+  const quarter = sheet.orientation === 'portrait' ? 54 : 50;
   const cols = schedule
     ? `var(--grid-col-id) minmax(0, 1fr)`
-    : lead.map(c => (c.flex ? `minmax(${c.w}px, 1fr)` : `minmax(0, ${c.w}px)`))
-      .join(' ') + ` repeat(${block.length}, ${sheet.orientation === 'portrait' ? 54 : 50}px)`;
+    : lead.map(c => (c.flex ? `minmax(${c.w}px, ${SHEET_TITLE_MAX}px)` : `minmax(0, ${c.w}px)`))
+      .join(' ') + ` repeat(${block.length}, minmax(${quarter}px, ${quarter * 2}px))`;
 
   const span = lead.length;
   const numbers = (values, cls = '') => block.map((q, i) =>

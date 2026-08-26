@@ -1,7 +1,7 @@
 [
   {
     "id": "pr51",
-    "number": "…0051",
+    "number": "0051",
     "title": "Musterlingen, Ahornweg 4+6, Instandsetzung",
     "location": "Musterlingen, Ahornweg 4+6",
     "kind": "Instandsetzung",
@@ -53,7 +53,7 @@
   },
   {
     "id": "pr12",
-    "number": "…0012",
+    "number": "0012",
     "title": "Beispielstadt, Place de l’Avenir 10, Unterhalt",
     "location": "Beispielstadt, Place de l’Avenir 10",
     "kind": "Unterhalt",
@@ -106,7 +106,7 @@
   },
   {
     "id": "pr06",
-    "number": "…0006",
+    "number": "0006",
     "title": "Beispielhofen, Mühleweg 6, Statik / Erdbeben",
     "location": "Beispielhofen, Mühleweg 6",
     "kind": "Statik / Erdbeben",
@@ -159,7 +159,7 @@
   },
   {
     "id": "pr57",
-    "number": "…0057",
+    "number": "0057",
     "title": "Musterlingen, Werkhof Ost, Teilsanierung",
     "location": "Musterlingen, Werkhof Ost",
     "kind": "Teilsanierung",
@@ -211,7 +211,7 @@
   },
   {
     "id": "pr66",
-    "number": "…0066",
+    "number": "0066",
     "title": "Musterlingen, Hauptstrasse 118, Instandsetzung",
     "location": "Musterlingen, Hauptstrasse 118",
     "kind": "Instandsetzung",
@@ -251,7 +251,7 @@
   },
   {
     "id": "pr44",
-    "number": "…0044",
+    "number": "0044",
     "title": "Musterbiel, Industriestrasse 22, Gesamtsanierung",
     "location": "Musterbiel, Industriestrasse 22",
     "kind": "Gesamtsanierung",
@@ -297,7 +297,7 @@
   },
   {
     "id": "pr03",
-    "number": "…0003",
+    "number": "0003",
     "title": "Beispielgrund, Via Sempione 3, Kauf",
     "location": "Beispielgrund, Via Sempione 3",
     "kind": "Kauf",
@@ -333,7 +333,7 @@
   },
   {
     "id": "pr10",
-    "number": "…0010",
+    "number": "0010",
     "title": "Musterthal, Seestrasse 95, Badanlage",
     "location": "Musterthal, Seestrasse 95",
     "kind": "Badanlage",
@@ -367,7 +367,7 @@
   },
   {
     "id": "pr26",
-    "number": "…0026",
+    "number": "0026",
     "title": "Beispielbach, Via Motta 14, Mehrzweckbau",
     "location": "Beispielbach, Via Motta 14",
     "kind": "Mehrzweckbau",
@@ -414,7 +414,7 @@
   },
   {
     "id": "pr39",
-    "number": "…0039",
+    "number": "0039",
     "title": "Beispielheim, Aussenstelle, Alternativobjekt",
     "location": "Beispielheim, Aussenstelle",
     "kind": "Alternativobjekt",
@@ -455,7 +455,7 @@
   },
   {
     "id": "pr53",
-    "number": "…0053",
+    "number": "0053",
     "title": "Musterlingen, Arealentwicklung Nord",
     "location": "Musterlingen, Arealentwicklung Nord",
     "kind": "Arealentwicklung",
@@ -490,7 +490,7 @@
   },
   {
     "id": "pr100",
-    "number": "…2946",
+    "number": "2946",
     "title": "Beispielgrund, Industriestrasse 15, Aussenanlagen",
     "location": "Beispielgrund, Industriestrasse 15",
     "kind": "Aussenanlagen",
@@ -548,7 +548,7 @@
   },
   {
     "id": "pr101",
-    "number": "…1664",
+    "number": "1664",
     "title": "Beispielwil, Via Sempione 54, Ersatzneubau",
     "location": "Beispielwil, Via Sempione 54",
     "kind": "Ersatzneubau",
@@ -605,7 +605,7 @@
   },
   {
     "id": "pr102",
-    "number": "…8491",
+    "number": "8491",
     "title": "Musterdorf, Alte Landstrasse 32+42, Dachsanierung",
     "location": "Musterdorf, Alte Landstrasse 32+42",
     "kind": "Dachsanierung",
@@ -656,7 +656,7 @@
   },
   {
     "id": "pr103",
-    "number": "…9894",
+    "number": "9894",
     "title": "Musterbiel, Kasernenstrasse 31, Fassadensanierung",
     "location": "Musterbiel, Kasernenstrasse 31",
     "kind": "Fassadensanierung",
@@ -701,7 +701,7 @@
   },
   {
     "id": "pr104",
-    "number": "…1672",
+    "number": "1672",
     "title": "Musterau, Via Sempione 50, Gesamtsanierung",
     "location": "Musterau, Via Sempione 50",
     "kind": "Gesamtsanierung",
@@ -759,7 +759,7 @@
   },
   {
     "id": "pr105",
-    "number": "…4968",
+    "number": "4968",
     "title": "Beispielau, Amtshausgasse 83, Teilsanierung",
     "location": "Beispielau, Amtshausgasse 83",
     "kind": "Teilsanierung",
@@ -816,7 +816,7 @@
   },
   {
     "id": "pr106",
-    "number": "…5790",
+    "number": "5790",
     "title": "Beispielwil, Feldweg 32+57, Unterhalt",
     "location": "Beispielwil, Feldweg 32+57",
     "kind": "Unterhalt",
@@ -867,7 +867,7 @@
   },
   {
     "id": "pr107",
-    "number": "…3828",
+    "number": "3828",
     "title": "Beispielau, Talstrasse 32, Neubau",
     "location": "Beispielau, Talstrasse 32",
     "kind": "Neubau",
@@ -918,7 +918,7 @@
   },
   {
     "id": "pr108",
-    "number": "…2265",
+    "number": "2265",
     "title": "Musteregg, Seestrasse 20, Umbau",
     "location": "Musteregg, Seestrasse 20",
     "kind": "Umbau",
@@ -975,7 +975,7 @@
   },
   {
     "id": "pr109",
-    "number": "…6708",
+    "number": "6708",
     "title": "Musterdorf, Quai du Lac 28, Unterhalt",
     "location": "Musterdorf, Quai du Lac 28",
     "kind": "Unterhalt",
@@ -1020,7 +1020,7 @@
   },
   {
     "id": "pr110",
-    "number": "…7935",
+    "number": "7935",
     "title": "Beispielbach, Werkhof West 9, Fassadensanierung",
     "location": "Beispielbach, Werkhof West 9",
     "kind": "Fassadensanierung",
@@ -1077,7 +1077,7 @@
   },
   {
     "id": "pr111",
-    "number": "…3670",
+    "number": "3670",
     "title": "Beispielhofen, Ringstrasse 93, Instandsetzung",
     "location": "Beispielhofen, Ringstrasse 93",
     "kind": "Instandsetzung",
@@ -1128,7 +1128,7 @@
   },
   {
     "id": "pr112",
-    "number": "…4737",
+    "number": "4737",
     "title": "Musterthal, Mühleweg 29, Instandsetzung",
     "location": "Musterthal, Mühleweg 29",
     "kind": "Instandsetzung",
@@ -1154,7 +1154,7 @@
   },
   {
     "id": "pr113",
-    "number": "…5294",
+    "number": "5294",
     "title": "Musterberg, Via Motta 9, Instandsetzung",
     "location": "Musterberg, Via Motta 9",
     "kind": "Instandsetzung",
@@ -1211,7 +1211,7 @@
   },
   {
     "id": "pr114",
-    "number": "…9928",
+    "number": "9928",
     "title": "Mustersee, Avenue de la Gare 46, Gesamtsanierung",
     "location": "Mustersee, Avenue de la Gare 46",
     "kind": "Gesamtsanierung",
@@ -1244,7 +1244,7 @@
   },
   {
     "id": "pr115",
-    "number": "…2050",
+    "number": "2050",
     "title": "Beispielbrunn, Mühleweg 69, Haustechnik",
     "location": "Beispielbrunn, Mühleweg 69",
     "kind": "Haustechnik",
@@ -1283,7 +1283,7 @@
   },
   {
     "id": "pr116",
-    "number": "…0697",
+    "number": "0697",
     "title": "Beispielbach, Rue des Alpes 26+57, Energetische Sanierung",
     "location": "Beispielbach, Rue des Alpes 26+57",
     "kind": "Energetische Sanierung",
@@ -1316,7 +1316,7 @@
   },
   {
     "id": "pr117",
-    "number": "…1554",
+    "number": "1554",
     "title": "Beispielegg, Rebbergweg 34+41, Brandschutz",
     "location": "Beispielegg, Rebbergweg 34+41",
     "kind": "Brandschutz",
@@ -1379,7 +1379,7 @@
   },
   {
     "id": "pr118",
-    "number": "…7264",
+    "number": "7264",
     "title": "Beispielbach, Hauptstrasse 5, Gesamtsanierung",
     "location": "Beispielbach, Hauptstrasse 5",
     "kind": "Gesamtsanierung",
@@ -1436,7 +1436,7 @@
   },
   {
     "id": "pr119",
-    "number": "…7030",
+    "number": "7030",
     "title": "Musterwil, Alte Landstrasse 37, Teilsanierung",
     "location": "Musterwil, Alte Landstrasse 37",
     "kind": "Teilsanierung",
@@ -1475,7 +1475,7 @@
   },
   {
     "id": "pr120",
-    "number": "…9032",
+    "number": "9032",
     "title": "Beispielstadt, Via Motta 65, Mehrzweckbau",
     "location": "Beispielstadt, Via Motta 65",
     "kind": "Mehrzweckbau",
@@ -1526,7 +1526,7 @@
   },
   {
     "id": "pr121",
-    "number": "…4606",
+    "number": "4606",
     "title": "Musterthal, Industriestrasse 66, Fassadensanierung",
     "location": "Musterthal, Industriestrasse 66",
     "kind": "Fassadensanierung",
@@ -1577,7 +1577,7 @@
   },
   {
     "id": "pr122",
-    "number": "…0882",
+    "number": "0882",
     "title": "Beispielhofen, Ringstrasse 96, Gesamtsanierung",
     "location": "Beispielhofen, Ringstrasse 96",
     "kind": "Gesamtsanierung",
@@ -1635,7 +1635,7 @@
   },
   {
     "id": "pr123",
-    "number": "…7910",
+    "number": "7910",
     "title": "Musterthal, Hauptstrasse 56, Neubau",
     "location": "Musterthal, Hauptstrasse 56",
     "kind": "Neubau",
@@ -1693,7 +1693,7 @@
   },
   {
     "id": "pr124",
-    "number": "…6156",
+    "number": "6156",
     "title": "Musterbiel, Seestrasse 26, Gesamtsanierung",
     "location": "Musterbiel, Seestrasse 26",
     "kind": "Gesamtsanierung",
@@ -1750,7 +1750,7 @@
   },
   {
     "id": "pr125",
-    "number": "…2348",
+    "number": "2348",
     "title": "Beispielhofen, Lindenweg 37, Statik / Erdbeben",
     "location": "Beispielhofen, Lindenweg 37",
     "kind": "Statik / Erdbeben",
@@ -1789,7 +1789,7 @@
   },
   {
     "id": "pr126",
-    "number": "…0576",
+    "number": "0576",
     "title": "Musterhofen, Alte Landstrasse 30, Mehrzweckbau",
     "location": "Musterhofen, Alte Landstrasse 30",
     "kind": "Mehrzweckbau",
@@ -1846,7 +1846,7 @@
   },
   {
     "id": "pr127",
-    "number": "…6387",
+    "number": "6387",
     "title": "Beispielstadt, Quai du Lac 4, Haustechnik",
     "location": "Beispielstadt, Quai du Lac 4",
     "kind": "Haustechnik",
@@ -1885,7 +1885,7 @@
   },
   {
     "id": "pr128",
-    "number": "…3944",
+    "number": "3944",
     "title": "Beispielgrund, Seestrasse 91, Mehrzweckbau",
     "location": "Beispielgrund, Seestrasse 91",
     "kind": "Mehrzweckbau",
@@ -1924,7 +1924,7 @@
   },
   {
     "id": "pr129",
-    "number": "…3209",
+    "number": "3209",
     "title": "Musteregg, Alte Landstrasse 12, Statik / Erdbeben",
     "location": "Musteregg, Alte Landstrasse 12",
     "kind": "Statik / Erdbeben",
@@ -1975,7 +1975,7 @@
   },
   {
     "id": "pr130",
-    "number": "…2369",
+    "number": "2369",
     "title": "Musterbach, Hauptstrasse 44, Barrierefreiheit",
     "location": "Musterbach, Hauptstrasse 44",
     "kind": "Barrierefreiheit",
@@ -2014,7 +2014,7 @@
   },
   {
     "id": "pr131",
-    "number": "…4456",
+    "number": "4456",
     "title": "Beispielau, Sonnhalde 61, Ersatzneubau",
     "location": "Beispielau, Sonnhalde 61",
     "kind": "Ersatzneubau",
@@ -2059,7 +2059,7 @@
   },
   {
     "id": "pr132",
-    "number": "…5534",
+    "number": "5534",
     "title": "Beispielstadt, Feldweg 5, Haustechnik",
     "location": "Beispielstadt, Feldweg 5",
     "kind": "Haustechnik",
@@ -2116,7 +2116,7 @@
   },
   {
     "id": "pr133",
-    "number": "…6737",
+    "number": "6737",
     "title": "Beispielau, Bahnhofstrasse 17, Instandsetzung",
     "location": "Beispielau, Bahnhofstrasse 17",
     "kind": "Instandsetzung",
@@ -2155,7 +2155,7 @@
   },
   {
     "id": "pr134",
-    "number": "…2570",
+    "number": "2570",
     "title": "Musterhofen, Rue des Alpes 9, Gesamtsanierung",
     "location": "Musterhofen, Rue des Alpes 9",
     "kind": "Gesamtsanierung",
@@ -2206,7 +2206,7 @@
   },
   {
     "id": "pr135",
-    "number": "…8134",
+    "number": "8134",
     "title": "Beispielstadt, Alte Landstrasse 65, Haustechnik",
     "location": "Beispielstadt, Alte Landstrasse 65",
     "kind": "Haustechnik",
@@ -2257,7 +2257,7 @@
   },
   {
     "id": "pr136",
-    "number": "…7084",
+    "number": "7084",
     "title": "Musteregg, Talstrasse 35+49, Statik / Erdbeben",
     "location": "Musteregg, Talstrasse 35+49",
     "kind": "Statik / Erdbeben",
@@ -2296,7 +2296,7 @@
   },
   {
     "id": "pr137",
-    "number": "…6518",
+    "number": "6518",
     "title": "Beispielstadt, Via Sempione 10, Teilsanierung",
     "location": "Beispielstadt, Via Sempione 10",
     "kind": "Teilsanierung",
@@ -2322,7 +2322,7 @@
   },
   {
     "id": "pr138",
-    "number": "…3580",
+    "number": "3580",
     "title": "Musterlingen, Chemin du Parc 25+44, Aussenanlagen",
     "location": "Musterlingen, Chemin du Parc 25+44",
     "kind": "Aussenanlagen",
@@ -2367,7 +2367,7 @@
   },
   {
     "id": "pr139",
-    "number": "…4675",
+    "number": "4675",
     "title": "Beispielwil, Industriestrasse 2+48, Gesamtsanierung",
     "location": "Beispielwil, Industriestrasse 2+48",
     "kind": "Gesamtsanierung",
@@ -2406,7 +2406,7 @@
   },
   {
     "id": "pr140",
-    "number": "…6238",
+    "number": "6238",
     "title": "Musterried, Feldweg 18, Umbau",
     "location": "Musterried, Feldweg 18",
     "kind": "Umbau",
@@ -2451,7 +2451,7 @@
   },
   {
     "id": "pr141",
-    "number": "…5539",
+    "number": "5539",
     "title": "Beispielhofen, Ringstrasse 15, Instandsetzung",
     "location": "Beispielhofen, Ringstrasse 15",
     "kind": "Instandsetzung",
@@ -2484,7 +2484,7 @@
   },
   {
     "id": "pr142",
-    "number": "…6461",
+    "number": "6461",
     "title": "Beispielstadt, Via Motta 76, Neubau",
     "location": "Beispielstadt, Via Motta 76",
     "kind": "Neubau",
@@ -2535,7 +2535,7 @@
   },
   {
     "id": "pr143",
-    "number": "…0439",
+    "number": "0439",
     "title": "Musterberg, Quai du Lac 41, Unterhalt",
     "location": "Musterberg, Quai du Lac 41",
     "kind": "Unterhalt",
@@ -2574,7 +2574,7 @@
   },
   {
     "id": "pr144",
-    "number": "…8923",
+    "number": "8923",
     "title": "Musterwil, Werkhof Ost 41, Fassadensanierung",
     "location": "Musterwil, Werkhof Ost 41",
     "kind": "Fassadensanierung",
@@ -2625,7 +2625,7 @@
   },
   {
     "id": "pr145",
-    "number": "…9621",
+    "number": "9621",
     "title": "Beispielried, Mühleweg 36+60, Barrierefreiheit",
     "location": "Beispielried, Mühleweg 36+60",
     "kind": "Barrierefreiheit",
@@ -2670,7 +2670,7 @@
   },
   {
     "id": "pr146",
-    "number": "…4004",
+    "number": "4004",
     "title": "Musterhofen, Ahornweg 71, Arealentwicklung",
     "location": "Musterhofen, Ahornweg 71",
     "kind": "Arealentwicklung",
@@ -2709,7 +2709,7 @@
   },
   {
     "id": "pr147",
-    "number": "…4175",
+    "number": "4175",
     "title": "Musterbiel, Via Cantonale 21+52, Instandsetzung",
     "location": "Musterbiel, Via Cantonale 21+52",
     "kind": "Instandsetzung",
@@ -2748,7 +2748,7 @@
   },
   {
     "id": "pr148",
-    "number": "…3628",
+    "number": "3628",
     "title": "Musterdorf, Seestrasse 89, Unterhalt",
     "location": "Musterdorf, Seestrasse 89",
     "kind": "Unterhalt",
@@ -2806,7 +2806,7 @@
   },
   {
     "id": "pr149",
-    "number": "…8115",
+    "number": "8115",
     "title": "Mustersee, Werkhof West 50, Erweiterung",
     "location": "Mustersee, Werkhof West 50",
     "kind": "Erweiterung",
@@ -2851,7 +2851,7 @@
   },
   {
     "id": "pr150",
-    "number": "…5310",
+    "number": "5310",
     "title": "Musterberg, Industriestrasse 60, Gesamtsanierung",
     "location": "Musterberg, Industriestrasse 60",
     "kind": "Gesamtsanierung",
@@ -2909,7 +2909,7 @@
   },
   {
     "id": "pr151",
-    "number": "…5557",
+    "number": "5557",
     "title": "Beispielwil, Talstrasse 62, Neubau",
     "location": "Beispielwil, Talstrasse 62",
     "kind": "Neubau",
@@ -2967,7 +2967,7 @@
   },
   {
     "id": "pr152",
-    "number": "…1605",
+    "number": "1605",
     "title": "Beispielbrunn, Kasernenstrasse 33+56, Teilsanierung",
     "location": "Beispielbrunn, Kasernenstrasse 33+56",
     "kind": "Teilsanierung",
@@ -2993,7 +2993,7 @@
   },
   {
     "id": "pr153",
-    "number": "…8441",
+    "number": "8441",
     "title": "Musterbach, Industriestrasse 94, Instandsetzung",
     "location": "Musterbach, Industriestrasse 94",
     "kind": "Instandsetzung",
@@ -3044,7 +3044,7 @@
   },
   {
     "id": "pr154",
-    "number": "…8211",
+    "number": "8211",
     "title": "Beispielbrunn, Rue des Alpes 33, Gesamtsanierung",
     "location": "Beispielbrunn, Rue des Alpes 33",
     "kind": "Gesamtsanierung",
@@ -3083,7 +3083,7 @@
   },
   {
     "id": "pr155",
-    "number": "…1405",
+    "number": "1405",
     "title": "Beispielstadt, Werkhof Ost 45, Unterhalt",
     "location": "Beispielstadt, Werkhof Ost 45",
     "kind": "Unterhalt",
@@ -3109,7 +3109,7 @@
   },
   {
     "id": "pr156",
-    "number": "…9800",
+    "number": "9800",
     "title": "Musterbiel, Avenue de la Gare 20, Fassadensanierung",
     "location": "Musterbiel, Avenue de la Gare 20",
     "kind": "Fassadensanierung",
@@ -3154,7 +3154,7 @@
   },
   {
     "id": "pr157",
-    "number": "…6082",
+    "number": "6082",
     "title": "Musterbiel, Bahnhofstrasse 32, Instandsetzung",
     "location": "Musterbiel, Bahnhofstrasse 32",
     "kind": "Instandsetzung",
@@ -3199,7 +3199,7 @@
   },
   {
     "id": "pr158",
-    "number": "…8039",
+    "number": "8039",
     "title": "Musterbach, Via Sempione 54, Brandschutz",
     "location": "Musterbach, Via Sempione 54",
     "kind": "Brandschutz",
@@ -3257,7 +3257,7 @@
   },
   {
     "id": "pr159",
-    "number": "…7756",
+    "number": "7756",
     "title": "Musteregg, Kasernenstrasse 79, Statik / Erdbeben",
     "location": "Musteregg, Kasernenstrasse 79",
     "kind": "Statik / Erdbeben",
@@ -3296,7 +3296,7 @@
   },
   {
     "id": "pr160",
-    "number": "…2084",
+    "number": "2084",
     "title": "Musterried, Werkhof West 2+43, Unterhalt",
     "location": "Musterried, Werkhof West 2+43",
     "kind": "Unterhalt",
@@ -3348,7 +3348,7 @@
   },
   {
     "id": "pr161",
-    "number": "…8020",
+    "number": "8020",
     "title": "Beispielstadt, Mühleweg 44, Instandsetzung",
     "location": "Beispielstadt, Mühleweg 44",
     "kind": "Instandsetzung",
@@ -3399,7 +3399,7 @@
   },
   {
     "id": "pr162",
-    "number": "…7318",
+    "number": "7318",
     "title": "Beispielegg, Ahornweg 6, Ersatzneubau",
     "location": "Beispielegg, Ahornweg 6",
     "kind": "Ersatzneubau",
@@ -3438,7 +3438,7 @@
   },
   {
     "id": "pr163",
-    "number": "…9765",
+    "number": "9765",
     "title": "Musterbiel, Talstrasse 90, Badanlage",
     "location": "Musterbiel, Talstrasse 90",
     "kind": "Badanlage",
@@ -3501,7 +3501,7 @@
   },
   {
     "id": "pr164",
-    "number": "…2895",
+    "number": "2895",
     "title": "Beispielbach, Postplatz 35, Barrierefreiheit",
     "location": "Beispielbach, Postplatz 35",
     "kind": "Barrierefreiheit",
@@ -3534,7 +3534,7 @@
   },
   {
     "id": "pr165",
-    "number": "…1767",
+    "number": "1767",
     "title": "Musterwil, Ringstrasse 60, Barrierefreiheit",
     "location": "Musterwil, Ringstrasse 60",
     "kind": "Barrierefreiheit",
@@ -3585,7 +3585,7 @@
   },
   {
     "id": "pr166",
-    "number": "…1561",
+    "number": "1561",
     "title": "Musterbach, Seestrasse 35, Instandsetzung",
     "location": "Musterbach, Seestrasse 35",
     "kind": "Instandsetzung",
@@ -3642,7 +3642,7 @@
   },
   {
     "id": "pr167",
-    "number": "…1584",
+    "number": "1584",
     "title": "Musterbach, Quai du Lac 22+51, Unterhalt",
     "location": "Musterbach, Quai du Lac 22+51",
     "kind": "Unterhalt",
@@ -3675,7 +3675,7 @@
   },
   {
     "id": "pr168",
-    "number": "…1278",
+    "number": "1278",
     "title": "Beispielwil, Avenue de la Gare 70, Haustechnik",
     "location": "Beispielwil, Avenue de la Gare 70",
     "kind": "Haustechnik",
@@ -3726,7 +3726,7 @@
   },
   {
     "id": "pr169",
-    "number": "…2304",
+    "number": "2304",
     "title": "Musterlingen, Werkhof Ost 15, Haustechnik",
     "location": "Musterlingen, Werkhof Ost 15",
     "kind": "Haustechnik",
@@ -3765,7 +3765,7 @@
   },
   {
     "id": "pr170",
-    "number": "…6728",
+    "number": "6728",
     "title": "Musteregg, Amtshausgasse 12, Erweiterung",
     "location": "Musteregg, Amtshausgasse 12",
     "kind": "Erweiterung",
@@ -3823,7 +3823,7 @@
   },
   {
     "id": "pr171",
-    "number": "…3077",
+    "number": "3077",
     "title": "Beispielau, Postplatz 55, Unterhalt",
     "location": "Beispielau, Postplatz 55",
     "kind": "Unterhalt",
@@ -3874,7 +3874,7 @@
   },
   {
     "id": "pr172",
-    "number": "…9202",
+    "number": "9202",
     "title": "Musterwil, Talstrasse 78, Teilsanierung",
     "location": "Musterwil, Talstrasse 78",
     "kind": "Teilsanierung",
@@ -3913,7 +3913,7 @@
   },
   {
     "id": "pr173",
-    "number": "…2566",
+    "number": "2566",
     "title": "Musterau, Talstrasse 91, Kauf",
     "location": "Musterau, Talstrasse 91",
     "kind": "Kauf",
@@ -3952,7 +3952,7 @@
   },
   {
     "id": "pr174",
-    "number": "…1579",
+    "number": "1579",
     "title": "Beispielbach, Alte Landstrasse 1, Instandsetzung",
     "location": "Beispielbach, Alte Landstrasse 1",
     "kind": "Instandsetzung",
@@ -4003,7 +4003,7 @@
   },
   {
     "id": "pr175",
-    "number": "…6233",
+    "number": "6233",
     "title": "Musterlingen, Werkhof Ost 96, Dachsanierung",
     "location": "Musterlingen, Werkhof Ost 96",
     "kind": "Dachsanierung",
@@ -4048,7 +4048,7 @@
   },
   {
     "id": "pr176",
-    "number": "…7561",
+    "number": "7561",
     "title": "Musterried, Rebbergweg 31, Brandschutz",
     "location": "Musterried, Rebbergweg 31",
     "kind": "Brandschutz",
@@ -4106,7 +4106,7 @@
   },
   {
     "id": "pr177",
-    "number": "…6444",
+    "number": "6444",
     "title": "Musterhofen, Rebbergweg 45, Instandsetzung",
     "location": "Musterhofen, Rebbergweg 45",
     "kind": "Instandsetzung",
@@ -4145,7 +4145,7 @@
   },
   {
     "id": "pr178",
-    "number": "…6331",
+    "number": "6331",
     "title": "Beispielried, Rebbergweg 82, Instandsetzung",
     "location": "Beispielried, Rebbergweg 82",
     "kind": "Instandsetzung",
@@ -4202,7 +4202,7 @@
   },
   {
     "id": "pr179",
-    "number": "…1962",
+    "number": "1962",
     "title": "Beispielbrunn, Feldweg 52, Energetische Sanierung",
     "location": "Beispielbrunn, Feldweg 52",
     "kind": "Energetische Sanierung",
@@ -4259,7 +4259,7 @@
   },
   {
     "id": "pr180",
-    "number": "…9399",
+    "number": "9399",
     "title": "Musterdorf, Hauptstrasse 21, Arealentwicklung",
     "location": "Musterdorf, Hauptstrasse 21",
     "kind": "Arealentwicklung",
@@ -4310,7 +4310,7 @@
   },
   {
     "id": "pr181",
-    "number": "…4646",
+    "number": "4646",
     "title": "Mustersee, Rue des Alpes 62, Aussenanlagen",
     "location": "Mustersee, Rue des Alpes 62",
     "kind": "Aussenanlagen",
@@ -4367,7 +4367,7 @@
   },
   {
     "id": "pr182",
-    "number": "…2972",
+    "number": "2972",
     "title": "Beispielbach, Feldweg 85, Umbau",
     "location": "Beispielbach, Feldweg 85",
     "kind": "Umbau",
@@ -4418,7 +4418,7 @@
   },
   {
     "id": "pr183",
-    "number": "…9026",
+    "number": "9026",
     "title": "Musteregg, Via Motta 76, Instandsetzung",
     "location": "Musteregg, Via Motta 76",
     "kind": "Instandsetzung",
@@ -4476,7 +4476,7 @@
   },
   {
     "id": "pr184",
-    "number": "…5724",
+    "number": "5724",
     "title": "Beispielegg, Via Cantonale 30+49, Umbau",
     "location": "Beispielegg, Via Cantonale 30+49",
     "kind": "Umbau",
@@ -4533,7 +4533,7 @@
   },
   {
     "id": "pr185",
-    "number": "…0846",
+    "number": "0846",
     "title": "Beispielbach, Kasernenstrasse 45, Badanlage",
     "location": "Beispielbach, Kasernenstrasse 45",
     "kind": "Badanlage",
@@ -4584,7 +4584,7 @@
   },
   {
     "id": "pr186",
-    "number": "…2658",
+    "number": "2658",
     "title": "Beispielbach, Industriestrasse 51, Instandsetzung",
     "location": "Beispielbach, Industriestrasse 51",
     "kind": "Instandsetzung",
@@ -4642,7 +4642,7 @@
   },
   {
     "id": "pr187",
-    "number": "…6493",
+    "number": "6493",
     "title": "Musterried, Ahornweg 42, Unterhalt",
     "location": "Musterried, Ahornweg 42",
     "kind": "Unterhalt",
@@ -4700,7 +4700,7 @@
   },
   {
     "id": "pr188",
-    "number": "…8305",
+    "number": "8305",
     "title": "Musterlingen, Feldweg 46, Unterhalt",
     "location": "Musterlingen, Feldweg 46",
     "kind": "Unterhalt",
@@ -4757,7 +4757,7 @@
   },
   {
     "id": "pr189",
-    "number": "…2079",
+    "number": "2079",
     "title": "Musterlingen, Zollstrasse 55, Energetische Sanierung",
     "location": "Musterlingen, Zollstrasse 55",
     "kind": "Energetische Sanierung",
@@ -4809,7 +4809,7 @@
   },
   {
     "id": "pr190",
-    "number": "…6452",
+    "number": "6452",
     "title": "Musterberg, Amtshausgasse 42, Gesamtsanierung",
     "location": "Musterberg, Amtshausgasse 42",
     "kind": "Gesamtsanierung",
@@ -4866,7 +4866,7 @@
   },
   {
     "id": "pr191",
-    "number": "…8790",
+    "number": "8790",
     "title": "Musterau, Schulhausplatz 85, Kauf",
     "location": "Musterau, Schulhausplatz 85",
     "kind": "Kauf",
@@ -4923,7 +4923,7 @@
   },
   {
     "id": "pr192",
-    "number": "…7709",
+    "number": "7709",
     "title": "Musteregg, Hauptstrasse 86, Unterhalt",
     "location": "Musteregg, Hauptstrasse 86",
     "kind": "Unterhalt",
@@ -4962,7 +4962,7 @@
   },
   {
     "id": "pr193",
-    "number": "…5301",
+    "number": "5301",
     "title": "Beispielheim, Industriestrasse 44, Instandsetzung",
     "location": "Beispielheim, Industriestrasse 44",
     "kind": "Instandsetzung",
@@ -5001,7 +5001,7 @@
   },
   {
     "id": "pr194",
-    "number": "…6682",
+    "number": "6682",
     "title": "Beispielbrunn, Via Motta 68, Dachsanierung",
     "location": "Beispielbrunn, Via Motta 68",
     "kind": "Dachsanierung",
@@ -5058,7 +5058,7 @@
   },
   {
     "id": "pr195",
-    "number": "…1534",
+    "number": "1534",
     "title": "Musteregg, Quai du Lac 55, Fassadensanierung",
     "location": "Musteregg, Quai du Lac 55",
     "kind": "Fassadensanierung",
@@ -5109,7 +5109,7 @@
   },
   {
     "id": "pr196",
-    "number": "…7160",
+    "number": "7160",
     "title": "Musterbach, Werkhof Ost 38+47, Fassadensanierung",
     "location": "Musterbach, Werkhof Ost 38+47",
     "kind": "Fassadensanierung",
@@ -5161,7 +5161,7 @@
   },
   {
     "id": "pr197",
-    "number": "…2266",
+    "number": "2266",
     "title": "Musterbiel, Feldweg 34, Erweiterung",
     "location": "Musterbiel, Feldweg 34",
     "kind": "Erweiterung",
@@ -5206,7 +5206,7 @@
   },
   {
     "id": "pr198",
-    "number": "…8558",
+    "number": "8558",
     "title": "Musterthal, Industriestrasse 73, Unterhalt",
     "location": "Musterthal, Industriestrasse 73",
     "kind": "Unterhalt",
@@ -5245,7 +5245,7 @@
   },
   {
     "id": "pr199",
-    "number": "…6982",
+    "number": "6982",
     "title": "Beispielbach, Ahornweg 70, Teilsanierung",
     "location": "Beispielbach, Ahornweg 70",
     "kind": "Teilsanierung",

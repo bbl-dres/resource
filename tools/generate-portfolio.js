@@ -142,7 +142,9 @@ function makeProject(n, usedNumbers, usedAddresses) {
   usedAddresses.add(address);
 
   let number;
-  do { number = '…' + String(between(1, 9998)).padStart(4, '0'); } while (usedNumbers.has(number));
+  // A complete number, not an abbreviation: the leading … was mockup shorthand
+  // and read on screen as a column too narrow to show the whole thing.
+  do { number = String(between(1, 9998)).padStart(4, '0'); } while (usedNumbers.has(number));
   usedNumbers.add(number);
 
   const kind = weighted(KINDS);
