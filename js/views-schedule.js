@@ -9,14 +9,13 @@ import {
 
 import {
   html, raw, icons, pageHeader, pageActions, toolbar, activeFilterRow,
-  timeControls, tooNarrow, noResults, legendBlock, legendItem, yearRule
+  timeControls, noResults, legendBlock, legendItem, yearRule, sortableHead
 } from './ui.js';
 
 
 export function renderSchedule() {
-  const body = state.narrow ? tooNarrow('Der Balkenplan')
-    : groupProjects().some(g => g.projects.length) ? ganttView()
-      : noResults('Bauprojekte');
+  const body = groupProjects().some(g => g.projects.length) ? ganttView()
+    : noResults('Bauprojekte');
 
   return html`
     ${pageHeader({
@@ -25,11 +24,10 @@ export function renderSchedule() {
       actions: pageActions({ edit: true })
     })}
     <div class="wrap"><div class="content">
-      ${state.narrow ? body : html`
-        ${toolbar()}
-        ${activeFilterRow()}
-        ${timeControls()}
-        ${body}`}
+      ${toolbar()}
+      ${activeFilterRow()}
+      ${timeControls()}
+      ${body}
     </div></div>`;
 }
 
@@ -60,14 +58,12 @@ function ganttView() {
   const groups = groupProjects();
   const tot = totals();
   const cols = periods();
-  // A column only has to hold its own label: "2026" and "Q3/26" need room,
-  // "Jul" does not. A single minimum made twelve months overflow the card.
-  const minCol = { year: 96, quarter: 88, month: 50 }[state.scale] ?? 88;
   const f = todayFraction(cols);
-  const todayLeft = f === null ? null
-    : `calc(var(--gantt-lead) + (100% - var(--gantt-lead)) * ${f.toFixed(4)})`;
+  // A share of the time axis, not of the card: the marker lives in an overlay
+  // that starts where the frozen column ends, so it can never run underneath it.
+  const todayLeft = f === null ? null : `${(f * 100).toFixed(2)}%`;
 
-  return html`<div class="gantt" style="--gantt-cols:${cols.length}; --gantt-quarter-min:${minCol}px">
+  return html`<div class="gantt" style="--gantt-cols:${cols.length}">
     ${groups.map(g => {
       const collapsed = g.label ? state.collapsedGroups[`g:${g.key}`] : false;
       return html`<section class="gantt__group">
@@ -83,9 +79,11 @@ function ganttView() {
           <div class="gantt__scroll" data-scroll>
           ${ganttAxis(cols)}
           <div class="gantt__body">
-            ${todayLeft && html`<div class="gantt__today" style="left:${raw(todayLeft)}" aria-hidden="true"></div>
+            ${todayLeft && html`<div class="gantt__overlay" aria-hidden="true">
+              <div class="gantt__today" style="left:${raw(todayLeft)}"></div>
               <div class="gantt__todaybadge" style="left:${raw(todayLeft)}"
-                   title="${t('Heute')}, ${data.meta.todayLabel}">${t('Heute')}</div>`}
+                   title="${t('Heute')}, ${data.meta.todayLabel}">${t('Heute')}</div>
+            </div>`}
             ${g.projects.map(p => ganttRow(p, cols))}
           </div>
           </div>
@@ -93,7 +91,7 @@ function ganttView() {
       </section>`;
     })}
 
-    <section class="capband scrollbox" style="--gantt-cols:${cols.length}; --gantt-quarter-min:${minCol}px">
+    <section class="capband scrollbox" style="--gantt-cols:${cols.length}">
       <div class="capband__scroll" data-scroll>
       <div class="capband__row">
         <div class="capband__label">
@@ -141,25 +139,24 @@ function ganttLegend() {
   ]);
 }
 
+/**
+ * A lead-column header. Clicking it sorts, exactly as in the pensum grid —
+ * both read the same two pieces of state, so the two tabs cannot disagree.
+ */
+function leadHead(key, label, cls) {
+  return sortableHead({
+    key, label, act: 'sort-col', cls: `gantt__axislabel ${cls}`,
+    active: state.sort === key, ascending: state.sortDir === 'asc'
+  });
+}
+
 function ganttAxis(cols) {
-  // At year scale the columns already are the years, so a band would repeat them.
-  const bands = [];
-  if (state.scale !== 'year') {
-    cols.forEach((col, i) => {
-      if (col.yearStart) bands.push({ label: col.year, span: 1 });
-      else bands[bands.length - 1].span++;
-    });
-  }
   return html`<header class="gantt__axis">
-    <div class="gantt__axislabel">${t('Projekt')}</div>
-    <div class="gantt__axiscols">
-      ${bands.length ? html`<div class="gantt__years">
-        ${bands.map(b => html`<div class="gantt__year" style="grid-column:span ${b.span}">${b.label}</div>`)}
-      </div>` : ''}
-      <div class="gantt__quarters">
-        ${cols.map(col => html`<div class="${col.isNow ? 'is-today' : ''} ${yearRule(col)}"
-          title="${col.label}">${col.short}</div>`)}
-      </div>
+    ${leadHead('id', 'ID', 'gantt__axisid')}
+    ${leadHead('project', t('Projekt'), 'gantt__axistitle')}
+    <div class="gantt__quarters">
+      ${cols.map(col => html`<div class="${col.isNow ? 'is-today' : ''} ${yearRule(col)}"
+        title="${col.label}">${col.short}</div>`)}
     </div>
   </header>`;
 }
@@ -170,8 +167,8 @@ function ganttRow(p, cols) {
   const rail = p.unassigned ? 'is-unassigned' : delayed ? 'is-delayed' : '';
 
   return html`<div class="gantt__row ${rail}">
-    <div class="gantt__rowlabel">
-      <span class="gantt__rowid">${p.number}</span>
+    <div class="gantt__rowlabel gantt__rowid">${p.number}</div>
+    <div class="gantt__rowlabel gantt__rowtitlecell">
       <button type="button" class="gantt__rowtitle" data-act="open-project" data-val="${p.id}"
               title="${p.title}">${p.title}</button>
     </div>

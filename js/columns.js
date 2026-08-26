@@ -100,6 +100,33 @@ export const COLUMNS = [
 const BY_KEY = Object.fromEntries(COLUMNS.map(c => [c.key, c]));
 export const column = key => BY_KEY[key];
 
+/*
+ * Which column gives way first when the window is too narrow, least
+ * load-bearing to most. The project title is not in the list: a table of
+ * projects without the project is not a view anyone wants.
+ */
+const YIELD_ORDER = ['nextMs', 'priority', 'portfolio', 'credit', 'phase', 'ampel', 'lead', 'id'];
+
+/**
+ * The columns that fit. `room` is the width available to the card and
+ * `axis` what the time axis needs at a minimum; anything that does not fit is
+ * dropped in yield order and returned so the view can say what it hid.
+ */
+export function fittingColumns(state, { room, axis, widthOf }) {
+  const shown = visibleColumns(state);
+  const hidden = [];
+  const lead = () => shown.reduce((a, c) => a + widthOf(c), 0);
+
+  for (const key of YIELD_ORDER) {
+    if (lead() + axis <= room) break;
+    const i = shown.findIndex(c => c.key === key);
+    if (i < 0) continue;
+    hidden.push(shown[i]);
+    shown.splice(i, 1);
+  }
+  return { shown, hidden };
+}
+
 /** Is this column switched on right now? A column with no flag is always on. */
 export function columnOn(state, col) {
   if (!col.flag) return true;

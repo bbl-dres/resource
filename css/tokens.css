@@ -324,13 +324,14 @@
   /* A card that lifts on hover needs somewhere to lift to. */
   --shadow-raised-hover: 0 2px 4px rgba(16, 24, 40, .06), 0 8px 20px rgba(16, 24, 40, .10);
   --shadow-raised: 0 1px 2px rgba(16, 24, 40, 0.04), 0 4px 12px rgba(16, 24, 40, 0.06);
-  /* An eased ramp: a linear fade banded visibly against the row fills. */
-  --fade-right: linear-gradient(to right,
-    #000 calc(100% - 56px), rgba(0, 0, 0, .92) calc(100% - 40px),
-    rgba(0, 0, 0, .65) calc(100% - 24px), rgba(0, 0, 0, .22) calc(100% - 10px),
-    transparent 100%);
-
-  --shadow-frozen: 8px 0 8px -8px rgba(17, 24, 39, 0.22);   /* the frozen column edge */
+  /*
+   * The edge of a scrolling card. A gradient rather than a box-shadow, because
+   * a shadow with a negative spread stops short of the box it belongs to — the
+   * right-hand one ended 8px inside the card. This lands exactly on the edge,
+   * and the two sides are the same ramp mirrored.
+   */
+  --scroll-edge: rgba(17, 24, 39, 0.055);
+  --scroll-edge-w: 22px;
   --shadow-modal: 0 24px 48px rgba(0, 0, 0, 0.18);
 
   --rail-danger: inset 3px 0 0 var(--red-600);
@@ -422,6 +423,10 @@
   --z-raised:  2;
   --z-sticky:  5;
   --z-label:   6;
+  /* Drawn over the plan: the today marker and the frozen pane's shadow. */
+  --z-overlay: 7;
+  /* The frozen pane itself, above everything that scrolls underneath it. */
+  --z-frozen:  8;
   --z-popover: 70;
   --z-scrim:   79;
   --z-modal:   80;

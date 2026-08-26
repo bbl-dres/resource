@@ -616,26 +616,47 @@ document.addEventListener('pointerdown', (event) => {
 
 /**
  * A horizontal scroller says so, but only when there is somewhere to go: the
- * edge fades track the actual scroll position rather than being decoration.
+ * edge fades and the frozen pane's shadow track the actual scroll position
+ * rather than being decoration. Both are drawn by the card around the scroller.
  */
 function syncScrollFades(scroller) {
-  const box = scroller.closest('.scrollbox') ?? scroller.parentElement;
-  if (!box) return;
+  const card = scroller.closest('.scrollbox') ?? scroller.parentElement;
+  if (!card) return;
   const room = scroller.scrollWidth - scroller.clientWidth;
-  // Group heads stick at the left edge and stretch across what is on screen.
-  scroller.firstElementChild?.style.setProperty('--port-w', `${scroller.clientWidth}px`);
-  box.classList.toggle('has-more', room > 1 && scroller.scrollLeft < room - 1);
-  box.classList.toggle('has-less', scroller.scrollLeft > 1);
-  // The frozen columns only cast a shadow once the track has actually moved.
-  scroller.firstElementChild?.classList.toggle('is-scrolled', scroller.scrollLeft > 0);
+  card.classList.toggle('has-more', room > 1 && scroller.scrollLeft < room - 1);
+  card.classList.toggle('is-scrolled', scroller.scrollLeft > 0);
+}
+
+/**
+ * Every group is its own card with its own scroller, so they have to be told to
+ * agree: two cards showing different months are not one table any more. The
+ * echo events this causes settle immediately, because a scroller already at the
+ * new position is skipped.
+ */
+function alignScrollers(source) {
+  for (const other of root.querySelectorAll('[data-scroll]')) {
+    if (other !== source && other.scrollLeft !== source.scrollLeft) {
+      other.scrollLeft = source.scrollLeft;
+    }
+  }
 }
 
 root.addEventListener('scroll', (event) => {
-  if (event.target.hasAttribute?.('data-scroll')) syncScrollFades(event.target);
+  if (!event.target.hasAttribute?.('data-scroll')) return;
+  syncScrollFades(event.target);
+  alignScrollers(event.target);
 }, true);
 
+/*
+ * The grid drops master-data columns to fit the window, so a resize can change
+ * what it draws. Debounced, because a drag fires this dozens of times and a
+ * re-render is not free.
+ */
+let resizeTimer;
 window.addEventListener('resize', () => {
   root.querySelectorAll('[data-scroll]').forEach(syncScrollFades);
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => setState({}), 150);
 });
 
 /*
@@ -664,14 +685,6 @@ subscribe(() => {
   lastTab = state.tab;
 });
 
-/**
- * Below 900px a pensum grid or a bar plan cannot be read, let alone edited.
- * The design says so explicitly, so those views offer the reading path instead.
- */
-const narrowQuery = window.matchMedia('(max-width: 899px)');
-const syncNarrow = () => { if (state.narrow !== narrowQuery.matches) setState({ narrow: narrowQuery.matches }); };
-narrowQuery.addEventListener('change', syncNarrow);
-
 /* -----------------------------------------------------------------------------
    Boot
    -------------------------------------------------------------------------- */
@@ -679,7 +692,6 @@ narrowQuery.addEventListener('change', syncNarrow);
 (async function boot() {
   try {
     await Promise.all([load(), loadIcons()]);
-    state.narrow = narrowQuery.matches;
     syncFromUrl();
     subscribe(render);
     render();

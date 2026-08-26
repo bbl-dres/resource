@@ -67,7 +67,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 
 /* Numbers are tabular everywhere — a system rule, not an option. */
 .kpi__value, .pcell, .capband__value, .barlist__value, .colchart__val,
-.log__date, .chg__date, .log__value, .sorthead__label, .gantt__year,
+.log__date, .chg__date, .log__value, .sorthead__label,
 .entry__metric, .minigrid__v { font-variant-numeric: tabular-nums; }
 
 /* ==========================================================================
@@ -238,18 +238,6 @@ button, input, select, textarea { font: inherit; color: inherit; }
  * so it never promises content that is not there.
  */
 .scrollbox { position: relative; }
-
-/*
- * The time axis runs off the right edge more often than not. Rather than lay a
- * wash over the card — which also greys the gaps between cards — the content
- * itself dissolves at the edge: nothing is painted where there is no row, so
- * only the rows fade. The frozen columns hold the left edge, and their shadow
- * already says the axis passes underneath, so that side needs no fade.
- */
-.scrollbox.has-more [data-scroll] {
-  -webkit-mask-image: var(--fade-right);
-  mask-image: var(--fade-right);
-}
 
 /*
  * No scrollbar. Stepping the window with the arrows beside «Heute» is the way
@@ -650,6 +638,14 @@ h1, h2, h3,
 .filterbar__none { color: var(--color-text-muted); }
 .filterbar__count { font-size: var(--text-sm); color: var(--color-text-muted); }
 
+/* Says what the window could not hold. A statement of fact, not a warning. */
+.dropped-note {
+  display: flex; align-items: center; gap: var(--space-4);
+  margin: 0 0 var(--space-6);
+  font-size: var(--text-sm); color: var(--color-text-muted);
+}
+.dropped-note .icon { flex: 0 0 auto; }
+
 .timebar {
   display: flex; align-items: center; justify-content: space-between;
   gap: var(--space-8); flex-wrap: wrap;
@@ -788,15 +784,17 @@ h1, h2, h3,
 .grid-card { display: flex; flex-direction: column; }
 
 /*
- * Head, each group and the footer are their own card, but they all sit inside
- * the single scroll track, so the columns still line up across every block.
- * No overflow:hidden here — that would turn each block into a scrollport and
- * the frozen columns would stop sticking.
+ * Each group and the footer are their own card, and each card wraps its own
+ * scroller. The frame therefore belongs to the page and stays put while the
+ * time axis moves inside it; built the other way round it travelled with the
+ * content and its edges left the window. app.js keeps the scrollers in step,
+ * so every card still shows the same time window.
  */
 .pblock {
-  background: var(--color-surface);
   border-radius: var(--radius-lg);
+  background: var(--color-surface);
   box-shadow: var(--shadow-raised);
+  overflow: hidden;
 }
 .pblock + .pgroup, .pgroup + .pblock { margin-top: var(--space-12); }
 .pblock > .prow:first-child { border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
@@ -804,8 +802,7 @@ h1, h2, h3,
 .pblock > .prow:first-child > :last-child { border-top-right-radius: var(--radius-lg); }
 .pblock > .prow:last-child > :last-child { border-bottom-right-radius: var(--radius-lg); }
 
-/* The bleed is the focus ring the scroller would otherwise clip, not spacing. */
-.pgrid { position: relative; overflow-x: auto; padding: 3px; margin: -3px; }
+.pgrid { position: relative; overflow-x: auto; }
 
 /*
  * One track for the whole grid. Every row is its own CSS grid, so they only
@@ -831,21 +828,43 @@ h1, h2, h3,
  * Frozen cells need an opaque ground, hence --row-bg on every row.
  */
 .is-frozen {
-  position: sticky; z-index: var(--z-raised);
+  position: sticky; z-index: var(--z-frozen);
   /* Full row height, or the quarters would show through above and below. */
   align-self: stretch;
   background: var(--row-bg, var(--color-surface));
 }
 /* A summary label spans the whole lead pane, so it is both first and last. */
 .prow--sum .is-frozen, .prow--foot .is-frozen, .prow--load .is-frozen { left: 0; }
-.is-frozen-last,
-.prow--sum .is-frozen, .prow--foot .is-frozen, .prow--load .is-frozen {
-  box-shadow: var(--shadow-frozen);
+
+/*
+ * Both edges of a scrolling card carry the same ramp, mirrored: on the left
+ * where the frozen column ends and the axis passes underneath, on the right
+ * where the axis continues past the card. One strip per card, not one per
+ * cell — drawn per cell it broke at every row separator.
+ */
+.pblock, .gantt__card, .capband { position: relative; }
+.pblock::before, .gantt__card::before, .capband::before,
+.pblock::after, .gantt__card::after, .capband::after {
+  content: ''; position: absolute; top: 0; bottom: 0;
+  width: var(--scroll-edge-w);
+  pointer-events: none; opacity: 0;
+  z-index: var(--z-overlay);
 }
-.pgrid__track:not(.is-scrolled) .is-frozen-last,
-.pgrid__track:not(.is-scrolled) .prow--sum .is-frozen,
-.pgrid__track:not(.is-scrolled) .prow--foot .is-frozen,
-.pgrid__track:not(.is-scrolled) .prow--load .is-frozen { box-shadow: none; }
+/* Left: anchored to the right edge of the frozen pane. */
+.pblock::after, .gantt__card::after, .capband::after {
+  left: var(--frozen-w);
+  background: linear-gradient(to right, var(--scroll-edge), transparent);
+}
+/* Right: anchored to the card's own edge. */
+.pblock::before, .gantt__card::before, .capband::before {
+  right: 0;
+  background: linear-gradient(to left, var(--scroll-edge), transparent);
+}
+.pblock { --frozen-w: var(--sticky-w); }
+.gantt__card, .capband { --frozen-w: var(--gantt-lead); }
+
+.is-scrolled::after { opacity: 1; }
+.has-more::before { opacity: 1; }
 
 .prow--head {
   min-height: 30px; --row-bg: var(--color-surface);
@@ -854,8 +873,14 @@ h1, h2, h3,
 }
 .prow > .pcell:first-child,
 .prow--head > :first-child { padding-left: var(--space-6); }
-.prow--head .pcell--num { text-align: right; padding-right: var(--space-5); }
-.prow--head .pcell--num.is-today {
+.prow--head .pcell--num {
+  text-align: right; padding-right: var(--space-5);
+  border-left: var(--border-hairline) solid var(--color-border-subtle);
+  border-right: var(--border-hairline) solid var(--color-border-subtle);
+}
+/* The current period is marked the same way in both grids. */
+.prow--head .pcell--num.is-today,
+.gantt__quarters .is-today {
   background: var(--color-surface-sunken); color: var(--color-text-strong);
   font-weight: var(--font-bold); box-shadow: inset 0 2px 0 var(--color-danger-solid);
 }
@@ -867,19 +892,7 @@ h1, h2, h3,
  */
 .pgroup + .pgroup { margin-top: var(--space-12); }   /* matches .gantt's gap */
 /* The whole label is the toggle — a wide, forgiving target. */
-.pgrouphead {
-  position: sticky; left: 0;
-  margin: 0; padding-bottom: var(--space-6); font-weight: inherit;
-}
-/*
- * In the Übersicht the head lives inside the scroll track, and a sticky box can
- * only slide within its own width — a full-width head would have nowhere to go
- * and would scroll away with the quarters. So the head itself takes no width
- * and the toggle inside it spills across the scrollport, whose width the
- * scroll handler publishes as --port-w.
- */
-.pgroup > .pgrouphead { width: 0; }
-.pgroup > .pgrouphead > .pgrouphead__toggle { width: var(--port-w, 100%); }
+.pgrouphead { margin: 0; padding-bottom: var(--space-6); font-weight: inherit; }
 .pgrouphead__toggle {
   display: flex; align-items: center; gap: var(--space-5);
   width: 100%; min-height: 32px;
@@ -1320,8 +1333,7 @@ h1, h2, h3,
    ========================================================================== */
 
 .gantt {
-  --gantt-lead: var(--grid-pane-left);
-  --gantt-quarter-min: 88px;
+  --gantt-lead: calc(var(--grid-col-id) + var(--grid-col-title));
   display: flex; flex-direction: column; gap: var(--space-13);
 }
 .gantt__group { display: flex; flex-direction: column; }
@@ -1336,33 +1348,77 @@ h1, h2, h3,
  * simply grew past the card, whose overflow:hidden then ate 96px with no
  * scrollbar. .capband__row already does it the right way.
  */
-.gantt__scroll > * { min-width: calc(var(--gantt-lead) + var(--gantt-cols, 8) * var(--gantt-quarter-min)); }
+/*
+ * The time axis is the same width in both tabs, so a quarter reads the same
+ * whichever way you are looking at it — and the bar plan scrolls in the same
+ * situations the pensum grid does.
+ */
+.gantt__scroll > * { min-width: calc(var(--gantt-lead) + var(--gantt-cols, 8) * var(--grid-quarter)); }
 
+/*
+ * The same two lead columns the pensum grid uses, at the same widths, so a
+ * project sits in the same place whichever tab you are reading.
+ */
 .gantt__axis,
 .gantt__row {
   display: grid;
-  grid-template-columns: var(--gantt-lead) minmax(0, 1fr);
+  grid-template-columns: var(--grid-col-id) var(--grid-col-title) minmax(0, 1fr);
 }
 .gantt__axis {
-  background: var(--color-surface-frame);
-  border-bottom: var(--border-hairline) solid var(--color-border);
+  min-height: var(--row-height);
+  background: var(--color-surface);
+  border-bottom: var(--border-hairline) solid var(--color-border-strong);
 }
 .gantt__axislabel {
-  display: flex; align-items: flex-end; padding: var(--space-4) var(--space-6);
-  font-size: var(--text-sm); font-weight: var(--font-semibold); color: var(--color-text-muted);
+  display: flex; align-items: center; padding: 0 var(--space-6);
+  font-size: var(--text-sm); font-weight: var(--font-semibold); color: var(--color-text-secondary);
 }
-.gantt__years, .gantt__quarters {
+
+/*
+ * A project keeps its name while its bars scroll under it. Without this the
+ * axis moved and the rows the reader was following moved with it.
+ */
+.gantt__axisid, .gantt__rowid { left: 0; }
+.gantt__axistitle, .gantt__rowtitlecell { left: var(--grid-col-id); }
+
+.gantt__axislabel, .gantt__rowlabel, .capband__label {
+  position: sticky; z-index: var(--z-frozen);
+  /* Full row height, or the bars and the today marker show through the gaps
+     between rows — the same reason .is-frozen stretches in the pensum grid. */
+  align-self: stretch;
+  background: var(--color-surface);
+}
+.gantt__axisid { padding-right: 0; }
+.gantt__axistitle { padding-left: 0; }
+.gantt__quarters {
   display: grid; grid-template-columns: repeat(var(--gantt-cols, 8), minmax(0, 1fr));
   align-items: center; text-align: center;
   font-size: var(--text-sm); font-weight: var(--font-semibold);
+  color: var(--color-text-secondary);
 }
-.gantt__years { height: 28px; color: var(--color-text-muted); }
-.gantt__year { border-left: var(--border-hairline) solid var(--color-border); }
-.gantt__quarters { height: 26px; color: var(--color-text-secondary); }
+.gantt__quarters > * {
+  align-self: stretch; display: flex; align-items: center; justify-content: center;
+  border-left: var(--border-hairline) solid var(--color-border-subtle);
+}
 .gantt__quarters .is-yearstart { border-left: var(--border-hairline) solid var(--color-border); }
-.gantt__quarters .is-today { background: var(--color-surface-sunken); color: var(--color-text-strong); }
 
 .gantt__body { position: relative; }
+/*
+ * The today marker belongs to the time axis, so it is clipped to it. Left in
+ * the row it scrolled underneath the frozen column and showed through the
+ * hairline between rows.
+ */
+.gantt__overlay {
+  position: absolute; top: 0; bottom: 0;
+  left: var(--gantt-lead); right: 0;
+  /* Sideways only. The badge is centred on the axis boundary and has to keep
+     reaching above this box, so overflow:hidden would cut it in half. */
+  clip-path: inset(-40px 0 0 0);
+  /* clip-path makes this a stacking context, so the marker inside it can no
+     longer out-rank the bars on its own — the whole overlay has to. */
+  z-index: var(--z-overlay);
+  pointer-events: none;
+}
 .gantt__today {
   position: absolute; top: 0; bottom: 0; width: 2px;
   /* "Now" is a position, not a problem — red belongs to over-capacity alone. */
@@ -1380,17 +1436,23 @@ h1, h2, h3,
   letter-spacing: 0.02em; white-space: nowrap;
 }
 
-.gantt__row {
-  align-items: center; min-height: 48px;
+.gantt__row { align-items: center; min-height: var(--row-height); }
+/*
+ * The separator sits on the cells, not on the row: the frozen label is opaque
+ * across the full row height, and a border on the row would leave a hairline
+ * it cannot cover — through which the today marker showed while scrolling.
+ */
+.gantt__row > * {
+  align-self: stretch;
   border-bottom: var(--border-hairline) solid var(--color-border-subtle);
 }
-.gantt__row:last-child { border-bottom: 0; }
+.gantt__row:last-child > * { border-bottom: 0; }
 .gantt__row.is-delayed { box-shadow: var(--rail-danger); }
 .gantt__row.is-unassigned { box-shadow: var(--rail-warn); }
 
 .gantt__rowlabel {
-  display: flex; align-items: baseline; gap: var(--space-5);
-  padding: var(--space-3) var(--space-6); min-width: 0;
+  display: flex; align-items: center; min-width: 0;
+  padding: 0 var(--space-6);
 }
 .gantt__rowtitle {
   display: block; min-width: 0; flex: 1; min-height: var(--target-min);
@@ -1401,14 +1463,17 @@ h1, h2, h3,
 }
 .gantt__rowtitle:hover { color: var(--color-text-link); text-decoration: underline; text-underline-offset: 2px; }
 .gantt__rowid {
-  flex: 0 0 auto; width: 56px;
+  /* The column already sets the width; a padding on both sides would squeeze
+     the number onto two lines. Left only, as in the pensum grid. */
+  padding-right: 0;
   font-size: var(--text-sm); color: var(--color-text-muted);
   font-variant-numeric: tabular-nums;
 }
+.gantt__rowtitlecell { padding-left: 0; }
 
 .gantt__track {
   display: grid; grid-template-columns: repeat(var(--gantt-cols, 8), minmax(0, 1fr));
-  grid-template-rows: 46px; align-items: center;
+  grid-template-rows: calc(var(--row-height) - 2px); align-items: center;
 }
 .gantt__gridline { grid-row: 1; border-left: var(--border-hairline) solid var(--color-border-subtle); height: 100%; }
 .gantt__gridline.is-yearstart { border-left-color: var(--color-border); }
@@ -1483,14 +1548,13 @@ h1, h2, h3,
 
 .capband {
   --gantt-lead: var(--grid-pane-left);
-  --gantt-quarter-min: 88px;
   border-radius: var(--radius-lg); background: var(--color-surface);
   box-shadow: var(--shadow-raised); overflow: hidden;
 }
 .capband__row {
   display: grid; grid-template-columns: var(--gantt-lead) minmax(0, 1fr);
   min-height: 42px; align-items: stretch;
-  min-width: calc(var(--gantt-lead) + var(--gantt-cols, 8) * var(--gantt-quarter-min));
+  min-width: calc(var(--gantt-lead) + var(--gantt-cols, 8) * var(--grid-quarter));
   background: var(--color-surface-frame);
 }
 .capband__label { display: flex; align-items: center; padding-left: var(--space-6); }

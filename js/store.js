@@ -73,8 +73,7 @@ const DEFAULT_STATE = {
   showAll: { attention: false, milestones: false },   // landing cards, expanded
   searchOpen: { header: false, toolbar: false },   // the two fields open independently
   collapsedGroups: {},
-  toast: null,
-  narrow: false          // < 900px: planning grids are not usable
+  toast: null
 };
 
 export const state = {
@@ -449,7 +448,7 @@ function buildPeriods() {
       out.push({
         id: `${q.year}-${month + 1}`,
         label: `${MONTHS_DE[month]} ${q.year}`,
-        short: MONTHS_DE[month],
+        short: `${MONTHS_DE[month]} ${String(q.year).slice(2)}`,
         quarters: [qi],
         isNow: qi === 0 && month === new Date(data.meta.today + 'T00:00:00').getMonth()
       });
@@ -460,7 +459,7 @@ function buildPeriods() {
   const start = Math.max(0, Math.min(off, qs.length - 1));
   return qs.slice(start).map((q, n) => ({
     id: q.id, label: q.label,
-    short: `${q.short}/${String(q.year).slice(2)}`,
+    short: `${q.short} ${String(q.year).slice(2)}`,
     quarters: [start + n], isNow: start + n === 0
   }));
 }

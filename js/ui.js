@@ -700,18 +700,6 @@ export function legendItem(mark, label) {
   return html`<span class="legend__item">${mark}${t(label)}</span>`;
 }
 
-export function tooNarrow(what) {
-  return html`<div class="narrow-note">
-    <p class="narrow-note__lead">${t(what)} ${t('braucht mehr Breite, als dieses Fenster bietet.')}</p>
-    <p>${t('Unter 900 px ist Planung nicht sinnvoll. Einstiegsseite, Dashboard und Verlauf sind als Lesesicht verfügbar.')}</p>
-    <div class="narrow-note__actions">
-      <button type="button" class="btn btn--primary" data-act="tab" data-val="start">${t('Zur Einstiegsseite')}</button>
-      <button type="button" class="btn" data-act="tab" data-val="dashboard">${t('Dashboard ansehen')}</button>
-      <button type="button" class="btn" data-act="tab" data-val="history">${t('Verlauf ansehen')}</button>
-    </div>
-  </div>`;
-}
-
 export function toast() {
   if (!state.toast) return '';
   return html`<div class="toast" role="status">${state.toast}</div>`;

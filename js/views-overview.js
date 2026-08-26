@@ -11,12 +11,12 @@ import {
 
 import {
   html, raw, icons, pageHeader, pageActions, toolbar, activeFilterRow,
-  timeControls, columnChart, tooNarrow, noResults, ampelLegend,
+  timeControls, columnChart, noResults, ampelLegend,
   legendBlock, legendItem, attr,
   tokenPx, tone, yearRule, pinCls, pinLeft, sortableHead
 } from './ui.js';
 
-import { visibleColumns, column } from './columns.js';
+import { fittingColumns, column } from './columns.js';
 
 /* -----------------------------------------------------------------------------
    Shared helpers
@@ -258,11 +258,10 @@ export function renderOverview() {
       actions: pageActions({ edit: true })
     })}
     <div class="wrap"><div class="content">
-      ${state.narrow ? tooNarrow('Das Pensum-Raster') : html`
-        ${toolbar()}
-        ${activeFilterRow()}
-        ${timeControls({})}
-        ${filteredProjects().length ? pensumGrid() : noResults('Bauprojekte')}`}
+      ${toolbar()}
+      ${activeFilterRow()}
+      ${timeControls({})}
+      ${filteredProjects().length ? pensumGrid() : noResults('Bauprojekte')}
     </div></div>`;
 }
 
@@ -284,8 +283,19 @@ export function renderOverview() {
  * The master data of a project stays put while the time axis moves, so every
  * lead column is frozen and each needs the running offset of the ones before.
  */
+/*
+ * Three periods is the least that still reads as a time axis; below that the
+ * view is a list with a number, not a plan.
+ */
+const MIN_PERIODS = 3;
+
 function gridLayout() {
-  const shown = visibleColumns(state);
+  const quarterW = tokenPx('--grid-quarter');
+  const { shown, hidden } = fittingColumns(state, {
+    room: cardWidth(),
+    axis: MIN_PERIODS * quarterW,
+    widthOf: c => tokenPx(c.width)
+  });
   const parts = [];
   const sticky = {};
   let offset = 0;
@@ -298,8 +308,8 @@ function gridLayout() {
   }
   sticky.width = offset;
   sticky.last = shown.at(-1)?.key ?? null;
+  sticky.shown = shown;
 
-  const quarterW = tokenPx('--grid-quarter');
   const cols = periods().length;
   parts.push(`repeat(${cols}, minmax(${quarterW}px, 1fr))`);
   let minWidth = offset + quarterW * cols;
@@ -309,23 +319,34 @@ function gridLayout() {
     parts.push(`${w}px`);
     minWidth += w;
   }
-  return { tpl: parts.join(' '), minWidth, sticky };
+  return { tpl: parts.join(' '), minWidth, sticky, shown, hidden };
 }
 
-/** How many columns sit left of the first quarter — used by the spanning rows. */
-function leadColumnCount() {
-  const c = state.cols;
-  return 1 + (state.ampel ? 1 : 0) + (c.id ? 1 : 0) + (c.phase ? 1 : 0) + (c.lead ? 1 : 0)
-    + (c.portfolio ? 1 : 0) + (c.priority ? 1 : 0) + (c.nextMs ? 1 : 0)
-    + (c.credit ? 1 : 0) + (state.target ? 1 : 0);
+/**
+ * Say what had to give. A window too narrow for every column is a reason to
+ * show fewer, not a reason to refuse to draw — but the reader has to know that
+ * what they are looking at is not the whole table.
+ */
+function droppedNote(hidden) {
+  if (!hidden.length) return '';
+  return html`<p class="dropped-note">
+    ${icons.info(14)}
+    ${hidden.length} ${t(hidden.length === 1 ? 'Spalte ausgeblendet' : 'Spalten ausgeblendet')},
+    ${t('das Fenster ist zu schmal')}: ${hidden.map(c => t(c.label)).join(', ')}.
+  </p>`;
+}
+
+/** How much width the card actually has, before it is in the DOM to measure. */
+function cardWidth() {
+  return Math.min(1440, document.documentElement.clientWidth) - 2 * tokenPx('--space-12');
 }
 
 function pensumGrid() {
   const groups = groupProjects();
   const list = filteredProjects();
   const tot = totals(list);
-  const span = leadColumnCount();
-  const { tpl, minWidth, sticky } = gridLayout();
+  const { tpl, minWidth, sticky, hidden } = gridLayout();
+  const span = sticky.shown.length;
   // One period list for the whole grid: every row must agree on the time axis.
   const cols = periods();
   const q0 = data.quarters[0];
@@ -358,19 +379,12 @@ function pensumGrid() {
     // its own sum for the same reason, and because the printed report already
     // does exactly that.
     return html`<section class="pgroup">${head}
-      <div class="pblock">${columnHeader(tpl, sticky, cols)}${rows}${groupSum(g, tpl, span, cols)}</div>
+      ${card(html`${columnHeader(tpl, sticky, cols)}${rows}${groupSum(g, tpl, span, cols)}`,
+        { minWidth, sticky })}
     </section>`;
   });
 
-  return html`<section class="grid-card">
-    <div class="scrollbox">
-    <div class="pgrid ${state.edit ? 'pgrid--edit' : ''}" data-scroll>
-     <div class="pgrid__track" style="min-width:${minWidth}px; --sticky-w:${sticky.width}px">
-
-      ${body}
-
-      <div class="pblock pblock--foot">
-      <div class="prow prow--sum" style="grid-template-columns:${raw(tpl)}">
+  const foot = html`<div class="prow prow--sum" style="grid-template-columns:${raw(tpl)}">
         <div style="grid-column:span ${span}" class="prow__sumlabel is-frozen">
           ${t('Bedarf total')}${tot.scoped ? html`<span class="prow__sumnote">${t('Auswahl')}</span>` : ''}
           <button type="button" class="linkbtn" data-act="foot-details">
@@ -399,14 +413,28 @@ function pensumGrid() {
           </span>`;
         })}
         ${state.trend && html`<span></span>`}
-      </div>
-      </div>
+      </div>`;
 
-    </div>
-    </div>
-
-  </section>
+  return html`${droppedNote(hidden)}
+    <section class="grid-card">
+      ${body}
+      ${card(foot, { minWidth, sticky, cls: 'pblock--foot' })}
+    </section>
     ${heatLegend()}`;
+}
+
+/**
+ * A group card. The card is the outer box and the scroller sits inside it, so
+ * its edge, radius and shadow belong to the page and stay put while the time
+ * axis moves underneath. Built the other way round, the frame travelled with
+ * the content and left the window.
+ */
+function card(rows, { minWidth, sticky, cls = '' }) {
+  return html`<div class="pblock scrollbox ${cls}" style="--sticky-w:${sticky.width}px">
+    <div class="pgrid ${state.edit ? 'pgrid--edit' : ''}" data-scroll>
+      <div class="pgrid__track" style="min-width:${minWidth}px">${rows}</div>
+    </div>
+  </div>`;
 }
 
 /** The same swatch legend the print sheet carries, so both read alike. */
@@ -481,7 +509,7 @@ function headLabel(col) {
 function columnHeader(tpl, sticky, cols) {
   return html`
     <div class="prow prow--head" style="grid-template-columns:${raw(tpl)}">
-      ${visibleColumns(state).map(col => {
+      ${sticky.shown.map(col => {
         const extra = col.numeric ? 'pcell--num' : '';
         // Without a sort key the header is a label, not a control.
         if (!col.sort) {
@@ -532,7 +560,7 @@ function projectRow(p, tpl, sticky, cols, rowIdx) {
 
   return html`<div class="prow" style="grid-template-columns:${raw(tpl)}"
       data-row="${rowIdx}">
-    ${visibleColumns(state).map(col => html`<span
+    ${sticky.shown.map(col => html`<span
         class="pcell ${col.cls} ${cellState(col, p, lead)} ${pinCls(sticky, col.key)}"
         style="${pinLeft(sticky, col.key)}">${cellBody(col, p, lead)}</span>`)}
 

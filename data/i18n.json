@@ -451,15 +451,15 @@
       "fr": "Feuille",
       "it": "Foglio"
     },
-    "braucht mehr Breite, als dieses Fenster bietet.": {
-      "en": "needs more width than this window offers.",
-      "fr": "a besoin de plus de largeur que cette fenêtre.",
-      "it": "necessita di più larghezza di quanta ne offra questa finestra."
-    },
     "Bundesamt für Bauten und Logistik BBL": {
       "en": "Federal Office for Buildings and Logistics FOBL",
       "fr": "Office fédéral des constructions et de la logistique OFCL",
       "it": "Ufficio federale delle costruzioni e della logistica UFCL"
+    },
+    "das Fenster ist zu schmal": {
+      "en": "the window is too narrow",
+      "fr": "la fenêtre est trop étroite",
+      "it": "la finestra è troppo stretta"
     },
     "Das laufende Quartal ist für Änderungen gesperrt.": {
       "en": "The current quarter is locked for changes.",
@@ -1256,10 +1256,20 @@
       "fr": "Tri",
       "it": "Ordinamento"
     },
+    "Spalte ausgeblendet": {
+      "en": "column hidden",
+      "fr": "colonne masquée",
+      "it": "colonna nascosta"
+    },
     "Spalten": {
       "en": "Columns",
       "fr": "Colonnes",
       "it": "Colonne"
+    },
+    "Spalten ausgeblendet": {
+      "en": "columns hidden",
+      "fr": "colonnes masquées",
+      "it": "colonne nascoste"
     },
     "Spitze": {
       "en": "Peak",
@@ -1386,11 +1396,6 @@
       "fr": "réaffecté à",
       "it": "riassegnato a"
     },
-    "Unter 900 px ist Planung nicht sinnvoll. Einstiegsseite, Dashboard und Verlauf sind als Lesesicht verfügbar.": {
-      "en": "Below 900 px planning is not workable. The entry page, dashboard and history remain available as a reading view.",
-      "fr": "En dessous de 900 px, la planification n'est pas praticable. La page d'accueil, le tableau de bord et l'historique restent disponibles en lecture.",
-      "it": "Sotto i 900 px la pianificazione non è praticabile. Pagina iniziale, cruscotto e cronologia restano disponibili in sola lettura."
-    },
     "Vergabe erfolgt": {
       "en": "Contract awarded",
       "fr": "Adjudication effectuée",
@@ -1475,11 +1480,6 @@
       "en": "Assigned to",
       "fr": "Attribué à",
       "it": "Assegnato a"
-    },
-    "Zur Einstiegsseite": {
-      "en": "To the entry page",
-      "fr": "Vers la page d'accueil",
-      "it": "Alla pagina iniziale"
     },
     "Zur Einstiegsseite, ohne Filter": {
       "en": "To the entry page, without filters",
