@@ -7,7 +7,7 @@
    ============================================================================= */
 
 import {
-  data, state, t, num, unitSuffix, cellValue, projectDemand, ampel, phaseOf, quarterPeriods,
+  data, state, t, num, unitSuffix, cellValue, projectDemand, ampel, phaseOf, quarterPeriods, columnSet,
   personUtilisation, totals, loadStatus, heatStep, filteredProjects, activeFilters,
   groupProjects
 } from './store.js';
@@ -15,9 +15,9 @@ import {
 import {
   html, raw, attr, icons, pageHeader, exportMenu, toolbar, activeFilterRow, noResults,
   dropdown, menuRadio,
-  scopeLine, AMPEL_STATES, legendBlock, legendItem, yearRule
+  scopeLine, AMPEL_STATES, legendBlock, legendItem, yearRule, ampelDot
 } from './ui.js';
-import { visibleColumns } from './columns.js';
+import { visibleColumns, leadLayout } from './columns.js';
 import { ganttRow, ganttLegend } from './views-schedule.js';
 
 /* =============================================================================
@@ -339,7 +339,7 @@ function methodSheet(sheet, { page, total }) {
  */
 function sheetColumns(sheet) {
   const wide = sheet.orientation === 'landscape';
-  return visibleColumns(state).map(c => ({
+  return visibleColumns(columnSet()).map(c => ({
     key: c.key,
     // The sheet has room for the longer name where the grid header does not.
     label: c.key === 'target'
@@ -358,10 +358,7 @@ function sheetColumns(sheet) {
  */
 function sheetCell(col, p, range) {
   switch (col.key) {
-    case 'ampel': {
-      const a = ampel(p.leadId, range);
-      return html`<span class="ampel ampel--${a.key}" title="${a.title}"></span>`;
-    }
+    case 'ampel': return ampelDot(p, range);
     case 'target': return `${num(p.target)}${unitSuffix()}`;
     default: return col.text(p) || '—';
   }
@@ -377,10 +374,17 @@ const continuation = (span) => html`<div class="sheet__row sheet__row--more">
  * printed plan and the screen plan cannot drift apart; only the width of the
  * lead columns differs, and that is a stylesheet matter.
  */
-function scheduleTable(rows, block, tot, last) {
+function scheduleTable(rows, block, tot, last, sheet) {
   const cols = quarterPeriods(block[0], block.length);
-  return html`<div class="sheet__gantt gantt" style="--gantt-cols:${cols.length}">
-    ${rows.some(r => r.kind === 'group') ? '' : ganttAxisHead(cols)}
+  // Paper widths, not screen ones — the same numbers the printed table uses.
+  const wide = sheet.orientation === 'landscape';
+  const lay = leadLayout(columnSet(), {
+    room: Infinity, axis: 0, widthOf: c => c.sheet.w[wide ? 1 : 0]
+  });
+  lay.tpl = [...lay.parts, 'minmax(0, 1fr)'].join(' ');
+  return html`<div class="sheet__gantt gantt"
+      style="--gantt-cols:${cols.length};--gantt-lead:${lay.width}px">
+    ${rows.some(r => r.kind === 'group') ? '' : ganttAxisHead(cols, lay)}
     ${rows.map(row => {
       if (row.kind === 'sum') return '';          // a bar plan has nothing to add up
       if (row.kind === 'group') {
@@ -388,18 +392,18 @@ function scheduleTable(rows, block, tot, last) {
           <span>${t(row.label)}</span>
           <span class="sheet__groupcount">${row.count} ${t('Projekte')}${
             row.continued ? ` · ${t('Fortsetzung')}` : ''}</span>
-        </div>${ganttAxisHead(cols)}`;
+        </div>${ganttAxisHead(cols, lay)}`;
       }
-      return ganttRow(row.p, cols);
+      return ganttRow(row.p, cols, lay);
     })}
     ${last ? capacityRow(cols, tot) : continuation(0)}
   </div>`;
 }
 
 /** The axis, repeated above every group exactly as the column head is. */
-const ganttAxisHead = (cols) => html`<header class="gantt__axis">
-  <div class="gantt__axislabel">ID</div>
-  <div class="gantt__axislabel">${t('Projekt')}</div>
+const ganttAxisHead = (cols, lay) => html`<header class="gantt__axis"
+    style="grid-template-columns:${raw(lay.tpl)}">
+  ${lay.shown.map(c => html`<div class="gantt__axislabel">${t(c.sheet.label ?? c.label)}</div>`)}
   <div class="gantt__quarters">
     ${cols.map(col => html`<div class="${col.isNow ? 'is-today' : ''} ${yearRule(col)}">${col.short}</div>`)}
   </div>
@@ -425,7 +429,7 @@ const demandLegend = (cfg) => legendBlock([
   },
   {
     label: 'Ampel',
-    items: state.ampel
+    items: columnSet().ampel
       ? AMPEL_STATES.filter(a => a.key !== 'none')
         .map(a => legendItem(html`<span class="ampel ampel--${a.key}"></span>`, a.label))
       : null
@@ -488,7 +492,7 @@ function printSheet(sheet, report, { rows, all, block, page, total, last }) {
     </header>
 
     <div class="sheet__table">
-      ${schedule ? scheduleTable(rows, block, tot, last)
+      ${schedule ? scheduleTable(rows, block, tot, last, sheet)
         : html`${rows.some(r => r.kind === 'group') ? '' : columnHead(lead, quarters)}
 
       ${rows.map(row => {

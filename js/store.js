@@ -55,11 +55,8 @@ const DEFAULT_STATE = {
   leads: [],               // selected person ids
   portfolios: [],          // selected portfolio ids
   overloadOnly: false,
-  // column / attribute toggles
-  cols: { id: true, phase: true, lead: true, credit: true, portfolio: false, priority: false, nextMs: false },
-  ampel: true,
-  trend: false,
-  target: false,
+  // column / attribute toggles, one set per grid — see columnSet()
+  cols: null,              // filled from COLUMN_DEFAULTS below
   hideZeros: false,
   // editing
   edit: false,
@@ -83,11 +80,43 @@ const DEFAULT_STATE = {
   toast: null
 };
 
+/*
+ * What each grid shows before anyone touches the Attribute menu. The two answer
+ * different questions, so they start from different columns: the pensum grid
+ * needs enough master data to judge a number, the bar plan needs only enough to
+ * find the row again.
+ */
+const COLUMN_DEFAULTS = {
+  overview: { title: true, phase: true, lead: true, ampel: true, credit: true,
+              portfolio: false, priority: false, nextMs: false, target: false, trend: false },
+  schedule: { title: true, phase: false, lead: false, ampel: false, credit: false,
+              portfolio: false, priority: false, nextMs: false, target: false, trend: false }
+};
+
 export const state = {
   ...DEFAULT_STATE,
-  cols: { ...DEFAULT_STATE.cols },
+  cols: { overview: { ...COLUMN_DEFAULTS.overview }, schedule: { ...COLUMN_DEFAULTS.schedule } },
   showAll: { ...DEFAULT_STATE.showAll }
 };
+
+/**
+ * Which set of switches the view in front of the reader is driven by.
+ *
+ * The export tab has no grid of its own — it prints one of the two, so it
+ * follows whichever report is selected. Anything else reads the pensum grid's
+ * set, which is also what the spreadsheet export takes its columns from.
+ */
+export function columnSet() {
+  const key = state.tab === 'schedule' || (state.tab === 'export' && state.report === 'schedule')
+    ? 'schedule' : 'overview';
+  return state.cols[key];
+}
+
+/** The name of the set columnSet() returns, for the action that writes to it. */
+export function columnSetKey() {
+  return state.tab === 'schedule' || (state.tab === 'export' && state.report === 'schedule')
+    ? 'schedule' : 'overview';
+}
 
 const listeners = new Set();
 

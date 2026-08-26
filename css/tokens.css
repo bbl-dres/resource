@@ -347,16 +347,23 @@
   /* ==========================================================================
      17 · Layout metrics
      ========================================================================== */
-  --layout-width:    1440px;   /* the design width          */
+  --layout-width:    1440px;   /* prose and cards: a readable measure */
+  --layout-width-grid: 1800px;  /* the two planning grids: at this width no
+                                   project name truncates any more */
   --shell-pad-x:     28px;
   --header-height:   60px;
   --tabbar-height:   40px;
 
   /* Pensum grid */
   --grid-quarter:      72px;    /* one quarter column        */
+  --grid-quarter-max:  96px;    /* and its ceiling: past this a wider window
+                                   should lengthen the project name, not the
+                                   space around a two-digit number */
   --grid-col-ampel:     62px;
   --grid-col-id:        62px;
   --grid-col-title:     285px;   /* the floor; the column takes the slack */
+  --grid-col-title-max: 460px;   /* and its ceiling — the width at which the
+                                    longest project name fits */
   --grid-col-phase:     152px;  /* «33 Bewilligungsverfahren» in full, 144px + padding */
   --grid-col-lead:      132px;
   --grid-col-portfolio: 110px;
@@ -372,7 +379,6 @@
   --person-col-employment: 70px;
   --person-col-projects:   60px;
   --person-col-peak:       76px;
-  --grid-pane-left:    360px;   /* gantt project column      */
 
   /* Rows and controls */
   --row-height:         38px;

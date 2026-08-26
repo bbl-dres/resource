@@ -8,7 +8,7 @@
    ============================================================================= */
 
 import {
-  data, state, t, projectDemand, ampel, groupProjects, filteredProjects, phaseOf,
+  data, state, t, projectDemand, ampel, groupProjects, filteredProjects, phaseOf, columnSet,
   totals, periods, periodValue, loadStatus, activeFilters
 } from './store.js';
 
@@ -21,7 +21,7 @@ import { visibleColumns } from './columns.js';
 
 /** 'text' left-aligns, 'num' is a real number, 'pct' a number in percent points. */
 function columns(cols) {
-  const list = visibleColumns(state).map(c => ({
+  const list = visibleColumns(columnSet()).map(c => ({
     key: c.key,
     // Two columns say something different on a spreadsheet than on screen:
     // the credit is a bare number in millions, and the target names its quarter.
@@ -38,7 +38,7 @@ function columns(cols) {
 function projectCells(p, cols) {
   const demand = projectDemand(p);
   const row = {};
-  for (const c of visibleColumns(state)) row[c.key] = c.text ? c.text(p) : null;
+  for (const c of visibleColumns(columnSet())) row[c.key] = c.text ? c.text(p) : null;
   // Numbers must reach the workbook as numbers, not as the words the grid shows.
   row.id = p.number.replace('…', '');
   row.credit = p.credit ?? null;

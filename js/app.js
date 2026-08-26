@@ -11,7 +11,7 @@
 
 import {
   data, state, load, subscribe, setState, syncFromUrl, closeOverlays,
-  cellValue, toggleIn, removeFilter, resetFilters, defaultDir, t
+  cellValue, toggleIn, removeFilter, resetFilters, defaultDir, t, columnSetKey
 } from './store.js';
 import { loadIcons } from './icons.js';
 import { html, appHeader, appFooter, toast } from './ui.js';
@@ -44,6 +44,14 @@ function render() {
 
   const view = VIEWS[state.tab] ?? renderLanding;
 
+  /*
+   * Before the view runs, not after: the stylesheet widens the shell for the
+   * two planning grids, and those grids measure that width while they build
+   * their column template. Set afterwards, the first render of a tab laid
+   * itself out against the previous tab's width.
+   */
+  document.documentElement.dataset.tab = state.tab;
+
   root.innerHTML = String(html`
     ${appHeader()}
     <main id="main">${view()}</main>
@@ -70,22 +78,34 @@ let lastRenderAt = 0;
  * Keep the open menu inside the window: cap its height at the space below the
  * trigger, and pull it back from the right edge when it would run off-screen.
  */
+const MENU_EDGE = 12;     // how close a panel may come to the window edge
+
 function positionMenu() {
   const panel = root.querySelector('.dd__panel');
   if (!panel) return;
   panel.style.removeProperty('--dd-max-h');
+  panel.style.removeProperty('left');
+  panel.style.removeProperty('right');
   panel.style.removeProperty('margin-left');
 
   const box = panel.getBoundingClientRect();
   panel.style.setProperty('--dd-max-h', `${Math.max(160, window.innerHeight - box.top - 16)}px`);
 
-  // Both edges: a panel anchored right of a left-hand trigger ran off the left.
-  const overflowRight = box.right - (window.innerWidth - 12);
-  if (overflowRight > 0) {
-    panel.style.marginLeft = `${-Math.ceil(overflowRight)}px`;
-  } else if (box.left < 12) {
-    panel.style.marginLeft = `${Math.ceil(12 - box.left)}px`;
-  }
+  /*
+   * Clamp in window coordinates, then state the result as a `left` against the
+   * panel's own containing block.
+   *
+   * The earlier version nudged with margin-left, which is only half a lever: on
+   * a right-anchored panel the margin enters the same equation `right` does, so
+   * a 376px correction moved the box 188px and the Attribute menu still hung
+   * 176px off the left edge of a phone.
+   */
+  const room = window.innerWidth - 2 * MENU_EDGE;
+  const width = Math.min(box.width, room);
+  const want = Math.min(Math.max(box.left, MENU_EDGE), window.innerWidth - MENU_EDGE - width);
+  const origin = (panel.offsetParent ?? panel.parentElement).getBoundingClientRect().left;
+  panel.style.left = `${Math.round(want - origin)}px`;
+  panel.style.right = 'auto';
 
   /* Landscape phones have no room below the trigger; open upwards instead. */
   const below = window.innerHeight - box.top;
@@ -278,7 +298,11 @@ const actions = {
     setState({ [kind]: val === 'all' ? all : [] });
   },
 
-  'toggle-col': (val) => setState(s => ({ cols: { ...s.cols, [val]: !s.cols[val] } })),
+  /* Writes into the set the visible grid is driven by, never the other one. */
+  'toggle-col': (val) => setState(s => {
+    const key = columnSetKey();
+    return { cols: { ...s.cols, [key]: { ...s.cols[key], [val]: !s.cols[key][val] } } };
+  }),
   'toggle-flag': (val) => setState(s => ({ [val]: !s[val] })),
   'overload-toggle': () => setState(s => ({ overloadOnly: !s.overloadOnly })),
 

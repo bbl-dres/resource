@@ -283,6 +283,15 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .gantt__card.scrollbox { overflow: hidden; }
 
 .wrap { max-width: var(--layout-width); margin: 0 auto; padding-inline: var(--shell-pad-x); }
+/*
+ * A table wants width, prose wants a measure. On a 1920 or 2560 screen the
+ * planning grids were an island: 1440px used, 480 to 1120px empty. The landing
+ * page and the API reference keep the narrower measure, where long lines cost
+ * more than they buy.
+ */
+:root[data-tab="overview"],
+:root[data-tab="schedule"],
+:root[data-tab="history"] { --layout-width: var(--layout-width-grid); }
 
 /*
  * Ground rules: navy chrome, one white strip that answers "where am I", then a
@@ -1427,7 +1436,8 @@ h1, h2, h3,
    ========================================================================== */
 
 .gantt {
-  --gantt-lead: calc(var(--grid-col-id) + var(--grid-col-title));
+  /* --gantt-lead comes from the view: it is the width of whichever columns the
+     Attribute menu has switched on, and the overlay and the min-width follow it. */
   display: flex; flex-direction: column; gap: var(--space-13);
 }
 .gantt__group { display: flex; flex-direction: column; }
@@ -1453,28 +1463,29 @@ h1, h2, h3,
  * The same two lead columns the pensum grid uses, at the same widths, so a
  * project sits in the same place whichever tab you are reading.
  */
+/* The template itself is set per render, from the column registry. */
 .gantt__axis,
-.gantt__row {
-  display: grid;
-  grid-template-columns: var(--grid-col-id) var(--grid-col-title) minmax(0, 1fr);
-}
+.gantt__row { display: grid; }
 .gantt__axis {
   min-height: var(--row-height);
   background: var(--color-surface);
   border-bottom: var(--border-hairline) solid var(--color-border-rule);
 }
+/*
+ * The same padding as the pensum grid, because the two read the same width
+ * tokens: at 12px on both sides a 152px column lost 8px and «33 Bewilligungs-
+ * verfahren» truncated in one tab while fitting in the other.
+ */
 .gantt__axislabel {
-  display: flex; align-items: center; padding: 0 var(--space-6);
+  display: flex; align-items: center; padding-right: var(--space-4);
   font-size: var(--text-sm); font-weight: var(--font-semibold); color: var(--color-text-secondary);
 }
 
 /*
  * A project keeps its name while its bars scroll under it. Without this the
- * axis moved and the rows the reader was following moved with it.
+ * axis moved and the rows the reader was following moved with it. The offset is
+ * inline, because which columns precede this one is a question of the menu.
  */
-.gantt__axisid, .gantt__rowid { left: 0; }
-.gantt__axistitle, .gantt__rowtitlecell { left: var(--grid-col-id); }
-
 .gantt__axislabel, .gantt__rowlabel, .capband__label {
   position: sticky; z-index: var(--z-frozen);
   /* Full row height, or the bars and the today marker show through the gaps
@@ -1482,8 +1493,7 @@ h1, h2, h3,
   align-self: stretch;
   background: var(--color-surface);
 }
-.gantt__axisid { padding-right: 0; }
-.gantt__axistitle { padding-left: 0; }
+
 .gantt__quarters {
   display: grid; grid-template-columns: repeat(var(--gantt-cols, 8), minmax(0, 1fr));
   align-items: center; text-align: center;
@@ -1559,8 +1569,11 @@ h1, h2, h3,
 
 .gantt__rowlabel {
   display: flex; align-items: center; min-width: 0;
-  padding: 0 var(--space-6);
+  padding-right: var(--space-4);
 }
+/* The block is inset from the card edge, exactly as the pensum grid's is. */
+.gantt__axis > *:first-child,
+.gantt__row > *:first-child { padding-left: var(--space-6); }
 .gantt__rowtitle {
   display: block; min-width: 0; flex: 1; min-height: var(--target-min);
   border: 0; padding: 0; background: none; text-align: left;
@@ -1569,14 +1582,21 @@ h1, h2, h3,
   cursor: pointer;
 }
 .gantt__rowtitle:hover { color: var(--color-text-link); text-decoration: underline; text-underline-offset: 2px; }
-.gantt__rowid {
-  /* The column already sets the width; a padding on both sides would squeeze
-     the number onto two lines. Left only, as in the pensum grid. */
-  padding-right: 0;
+.gantt__row .gantt__col--id {
   font-size: var(--text-sm); color: var(--color-text-muted);
   font-variant-numeric: tabular-nums;
 }
-.gantt__rowtitlecell { padding-left: 0; }
+.gantt__row .gantt__col--phase,
+.gantt__row .gantt__col--lead,
+.gantt__row .gantt__col--portfolio,
+.gantt__row .gantt__col--priority,
+.gantt__row .gantt__col--nextMs {
+  font-size: var(--text-base); color: var(--color-text-secondary);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;
+  line-height: var(--row-height);
+}
+.gantt__row .gantt__col--credit,
+.gantt__row .gantt__col--target { justify-content: flex-end; }
 
 .gantt__track {
   display: grid; grid-template-columns: repeat(var(--gantt-cols, 8), minmax(0, 1fr));
@@ -1658,7 +1678,6 @@ h1, h2, h3,
 .diamond.is-open { background: var(--color-surface); border: 2px solid var(--color-border-emphasis); }
 
 .capband {
-  --gantt-lead: var(--grid-pane-left);
   border-radius: var(--radius-lg); background: var(--color-surface);
   box-shadow: var(--shadow-raised); overflow: hidden;
 }
@@ -1921,7 +1940,7 @@ h1, h2, h3,
 .sheet__gantt .gantt__quarters { font-size: var(--sheet-text); }
 .sheet__gantt .gantt__axislabel { font-size: var(--sheet-text); padding-inline: 6px; }
 .sheet__gantt .gantt__rowlabel { padding: 0 6px; }
-.sheet__gantt .gantt__rowid { font-size: var(--sheet-text); }
+.sheet__gantt .gantt__col--id { font-size: var(--sheet-text); }
 .sheet__gantt .gantt__rowtitle { font-size: var(--sheet-text); font-weight: var(--font-semibold); }
 .sheet__gantt .gantt__barlabel { font-size: var(--sheet-text); }
 .sheet__gantt .gantt__track { align-items: center; }
@@ -2114,8 +2133,6 @@ h1, h2, h3,
 }
 
 @media (max-width: 1100px) {
-  /* Give the timeline its width back before making anyone scroll for it. */
-  .gantt, .capband { --gantt-lead: 260px; }
   .kpi-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .entry-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   /* Below the planning widths the row may break rather than overflow. */
@@ -2132,16 +2149,51 @@ h1, h2, h3,
   #swagger { margin-inline: calc(-1 * var(--space-8)); }
 }
 
+/*
+ * On a phone the nine toolbar controls wrapped into six rows: 202px of chrome,
+ * and the first data row landed at 95 % of the window height — you scrolled a
+ * whole screen to see a number. One row that scrolls sideways keeps every
+ * control reachable and gives the table back most of the screen.
+ */
+@media (max-width: 700px) {
+  .toolbar {
+    flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none;
+    scroll-padding-inline: var(--space-8);
+    margin-inline: calc(-1 * var(--space-8)); padding-inline: var(--space-8);
+  }
+  .toolbar::-webkit-scrollbar { width: 0; height: 0; }
+  .toolbar > * { flex: 0 0 auto; }
+  .toolbar .btn > :not(.icon):not(.badge-count) { overflow: visible; }
+
+}
+
 @media (max-width: 760px) {
   .kpi-strip, .entry-grid { grid-template-columns: minmax(0, 1fr); }
   .card--span4, .card--span4:last-child { grid-column: span 12; }
   .page-header__row { flex-direction: column; align-items: flex-start; gap: var(--space-6); }
   .page-header__actions { flex-wrap: wrap; }
-  .chg, .log { grid-template-columns: minmax(0, 1fr); gap: var(--space-2); }
-  .chg--head, .log--head { display: none; }
+  .log { grid-template-columns: minmax(0, 1fr); gap: var(--space-2); }
+  .log--head { display: none; }
   .rebook { grid-template-columns: minmax(0, 1fr); }
   /* The modal's twin of the .chg/.log reflow, missed when that one was written. */
   .modal__log li, .facts__row { grid-template-columns: minmax(0, 1fr); gap: var(--space-2); }
+}
+
+/*
+ * Below 760 the page actions wrap; on a phone two stacked rows cost 66px of an
+ * 844px screen. Declared after that block so it wins on source order.
+ */
+@media (max-width: 700px) {
+  .page-header__actions {
+    /* The row above turns into a column with align-items: flex-start, so this
+       box sizes to its content and overflow-x never fires — it grew 4px past
+       the window instead of scrolling inside it. */
+    align-self: stretch;
+    flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none;
+    margin-inline: calc(-1 * var(--space-8)); padding-inline: var(--space-8);
+  }
+  .page-header__actions::-webkit-scrollbar { width: 0; height: 0; }
+  .page-header__actions > * { flex: 0 0 auto; }
 }
 
 /*

@@ -6,7 +6,8 @@
    ============================================================================= */
 
 import {
-  data, state, t, activeFilters, kpis, filteredProjects, sortKey, canStep, notifications
+  data, state, t, activeFilters, kpis, filteredProjects, sortKey, canStep, notifications,
+  columnSet, ampel
 } from './store.js';
 import { toggleableColumns } from './columns.js';
 import { icon } from './icons.js';
@@ -118,6 +119,31 @@ export function tokenPx(name) {
 
 /** The rule that separates one year from the next, drawn on its first column. */
 export const yearRule = period => (period.yearStart ? 'is-yearstart' : '');
+
+/**
+ * The row's traffic light. Three views draw it — the table, the bar plan and
+ * the printed sheet — and a dot with no accessible name is a dot with no
+ * meaning, so the name is part of the mark, not of the caller.
+ */
+/**
+ * Say what had to give. A window too narrow for every column is a reason to
+ * show fewer, not a reason to refuse to draw — but the reader has to know that
+ * what they are looking at is not the whole table.
+ */
+export function droppedNote(hidden) {
+  if (!hidden.length) return '';
+  return html`<p class="dropped-note">
+    ${icons.info()}
+    ${hidden.length} ${t(hidden.length === 1 ? 'Spalte ausgeblendet' : 'Spalten ausgeblendet')},
+    ${t('das Fenster ist zu schmal')}: ${hidden.map(c => t(c.label)).join(', ')}.
+  </p>`;
+}
+
+export function ampelDot(p, range) {
+  const a = ampel(p.leadId, range);
+  return html`<span class="ampel ampel--${a.key}" role="img"
+    aria-label="${a.title}" title="${a.title}"></span>`;
+}
 
 /** The project cell of a change row: a link when the entry names a project. */
 export const changeProject = (c) => (c.projectId
@@ -447,7 +473,7 @@ const GROUPS = [
  * implementation detail the menu does not expose. Order comes from the
  * registry, so the menu always reads against the table.
  */
-const menuColumnOn = c => (c.act === 'toggle-col' ? state.cols[c.id] : state[c.id]);
+
 
 export function toolbar({ attributes = true, exclude = [] } = {}) {
   const active = sortKey();
@@ -527,7 +553,7 @@ export function toolbar({ attributes = true, exclude = [] } = {}) {
         ${divider()}
         ${menuGroupLabel(t('Spalten'))}
         ${toggleableColumns().filter(c => !exclude.includes(c.id))
-          .map(c => menuCheckbox(t(c.label), menuColumnOn(c), c.act, c.id))}
+          .map(c => menuCheckbox(t(c.label), !!columnSet()[c.id], 'toggle-col', c.id))}
         ${divider()}
         ${menuCheckbox(t('Nullwerte ausblenden'), state.hideZeros, 'toggle-flag', 'hideZeros')}`
     })}

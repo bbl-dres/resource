@@ -9,8 +9,8 @@
    A column carries what all six need:
      key      identity, and the field name in an exported row
      label    German source string; every consumer runs it through t()
-     flag     which switch turns it on — 'cols' for the column set, 'state' for
-              a top-level flag. The menu hides the distinction; the code cannot.
+     flag     the switch that turns it on, or null for a column that is always
+              there. Only `id` is always there: a row has to be identifiable.
      sort     the SORT_KEYS entry a header click selects, if it sorts at all
      width    the design token holding its width in the grid
      sheet    { w: [portrait, landscape], cls } for the printed sheet
@@ -31,59 +31,61 @@ const nextGate = (p) => {
 
 export const COLUMNS = [
   {
-    key: 'id', label: 'ID', flag: ['cols', 'id'], sort: 'id', width: '--grid-col-id',
+    // The one column with no switch: hide everything else and a row is still
+    // a row, hide this and it is an anonymous strip of numbers.
+    key: 'id', label: 'ID', flag: null, sort: 'id', width: '--grid-col-id',
     cls: 'pcell--id', sheet: { w: [52, 62], cls: 'sheet__id' }, xls: { type: 'text', width: 12 },
     text: p => p.number
   },
   {
-    key: 'title', label: 'Projekt', flag: null, sort: 'project', width: '--grid-col-title',
+    key: 'title', label: 'Projekt', flag: 'title', sort: 'project', width: '--grid-col-title',
     grow: true, cls: 'pcell--title', sheet: { w: [150, 190], flex: true }, xls: { type: 'text', width: 38 },
     text: p => p.title
   },
   {
-    key: 'phase', label: 'SIA-Phase', flag: ['cols', 'phase'], sort: 'phase', width: '--grid-col-phase',
+    key: 'phase', label: 'SIA-Phase', flag: 'phase', sort: 'phase', width: '--grid-col-phase',
     cls: 'pcell--phase', sheet: { w: [124, 128], cls: 'sheet__muted', label: 'SIA-Teilphase' },
     xls: { type: 'text', width: 20 },
     text: p => t(phaseOf(p.phase).label)
   },
   {
-    key: 'lead', label: 'Projektleitung', flag: ['cols', 'lead'], sort: 'lead', width: '--grid-col-lead',
+    key: 'lead', label: 'Projektleitung', flag: 'lead', sort: 'lead', width: '--grid-col-lead',
     cls: 'pcell--lead', sheet: { w: [86, 108], cls: 'sheet__muted' }, xls: { type: 'text', width: 20 },
     text: leadName
   },
   {
     // The signal reports on the project lead, so it sits beside that column.
-    key: 'ampel', label: 'Ampel', flag: ['state', 'ampel'], sort: null, width: '--grid-col-ampel',
+    key: 'ampel', label: 'Ampel', flag: 'ampel', sort: null, width: '--grid-col-ampel',
     cls: 'pcell--ampel', sheet: { w: [34, 38], cls: 'sheet__mark' }, xls: { type: 'text', width: 14 },
     // A coloured dot carries nothing in a spreadsheet, so it exports as its word.
     text: p => t(ampel(p.leadId).word)
   },
   {
-    key: 'portfolio', label: 'Teilportfolio', flag: ['cols', 'portfolio'], sort: 'portfolio',
+    key: 'portfolio', label: 'Teilportfolio', flag: 'portfolio', sort: 'portfolio',
     width: '--grid-col-portfolio', cls: 'pcell--text', sheet: { w: [76, 96], cls: 'sheet__muted' },
     xls: { type: 'text', width: 18 },
     text: p => t(data.portfoliosById[p.portfolio].label)
   },
   {
-    key: 'priority', label: 'Priorität', flag: ['cols', 'priority'], sort: 'priority',
+    key: 'priority', label: 'Priorität', flag: 'priority', sort: 'priority',
     width: '--grid-col-priority', cls: 'pcell--text', sheet: { w: [50, 62], cls: 'sheet__muted' },
     xls: { type: 'text', width: 12 },
     text: p => t(p.priority)
   },
   {
-    key: 'nextMs', label: 'Nächster Meilenstein', flag: ['cols', 'nextMs'], sort: null,
+    key: 'nextMs', label: 'Nächster Meilenstein', flag: 'nextMs', sort: null,
     width: '--grid-col-nextms', cls: 'pcell--text', sheet: { w: [92, 116], cls: 'sheet__muted' },
     xls: { type: 'text', width: 24 },
     text: nextGate
   },
   {
-    key: 'credit', label: 'Kredit CHF', flag: ['cols', 'credit'], sort: 'credit',
+    key: 'credit', label: 'Kredit CHF', flag: 'credit', sort: 'credit',
     width: '--grid-col-credit', cls: 'pcell--credit', numeric: true,
     sheet: { w: [62, 76], cls: 'sheet__num sheet__muted' }, xls: { type: 'num', width: 14 },
     text: p => t(p.creditLabel)
   },
   {
-    key: 'target', label: 'Soll-Pensum', flag: ['state', 'target'], sort: 'target',
+    key: 'target', label: 'Soll-Pensum', flag: 'target', sort: 'target',
     width: '--grid-col-target', cls: 'pcell--target', numeric: true,
     sheet: { w: [44, 52], cls: 'sheet__num' }, xls: { type: 'pct', width: 10 }
     // `text` is omitted: the value is a pensum and every consumer formats it
@@ -92,7 +94,7 @@ export const COLUMNS = [
   {
     // Not master data: a sparkline of the row's own numbers, so it sits after
     // the time axis and no other consumer has a use for it.
-    key: 'trend', label: 'Verlauf', flag: ['state', 'trend'], sort: null,
+    key: 'trend', label: 'Verlauf', flag: 'trend', sort: null,
     width: '--grid-col-trend', cls: 'pcell--trend', afterQuarters: true
   }
 ];
@@ -102,18 +104,19 @@ export const column = key => BY_KEY[key];
 
 /*
  * Which column gives way first when the window is too narrow, least
- * load-bearing to most. The project title is not in the list: a table of
- * projects without the project is not a view anyone wants.
+ * load-bearing to most. `id` is not in the list — it is the floor, and on a
+ * phone the list runs to its end and leaves exactly that.
  */
-const YIELD_ORDER = ['nextMs', 'priority', 'portfolio', 'credit', 'phase', 'ampel', 'lead', 'id'];
+const YIELD_ORDER = ['nextMs', 'priority', 'portfolio', 'target', 'credit',
+                     'phase', 'ampel', 'lead', 'title'];
 
 /**
  * The columns that fit. `room` is the width available to the card and
  * `axis` what the time axis needs at a minimum; anything that does not fit is
  * dropped in yield order and returned so the view can say what it hid.
  */
-export function fittingColumns(state, { room, axis, widthOf }) {
-  const shown = visibleColumns(state);
+export function fittingColumns(set, { room, axis, widthOf }) {
+  const shown = visibleColumns(set);
   const hidden = [];
   const lead = () => shown.reduce((a, c) => a + widthOf(c), 0);
 
@@ -127,24 +130,46 @@ export function fittingColumns(state, { room, axis, widthOf }) {
   return { shown, hidden };
 }
 
-/** Is this column switched on right now? A column with no flag is always on. */
-export function columnOn(state, col) {
-  if (!col.flag) return true;
-  const [where, key] = col.flag;
-  return where === 'cols' ? !!state.cols[key] : !!state[key];
+/**
+ * The frozen block both grids put in front of the time axis: the template parts
+ * for its columns, where each one is pinned, and what had to give.
+ *
+ * Both tabs freeze the same columns in the same order for the same reason, so
+ * they compute it from one place — a project sits in the same spot whichever
+ * tab you are reading.
+ */
+export function leadLayout(set, fit) {
+  const { shown, hidden } = fittingColumns(set, fit);
+  /*
+   * Only one track in a row may take the slack. The pensum grid gives it to the
+   * project title; the bar plan gives it to the bars, so there the title is
+   * fixed — with two flexible tracks the title ate half the free width and the
+   * capacity band, which measures the frozen block, no longer lined up under it.
+   */
+  const grow = fit.grow === true;
+  const parts = [];
+  const sticky = {};
+  let offset = 0;
+
+  for (const col of shown) {
+    const w = fit.widthOf(col);
+    sticky[col.key] = offset;
+    offset += w;
+    parts.push(grow && col.grow ? `minmax(${w}px, 1fr)` : `${w}px`);
+  }
+  sticky.width = offset;
+  sticky.last = shown.at(-1)?.key ?? null;
+  sticky.shown = shown;
+  return { parts, sticky, shown, hidden, width: offset };
 }
 
-/** The columns currently on, in grid order. */
-export const visibleColumns = state =>
-  COLUMNS.filter(c => !c.afterQuarters && columnOn(state, c));
+/** Is this column switched on? A column with no flag is always on. */
+export const columnOn = (set, col) => !col.flag || !!set[col.flag];
 
-/**
- * The Attribute menu. `title` is not offered — a table of projects without the
- * project is not a view anyone wants — so it is the one column with no switch.
- */
+/** The columns currently on, in grid order. */
+export const visibleColumns = set =>
+  COLUMNS.filter(c => !c.afterQuarters && columnOn(set, c));
+
+/** The Attribute menu: every column that has a switch. */
 export const toggleableColumns = () =>
-  COLUMNS.filter(c => c.flag).map(c => ({
-    id: c.flag[1],
-    label: c.label,
-    act: c.flag[0] === 'cols' ? 'toggle-col' : 'toggle-flag'
-  }));
+  COLUMNS.filter(c => c.flag).map(c => ({ id: c.flag, label: c.label }));

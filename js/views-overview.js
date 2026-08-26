@@ -6,18 +6,18 @@ import {
   data, state, t, num, fmt, unitSuffix, fmtMio,
   cellValue, projectDemand, isEdited, personLoad, personUtilisation,
   totals, loadStatus, heatStep, ampel, filteredProjects, groupProjects,
-  activeFilters, milestones, milestoneStats, kpis, periods, periodValue, phaseOf, windowEdges,
+  activeFilters, milestones, milestoneStats, kpis, periods, periodValue, phaseOf, windowEdges, columnSet,
   chartTone
 } from './store.js';
 
 import {
   html, raw, icons, pageHeader, pageActions, toolbar, activeFilterRow,
-  timeControls, columnChart, noResults, ampelLegend,
+  timeControls, columnChart, noResults, ampelLegend, ampelDot, droppedNote,
   legendBlock, legendItem, attr,
   tokenPx, yearRule, pinCls, pinLeft, sortableHead, changeProject
 } from './ui.js';
 
-import { fittingColumns, column } from './columns.js';
+import { leadLayout, column } from './columns.js';
 
 /* -----------------------------------------------------------------------------
    Shared helpers
@@ -289,30 +289,25 @@ const MIN_PERIODS = 3;
 
 function gridLayout() {
   const quarterW = tokenPx('--grid-quarter');
-  const { shown, hidden } = fittingColumns(state, {
+  const { parts, sticky, shown, hidden, width: offset } = leadLayout(columnSet(), {
     room: cardWidth(),
     axis: MIN_PERIODS * quarterW,
-    widthOf: c => tokenPx(c.width)
+    widthOf: c => tokenPx(c.width),
+    grow: true          // the project title absorbs what the axis leaves over
   });
-  const parts = [];
-  const sticky = {};
-  let offset = 0;
-
-  for (const col of shown) {
-    const w = tokenPx(col.width);
-    sticky[col.key] = offset;
-    offset += w;
-    parts.push(col.grow ? `minmax(${w}px, 1fr)` : `${w}px`);
-  }
-  sticky.width = offset;
-  sticky.last = shown.at(-1)?.key ?? null;
-  sticky.shown = shown;
 
   const cols = periods().length;
-  parts.push(`repeat(${cols}, minmax(${quarterW}px, 1fr))`);
+  /*
+   * A ceiling, not a free share. With eight flexible quarter tracks against one
+   * flexible title track the quarters took 8/9 of every extra pixel: at 2400px
+   * they reached 192px around a two-digit number while 29 of 111 project names
+   * still truncated at 285px. Capped, the surplus goes to the name instead and
+   * none of them truncates.
+   */
+  parts.push(`repeat(${cols}, minmax(${quarterW}px, ${tokenPx('--grid-quarter-max')}px))`);
   let minWidth = offset + quarterW * cols;
 
-  if (state.trend) {
+  if (columnSet().trend) {
     const w = tokenPx(column('trend').width);
     parts.push(`${w}px`);
     minWidth += w;
@@ -320,23 +315,10 @@ function gridLayout() {
   return { tpl: parts.join(' '), minWidth, sticky, shown, hidden };
 }
 
-/**
- * Say what had to give. A window too narrow for every column is a reason to
- * show fewer, not a reason to refuse to draw — but the reader has to know that
- * what they are looking at is not the whole table.
- */
-function droppedNote(hidden) {
-  if (!hidden.length) return '';
-  return html`<p class="dropped-note">
-    ${icons.info()}
-    ${hidden.length} ${t(hidden.length === 1 ? 'Spalte ausgeblendet' : 'Spalten ausgeblendet')},
-    ${t('das Fenster ist zu schmal')}: ${hidden.map(c => t(c.label)).join(', ')}.
-  </p>`;
-}
-
 /** How much width the card actually has, before it is in the DOM to measure. */
 function cardWidth() {
-  return Math.min(1440, document.documentElement.clientWidth) - 2 * tokenPx('--shell-pad-x');
+  return Math.min(tokenPx('--layout-width'), document.documentElement.clientWidth)
+    - 2 * tokenPx('--shell-pad-x');
 }
 
 function pensumGrid() {
@@ -390,7 +372,7 @@ function pensumGrid() {
           </button>
         </div>
         ${cols.map(period => html`<span class="pcell pcell--sum ${yearRule(period)}">${fmt(periodValue(tot.demand, period))}</span>`)}
-        ${state.trend && html`<span></span>`}
+        ${columnSet().trend && html`<span></span>`}
       </div>
 
       ${state.footDetails && html`
@@ -410,7 +392,7 @@ function pensumGrid() {
             <span class="pcell__pct">${pct} %</span>
           </span>`;
         })}
-        ${state.trend && html`<span></span>`}
+        ${columnSet().trend && html`<span></span>`}
       </div>`;
 
   return html`${droppedNote(hidden)}
@@ -445,7 +427,7 @@ export function heatLegend() {
       label: 'Pensum',
       items: l.steps.map(s => legendItem(html`<span class="legend__swatch heat-${s.step}"></span>`, s.label))
     },
-    { label: 'Ampel', items: state.ampel ? ampelLegend() : null },
+    { label: 'Ampel', items: columnSet().ampel ? ampelLegend() : null },
     {
       label: 'Markierung',
       items: html`${legendItem(icons.warn(13), 'Projektleitung über 100 % im Quartal')}
@@ -478,10 +460,7 @@ const CELL_BODY = {
       : name;
   },
 
-  ampel: (p) => {
-    const a = ampel(p.leadId);
-    return html`<span class="ampel ampel--${a.key}" role="img" aria-label="${a.title}" title="${a.title}"></span>`;
-  },
+  ampel: p => ampelDot(p),
 
   target: p => html`${num(p.target)}${unitSuffix()}`
 };
@@ -526,7 +505,7 @@ function columnHeader(tpl, sticky, cols) {
           ? `${t('Heute')}, ${data.meta.todayLabel} — ${t('laufendes Quartal, gesperrt')}`
           : period.label
       }))}
-      ${state.trend && html`<span class="pcell--text">${t('Verlauf')}</span>`}
+      ${columnSet().trend && html`<span class="pcell--text">${t('Verlauf')}</span>`}
     </div>`;
 }
 
@@ -542,7 +521,7 @@ function groupSum(g, tpl, span, cols) {
   return html`<div class="prow prow--sum prow--groupsum" style="grid-template-columns:${raw(tpl)}">
     <div style="grid-column:span ${span}" class="prow__sumlabel is-frozen">${t('Summe')} ${g.label}</div>
     ${cols.map(period => html`<span class="pcell pcell--sum ${yearRule(period)}">${fmt(periodValue(values, period))}</span>`)}
-    ${state.trend && html`<span></span>`}
+    ${columnSet().trend && html`<span></span>`}
   </div>`;
 }
 
@@ -550,7 +529,7 @@ function footRow(label, values, tpl, span, cols) {
   return html`<div class="prow prow--foot" style="grid-template-columns:${raw(tpl)}">
     <div style="grid-column:span ${span}" class="prow__footlabel is-frozen">${label}</div>
     ${cols.map(period => html`<span class="pcell pcell--foot ${yearRule(period)}">${fmt(periodValue(values, period))}</span>`)}
-    ${state.trend && html`<span></span>`}
+    ${columnSet().trend && html`<span></span>`}
   </div>`;
 }
 
@@ -584,7 +563,7 @@ function projectRow(p, tpl, sticky, cols, rowIdx) {
       </button>`;
     })}
 
-    ${state.trend && html`<span class="pcell pcell--trend">
+    ${columnSet().trend && html`<span class="pcell pcell--trend">
       ${cols.map(period => {
         const v = periodValue(cells, period);
         return html`<span class="spark ${v ? '' : 'is-empty'}"

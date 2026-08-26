@@ -4,14 +4,55 @@
    ============================================================================= */
 
 import {
-  data, state, t, totals, loadStatus, groupProjects, periods, periodValue, windowEdges
+  data, state, t, num, unitSuffix, totals, loadStatus, groupProjects, periods,
+  periodValue, windowEdges, columnSet
 } from './store.js';
 
 import {
   html, raw, icons, pageHeader, pageActions, toolbar, activeFilterRow,
-  timeControls, noResults, legendBlock, legendItem, yearRule, sortableHead, attr
+  timeControls, noResults, legendBlock, legendItem, yearRule, sortableHead, attr,
+  tokenPx, pinCls, pinLeft, ampelDot, droppedNote
 } from './ui.js';
 
+import { leadLayout } from './columns.js';
+
+/*
+ * Below three quarters the axis stops being a plan, so the lead columns give
+ * way first — the same floor the pensum grid holds.
+ */
+const MIN_PERIODS = 3;
+
+/** The frozen block in front of the bars, from the same registry as the table. */
+function ganttLayout() {
+  const quarterW = tokenPx('--grid-quarter');
+  const room = Math.min(tokenPx('--layout-width'), document.documentElement.clientWidth)
+    - 2 * tokenPx('--shell-pad-x');
+  const lay = leadLayout(columnSet(), {
+    room, axis: MIN_PERIODS * quarterW, widthOf: c => tokenPx(c.width)
+  });
+
+  /*
+   * A wider window first lengthens the project name, up to the width at which
+   * the longest one fits — without this a 1920px screen showed every name in
+   * full in the table and truncated 29 of them here. Past that ceiling the
+   * surplus goes to the bars, which are what this grid is actually saying.
+   *
+   * The name is set to an exact width rather than a share: with two flexible
+   * tracks in one row they split the slack, and the frozen block would no
+   * longer be the width the capacity band below it is drawn to.
+   */
+  const cols = periods().length;
+  const head = tokenPx('--grid-col-title-max') - tokenPx('--grid-col-title');
+  const extra = Math.max(0, Math.min(head, room - lay.width - cols * quarterW));
+  const parts = lay.parts.map((p, i) =>
+    (lay.shown[i].grow ? `${tokenPx(lay.shown[i].width) + extra}px` : p));
+
+  return { ...lay, width: lay.width + extra, tpl: [...parts, 'minmax(0, 1fr)'].join(' ') };
+}
+
+
+/* A sparkline draws over the quarter cells, which this grid has not got. */
+const MENU = { exclude: ['trend'] };
 
 export function renderSchedule() {
   const body = groupProjects().some(g => g.projects.length) ? ganttView()
@@ -24,7 +65,7 @@ export function renderSchedule() {
       actions: pageActions({ edit: true })
     })}
     <div class="wrap"><div class="content">
-      ${toolbar()}
+      ${toolbar(MENU)}
       ${activeFilterRow()}
       ${timeControls()}
       ${body}
@@ -66,13 +107,15 @@ function ganttView() {
   const groups = groupProjects();
   const tot = totals();
   const cols = periods();
+  const lay = ganttLayout();
   const edge = windowEdges(cols);
   const f = todayFraction(cols);
   // A share of the time axis, not of the card: the marker lives in an overlay
   // that starts where the frozen column ends, so it can never run underneath it.
   const todayLeft = f === null ? null : `${(f * 100).toFixed(2)}%`;
 
-  return html`<div class="gantt" style="--gantt-cols:${cols.length}">
+  return html`<div class="gantt" style="--gantt-cols:${cols.length};--gantt-lead:${lay.width}px">
+    ${droppedNote(lay.hidden)}
     ${groups.map(g => {
       const collapsed = g.label ? state.collapsedGroups[`g:${g.key}`] : false;
       return html`<section class="gantt__group">
@@ -87,21 +130,21 @@ function ganttView() {
         ${!collapsed && html`<div class="gantt__card scrollbox"
           ${attr(edge.before, 'data-before')} ${attr(edge.after, 'data-after')}>
           <div class="gantt__scroll" data-scroll>
-          ${ganttAxis(cols)}
+          ${ganttAxis(cols, lay)}
           <div class="gantt__body">
             ${todayLeft && html`<div class="gantt__overlay" aria-hidden="true">
               <div class="gantt__today" style="left:${raw(todayLeft)}"></div>
               <div class="gantt__todaybadge" style="left:${raw(todayLeft)}"
                    title="${t('Heute')}, ${data.meta.todayLabel}">${t('Heute')}</div>
             </div>`}
-            ${g.projects.map(p => ganttRow(p, cols))}
+            ${g.projects.map(p => ganttRow(p, cols, lay))}
           </div>
           </div>
         </div>`}
       </section>`;
     })}
 
-    <section class="capband scrollbox" style="--gantt-cols:${cols.length}"
+    <section class="capband scrollbox" style="--gantt-cols:${cols.length};--gantt-lead:${lay.width}px"
       ${attr(edge.before, 'data-before')} ${attr(edge.after, 'data-after')}>
       <div class="capband__scroll" data-scroll>
       <div class="capband__row">
@@ -151,20 +194,25 @@ export function ganttLegend(cls = '') {
 }
 
 /**
- * A lead-column header. Clicking it sorts, exactly as in the pensum grid —
- * both read the same two pieces of state, so the two tabs cannot disagree.
+ * A lead-column header. Clicking it sorts, exactly as in the pensum grid — both
+ * read the same two pieces of state, so the two tabs cannot disagree. A column
+ * with no sort key is a label, not a control.
  */
-function leadHead(key, label, cls) {
+function leadHead(col, lay) {
+  const cls = `gantt__axislabel gantt__col--${col.key} ${pinCls(lay.sticky, col.key)}`;
+  if (!col.sort) {
+    return html`<span class="${cls}" style="${pinLeft(lay.sticky, col.key)}">${t(col.label)}</span>`;
+  }
   return sortableHead({
-    key, label, act: 'sort-col', cls: `gantt__axislabel ${cls}`,
-    active: state.sort === key, ascending: state.sortDir === 'asc'
+    key: col.sort, label: t(col.label), act: 'sort-col', cls,
+    style: pinLeft(lay.sticky, col.key),
+    active: state.sort === col.sort, ascending: state.sortDir === 'asc'
   });
 }
 
-function ganttAxis(cols) {
-  return html`<header class="gantt__axis">
-    ${leadHead('id', 'ID', 'gantt__axisid')}
-    ${leadHead('project', t('Projekt'), 'gantt__axistitle')}
+function ganttAxis(cols, lay) {
+  return html`<header class="gantt__axis" style="grid-template-columns:${raw(lay.tpl)}">
+    ${lay.shown.map(col => leadHead(col, lay))}
     <div class="gantt__quarters">
       ${cols.map(col => html`<div class="${col.isNow ? 'is-today' : ''} ${yearRule(col)}"
         title="${col.label}">${col.short}</div>`)}
@@ -172,17 +220,26 @@ function ganttAxis(cols) {
   </header>`;
 }
 
-export function ganttRow(p, cols) {
+/** What a lead column shows in the bar plan. Three draw; the rest is text. */
+function leadCell(col, p) {
+  if (col.key === 'title') {
+    return html`<button type="button" class="gantt__rowtitle" data-act="open-project"
+        data-val="${p.id}" title="${p.title}">${p.title}</button>`;
+  }
+  if (col.key === 'ampel') return ampelDot(p);
+  if (col.key === 'target') return html`${num(p.target)}${unitSuffix()}`;
+  return col.text ? col.text(p) : '';
+}
+
+export function ganttRow(p, cols, lay) {
   const bars = p.bars ?? [];
   const delayed = bars.some(b => b.delay);
   const rail = p.unassigned ? 'is-unassigned' : delayed ? 'is-delayed' : '';
 
-  return html`<div class="gantt__row ${rail}">
-    <div class="gantt__rowlabel gantt__rowid">${p.number}</div>
-    <div class="gantt__rowlabel gantt__rowtitlecell">
-      <button type="button" class="gantt__rowtitle" data-act="open-project" data-val="${p.id}"
-              title="${p.title}">${p.title}</button>
-    </div>
+  return html`<div class="gantt__row ${rail}" style="grid-template-columns:${raw(lay.tpl)}">
+    ${lay.shown.map(col => html`<div
+      class="gantt__rowlabel gantt__col--${col.key} ${pinCls(lay.sticky, col.key)}"
+      style="${pinLeft(lay.sticky, col.key)}">${leadCell(col, p)}</div>`)}
     <div class="gantt__track">
       ${cols.map((col, n) => html`<span class="gantt__gridline ${yearRule(col)}"
         style="grid-column:${n + 1}"></span>`)}
