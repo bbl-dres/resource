@@ -10,7 +10,7 @@ import {
 } from './store.js';
 
 import {
-  html, raw, icons, pageHeader, exportMenu, toolbar, activeFilterRow,
+  html, raw, icons, pageHeader, pageActions, toolbar, activeFilterRow,
   columnChart, barList, kpiStrip, segmented,
 } from './ui.js';
 
@@ -31,8 +31,7 @@ export function renderDashboard() {
     ${pageHeader({
       crumbs: ['Bauprojekte', 'Dashboard'],
       title: 'Ressourcenplanung',
-      actions: html`${exportMenu()}
-        <button type="button" class="btn" data-act="share">${icons.share(14)}${t('Teilen')}</button>`
+      actions: pageActions()
     })}
     <div class="wrap"><div class="content">
       ${toolbar()}
@@ -52,6 +51,13 @@ export function renderDashboard() {
 /* =============================================================================
    «Personen» — the same grid the Übersicht uses, with people as the rows
    ========================================================================== */
+
+/**
+ * Person utilisation runs to 245 %, where the project ramp tops out at 120 —
+ * reused unchanged it put 64 % of the table into its two darkest steps and
+ * flattened 120 % and 245 % into one blue. Same five tokens, own thresholds.
+ */
+const personHeat = v => (v === 0 ? 0 : v <= 80 ? 1 : v <= 100 ? 2 : v <= 150 ? 3 : 4);
 
 /** Fixed widths in px, so every row can be told exactly how wide the track is. */
 const P_COL = { name: 150, role: 130, employment: 70, projects: 60, peak: 76, quarter: 72 };
@@ -130,7 +136,7 @@ function personSection() {
             ${cols.map((col, i) => {
               const v = r.values[i];
               const label = r.leads ? `${v} %` : '—';
-              return html`<span class="pcell pcell--val ${r.leads ? `heat-${heatStep(v)}` : ''}
+              return html`<span class="pcell pcell--val ${r.leads ? `heat-${personHeat(v)}` : ''}
                   ${r.leads && v > 100 ? 'is-warn' : ''} ${col.yearStart ? 'is-yearstart' : ''}"
                   title="${r.person.name}, ${col.label}: ${label} ${t('der Anstellung')}">${label}</span>`;
             })}
@@ -303,8 +309,7 @@ export function renderVerlauf() {
     ${pageHeader({
       crumbs: ['Bauprojekte', 'Verlauf'],
       title: 'Ressourcenplanung',
-      actions: html`${exportMenu()}
-        <button type="button" class="btn" data-act="share">${icons.share(14)}${t('Teilen')}</button>`
+      actions: pageActions()
     })}
     <div class="wrap"><div class="content">
       ${toolbar({ attributes: false })}

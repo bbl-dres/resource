@@ -12,7 +12,7 @@ import {
 } from './store.js';
 import { loadIcons } from './icons.js';
 import { html, appHeader, appFooter, toast } from './ui.js';
-import { renderLanding, renderUebersicht } from './views-overview.js';
+import { renderLanding, renderUebersicht, editPopover } from './views-overview.js';
 import { renderModal } from './views-modals.js';
 import { renderTermine } from './views-schedule.js';
 import { renderDashboard, renderVerlauf } from './views-analysis.js';
@@ -45,6 +45,7 @@ function render() {
     ${appHeader()}
     <main id="main">${view()}</main>
     ${appFooter()}
+    ${state.editing ? editPopover() : ''}
     ${renderModal()}
     ${toast()}
   `);
@@ -54,6 +55,7 @@ function render() {
   root.querySelectorAll('[data-scroll]').forEach(syncScrollFades);
   positionMenu();
   restoreFocus(focus);
+  syncModalFocus();
   if (Math.abs(window.scrollY - scrollY) > 1) window.scrollTo({ top: scrollY });
   lastRenderAt = performance.now();
 }
@@ -74,28 +76,97 @@ function positionMenu() {
   const box = panel.getBoundingClientRect();
   panel.style.setProperty('--dd-max-h', `${Math.max(160, window.innerHeight - box.top - 16)}px`);
 
+  // Both edges: a panel anchored right of a left-hand trigger ran off the left.
   const overflowRight = box.right - (window.innerWidth - 12);
-  if (overflowRight > 0) panel.style.marginLeft = `${-Math.ceil(overflowRight)}px`;
+  if (overflowRight > 0) {
+    panel.style.marginLeft = `${-Math.ceil(overflowRight)}px`;
+  } else if (box.left < 12) {
+    panel.style.marginLeft = `${Math.ceil(12 - box.left)}px`;
+  }
+
+  /* Landscape phones have no room below the trigger; open upwards instead. */
+  const below = window.innerHeight - box.top;
+  panel.classList.toggle('dd__panel--up', below < 200 && box.top > below);
+  if (panel.classList.contains('dd__panel--up')) {
+    panel.style.setProperty('--dd-max-h', `${Math.max(160, box.bottom - 16)}px`);
+  }
 }
 
+/*
+ * A full re-render replaces every node, so focus has to be found again by
+ * identity rather than by reference. Only nine controls carry an explicit
+ * data-fk; for the rest the dispatch attributes already form a unique name, so
+ * the two are looked up the same way. Without this, nine of ten activations
+ * dropped focus to <body> and the next Tab restarted at the skip link.
+ */
+const focusKey = (el) => {
+  if (!el || !el.dataset) return null;
+  if (el.dataset.fk) return { by: 'fk', key: el.dataset.fk };
+  if (!el.dataset.act) return null;
+  return { by: 'act', key: [el.dataset.act, el.dataset.val ?? '', el.dataset.q ?? ''].join('\u0001') };
+};
+
+const focusSelector = (found) => {
+  if (found.by === 'fk') return `[data-fk="${CSS.escape(found.key)}"]`;
+  const [act, val, q] = found.key.split('\u0001');
+  return `[data-act="${CSS.escape(act)}"]`
+    + (val ? `[data-val="${CSS.escape(val)}"]` : '')
+    + (q ? `[data-q="${CSS.escape(q)}"]` : '');
+};
+
 function captureFocus() {
-  const el = document.activeElement;
-  if (!el || !el.dataset || !el.dataset.fk) return null;
+  const found = focusKey(document.activeElement);
+  if (!found) return null;
   return {
-    key: el.dataset.fk,
-    start: el.selectionStart ?? null,
-    end: el.selectionEnd ?? null
+    ...found,
+    start: document.activeElement.selectionStart ?? null,
+    end: document.activeElement.selectionEnd ?? null
   };
 }
 
 function restoreFocus(focus) {
   if (!focus) return;
-  const el = root.querySelector(`[data-fk="${CSS.escape(focus.key)}"]`);
+  const el = root.querySelector(focusSelector(focus));
   if (!el) return;
   el.focus({ preventScroll: true });
   if (focus.start != null && typeof el.setSelectionRange === 'function') {
     try { el.setSelectionRange(focus.start, focus.end); } catch { /* number inputs refuse */ }
   }
+}
+
+/*
+ * A dialog takes focus when it opens, keeps it while it is open and hands it
+ * back to whatever opened it. aria-modal says all three are true, so they have
+ * to be.
+ */
+let modalReturn = null;
+
+function trapFocusables(scope) {
+  return [...scope.querySelectorAll(
+    'a[href], button:not(:disabled), input:not(:disabled), select:not(:disabled),'
+    + ' textarea:not(:disabled), [tabindex]:not([tabindex="-1"])'
+  )].filter(el => el.offsetParent !== null);
+}
+
+let overlayWasOpen = false;
+
+function syncModalFocus() {
+  const overlay = root.querySelector('.modal') ?? root.querySelector('.pop');
+
+  if (!overlay) {
+    // Only on the render where it actually closed, so this never fights
+    // restoreFocus during ordinary clicks.
+    if (overlayWasOpen && modalReturn) {
+      root.querySelector(focusSelector(modalReturn))?.focus({ preventScroll: true });
+    }
+    modalReturn = null;
+    overlayWasOpen = false;
+    return;
+  }
+
+  overlayWasOpen = true;
+  if (overlay.contains(document.activeElement)) return;
+  (trapFocusables(overlay)[0] ?? overlay.querySelector('.modal__close'))?.focus({ preventScroll: true });
 }
 
 /** Move the caret into the field the moment it expands. */
@@ -120,7 +191,15 @@ let toastTimer;
 function flash(message) {
   clearTimeout(toastTimer);
   setState({ toast: message });
-  toastTimer = setTimeout(() => setState({ toast: null }), 2600);
+  // It arrives over 160ms; it should leave the same way rather than blink out.
+  toastTimer = setTimeout(() => {
+    const el = root.querySelector('.toast');
+    if (!el || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return setState({ toast: null });
+    }
+    el.classList.add('is-leaving');
+    setTimeout(() => setState({ toast: null }), 160);
+  }, 2600);
 }
 
 /* -----------------------------------------------------------------------------
@@ -141,10 +220,15 @@ const actions = {
 
   menu: (val, el) => {
     const opening = state.menu !== val;
+    /*
+     * Ask before rendering: setState() replaces the DOM synchronously, so by the
+     * time the old code tested :focus-visible the element was detached and the
+     * answer was always false — which is why arrow keys never reached the panel.
+     */
+    const byKeyboard = el.matches(':focus-visible');
     setState({ menu: opening ? val : null, menuSearch: '' });
     if (!opening) return;
-    // A pointer click leaves focus alone; a keyboard activation moves into the menu.
-    if (el.matches(':focus-visible')) {
+    if (byKeyboard) {
       requestAnimationFrame(() => {
         const m = root.querySelector('.dd__panel');
         (m?.querySelector('[data-act="menu-search"]') ?? m?.querySelector(MENU_ITEMS))?.focus();
@@ -333,8 +417,10 @@ const actions = {
     ? { pDir: s.pDir === 'asc' ? 'desc' : 'asc' }
     : { pSort: val, pDir: val === 'name' || val === 'role' ? 'asc' : 'desc' })),
 
-  'scroll-to': (val) => root.querySelector(`#${val}`)
-    ?.scrollIntoView({ behavior: 'smooth', block: 'start' }),
+  'scroll-to': (val) => root.querySelector(`#${val}`)?.scrollIntoView({
+    behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+    block: 'start'
+  }),
 
   sheet: (val) => setState({ sheet: val }),
   print: () => window.print()
@@ -355,6 +441,9 @@ root.addEventListener('click', (event) => {
   const fn = actions[act];
   if (!fn) return;
   event.preventDefault();
+  // Remember the opener, but only while nothing is open — so the key belongs to
+  // whatever is about to open, not to a click inside an open dialog.
+  if (!state.modal && !state.editing) modalReturn = focusKey(el);
   fn(el.dataset.val, el);
 });
 
@@ -439,6 +528,28 @@ function moveMenuFocus(step) {
 }
 
 document.addEventListener('keydown', (event) => {
+  /*
+   * A dialog owns Tab while it is open. Without this, six presses walked out of
+   * an aria-modal dialog onto the brand link and the header search, behind the
+   * scrim, with no way to tell you had left.
+   */
+  const modal = (state.modal || state.editing)
+    && (root.querySelector('.modal') ?? root.querySelector('.pop'));
+  if (modal && event.key === 'Tab') {
+    const items = trapFocusables(modal);
+    if (items.length) {
+      const first = items[0];
+      const last = items[items.length - 1];
+      const at = document.activeElement;
+      if (event.shiftKey && (at === first || !modal.contains(at))) {
+        event.preventDefault(); last.focus();
+      } else if (!event.shiftKey && (at === last || !modal.contains(at))) {
+        event.preventDefault(); first.focus();
+      }
+    }
+    return;
+  }
+
   // A menu is open: it owns the arrow keys.
   if (state.menu !== null && root.contains(event.target)) {
     const inSearch = event.target.matches('[data-act="menu-search"]');
@@ -504,10 +615,18 @@ window.addEventListener('resize', () => {
   root.querySelectorAll('[data-scroll]').forEach(syncScrollFades);
 });
 
-/** The edit popover is anchored in viewport space, so scrolling closes it. */
+/*
+ * The popover is anchored in viewport space, so a scroll has to close it — but
+ * not once there is work in it. One inertial trackpad tick used to discard a
+ * typed reason with no way to get it back.
+ */
 document.addEventListener('scroll', () => {
   if (!state.editing) return;
   if (performance.now() - lastRenderAt < 150) return;
+  const project = data.projectsById[state.editing.projectId];
+  const started = state.reason.trim() !== ''
+    || (project && state.draft !== cellValue(project, state.editing.q));
+  if (started) return;
   setState({ editing: null });
 }, { capture: true, passive: true });
 

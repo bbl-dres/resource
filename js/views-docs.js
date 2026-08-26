@@ -7,13 +7,14 @@
    ============================================================================= */
 
 import {
-  data, state, t, num, unitSuffix, cellValue, projectDemand,
+  data, state, t, num, unitSuffix, cellValue, projectDemand, ampel,
   personUtilisation, totals, loadStatus, heatStep, filteredProjects, activeFilters,
   groupProjects
 } from './store.js';
 
 import {
-  html, raw, icons, pageHeader, exportMenu, toolbar, activeFilterRow, phaseOf, scopeLine
+  html, raw, icons, pageHeader, exportMenu, toolbar, activeFilterRow, noResults,
+  phaseOf, scopeLine, AMPEL_STATES, legendBlock, legendItem
 } from './ui.js';
 
 /* =============================================================================
@@ -112,7 +113,7 @@ export function renderExport() {
         <button type="button" class="btn btn--primary" data-act="print">${icons.download(15)}${t('Drucken')}</button>`
     })}
     <div class="wrap"><div class="content">
-      ${toolbar({ attributes: false })}
+      ${toolbar({ exclude: ['trend'] })}
       ${activeFilterRow()}
       <div class="sheetbar">
         <div class="segmented">
@@ -120,7 +121,9 @@ export function renderExport() {
             aria-pressed="${s.id === sheet.id}" data-act="sheet" data-val="${s.id}">${t(s.label)}</button>`)}
         </div>
       </div>
-      <div class="mount">${printSheets(sheet)}</div>
+      ${filteredProjects().length
+        ? html`<div class="mount">${printSheets(sheet)}</div>`
+        : noResults('Bauprojekte')}
     </div></div>`;
 }
 
@@ -136,11 +139,15 @@ export function renderExport() {
  * toolbar puts a heading before each group and a sum after it — the per-group
  * figures the grid leaves out because they belong on paper.
  */
-function sheetRows() {
+function sheetRows(titleChars) {
   const rows = [];
   for (const group of groupProjects()) {
     if (group.label) rows.push({ kind: 'group', label: group.label, count: group.projects.length });
-    group.projects.forEach(p => rows.push({ kind: 'project', p }));
+    group.projects.forEach(p => rows.push({
+      kind: 'project', p,
+      // A wrapped title costs 27.5px against a 22px row, not a whole second one.
+      cost: p.title.length > titleChars ? 1.3 : 1
+    }));
     if (group.label) rows.push({ kind: 'sum', label: group.label, projects: group.projects });
   }
   return rows;
@@ -150,8 +157,9 @@ function sheetRows() {
  * Break the stream into pages. A heading never ends a page, and a group that
  * runs over one carries its heading to the top of the next.
  */
-const ROW_COST = { group: 1.6, sum: 1, project: 1 };
-const costOf = page => page.reduce((a, r) => a + ROW_COST[r.kind], 0);
+const ROW_COST = { group: 2.9, sum: 1, project: 1 };   /* heading + gap + column head */
+const rowCost = row => row.cost ?? ROW_COST[row.kind];
+const costOf = page => page.reduce((a, r) => a + rowCost(r), 0);
 
 function paginate(rows, perPage) {
   const pages = [];
@@ -163,7 +171,7 @@ function paginate(rows, perPage) {
     const cost = costOf(page);
     // A heading on the last line of a page belongs to the next one.
     const orphan = row.kind === 'group' && cost + ROW_COST.group > perPage;
-    if (cost + ROW_COST[row.kind] > perPage || orphan) {
+    if (cost + rowCost(row) > perPage || orphan) {
       pages.push(page);
       page = group && row.kind === 'project' ? [{ ...group, continued: true }] : [];
     }
@@ -191,14 +199,155 @@ function printSheets(sheet) {
   for (let from = 0; from < data.quarters.length; from += sheet.quarters) {
     blocks.push(data.quarters.slice(from, from + sheet.quarters).map((_, i) => from + i));
   }
-  const pages = paginate(sheetRows(), perSheet);
-  const total = blocks.length * pages.length;
+  /*
+   * How much of a title fits on one line depends on how many attributes are
+   * switched on, so the page budget has to be told — otherwise turning on four
+   * columns silently pushes every sheet past the paper.
+   */
+  const lead = sheetColumns(sheet);
+  const inner = (sheet.id === 'hoch' ? 800 - 64 : 1100 - 68);
+  const quarterW = sheet.id === 'hoch' ? 54 : 50;
+  const fixed = lead.filter(c => !c.flex).reduce((a, c) => a + c.w, 0);
+  const titleW = inner - fixed - sheet.quarters * quarterW;
+  const titleChars = Math.max(12, Math.floor(titleW / 5.4));
+
+  const pages = paginate(sheetRows(titleChars), perSheet);
+  const total = blocks.length * pages.length + 1;   // + the method sheet
 
   let page = 0;
-  return blocks.flatMap(block => pages.map((rows, i) => {
+  const sheets = blocks.flatMap(block => pages.map((rows, i) => {
     page++;
     return printSheet(sheet, { rows, all, block, page, total, last: i === pages.length - 1 });
   }));
+  sheets.push(methodSheet(sheet, { page: total, total }));
+  return sheets;
+}
+
+/*
+ * A report that leaves the building has to be readable without the application
+ * next to it: how each figure is derived, and what the words mean.
+ */
+const METHOD = [
+  ['Pensum ist eine Rate, kein Vorrat',
+   'Ein Jahr zeigt den Durchschnitt seiner Quartale, ein Monat den Wert seines Quartals — nie eine Summe. 80 % über vier Quartale bleiben 80 %.'],
+  ['Bedarf total',
+   'Summe der Projektpensen je Quartal über den gesetzten Umfang. Steht ein Filter, zählt nur die Auswahl.'],
+  ['Kapazität netto',
+   'Kapazität brutto abzüglich Abwesenheiten. Brutto ist die Summe der Anstellungsgrade der Abteilung.'],
+  ['Auslastung',
+   'Bedarf des Gesamtportfolios abzüglich extern beauftragter Leistung, geteilt durch Kapazität netto. Die Zahl beschreibt immer die ganze Abteilung — auch wenn ein Filter gesetzt ist, denn Kapazität lässt sich nicht filtern.'],
+  ['Ampel',
+   'Auslastung der Projektleitung gegen die eigene Anstellung im laufenden Quartal. Die Form trägt die Aussage, damit sie auch auf einer Fotokopie lesbar bleibt.'],
+  ['Blaustufen',
+   'Sie kodieren die Grösse eines Pensums, nicht seinen Status. Rot und das Dreieck ▲ kennzeichnen Überlast.']
+];
+
+const GLOSSARY = [
+  ['Pensum', 'Arbeitsanteil in Prozent einer Vollzeitstelle. 100 % entspricht einer Person Vollzeit.'],
+  ['Bedarf', 'Geplantes Pensum eines Projekts in einem Quartal.'],
+  ['Extern beauftragt', 'Leistung, die nicht die eigene Abteilung erbringt; sie mindert den Bedarf an eigener Kapazität.'],
+  ['Baukredit-Freigabe', 'Gate MS4. Davor ist ein Projekt planerisch, aber nicht finanziell gebunden — «vor Baukredit-Freigabe» weist diesen Anteil aus.'],
+  ['SIA 112', 'Phasenmodell des Bauwesens: 1 Strategische Planung, 2 Vorstudien, 3 Projektierung, 4 Ausschreibung, 5 Realisierung, 6 Bewirtschaftung.'],
+  ['Meilenstein / Gate', 'Entscheidpunkt zwischen zwei Phasen, mit Plan- und Prognosetermin.'],
+  ['Teilportfolio', 'Gebäudekategorie des BBL, etwa Verwaltung, Zoll oder Bauten im Ausland.'],
+  ['Soll-Pensum', 'Vereinbartes Pensum im laufenden Quartal, zum Vergleich mit dem geplanten Bedarf.'],
+  ['Überlast · knapp · ok · frei', 'Auslastung über 100 · 95 – 100 · 80 – 94 · darunter.']
+];
+
+function methodSheet(sheet, { page, total }) {
+  const cfg = data.print;
+  return html`<article class="sheet sheet--${sheet.id} sheet--method">
+    <header class="sheet__head">
+      <div class="sheet__sender">
+        <img src="assets/swiss-logo-flag.svg" alt="" width="24" height="26">
+        <div>${cfg.sender.map((line, i) => html`<span class="${i === 2 ? 'is-muted' : ''}">${line}</span>`)}</div>
+      </div>
+      <div class="sheet__titles">
+        <div class="sheet__title">${t('Methodik und Begriffe')}</div>
+        <div class="sheet__sub">${t('Wie die Zahlen dieses Berichts entstehen')}</div>
+      </div>
+      <div class="sheet__meta">
+        <span>${t('Datenstand ePPM')}: ${cfg.syncedAt}</span>
+        <span>${cfg.classification}</span>
+      </div>
+    </header>
+
+    <div class="sheet__prose">
+      <section>
+        <h3>${t('Methodik')}</h3>
+        <dl>${METHOD.map(([term, text]) => html`<dt>${t(term)}</dt><dd>${t(text)}</dd>`)}</dl>
+      </section>
+      <section>
+        <h3>${t('Begriffe')}</h3>
+        <dl>${GLOSSARY.map(([term, text]) => html`<dt>${t(term)}</dt><dd>${t(text)}</dd>`)}</dl>
+      </section>
+    </div>
+
+    <p class="sheet__disclaimer">${t(data.meta.prototypeNotice)}</p>
+
+    <footer class="sheet__foot">
+      <span>${t('Erstellt am')} ${cfg.createdAt} ${t('durch')} ${cfg.createdBy}</span>
+      <span>${cfg.documentId}</span>
+      <span>${t('Blatt')} ${page} ${t('von')} ${total}</span>
+    </footer>
+  </article>`;
+}
+
+/*
+ * The same attributes the grid offers, on paper. Widths are ceilings rather
+ * than fixed tracks — minmax(0, n) lets the grid give space back when several
+ * attributes are on at once, so the sheet never grows past the page.
+ */
+function sheetColumns(sheet) {
+  const c = state.cols;
+  const wide = sheet.id === 'quer';
+  const w = (a, b) => (wide ? b : a);
+  const cols = [];
+
+  if (c.id) cols.push({ key: 'id', label: 'ID', w: w(52, 62), cls: 'sheet__id' });
+  cols.push({ key: 'title', label: t('Projekt'), flex: true, w: w(150, 190) });
+  if (c.phase) cols.push({ key: 'phase', label: t('SIA-Teilphase'), w: w(88, 112), cls: 'sheet__muted' });
+  if (c.lead) cols.push({ key: 'lead', label: t('Projektleitung'), w: w(86, 108), cls: 'sheet__muted' });
+  if (state.ampel) cols.push({ key: 'ampel', label: t('Ampel'), w: w(34, 38), cls: 'sheet__mark' });
+  if (c.portfolio) cols.push({ key: 'portfolio', label: t('Teilportfolio'), w: w(76, 96), cls: 'sheet__muted' });
+  if (c.priority) cols.push({ key: 'priority', label: t('Priorität'), w: w(50, 62), cls: 'sheet__muted' });
+  if (c.nextMs) cols.push({ key: 'nextMs', label: t('Nächster Meilenstein'), w: w(92, 116), cls: 'sheet__muted' });
+  if (c.credit) cols.push({ key: 'credit', label: t('Kredit CHF'), w: w(62, 76), cls: 'sheet__num sheet__muted' });
+  if (state.target) {
+    cols.push({ key: 'target', label: `${t('Soll')} ${data.quarters[0].short}`, w: w(44, 52), cls: 'sheet__num' });
+  }
+  return cols;
+}
+
+/** One project's value for a lead column, already formatted for paper. */
+function sheetCell(col, p, lead) {
+  switch (col.key) {
+    case 'id': return p.number;
+    case 'title': return p.title;
+    case 'phase': return phaseOf(p.phase).label;
+    case 'lead': return lead ? lead.name : t('nicht zugewiesen');
+    case 'ampel': {
+      const a = ampel(p.leadId, 0);
+      return html`<span class="ampel ampel--${a.key}" title="${a.title}"></span>`;
+    }
+    case 'portfolio': return t(data.portfoliosById[p.portfolio].label);
+    case 'priority': return t(p.priority);
+    case 'nextMs': {
+      const ms = data.milestones.items.find(m => m.projectId === p.id);
+      return ms ? `${ms.code} · ${data.quarters[data.quarterIndex[ms.plan]].label}` : '—';
+    }
+    case 'credit': return p.creditLabel;
+    case 'target': return `${num(p.target)}${unitSuffix()}`;
+    default: return '';
+  }
+}
+
+/** The column header, repeated wherever the reader needs it again. */
+function columnHead(lead, quarters) {
+  return html`<div class="sheet__row sheet__row--head">
+    ${lead.map(c => html`<span class="${c.cls ?? ''}">${c.label}</span>`)}
+    ${quarters.map(q => html`<span class="sheet__num">${q.short}/${String(q.year).slice(2)}</span>`)}
+  </div>`;
 }
 
 function printSheet(sheet, { rows, all, block, page, total, last }) {
@@ -206,12 +355,13 @@ function printSheet(sheet, { rows, all, block, page, total, last }) {
   const quarters = block.map(q => data.quarters[q]);
   const tot = totals(all);
   const chips = activeFilters();
+  const lead = sheetColumns(sheet);
 
-  const cols = sheet.id === 'hoch'
-    ? `64px minmax(0, 200px) 96px 92px 62px repeat(${block.length}, 54px)`
-    : `78px minmax(0, 244px) 120px 112px 76px repeat(${block.length}, 50px)`;
+  const cols = lead
+    .map(c => (c.flex ? `minmax(${c.w}px, 1fr)` : `minmax(0, ${c.w}px)`))
+    .join(' ') + ` repeat(${block.length}, ${sheet.id === 'hoch' ? 54 : 50}px)`;
 
-  const span = 5;
+  const span = lead.length;
   const numbers = (values, cls = '') => block.map(q =>
     html`<span class="sheet__num ${cls}">${num(values[q])}</span>`);
 
@@ -235,22 +385,16 @@ function printSheet(sheet, { rows, all, block, page, total, last }) {
     </header>
 
     <div class="sheet__table">
-      <div class="sheet__row sheet__row--head">
-        <span class="sheet__id">ID</span>
-        <span>${t('Projekt')}</span>
-        <span>${t('SIA-Teilphase')}</span>
-        <span>${t('Projektleitung')}</span>
-        <span class="sheet__num">${t('Kredit CHF')}</span>
-        ${quarters.map(q => html`<span class="sheet__num">${q.short}/${String(q.year).slice(2)}</span>`)}
-      </div>
+      ${rows.some(r => r.kind === 'group') ? '' : columnHead(lead, quarters)}
 
       ${rows.map(row => {
         if (row.kind === 'group') {
+          // A page can hold several groups, so each carries its own head.
           return html`<div class="sheet__row sheet__row--group">
-            <span style="grid-column:span ${block.length + 5}">${t(row.label)}
+            <span style="grid-column:span ${block.length + lead.length}">${t(row.label)}
               <span class="sheet__groupcount">${row.count} ${t('Projekte')}${
                 row.continued ? ` · ${t('Fortsetzung')}` : ''}</span></span>
-          </div>`;
+          </div>${columnHead(lead, quarters)}`;
         }
         if (row.kind === 'sum') {
           const values = block.map(q => row.projects.reduce((a, p) => a + projectDemand(p)[q], 0));
@@ -262,15 +406,12 @@ function printSheet(sheet, { rows, all, block, page, total, last }) {
 
         const p = row.p;
         const cells = projectDemand(p);
-        const lead = p.leadId ? data.peopleById[p.leadId] : null;
+        const who = p.leadId ? data.peopleById[p.leadId] : null;
         return html`<div class="sheet__row ${p.leadId ? '' : 'is-unassigned'}">
-          <span class="sheet__id">${p.number}</span>
-          <span class="sheet__project">${p.title}</span>
-          <span class="sheet__muted">${phaseOf(p.phase).label}</span>
-          <span class="sheet__muted">${lead ? lead.name : t('nicht zugewiesen')}</span>
-          <span class="sheet__num sheet__muted">${p.creditLabel}</span>
+          ${lead.map(c => html`<span class="${c.key === 'title' ? 'sheet__project' : `sheet__lead ${c.cls ?? ''}`}"
+            >${sheetCell(c, p, who)}</span>`)}
           ${block.map(q => {
-            const over = lead && personUtilisation(p.leadId, q) > 100;
+            const over = who && personUtilisation(p.leadId, q) > 100;
             return html`<span class="sheet__cell heat-${heatStep(cells[q])}">${over && cells[q] > 0 ? '▲ ' : ''}${cells[q] ? num(cells[q]) : '–'}</span>`;
           })}
         </div>`;
@@ -296,14 +437,25 @@ function printSheet(sheet, { rows, all, block, page, total, last }) {
       </div>`}
     </div>
 
-    <div class="sheet__legend">
-      <span class="sheet__legendlabel">${t(cfg.legend.label)}</span>
-      ${cfg.legend.steps.map(s => html`<span class="sheet__swatchitem">
-        <span class="sheet__swatch heat-${s.step}"></span>${s.label}</span>`)}
-      <span>${cfg.legend.marker}</span>
-      <span class="sheet__swatchitem"><span class="sheet__swatch is-nolead"></span>${t(cfg.legend.noLead)}</span>
-      <span>${t(cfg.legend.thresholds)}</span>
-    </div>
+    ${legendBlock([
+      {
+        label: 'Pensum',
+        items: cfg.legend.steps.map(s => legendItem(html`<span class="legend__swatch heat-${s.step}"></span>`, s.label))
+      },
+      {
+        label: 'Ampel',
+        items: state.ampel
+          ? AMPEL_STATES.filter(a => a.key !== 'none')
+            .map(a => legendItem(html`<span class="ampel ampel--${a.key}"></span>`, a.label))
+          : null
+      },
+      {
+        label: 'Markierung',
+        items: html`<span class="legend__item">${cfg.legend.marker}</span>
+          ${legendItem(html`<span class="legend__swatch is-nolead"></span>`, cfg.legend.noLead)}`
+      },
+      { label: 'Auslastung', items: html`${t(cfg.legend.thresholds).replace(/^Auslastung:\s*/, '')}` }
+    ], 'legend--sheet')}
 
     <footer class="sheet__foot">
       <span>${t('Erstellt am')} ${cfg.createdAt} ${t('durch')} ${cfg.createdBy} · ${t('Datenstand ePPM')}: ${cfg.syncedAt}</span>

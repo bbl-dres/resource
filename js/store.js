@@ -261,16 +261,33 @@ export function netCapacity(q) {
   return data.capacity.gross[q] - data.capacity.absence[q];
 }
 
+/**
+ * Demand is a property of the selection; capacity is a property of the
+ * department. A ratio of one against the other only means something when both
+ * describe the same people — so utilisation, free capacity and everything else
+ * on the capacity side is always the whole portfolio. Filtering the view does
+ * not change how busy the division is, and a filtered numerator over an
+ * unfiltered denominator produced figures like «−2 %».
+ */
 export function totals(projects = filteredProjects()) {
   const qs = data.quarters.map((_, i) => i);
-  const demand = qs.map(q => projects.reduce((a, p) => a + cellValue(p, q), 0));
-  const preCredit = qs.map(q => projects.filter(p => p.preCredit).reduce((a, p) => a + cellValue(p, q), 0));
+  const sum = (list, q) => list.reduce((a, p) => a + cellValue(p, q), 0);
+
+  const demand = qs.map(q => sum(projects, q));
+  const preCredit = qs.map(q => sum(projects.filter(p => p.preCredit), q));
+
   const external = data.capacity.external;
   const net = qs.map(netCapacity);
-  const booked = qs.map(q => demand[q] - external[q]);
+  const portfolio = qs.map(q => sum(data.projects, q));
+  const booked = qs.map(q => portfolio[q] - external[q]);
   const utilisation = qs.map(q => Math.round(booked[q] / net[q] * 100));
   const free = qs.map(q => net[q] - booked[q]);
-  return { demand, preCredit, external, net, booked, utilisation, free };
+
+  return {
+    demand, preCredit, external, net, booked, utilisation, free, portfolio,
+    // True when the demand row describes fewer projects than the capacity row.
+    scoped: projects.length !== data.projects.length
+  };
 }
 
 /**
@@ -633,7 +650,7 @@ export function kpis() {
     utilisation: {
       label: 'Auslastung',
       value: `${tot.utilisation[0]} %`,
-      note: `${tot.demand[0]} % Bedarf auf ${tot.net[0]} % netto · ` + (lastOver >= 0
+      note: `${tot.portfolio[0]} % Bedarf auf ${tot.net[0]} % netto · ` + (lastOver >= 0
         ? `Überlast bis ${data.quarters[lastOver].label}`
         : 'keine Überlast im Zeitraum'),
       alert: tot.utilisation[0] > 100

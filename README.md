@@ -39,7 +39,7 @@ running the content through Jekyll.
 | Dashboard | `#?tab=dashboard&bi=…` | The KPI strip, then two sections: **Allgemein** (utilisation and free capacity over time, project count by phase, demand by portfolio, committed credit by year and by phase) and **Personen** (utilisation per person and quarter as a grid, sortable, with a peak column and a per-quarter count of people over their contract). |
 | Verlauf | `#?tab=verlauf` | The immutable change log for app-owned fields. |
 | API | `#?tab=api` | Swagger UI over `data/openapi.json` — a real OpenAPI 3.1 document, 13 operations in five groups, with a response example per endpoint. Reached from the **API** link in the footer. |
-| Drucklayout | `#?tab=export` | The PDF export, every page of it: A4 portrait carries four quarters and 24 rows per sheet, landscape all eight quarters and 14 rows. 111 projects come out as 10 portrait sheets or 8 landscape ones, each with letterhead, legend, document ID and «Blatt x von y»; the totals close each quarter block. Reached from **Exportieren → Als PDF exportieren**. |
+| Drucklayout | `#?tab=export` | The PDF export, every page of it: A4 portrait carries four quarters and 24 rows per sheet, landscape all eight quarters and 14 rows. 111 projects come out as 10 portrait sheets or 8 landscape ones, each with letterhead, legend, document ID and «Blatt x von y»; the totals close each quarter block. The **Attribute** menu applies here too: any of the ten grid columns can be added to the sheet, and the pagination re-measures itself so a title that wraps to two lines never pushes a sheet past the page. Reached from **Exportieren → Als PDF exportieren**. |
 
 ### Interactions that actually work
 
@@ -195,6 +195,9 @@ Three review documents sit alongside this one:
   contrast, greyscale legibility, density on a small laptop, target sizes, ARIA.
 - [docs/CODE-REVIEW.md](docs/CODE-REVIEW.md) — correctness, structure, duplication and dead
   code, with the fixes applied.
+- [docs/DESIGN-REVIEW-2.md](docs/DESIGN-REVIEW-2.md) — a second, measured design pass across
+  spacing, typography, colour, interaction and responsive behaviour, with the fixes applied.
+- [docs/DASHBOARD-STUDY.md](docs/DASHBOARD-STUDY.md) — what the dashboard should become, and why.
 
 ## Deliberate deviations from the wireframe
 

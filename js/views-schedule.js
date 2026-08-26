@@ -8,26 +8,28 @@ import {
 } from './store.js';
 
 import {
-  html, raw, icons, pageHeader, editToggle, exportMenu, toolbar, activeFilterRow,
-  timeControls, tooNarrow,
+  html, raw, icons, pageHeader, pageActions, toolbar, activeFilterRow,
+  timeControls, tooNarrow, noResults, legendBlock, legendItem,
 } from './ui.js';
 
 
 export function renderTermine() {
-  const body = state.narrow ? tooNarrow('Der Balkenplan') : ganttView();
+  const body = state.narrow ? tooNarrow('Der Balkenplan')
+    : groupProjects().some(g => g.projects.length) ? ganttView()
+      : noResults('Bauprojekte');
 
   return html`
     ${pageHeader({
       crumbs: ['Bauprojekte', 'Termine'],
       title: 'Ressourcenplanung',
-      actions: html`${editToggle()}${exportMenu()}
-        <button type="button" class="btn" data-act="share">${icons.share(14)}${t('Teilen')}</button>`
+      actions: pageActions({ edit: true })
     })}
     <div class="wrap"><div class="content">
-      ${toolbar()}
-      ${activeFilterRow()}
-      ${timeControls()}
-      ${body}
+      ${state.narrow ? body : html`
+        ${toolbar()}
+        ${activeFilterRow()}
+        ${timeControls()}
+        ${body}`}
     </div></div>`;
 }
 
@@ -123,15 +125,20 @@ function ganttView() {
  */
 function ganttLegend() {
   const l = data.print.legend;
-  return html`<div class="heatlegend">
-    <span class="heatlegend__label">${t('Legende')}</span>
-    <span class="heatlegend__item"><span class="heatlegend__swatch is-delay"></span>${t('Verzug')}</span>
-    <span class="heatlegend__item"><span class="heatlegend__swatch is-nolead"></span>${t('ohne Projektleitung')}</span>
-    <span class="heatlegend__item"><span class="diamond"></span>${t('Meilenstein')}</span>
-    <span class="heatlegend__item"><span class="diamond is-late"></span>${t('verschoben')}</span>
-    <span class="heatlegend__item"><span class="diamond is-open"></span>${t('Termin offen')}</span>
-    <span class="heatlegend__item">${t(l.thresholds)}</span>
-  </div>`;
+  return legendBlock([
+    {
+      label: 'Balken',
+      items: html`${legendItem(html`<span class="legend__swatch is-delay"></span>`, 'Verzug')}
+        ${legendItem(html`<span class="legend__swatch is-nolead"></span>`, 'ohne Projektleitung')}`
+    },
+    {
+      label: 'Meilenstein',
+      items: html`${legendItem(html`<span class="diamond"></span>`, 'im Termin')}
+        ${legendItem(html`<span class="diamond is-late"></span>`, 'verschoben')}
+        ${legendItem(html`<span class="diamond is-open"></span>`, 'Termin offen')}`
+    },
+    { label: 'Auslastung', items: html`${t(l.thresholds).replace(/^Auslastung:\s*/, '')}` }
+  ]);
 }
 
 function ganttAxis(cols) {

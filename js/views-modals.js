@@ -12,6 +12,22 @@ import {
 
 import { html, icons, phaseOf, attr } from './ui.js';
 
+/**
+ * One dialog head for all four: the same close button was written out four
+ * times, so it could drift four ways.
+ */
+function modalHead(kicker, title, meta = '') {
+  return html`<header class="modal__head">
+    <div>
+      <p class="modal__kicker">${kicker}</p>
+      <h2 class="modal__title" id="modal-title">${title}</h2>
+      ${meta ? html`<p class="modal__meta-line">${meta}</p>` : ''}
+    </div>
+    <button type="button" class="modal__close" data-act="close-modal"
+            aria-label="${t('Schliessen')}">${icons.close(15)}</button>
+  </header>`;
+}
+
 export function renderModal() {
   if (!state.modal) return '';
   const body = state.modal.type === 'project' ? projectModal(state.modal)
@@ -35,20 +51,13 @@ function assignModal({ projectId, search = '', targetId }) {
   const candidates = data.people.filter(x => !query || x.name.toLowerCase().includes(query));
 
   return html`
-    <header class="modal__head">
-      <div>
-        <p class="modal__kicker">${t('Projektleitung')}</p>
-        <h2 class="modal__title" id="modal-title">${project.title}</h2>
-        <p class="modal__meta-line">${current
-          ? `${t('Aktuell')}: ${current.name} · ${personUtilisation(current.id, 0)} %`
-          : t('Aktuell nicht zugewiesen')}</p>
-      </div>
-      <button type="button" class="modal__close" data-act="close-modal" aria-label="${t('Schliessen')}">${icons.close(14)}</button>
-    </header>
+    ${modalHead(t('Projektleitung'), project.title, current
+      ? `${t('Aktuell')}: ${current.name} · ${personUtilisation(current.id, 0)} %`
+      : t('Aktuell nicht zugewiesen'))}
 
     <div class="rebook__to">
       <label class="dd__searchfield">
-        ${icons.search(14)}
+        ${icons.search(15)}
         <input type="search" role="combobox" aria-expanded="true" aria-controls="assign-list"
                data-act="assign-search" data-fk="assign-search" value="${search}"
                placeholder="${t('Person suchen')}" aria-label="${t('Person suchen')}" autocomplete="off">
@@ -64,7 +73,8 @@ function assignModal({ projectId, search = '', targetId }) {
     </div>
 
     <footer class="modal__foot">
-      ${current && html`<button type="button" class="btn" data-act="assign-clear">${t('Zuweisung aufheben')}</button>`}
+      ${current && html`<button type="button" class="btn btn--danger modal__foot-left"
+        data-act="assign-clear">${t('Zuweisung aufheben')}</button>`}
       <button type="button" class="btn" data-act="close-modal">${t('Abbrechen')}</button>
       <button type="button" class="btn btn--primary" data-act="assign-apply" ${attr(!targetId, 'disabled')}>${t('Zuweisen')}</button>
     </footer>`;
@@ -72,13 +82,7 @@ function assignModal({ projectId, search = '', targetId }) {
 
 function shareModal({ copied }) {
   return html`
-    <header class="modal__head">
-      <div>
-        <p class="modal__kicker">${t('Teilen')}</p>
-        <h2 class="modal__title" id="modal-title">${t('Diese Ansicht teilen')}</h2>
-      </div>
-      <button type="button" class="modal__close" data-act="close-modal" aria-label="${t('Schliessen')}">${icons.close(14)}</button>
-    </header>
+    ${modalHead(t('Teilen'), t('Diese Ansicht teilen'))}
 
     <div class="share">
       <label class="share__field">
@@ -87,7 +91,7 @@ function shareModal({ copied }) {
                data-act="share-select" aria-label="${t('Link')}">
       </label>
       <button type="button" class="btn btn--primary" data-act="share-copy">
-        ${copied ? icons.check(14) : icons.externalLink(14)}${copied ? t('Kopiert') : t('Link kopieren')}
+        ${copied ? icons.check(15) : icons.externalLink(15)}${copied ? t('Kopiert') : t('Link kopieren')}
       </button>
     </div>`;
 }
@@ -138,13 +142,7 @@ function projectModal({ projectId }) {
   ];
 
   return html`
-    <header class="modal__head">
-      <div>
-        <p class="modal__kicker">${p.number} · ${t(data.portfoliosById[p.portfolio].label)} · ${p.location.split(',')[0]}</p>
-        <h2 class="modal__title" id="modal-title">${p.title}</h2>
-      </div>
-      <button type="button" class="modal__close" data-act="close-modal" aria-label="${t('Schliessen')}">${icons.close(14)}</button>
-    </header>
+    ${modalHead(`${p.number} · ${t(data.portfoliosById[p.portfolio].label)} · ${p.location.split(',')[0]}`, p.title)}
 
     <dl class="facts">
       ${facts.map(f => html`<div class="facts__row">
@@ -193,14 +191,8 @@ function rebookModal({ projectId, q, amount, targetId, quarters = 2, search = ''
   const ready = target && amount > 0 && reason.trim();
 
   return html`
-    <header class="modal__head">
-      <div>
-        <p class="modal__kicker">${t('Pensum umbuchen')}</p>
-        <h2 class="modal__title" id="modal-title">${p.title}</h2>
-        <p class="modal__meta-line">${t('Rolle Projektleitung')} · ${t('ab')} ${quarter.label}, ${quarters} ${t('Quartale')}</p>
-      </div>
-      <button type="button" class="modal__close" data-act="close-modal" aria-label="${t('Schliessen')}">${icons.close(14)}</button>
-    </header>
+    ${modalHead(t('Pensum umbuchen'), p.title,
+      `${t('Projektleitung')} · ${t('ab')} ${quarter.label}, ${quarters} ${t('Quartale')}`)}
 
     <p class="modal__lead">${t('Ein Vorgang statt zwei Transaktionen: von, an, Betrag und Zeitraum ergeben einen Verlaufseintrag mit beiden Seiten.')}</p>
 
@@ -230,7 +222,7 @@ function rebookModal({ projectId, q, amount, targetId, quarters = 2, search = ''
     <div class="rebook__to">
       <span class="rebook__label">${t('An')}</span>
       <label class="dd__searchfield">
-        ${icons.search(14)}
+        ${icons.search(15)}
         <input type="search" role="combobox" aria-expanded="true" aria-controls="rebook-list"
                data-act="rebook-search" data-fk="rebook-search" value="${search}"
                placeholder="${t('Person suchen — Name oder Kürzel')}" aria-label="${t('Person suchen')}" autocomplete="off">

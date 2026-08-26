@@ -190,6 +190,21 @@
   --color-neutral-solid:  var(--grey-400);
 
   /* ==========================================================================
+     11 · Ampel — the project lead's own utilisation
+     Wired to the status ramp so the four states keep its tuned luminances.
+     Shape, not hue, is what separates them: disc / ring / diamond / outline.
+     ========================================================================== */
+  --ampel-ok-bg:        var(--color-ok-bg);
+  --ampel-ok-border:    var(--color-ok-solid);
+  --ampel-tight-bg:     var(--color-surface);
+  --ampel-tight-border: var(--color-warn-solid);
+  --ampel-over-bg:      var(--color-danger-bg);
+  --ampel-over-border:  var(--color-danger-solid);
+
+  /* A planned milestone is structure, not status. */
+  --color-milestone:    var(--grey-600);
+
+  /* ==========================================================================
      12 · Pensum heat ramp — blue only encodes the SIZE of a pensum
      0 % · 1–39 % · 40–79 % · 80–119 % · >= 120 %, plus no-value and negative
      ========================================================================== */
@@ -221,7 +236,6 @@
   --text-2xl:  24px;   /* page title                       */
   --text-xl:   22px;   /* KPI value, section heading       */
   --text-lg:   18px;   /* stepper glyph, strong numeric    */
-  --text-card: 17px;   /* card heading                     */
   --text-sub:  16px;   /* sub-section heading              */
   --text-tab:  15px;   /* tab labels, list item titles     */
   --text-btn:  14px;   /* button labels                    */
@@ -231,7 +245,11 @@
   --text-2xs:  10px;   /* notification count, tiny tag     */
 
   --font-regular:  400;
-  --font-medium:   500;
+  /*
+   * No --font-medium. Segoe UI — the platform this ships on — has no Medium, so
+   * 500 resolves to Semibold and rendered pixel-identically to 600 across 874
+   * instances. Three weights are declared because three is what renders.
+   */
   --font-semibold: 600;
   --font-bold:     700;
 
@@ -254,7 +272,6 @@
   --space-6:  12px;
   --space-7:  14px;
   --space-8:  16px;
-  --space-9:  18px;
   --space-10: 20px;
   --space-11: 24px;
   --space-12: 28px;
@@ -284,6 +301,8 @@
   --shadow-menu-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.18),
                     0 8px 10px -6px rgba(0, 0, 0, 0.1);
   /* Content cards sit on the page ground with a soft lift instead of a border. */
+  /* A card that lifts on hover needs somewhere to lift to. */
+  --shadow-raised-hover: 0 2px 4px rgba(16, 24, 40, .06), 0 8px 20px rgba(16, 24, 40, .10);
   --shadow-raised: 0 1px 2px rgba(16, 24, 40, 0.04), 0 4px 12px rgba(16, 24, 40, 0.06);
   /* An eased ramp: a linear fade banded visibly against the row fills. */
   --fade-right: linear-gradient(to right,
@@ -297,7 +316,9 @@
   --rail-danger: inset 3px 0 0 var(--red-600);
   --rail-warn:   inset 3px 0 0 var(--amber-600);
 
-  --focus-ring:        3px solid var(--blue-500);
+  /* blue-700, not blue-500: the ring is painted onto the neighbouring heat
+     cell, where 500 measured 2.46:1. 700 clears 3:1 on every ground it meets. */
+  --focus-ring:        3px solid var(--blue-700);
   --focus-ring-offset: 2px;
   --ring-cell-edit:    inset 0 0 0 2px var(--blue-600);
 
@@ -312,7 +333,7 @@
   /* Pensum grid */
   --grid-quarter:      72px;    /* one quarter column        */
   --grid-col-ampel:    62px;
-  --grid-col-id:       100px;
+  --grid-col-id:       62px;
   --grid-col-phase:    128px;
   --grid-col-lead:     132px;
   --grid-col-budget:   112px;

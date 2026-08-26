@@ -10,8 +10,9 @@ import {
 } from './store.js';
 
 import {
-  html, raw, icons, pageHeader, editToggle, exportMenu, toolbar, activeFilterRow,
-  timeControls, columnChart, tooNarrow, phaseOf,
+  html, raw, icons, pageHeader, pageActions, toolbar, activeFilterRow,
+  timeControls, columnChart, tooNarrow, noResults, phaseOf, ampelLegend,
+  legendBlock, legendItem,
   attr
 } from './ui.js';
 
@@ -79,7 +80,7 @@ export function renderLanding() {
       title: 'Projekte', count: data.projects.length,
       sub: `${tot.demand[0]} % Bedarf · ${tot.preCredit[0]} % vor Baukredit-Freigabe`,
       metric: unassigned.length, metricLabel: 'ohne Projektleitung',
-      tone: 'info', tab: 'uebersicht'
+      tone: 'warn', tab: 'uebersicht'
     }
   ];
 
@@ -88,14 +89,13 @@ export function renderLanding() {
       crumbs: ['Bauprojekte'],
       title: 'Ressourcenplanung',
       chrome: false,
-      actions: html`${exportMenu()}
-        <button type="button" class="btn" data-act="share">${icons.share(14)}${t('Teilen')}</button>
-        <button type="button" class="btn btn--primary" data-act="tab" data-val="uebersicht">${t('Zur Planung')}</button>`
+      actions: pageActions({ extra: html`<button type="button" class="btn btn--primary"
+        data-act="tab" data-val="uebersicht">${t('Zur Planung')}</button>` })
     })}
 
     <div class="wrap"><div class="content content--landing">
       <div class="entry-grid">
-        ${cards.map(c => html`<button type="button" class="entry entry--${c.tone}" data-act="tab" data-val="${c.tab}">
+        ${cards.map(c => html`<button type="button" class="entry entry--${c.metric ? c.tone : 'neutral'}" data-act="tab" data-val="${c.tab}">
           <span class="entry__head">
             <span class="entry__title">${t(c.title)}${
               c.count ? html`<span class="count-pill">${c.count}</span>` : ''}</span>
@@ -163,8 +163,7 @@ function attentionCard(overPeople, unassigned) {
       context: data.projects.filter(x => x.leadId === p.id).map(shortName).join(' · '),
       value: `${personLoad(p.id, 0)} %`,
       act: 'filter-lead', val: p.id
-    }))
-    .sort((a, b) => parseInt(b.value) - parseInt(a.value));
+    }));
 
   unassigned.forEach(p => {
     const start = projectDemand(p).findIndex(v => v > 0);
@@ -176,6 +175,21 @@ function attentionCard(overPeople, unassigned) {
       act: 'filter-lead', val: 'none'
     });
   });
+
+  /*
+   * Both kinds belong in the visible few. Appended one after the other, every
+   * row the reader saw was an overload and the severity rail said nothing; the
+   * open demand — the other half of what this card exists for — never surfaced.
+   * Each kind is ordered by size, then woven so both show early.
+   */
+  const over = rows.filter(r => r.severity === 'danger').sort((a, b) => parseInt(b.value) - parseInt(a.value));
+  const open = rows.filter(r => r.severity === 'warn').sort((a, b) => parseInt(b.value) - parseInt(a.value));
+  const every = Math.min(3, Math.max(1, Math.ceil(over.length / Math.max(1, open.length))));
+  rows.length = 0;
+  while (over.length || open.length) {
+    for (let i = 0; i < every && over.length; i++) rows.push(over.shift());
+    if (open.length) rows.push(open.shift());
+  }
 
   const list = state.showAll.attention ? rows : rows.slice(0, CARD_ROWS);
 
@@ -246,22 +260,26 @@ export function renderUebersicht() {
     ${pageHeader({
       crumbs: ['Bauprojekte', 'Übersicht'],
       title: 'Ressourcenplanung',
-      actions: html`${editToggle()}${exportMenu()}
-        <button type="button" class="btn" data-act="share">${icons.share(14)}${t('Teilen')}</button>`
+      actions: pageActions({ edit: true })
     })}
     <div class="wrap"><div class="content">
       ${state.narrow ? tooNarrow('Das Pensum-Raster') : html`
         ${toolbar()}
         ${activeFilterRow()}
         ${timeControls({})}
-        ${pensumGrid()}`}
+        ${filteredProjects().length ? pensumGrid() : noResults('Bauprojekte')}`}
     </div></div>`;
 }
 
 /** The column template, rebuilt whenever a column is toggled. */
 /** Fixed widths in px, mirroring the layout tokens in tokens.css. */
+/*
+ * Widths measured against the data, not guessed: the ID column held 100px for
+ * 35px of content while 99 of 111 titles were clipped — and it is always the
+ * Massnahme at the end that goes.
+ */
 const COL_W = {
-  ampel: 62, id: 100, title: 220, phase: 128, lead: 132,
+  ampel: 62, id: 62, title: 285, phase: 128, lead: 132,
   portfolio: 110, priority: 90, nextMs: 150, credit: 112,
   target: 76, quarter: 72, trend: 130
 };
@@ -364,7 +382,7 @@ function pensumGrid() {
 
   return html`<section class="grid-card">
     <div class="scrollbox">
-    <div class="pgrid" data-scroll>
+    <div class="pgrid ${state.edit ? 'pgrid--edit' : ''}" data-scroll>
      <div class="pgrid__track" style="min-width:${minWidth}px; --sticky-w:${sticky.width}px">
 
       ${body}
@@ -372,7 +390,7 @@ function pensumGrid() {
       <div class="pblock pblock--foot">
       <div class="prow prow--sum" style="grid-template-columns:${raw(tpl)}">
         <div style="grid-column:span ${span}" class="prow__sumlabel is-frozen">
-          ${t('Bedarf total')}
+          ${t('Bedarf total')}${tot.scoped ? html`<span class="prow__sumnote">${t('Auswahl')}</span>` : ''}
           <button type="button" class="linkbtn" data-act="foot-details">
             ${state.footDetails ? t('Details ausblenden') : t('Details anzeigen')}
           </button>
@@ -387,7 +405,8 @@ function pensumGrid() {
         ${footRow(t('Kapazität netto, nach Abwesenheiten'), tot.net, tpl, span, cols)}`}
 
       <div class="prow prow--load" style="grid-template-columns:${raw(tpl)}">
-        <div style="grid-column:span ${span}" class="prow__sumlabel is-frozen">${t('Auslastung')}</div>
+        <div style="grid-column:span ${span}" class="prow__sumlabel is-frozen">${t('Auslastung')}${
+          tot.scoped ? html`<span class="prow__sumnote">${t('Gesamtportfolio')}</span>` : ''}</div>
         ${cols.map(period => {
           const q = period.quarters[0];
           const pct = periodValue(tot.utilisation, period);
@@ -401,7 +420,6 @@ function pensumGrid() {
       </div>
       </div>
 
-      ${state.editing && editPopover()}
     </div>
     </div>
 
@@ -412,14 +430,19 @@ function pensumGrid() {
 /** The same swatch legend the print sheet carries, so both read alike. */
 export function heatLegend() {
   const l = data.print.legend;
-  return html`<div class="heatlegend">
-    <span class="heatlegend__label">${t(l.label)}</span>
-    ${l.steps.map(s => html`<span class="heatlegend__item">
-      <span class="heatlegend__swatch heat-${s.step}"></span>${s.label}</span>`)}
-    <span class="heatlegend__item">${icons.warn(11)}${t('Projektleitung über 100 % im Quartal')}</span>
-    <span class="heatlegend__item"><span class="heatlegend__swatch is-nolead"></span>${t(l.noLead)}</span>
-    <span class="heatlegend__item">${t(l.thresholds)}</span>
-  </div>`;
+  return legendBlock([
+    {
+      label: 'Pensum',
+      items: l.steps.map(s => legendItem(html`<span class="legend__swatch heat-${s.step}"></span>`, s.label))
+    },
+    { label: 'Ampel', items: state.ampel ? ampelLegend() : null },
+    {
+      label: 'Markierung',
+      items: html`${legendItem(icons.warn(13), 'Projektleitung über 100 % im Quartal')}
+        ${legendItem(html`<span class="legend__swatch is-nolead"></span>`, l.noLead)}`
+    },
+    { label: 'Auslastung', items: html`${t(l.thresholds).replace(/^Auslastung:\s*/, '')}` }
+  ]);
 }
 
 /** The rule that separates one year from the next, drawn on its first column. */
@@ -552,7 +575,7 @@ function projectRow(p, tpl, sticky, cols, rowIdx) {
 const POP_WIDTH = 308;
 const POP_HEIGHT = 340;
 
-function editPopover() {
+export function editPopover() {
   const { projectId, q, anchor } = state.editing;
   const p = data.projectsById[projectId];
   const lead = p.leadId ? data.peopleById[p.leadId] : null;
