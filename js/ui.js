@@ -643,9 +643,9 @@ export function ampelLegend() {
  */
 export function legendBlock(groups, cls = '') {
   return html`<dl class="legend ${cls}">
-    ${groups.filter(g => g.items).map(g => html`
-      <dt>${t(g.label)}</dt>
-      <dd>${g.items}</dd>`)}
+    ${groups.filter(g => g.items).map(g => html`<div class="legend__group">
+      <dt>${t(g.label)}</dt><dd>${g.items}</dd>
+    </div>`)}
   </dl>`;
 }
 

@@ -254,18 +254,26 @@ const REASONS = [
   'Lieferfristen Haustechnik'
 ];
 
+/*
+ * Every gate the project passes inside the window, not just the next one — a
+ * project in Realisierung has Vergabe behind it and Abnahme ahead, and a
+ * portfolio view that shows one gate per project hides the clustering that
+ * makes approval bodies the bottleneck.
+ */
 function makeMilestones(projects) {
   const items = [];
   for (const p of projects) {
     for (const bar of p.bars) {
       const code = GATE[bar.phase];
-      // A gate sits at the end of its phase, and only the ones inside the window count.
       if (!code || bar.to < 1 || bar.to > QUARTERS) continue;
-      if (rnd() > 0.55) continue;
+
       const planIdx = Math.max(0, bar.to - 1);
-      const late = weighted([[0, 74], [1, 18], [2, 8]]);
+      // The further out a gate sits, the less anyone knows about it yet.
+      const near = planIdx <= 2;
+      const late = weighted(near ? [[0, 62], [1, 24], [2, 14]] : [[0, 84], [1, 12], [2, 4]]);
       const forecastIdx = Math.min(QUARTERS - 1, planIdx + late);
-      const pending = late === 0 && rnd() < 0.06;
+      const pending = late === 0 && rnd() < (near ? 0.08 : 0.04);
+
       items.push({
         id: `ms-${p.id.slice(2)}-${code.slice(2)}`,
         code,
@@ -281,7 +289,6 @@ function makeMilestones(projects) {
             : 'Termin gehalten',
         ...(late ? { impact: pick(REASONS) } : {})
       });
-      break;   // at most one open gate per project, which is how they are tracked
     }
   }
   return items;

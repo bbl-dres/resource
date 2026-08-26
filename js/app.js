@@ -385,6 +385,13 @@ const actions = {
     flash(`${project.location} — ${t('Zuweisung aufgehoben')}`);
   },
 
+  'open-phase': (val) => {
+    const [projectId, from] = val.split(':');
+    setState({ modal: { type: 'phase', projectId, from: Number(from) }, menu: null, editing: null });
+  },
+
+  'open-milestone': (val) => setState({ modal: { type: 'milestone', milestoneId: val }, menu: null, editing: null }),
+
   'open-project': (val) => setState({ modal: { type: 'project', projectId: val }, menu: null, editing: null }),
   'open-termine': (val) => setState({ tab: 'termine', modal: null, search: data.projectsById[val].location }),
 

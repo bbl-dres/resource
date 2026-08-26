@@ -175,17 +175,91 @@
       "statusLabel": "Termin gehalten"
     },
     {
+      "id": "ms-100-3",
+      "code": "MS3",
+      "projectId": "pr100",
+      "subPhase": "31",
+      "plan": "2027Q1",
+      "planDate": "2027-03-31",
+      "forecast": "2027Q2",
+      "forecastDate": "2027-06-30",
+      "status": "late",
+      "statusLabel": "▲ 1 Quartal verspätet",
+      "impact": "Abstimmung mit Nutzer offen"
+    },
+    {
+      "id": "ms-100-4",
+      "code": "MS4",
+      "projectId": "pr100",
+      "subPhase": "33",
+      "plan": "2027Q4",
+      "planDate": "2027-12-31",
+      "forecast": "2027Q4",
+      "forecastDate": "2027-12-31",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
       "id": "ms-100-5",
       "code": "MS5",
       "projectId": "pr100",
       "subPhase": "41",
       "plan": "2028Q1",
       "planDate": "2028-03-31",
+      "forecast": "2028Q1",
+      "forecastDate": "2028-03-31",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
+      "id": "ms-101-3",
+      "code": "MS3",
+      "projectId": "pr101",
+      "subPhase": "31",
+      "plan": "2027Q1",
+      "planDate": "2027-03-31",
+      "forecast": "2027Q2",
+      "forecastDate": "2027-06-30",
+      "status": "late",
+      "statusLabel": "▲ 1 Quartal verspätet",
+      "impact": "Kreditfreigabe verschoben"
+    },
+    {
+      "id": "ms-101-4",
+      "code": "MS4",
+      "projectId": "pr101",
+      "subPhase": "33",
+      "plan": "2028Q1",
+      "planDate": "2028-03-31",
+      "forecast": "2028Q1",
+      "forecastDate": "2028-03-31",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
+      "id": "ms-101-5",
+      "code": "MS5",
+      "projectId": "pr101",
+      "subPhase": "41",
+      "plan": "2028Q2",
+      "planDate": "2028-06-30",
       "forecast": "2028Q2",
       "forecastDate": "2028-06-30",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
+      "id": "ms-102-3",
+      "code": "MS3",
+      "projectId": "pr102",
+      "subPhase": "31",
+      "plan": "2026Q4",
+      "planDate": "2026-12-31",
+      "forecast": "2027Q1",
+      "forecastDate": "2027-03-31",
       "status": "late",
-      "statusLabel": "▲ 2 Quartale verspätet",
-      "impact": "Verzug durch Einsprache"
+      "statusLabel": "▲ 1 Quartal verspätet",
+      "impact": "Abstimmung mit Nutzer offen"
     },
     {
       "id": "ms-102-4",
@@ -200,17 +274,52 @@
       "statusLabel": "Termin gehalten"
     },
     {
+      "id": "ms-102-5",
+      "code": "MS5",
+      "projectId": "pr102",
+      "subPhase": "41",
+      "plan": "2028Q2",
+      "planDate": "2028-06-30",
+      "forecast": "2028Q2",
+      "forecastDate": "2028-06-30",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
+      "id": "ms-103-6",
+      "code": "MS6",
+      "projectId": "pr103",
+      "subPhase": "53",
+      "plan": "2027Q2",
+      "planDate": "2027-06-30",
+      "forecast": "2027Q2",
+      "forecastDate": "2027-06-30",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
+      "id": "ms-104-4",
+      "code": "MS4",
+      "projectId": "pr104",
+      "subPhase": "33",
+      "plan": "2027Q2",
+      "planDate": "2027-06-30",
+      "forecast": null,
+      "forecastDate": null,
+      "status": "pending",
+      "statusLabel": "▲ Auftrag noch hängig"
+    },
+    {
       "id": "ms-104-5",
       "code": "MS5",
       "projectId": "pr104",
       "subPhase": "41",
       "plan": "2027Q3",
       "planDate": "2027-09-30",
-      "forecast": "2027Q4",
-      "forecastDate": "2027-12-31",
-      "status": "late",
-      "statusLabel": "▲ 1 Quartal verspätet",
-      "impact": "Verzug durch Statikprüfung"
+      "forecast": "2027Q3",
+      "forecastDate": "2027-09-30",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
     },
     {
       "id": "ms-105-3",
@@ -223,7 +332,31 @@
       "forecastDate": "2026-12-31",
       "status": "late",
       "statusLabel": "▲ 1 Quartal verspätet",
-      "impact": "Bewilligung ausstehend"
+      "impact": "Vergabe verschoben"
+    },
+    {
+      "id": "ms-105-4",
+      "code": "MS4",
+      "projectId": "pr105",
+      "subPhase": "33",
+      "plan": "2027Q3",
+      "planDate": "2027-09-30",
+      "forecast": "2027Q3",
+      "forecastDate": "2027-09-30",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
+      "id": "ms-105-5",
+      "code": "MS5",
+      "projectId": "pr105",
+      "subPhase": "41",
+      "plan": "2027Q4",
+      "planDate": "2027-12-31",
+      "forecast": "2027Q4",
+      "forecastDate": "2027-12-31",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
     },
     {
       "id": "ms-106-5",
@@ -232,8 +365,21 @@
       "subPhase": "41",
       "plan": "2026Q3",
       "planDate": "2026-09-30",
-      "forecast": "2026Q3",
-      "forecastDate": "2026-09-30",
+      "forecast": "2026Q4",
+      "forecastDate": "2026-12-31",
+      "status": "late",
+      "statusLabel": "▲ 1 Quartal verspätet",
+      "impact": "Abstimmung mit Nutzer offen"
+    },
+    {
+      "id": "ms-106-6",
+      "code": "MS6",
+      "projectId": "pr106",
+      "subPhase": "53",
+      "plan": "2028Q1",
+      "planDate": "2028-03-31",
+      "forecast": "2028Q1",
+      "forecastDate": "2028-03-31",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -244,11 +390,36 @@
       "subPhase": "41",
       "plan": "2026Q3",
       "planDate": "2026-09-30",
+      "forecast": "2027Q1",
+      "forecastDate": "2027-03-31",
+      "status": "late",
+      "statusLabel": "▲ 2 Quartale verspätet",
+      "impact": "Abstimmung mit Nutzer offen"
+    },
+    {
+      "id": "ms-107-6",
+      "code": "MS6",
+      "projectId": "pr107",
+      "subPhase": "53",
+      "plan": "2028Q1",
+      "planDate": "2028-03-31",
+      "forecast": "2028Q1",
+      "forecastDate": "2028-03-31",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
+      "id": "ms-108-3",
+      "code": "MS3",
+      "projectId": "pr108",
+      "subPhase": "31",
+      "plan": "2026Q3",
+      "planDate": "2026-09-30",
       "forecast": "2026Q4",
       "forecastDate": "2026-12-31",
       "status": "late",
       "statusLabel": "▲ 1 Quartal verspätet",
-      "impact": "Vergabe verschoben"
+      "impact": "Abstimmung mit Nutzer offen"
     },
     {
       "id": "ms-108-4",
@@ -257,10 +428,48 @@
       "subPhase": "33",
       "plan": "2027Q3",
       "planDate": "2027-09-30",
+      "forecast": "2027Q4",
+      "forecastDate": "2027-12-31",
+      "status": "late",
+      "statusLabel": "▲ 1 Quartal verspätet",
+      "impact": "Verzug durch Statikprüfung"
+    },
+    {
+      "id": "ms-108-5",
+      "code": "MS5",
+      "projectId": "pr108",
+      "subPhase": "41",
+      "plan": "2028Q1",
+      "planDate": "2028-03-31",
+      "forecast": null,
+      "forecastDate": null,
+      "status": "pending",
+      "statusLabel": "▲ Auftrag noch hängig"
+    },
+    {
+      "id": "ms-109-6",
+      "code": "MS6",
+      "projectId": "pr109",
+      "subPhase": "53",
+      "plan": "2027Q3",
+      "planDate": "2027-09-30",
       "forecast": "2027Q3",
       "forecastDate": "2027-09-30",
       "status": "ok",
       "statusLabel": "Termin gehalten"
+    },
+    {
+      "id": "ms-110-4",
+      "code": "MS4",
+      "projectId": "pr110",
+      "subPhase": "33",
+      "plan": "2027Q1",
+      "planDate": "2027-03-31",
+      "forecast": "2027Q3",
+      "forecastDate": "2027-09-30",
+      "status": "late",
+      "statusLabel": "▲ 2 Quartale verspätet",
+      "impact": "Verzug durch Einsprache"
     },
     {
       "id": "ms-110-5",
@@ -269,10 +478,24 @@
       "subPhase": "41",
       "plan": "2027Q2",
       "planDate": "2027-06-30",
-      "forecast": "2027Q2",
-      "forecastDate": "2027-06-30",
-      "status": "ok",
-      "statusLabel": "Termin gehalten"
+      "forecast": "2027Q4",
+      "forecastDate": "2027-12-31",
+      "status": "late",
+      "statusLabel": "▲ 2 Quartale verspätet",
+      "impact": "Bewilligung ausstehend"
+    },
+    {
+      "id": "ms-111-5",
+      "code": "MS5",
+      "projectId": "pr111",
+      "subPhase": "41",
+      "plan": "2026Q3",
+      "planDate": "2026-09-30",
+      "forecast": "2026Q4",
+      "forecastDate": "2026-12-31",
+      "status": "late",
+      "statusLabel": "▲ 1 Quartal verspätet",
+      "impact": "Kreditfreigabe verschoben"
     },
     {
       "id": "ms-111-6",
@@ -287,21 +510,70 @@
       "statusLabel": "Termin gehalten"
     },
     {
+      "id": "ms-113-4",
+      "code": "MS4",
+      "projectId": "pr113",
+      "subPhase": "33",
+      "plan": "2026Q3",
+      "planDate": "2026-09-30",
+      "forecast": "2026Q3",
+      "forecastDate": "2026-09-30",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
+      "id": "ms-113-5",
+      "code": "MS5",
+      "projectId": "pr113",
+      "subPhase": "41",
+      "plan": "2026Q4",
+      "planDate": "2026-12-31",
+      "forecast": "2026Q4",
+      "forecastDate": "2026-12-31",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
       "id": "ms-113-6",
       "code": "MS6",
       "projectId": "pr113",
       "subPhase": "53",
       "plan": "2027Q4",
       "planDate": "2027-12-31",
+      "forecast": "2027Q4",
+      "forecastDate": "2027-12-31",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
+      "id": "ms-114-6",
+      "code": "MS6",
+      "projectId": "pr114",
+      "subPhase": "53",
+      "plan": "2026Q3",
+      "planDate": "2026-09-30",
+      "forecast": "2027Q1",
+      "forecastDate": "2027-03-31",
+      "status": "late",
+      "statusLabel": "▲ 2 Quartale verspätet",
+      "impact": "Verzug durch Statikprüfung"
+    },
+    {
+      "id": "ms-115-6",
+      "code": "MS6",
+      "projectId": "pr115",
+      "subPhase": "53",
+      "plan": "2027Q3",
+      "planDate": "2027-09-30",
       "forecast": null,
       "forecastDate": null,
       "status": "pending",
       "statusLabel": "▲ Auftrag noch hängig"
     },
     {
-      "id": "ms-114-6",
+      "id": "ms-116-6",
       "code": "MS6",
-      "projectId": "pr114",
+      "projectId": "pr116",
       "subPhase": "53",
       "plan": "2026Q3",
       "planDate": "2026-09-30",
@@ -311,17 +583,29 @@
       "statusLabel": "Termin gehalten"
     },
     {
-      "id": "ms-115-6",
-      "code": "MS6",
-      "projectId": "pr115",
-      "subPhase": "53",
-      "plan": "2027Q3",
-      "planDate": "2027-09-30",
-      "forecast": "2028Q1",
-      "forecastDate": "2028-03-31",
+      "id": "ms-117-3",
+      "code": "MS3",
+      "projectId": "pr117",
+      "subPhase": "31",
+      "plan": "2026Q4",
+      "planDate": "2026-12-31",
+      "forecast": "2027Q2",
+      "forecastDate": "2027-06-30",
       "status": "late",
       "statusLabel": "▲ 2 Quartale verspätet",
       "impact": "Bewilligung ausstehend"
+    },
+    {
+      "id": "ms-117-4",
+      "code": "MS4",
+      "projectId": "pr117",
+      "subPhase": "33",
+      "plan": "2027Q3",
+      "planDate": "2027-09-30",
+      "forecast": "2027Q3",
+      "forecastDate": "2027-09-30",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
     },
     {
       "id": "ms-117-5",
@@ -330,10 +614,11 @@
       "subPhase": "41",
       "plan": "2028Q1",
       "planDate": "2028-03-31",
-      "forecast": "2028Q1",
-      "forecastDate": "2028-03-31",
-      "status": "ok",
-      "statusLabel": "Termin gehalten"
+      "forecast": "2028Q2",
+      "forecastDate": "2028-06-30",
+      "status": "late",
+      "statusLabel": "▲ 1 Quartal verspätet",
+      "impact": "Verzug durch Statikprüfung"
     },
     {
       "id": "ms-118-3",
@@ -342,11 +627,59 @@
       "subPhase": "31",
       "plan": "2027Q1",
       "planDate": "2027-03-31",
-      "forecast": "2027Q3",
-      "forecastDate": "2027-09-30",
+      "forecast": "2027Q1",
+      "forecastDate": "2027-03-31",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
+      "id": "ms-118-4",
+      "code": "MS4",
+      "projectId": "pr118",
+      "subPhase": "33",
+      "plan": "2028Q1",
+      "planDate": "2028-03-31",
+      "forecast": "2028Q1",
+      "forecastDate": "2028-03-31",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
+      "id": "ms-118-5",
+      "code": "MS5",
+      "projectId": "pr118",
+      "subPhase": "41",
+      "plan": "2028Q2",
+      "planDate": "2028-06-30",
+      "forecast": "2028Q2",
+      "forecastDate": "2028-06-30",
       "status": "late",
-      "statusLabel": "▲ 2 Quartale verspätet",
-      "impact": "Verzug durch Einsprache"
+      "statusLabel": "▲ 1 Quartal verspätet",
+      "impact": "Bewilligung ausstehend"
+    },
+    {
+      "id": "ms-119-6",
+      "code": "MS6",
+      "projectId": "pr119",
+      "subPhase": "53",
+      "plan": "2027Q1",
+      "planDate": "2027-03-31",
+      "forecast": "2027Q1",
+      "forecastDate": "2027-03-31",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
+      "id": "ms-120-5",
+      "code": "MS5",
+      "projectId": "pr120",
+      "subPhase": "41",
+      "plan": "2026Q3",
+      "planDate": "2026-09-30",
+      "forecast": "2026Q3",
+      "forecastDate": "2026-09-30",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
     },
     {
       "id": "ms-120-6",
@@ -355,10 +688,11 @@
       "subPhase": "53",
       "plan": "2028Q1",
       "planDate": "2028-03-31",
-      "forecast": null,
-      "forecastDate": null,
-      "status": "pending",
-      "statusLabel": "▲ Auftrag noch hängig"
+      "forecast": "2028Q2",
+      "forecastDate": "2028-06-30",
+      "status": "late",
+      "statusLabel": "▲ 2 Quartale verspätet",
+      "impact": "Lieferfristen Haustechnik"
     },
     {
       "id": "ms-121-4",
@@ -369,6 +703,18 @@
       "planDate": "2027-06-30",
       "forecast": "2027Q2",
       "forecastDate": "2027-06-30",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
+      "id": "ms-121-5",
+      "code": "MS5",
+      "projectId": "pr121",
+      "subPhase": "41",
+      "plan": "2027Q4",
+      "planDate": "2027-12-31",
+      "forecast": "2027Q4",
+      "forecastDate": "2027-12-31",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -385,6 +731,30 @@
       "statusLabel": "Termin gehalten"
     },
     {
+      "id": "ms-122-5",
+      "code": "MS5",
+      "projectId": "pr122",
+      "subPhase": "41",
+      "plan": "2027Q4",
+      "planDate": "2027-12-31",
+      "forecast": "2027Q4",
+      "forecastDate": "2027-12-31",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
+      "id": "ms-123-1",
+      "code": "MS1",
+      "projectId": "pr123",
+      "subPhase": "11",
+      "plan": "2027Q1",
+      "planDate": "2027-03-31",
+      "forecast": "2027Q1",
+      "forecastDate": "2027-03-31",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
       "id": "ms-123-2",
       "code": "MS2",
       "projectId": "pr123",
@@ -397,17 +767,53 @@
       "statusLabel": "Termin gehalten"
     },
     {
+      "id": "ms-123-3",
+      "code": "MS3",
+      "projectId": "pr123",
+      "subPhase": "31",
+      "plan": "2027Q4",
+      "planDate": "2027-12-31",
+      "forecast": "2027Q4",
+      "forecastDate": "2027-12-31",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
       "id": "ms-124-4",
       "code": "MS4",
       "projectId": "pr124",
       "subPhase": "33",
       "plan": "2026Q4",
       "planDate": "2026-12-31",
-      "forecast": "2027Q1",
-      "forecastDate": "2027-03-31",
+      "forecast": "2026Q4",
+      "forecastDate": "2026-12-31",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
+      "id": "ms-124-5",
+      "code": "MS5",
+      "projectId": "pr124",
+      "subPhase": "41",
+      "plan": "2027Q1",
+      "planDate": "2027-03-31",
+      "forecast": "2027Q2",
+      "forecastDate": "2027-06-30",
       "status": "late",
       "statusLabel": "▲ 1 Quartal verspätet",
-      "impact": "Lieferfristen Haustechnik"
+      "impact": "Abstimmung mit Nutzer offen"
+    },
+    {
+      "id": "ms-124-6",
+      "code": "MS6",
+      "projectId": "pr124",
+      "subPhase": "53",
+      "plan": "2028Q2",
+      "planDate": "2028-06-30",
+      "forecast": "2028Q2",
+      "forecastDate": "2028-06-30",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
     },
     {
       "id": "ms-125-6",
@@ -422,17 +828,52 @@
       "statusLabel": "Termin gehalten"
     },
     {
+      "id": "ms-126-4",
+      "code": "MS4",
+      "projectId": "pr126",
+      "subPhase": "33",
+      "plan": "2026Q3",
+      "planDate": "2026-09-30",
+      "forecast": "2026Q3",
+      "forecastDate": "2026-09-30",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
       "id": "ms-126-5",
       "code": "MS5",
       "projectId": "pr126",
       "subPhase": "41",
       "plan": "2027Q1",
       "planDate": "2027-03-31",
+      "forecast": "2027Q1",
+      "forecastDate": "2027-03-31",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
+      "id": "ms-126-6",
+      "code": "MS6",
+      "projectId": "pr126",
+      "subPhase": "53",
+      "plan": "2028Q2",
+      "planDate": "2028-06-30",
+      "forecast": "2028Q2",
+      "forecastDate": "2028-06-30",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
+      "id": "ms-127-6",
+      "code": "MS6",
+      "projectId": "pr127",
+      "subPhase": "53",
+      "plan": "2027Q3",
+      "planDate": "2027-09-30",
       "forecast": "2027Q3",
       "forecastDate": "2027-09-30",
-      "status": "late",
-      "statusLabel": "▲ 2 Quartale verspätet",
-      "impact": "Lieferfristen Haustechnik"
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
     },
     {
       "id": "ms-128-6",
@@ -453,10 +894,37 @@
       "subPhase": "41",
       "plan": "2027Q1",
       "planDate": "2027-03-31",
-      "forecast": "2027Q1",
-      "forecastDate": "2027-03-31",
-      "status": "ok",
-      "statusLabel": "Termin gehalten"
+      "forecast": "2027Q3",
+      "forecastDate": "2027-09-30",
+      "status": "late",
+      "statusLabel": "▲ 2 Quartale verspätet",
+      "impact": "Verzug durch Einsprache"
+    },
+    {
+      "id": "ms-129-6",
+      "code": "MS6",
+      "projectId": "pr129",
+      "subPhase": "53",
+      "plan": "2028Q2",
+      "planDate": "2028-06-30",
+      "forecast": "2028Q2",
+      "forecastDate": "2028-06-30",
+      "status": "late",
+      "statusLabel": "▲ 1 Quartal verspätet",
+      "impact": "Verzug durch Statikprüfung"
+    },
+    {
+      "id": "ms-130-6",
+      "code": "MS6",
+      "projectId": "pr130",
+      "subPhase": "53",
+      "plan": "2027Q1",
+      "planDate": "2027-03-31",
+      "forecast": "2027Q3",
+      "forecastDate": "2027-09-30",
+      "status": "late",
+      "statusLabel": "▲ 2 Quartale verspätet",
+      "impact": "Lieferfristen Haustechnik"
     },
     {
       "id": "ms-131-3",
@@ -477,8 +945,33 @@
       "subPhase": "21",
       "plan": "2026Q4",
       "planDate": "2026-12-31",
-      "forecast": "2026Q4",
-      "forecastDate": "2026-12-31",
+      "forecast": "2027Q1",
+      "forecastDate": "2027-03-31",
+      "status": "late",
+      "statusLabel": "▲ 1 Quartal verspätet",
+      "impact": "Verzug durch Einsprache"
+    },
+    {
+      "id": "ms-132-3",
+      "code": "MS3",
+      "projectId": "pr132",
+      "subPhase": "31",
+      "plan": "2027Q3",
+      "planDate": "2027-09-30",
+      "forecast": "2027Q3",
+      "forecastDate": "2027-09-30",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
+      "id": "ms-132-4",
+      "code": "MS4",
+      "projectId": "pr132",
+      "subPhase": "33",
+      "plan": "2028Q2",
+      "planDate": "2028-06-30",
+      "forecast": "2028Q2",
+      "forecastDate": "2028-06-30",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -495,6 +988,18 @@
       "statusLabel": "Termin gehalten"
     },
     {
+      "id": "ms-134-3",
+      "code": "MS3",
+      "projectId": "pr134",
+      "subPhase": "31",
+      "plan": "2026Q4",
+      "planDate": "2026-12-31",
+      "forecast": "2026Q4",
+      "forecastDate": "2026-12-31",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
       "id": "ms-134-4",
       "code": "MS4",
       "projectId": "pr134",
@@ -507,17 +1012,40 @@
       "statusLabel": "Termin gehalten"
     },
     {
+      "id": "ms-134-5",
+      "code": "MS5",
+      "projectId": "pr134",
+      "subPhase": "41",
+      "plan": "2028Q2",
+      "planDate": "2028-06-30",
+      "forecast": "2028Q2",
+      "forecastDate": "2028-06-30",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
+      "id": "ms-135-5",
+      "code": "MS5",
+      "projectId": "pr135",
+      "subPhase": "41",
+      "plan": "2026Q4",
+      "planDate": "2026-12-31",
+      "forecast": "2026Q4",
+      "forecastDate": "2026-12-31",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
       "id": "ms-135-6",
       "code": "MS6",
       "projectId": "pr135",
       "subPhase": "53",
       "plan": "2028Q1",
       "planDate": "2028-03-31",
-      "forecast": "2028Q2",
-      "forecastDate": "2028-06-30",
-      "status": "late",
-      "statusLabel": "▲ 2 Quartale verspätet",
-      "impact": "Verzug durch Statikprüfung"
+      "forecast": "2028Q1",
+      "forecastDate": "2028-03-31",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
     },
     {
       "id": "ms-136-6",
@@ -550,11 +1078,22 @@
       "subPhase": "31",
       "plan": "2027Q3",
       "planDate": "2027-09-30",
+      "forecast": "2027Q3",
+      "forecastDate": "2027-09-30",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
+      "id": "ms-140-6",
+      "code": "MS6",
+      "projectId": "pr140",
+      "subPhase": "53",
+      "plan": "2028Q1",
+      "planDate": "2028-03-31",
       "forecast": "2028Q1",
       "forecastDate": "2028-03-31",
-      "status": "late",
-      "statusLabel": "▲ 2 Quartale verspätet",
-      "impact": "Verzug durch Einsprache"
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
     },
     {
       "id": "ms-141-6",
@@ -563,11 +1102,10 @@
       "subPhase": "53",
       "plan": "2026Q3",
       "planDate": "2026-09-30",
-      "forecast": "2027Q1",
-      "forecastDate": "2027-03-31",
-      "status": "late",
-      "statusLabel": "▲ 2 Quartale verspätet",
-      "impact": "Lieferfristen Haustechnik"
+      "forecast": "2026Q3",
+      "forecastDate": "2026-09-30",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
     },
     {
       "id": "ms-142-5",
@@ -582,14 +1120,39 @@
       "statusLabel": "Termin gehalten"
     },
     {
+      "id": "ms-142-6",
+      "code": "MS6",
+      "projectId": "pr142",
+      "subPhase": "53",
+      "plan": "2028Q1",
+      "planDate": "2028-03-31",
+      "forecast": "2028Q1",
+      "forecastDate": "2028-03-31",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
       "id": "ms-143-6",
       "code": "MS6",
       "projectId": "pr143",
       "subPhase": "53",
       "plan": "2027Q2",
       "planDate": "2027-06-30",
-      "forecast": "2027Q2",
-      "forecastDate": "2027-06-30",
+      "forecast": "2027Q3",
+      "forecastDate": "2027-09-30",
+      "status": "late",
+      "statusLabel": "▲ 1 Quartal verspätet",
+      "impact": "Bewilligung ausstehend"
+    },
+    {
+      "id": "ms-144-5",
+      "code": "MS5",
+      "projectId": "pr144",
+      "subPhase": "41",
+      "plan": "2026Q3",
+      "planDate": "2026-09-30",
+      "forecast": "2026Q3",
+      "forecastDate": "2026-09-30",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -624,11 +1187,35 @@
       "subPhase": "53",
       "plan": "2027Q1",
       "planDate": "2027-03-31",
+      "forecast": "2027Q1",
+      "forecastDate": "2027-03-31",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
+      "id": "ms-147-6",
+      "code": "MS6",
+      "projectId": "pr147",
+      "subPhase": "53",
+      "plan": "2027Q2",
+      "planDate": "2027-06-30",
       "forecast": "2027Q2",
       "forecastDate": "2027-06-30",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
+      "id": "ms-148-4",
+      "code": "MS4",
+      "projectId": "pr148",
+      "subPhase": "33",
+      "plan": "2027Q1",
+      "planDate": "2027-03-31",
+      "forecast": "2027Q3",
+      "forecastDate": "2027-09-30",
       "status": "late",
-      "statusLabel": "▲ 1 Quartal verspätet",
-      "impact": "Vergabe verschoben"
+      "statusLabel": "▲ 2 Quartale verspätet",
+      "impact": "Verzug durch Einsprache"
     },
     {
       "id": "ms-148-5",
@@ -637,8 +1224,20 @@
       "subPhase": "41",
       "plan": "2027Q3",
       "planDate": "2027-09-30",
-      "forecast": "2027Q4",
-      "forecastDate": "2027-12-31",
+      "forecast": "2027Q3",
+      "forecastDate": "2027-09-30",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
+      "id": "ms-149-6",
+      "code": "MS6",
+      "projectId": "pr149",
+      "subPhase": "53",
+      "plan": "2027Q4",
+      "planDate": "2027-12-31",
+      "forecast": "2028Q1",
+      "forecastDate": "2028-03-31",
       "status": "late",
       "statusLabel": "▲ 1 Quartal verspätet",
       "impact": "Verzug durch Einsprache"
@@ -656,6 +1255,31 @@
       "statusLabel": "Termin gehalten"
     },
     {
+      "id": "ms-150-3",
+      "code": "MS3",
+      "projectId": "pr150",
+      "subPhase": "31",
+      "plan": "2027Q2",
+      "planDate": "2027-06-30",
+      "forecast": "2027Q2",
+      "forecastDate": "2027-06-30",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
+      "id": "ms-151-3",
+      "code": "MS3",
+      "projectId": "pr151",
+      "subPhase": "31",
+      "plan": "2027Q1",
+      "planDate": "2027-03-31",
+      "forecast": "2027Q3",
+      "forecastDate": "2027-09-30",
+      "status": "late",
+      "statusLabel": "▲ 2 Quartale verspätet",
+      "impact": "Verzug durch Einsprache"
+    },
+    {
       "id": "ms-151-4",
       "code": "MS4",
       "projectId": "pr151",
@@ -668,16 +1292,29 @@
       "statusLabel": "Termin gehalten"
     },
     {
+      "id": "ms-153-5",
+      "code": "MS5",
+      "projectId": "pr153",
+      "subPhase": "41",
+      "plan": "2026Q4",
+      "planDate": "2026-12-31",
+      "forecast": "2026Q4",
+      "forecastDate": "2026-12-31",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
       "id": "ms-153-6",
       "code": "MS6",
       "projectId": "pr153",
       "subPhase": "53",
       "plan": "2028Q1",
       "planDate": "2028-03-31",
-      "forecast": "2028Q1",
-      "forecastDate": "2028-03-31",
-      "status": "ok",
-      "statusLabel": "Termin gehalten"
+      "forecast": "2028Q2",
+      "forecastDate": "2028-06-30",
+      "status": "late",
+      "statusLabel": "▲ 1 Quartal verspätet",
+      "impact": "Lieferfristen Haustechnik"
     },
     {
       "id": "ms-154-6",
@@ -686,11 +1323,10 @@
       "subPhase": "53",
       "plan": "2027Q1",
       "planDate": "2027-03-31",
-      "forecast": "2027Q2",
-      "forecastDate": "2027-06-30",
-      "status": "late",
-      "statusLabel": "▲ 1 Quartal verspätet",
-      "impact": "Bewilligung ausstehend"
+      "forecast": "2027Q1",
+      "forecastDate": "2027-03-31",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
     },
     {
       "id": "ms-156-6",
@@ -717,6 +1353,18 @@
       "statusLabel": "Termin gehalten"
     },
     {
+      "id": "ms-157-5",
+      "code": "MS5",
+      "projectId": "pr157",
+      "subPhase": "41",
+      "plan": "2028Q2",
+      "planDate": "2028-06-30",
+      "forecast": "2028Q2",
+      "forecastDate": "2028-06-30",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
       "id": "ms-158-3",
       "code": "MS3",
       "projectId": "pr158",
@@ -729,17 +1377,28 @@
       "statusLabel": "Termin gehalten"
     },
     {
+      "id": "ms-158-4",
+      "code": "MS4",
+      "projectId": "pr158",
+      "subPhase": "33",
+      "plan": "2028Q1",
+      "planDate": "2028-03-31",
+      "forecast": "2028Q1",
+      "forecastDate": "2028-03-31",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
       "id": "ms-159-6",
       "code": "MS6",
       "projectId": "pr159",
       "subPhase": "53",
       "plan": "2027Q1",
       "planDate": "2027-03-31",
-      "forecast": "2027Q2",
-      "forecastDate": "2027-06-30",
-      "status": "late",
-      "statusLabel": "▲ 1 Quartal verspätet",
-      "impact": "Verzug durch Einsprache"
+      "forecast": "2027Q1",
+      "forecastDate": "2027-03-31",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
     },
     {
       "id": "ms-160-4",
@@ -748,8 +1407,21 @@
       "subPhase": "33",
       "plan": "2027Q3",
       "planDate": "2027-09-30",
-      "forecast": "2027Q3",
-      "forecastDate": "2027-09-30",
+      "forecast": "2028Q1",
+      "forecastDate": "2028-03-31",
+      "status": "late",
+      "statusLabel": "▲ 2 Quartale verspätet",
+      "impact": "Bewilligung ausstehend"
+    },
+    {
+      "id": "ms-160-5",
+      "code": "MS5",
+      "projectId": "pr160",
+      "subPhase": "41",
+      "plan": "2028Q1",
+      "planDate": "2028-03-31",
+      "forecast": "2028Q1",
+      "forecastDate": "2028-03-31",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -760,8 +1432,21 @@
       "subPhase": "41",
       "plan": "2026Q4",
       "planDate": "2026-12-31",
-      "forecast": "2026Q4",
-      "forecastDate": "2026-12-31",
+      "forecast": "2027Q1",
+      "forecastDate": "2027-03-31",
+      "status": "late",
+      "statusLabel": "▲ 1 Quartal verspätet",
+      "impact": "Verzug durch Statikprüfung"
+    },
+    {
+      "id": "ms-161-6",
+      "code": "MS6",
+      "projectId": "pr161",
+      "subPhase": "53",
+      "plan": "2027Q4",
+      "planDate": "2027-12-31",
+      "forecast": "2027Q4",
+      "forecastDate": "2027-12-31",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -772,11 +1457,10 @@
       "subPhase": "53",
       "plan": "2026Q4",
       "planDate": "2026-12-31",
-      "forecast": "2027Q1",
-      "forecastDate": "2027-03-31",
-      "status": "late",
-      "statusLabel": "▲ 1 Quartal verspätet",
-      "impact": "Lieferfristen Haustechnik"
+      "forecast": "2026Q4",
+      "forecastDate": "2026-12-31",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
     },
     {
       "id": "ms-163-3",
@@ -791,9 +1475,108 @@
       "statusLabel": "Termin gehalten"
     },
     {
+      "id": "ms-163-4",
+      "code": "MS4",
+      "projectId": "pr163",
+      "subPhase": "33",
+      "plan": "2027Q3",
+      "planDate": "2027-09-30",
+      "forecast": "2027Q3",
+      "forecastDate": "2027-09-30",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
+      "id": "ms-163-5",
+      "code": "MS5",
+      "projectId": "pr163",
+      "subPhase": "41",
+      "plan": "2027Q4",
+      "planDate": "2027-12-31",
+      "forecast": "2027Q4",
+      "forecastDate": "2027-12-31",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
       "id": "ms-164-6",
       "code": "MS6",
       "projectId": "pr164",
+      "subPhase": "53",
+      "plan": "2026Q3",
+      "planDate": "2026-09-30",
+      "forecast": "2026Q4",
+      "forecastDate": "2026-12-31",
+      "status": "late",
+      "statusLabel": "▲ 1 Quartal verspätet",
+      "impact": "Verzug durch Statikprüfung"
+    },
+    {
+      "id": "ms-165-5",
+      "code": "MS5",
+      "projectId": "pr165",
+      "subPhase": "41",
+      "plan": "2026Q3",
+      "planDate": "2026-09-30",
+      "forecast": "2026Q4",
+      "forecastDate": "2026-12-31",
+      "status": "late",
+      "statusLabel": "▲ 1 Quartal verspätet",
+      "impact": "Kreditfreigabe verschoben"
+    },
+    {
+      "id": "ms-165-6",
+      "code": "MS6",
+      "projectId": "pr165",
+      "subPhase": "53",
+      "plan": "2027Q3",
+      "planDate": "2027-09-30",
+      "forecast": "2027Q3",
+      "forecastDate": "2027-09-30",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
+      "id": "ms-166-3",
+      "code": "MS3",
+      "projectId": "pr166",
+      "subPhase": "31",
+      "plan": "2026Q4",
+      "planDate": "2026-12-31",
+      "forecast": null,
+      "forecastDate": null,
+      "status": "pending",
+      "statusLabel": "▲ Auftrag noch hängig"
+    },
+    {
+      "id": "ms-166-4",
+      "code": "MS4",
+      "projectId": "pr166",
+      "subPhase": "33",
+      "plan": "2027Q4",
+      "planDate": "2027-12-31",
+      "forecast": "2027Q4",
+      "forecastDate": "2027-12-31",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
+      "id": "ms-166-5",
+      "code": "MS5",
+      "projectId": "pr166",
+      "subPhase": "41",
+      "plan": "2028Q2",
+      "planDate": "2028-06-30",
+      "forecast": "2028Q2",
+      "forecastDate": "2028-06-30",
+      "status": "late",
+      "statusLabel": "▲ 1 Quartal verspätet",
+      "impact": "Verzug durch Statikprüfung"
+    },
+    {
+      "id": "ms-167-6",
+      "code": "MS6",
+      "projectId": "pr167",
       "subPhase": "53",
       "plan": "2026Q3",
       "planDate": "2026-09-30",
@@ -803,42 +1586,28 @@
       "statusLabel": "Termin gehalten"
     },
     {
-      "id": "ms-165-6",
-      "code": "MS6",
-      "projectId": "pr165",
-      "subPhase": "53",
-      "plan": "2027Q3",
-      "planDate": "2027-09-30",
-      "forecast": "2028Q1",
-      "forecastDate": "2028-03-31",
-      "status": "late",
-      "statusLabel": "▲ 2 Quartale verspätet",
-      "impact": "Verzug durch Einsprache"
-    },
-    {
-      "id": "ms-166-4",
-      "code": "MS4",
-      "projectId": "pr166",
-      "subPhase": "33",
-      "plan": "2027Q4",
-      "planDate": "2027-12-31",
-      "forecast": "2028Q2",
-      "forecastDate": "2028-06-30",
-      "status": "late",
-      "statusLabel": "▲ 2 Quartale verspätet",
-      "impact": "Vergabe verschoben"
-    },
-    {
       "id": "ms-168-4",
       "code": "MS4",
       "projectId": "pr168",
       "subPhase": "33",
       "plan": "2027Q2",
       "planDate": "2027-06-30",
-      "forecast": null,
-      "forecastDate": null,
-      "status": "pending",
-      "statusLabel": "▲ Auftrag noch hängig"
+      "forecast": "2027Q2",
+      "forecastDate": "2027-06-30",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
+      "id": "ms-168-5",
+      "code": "MS5",
+      "projectId": "pr168",
+      "subPhase": "41",
+      "plan": "2027Q4",
+      "planDate": "2027-12-31",
+      "forecast": "2027Q4",
+      "forecastDate": "2027-12-31",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
     },
     {
       "id": "ms-169-6",
@@ -847,8 +1616,21 @@
       "subPhase": "53",
       "plan": "2027Q3",
       "planDate": "2027-09-30",
-      "forecast": "2027Q3",
-      "forecastDate": "2027-09-30",
+      "forecast": "2027Q4",
+      "forecastDate": "2027-12-31",
+      "status": "late",
+      "statusLabel": "▲ 1 Quartal verspätet",
+      "impact": "Bewilligung ausstehend"
+    },
+    {
+      "id": "ms-170-4",
+      "code": "MS4",
+      "projectId": "pr170",
+      "subPhase": "33",
+      "plan": "2027Q2",
+      "planDate": "2027-06-30",
+      "forecast": "2027Q2",
+      "forecastDate": "2027-06-30",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -865,9 +1647,45 @@
       "statusLabel": "Termin gehalten"
     },
     {
+      "id": "ms-171-5",
+      "code": "MS5",
+      "projectId": "pr171",
+      "subPhase": "41",
+      "plan": "2026Q3",
+      "planDate": "2026-09-30",
+      "forecast": "2026Q3",
+      "forecastDate": "2026-09-30",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
       "id": "ms-171-6",
       "code": "MS6",
       "projectId": "pr171",
+      "subPhase": "53",
+      "plan": "2027Q3",
+      "planDate": "2027-09-30",
+      "forecast": "2027Q3",
+      "forecastDate": "2027-09-30",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
+      "id": "ms-172-6",
+      "code": "MS6",
+      "projectId": "pr172",
+      "subPhase": "53",
+      "plan": "2027Q3",
+      "planDate": "2027-09-30",
+      "forecast": "2027Q3",
+      "forecastDate": "2027-09-30",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
+      "id": "ms-173-6",
+      "code": "MS6",
+      "projectId": "pr173",
       "subPhase": "53",
       "plan": "2027Q3",
       "planDate": "2027-09-30",
@@ -883,10 +1701,24 @@
       "subPhase": "41",
       "plan": "2026Q3",
       "planDate": "2026-09-30",
-      "forecast": "2026Q3",
-      "forecastDate": "2026-09-30",
-      "status": "ok",
-      "statusLabel": "Termin gehalten"
+      "forecast": "2026Q4",
+      "forecastDate": "2026-12-31",
+      "status": "late",
+      "statusLabel": "▲ 1 Quartal verspätet",
+      "impact": "Verzug durch Statikprüfung"
+    },
+    {
+      "id": "ms-174-6",
+      "code": "MS6",
+      "projectId": "pr174",
+      "subPhase": "53",
+      "plan": "2027Q4",
+      "planDate": "2027-12-31",
+      "forecast": "2028Q2",
+      "forecastDate": "2028-06-30",
+      "status": "late",
+      "statusLabel": "▲ 2 Quartale verspätet",
+      "impact": "Vergabe verschoben"
     },
     {
       "id": "ms-175-6",
@@ -895,8 +1727,21 @@
       "subPhase": "53",
       "plan": "2027Q2",
       "planDate": "2027-06-30",
-      "forecast": "2027Q2",
-      "forecastDate": "2027-06-30",
+      "forecast": "2027Q3",
+      "forecastDate": "2027-09-30",
+      "status": "late",
+      "statusLabel": "▲ 1 Quartal verspätet",
+      "impact": "Verzug durch Einsprache"
+    },
+    {
+      "id": "ms-176-2",
+      "code": "MS2",
+      "projectId": "pr176",
+      "subPhase": "21",
+      "plan": "2026Q4",
+      "planDate": "2026-12-31",
+      "forecast": "2026Q4",
+      "forecastDate": "2026-12-31",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -913,16 +1758,92 @@
       "statusLabel": "Termin gehalten"
     },
     {
+      "id": "ms-177-6",
+      "code": "MS6",
+      "projectId": "pr177",
+      "subPhase": "53",
+      "plan": "2027Q1",
+      "planDate": "2027-03-31",
+      "forecast": "2027Q2",
+      "forecastDate": "2027-06-30",
+      "status": "late",
+      "statusLabel": "▲ 1 Quartal verspätet",
+      "impact": "Lieferfristen Haustechnik"
+    },
+    {
       "id": "ms-178-2",
       "code": "MS2",
       "projectId": "pr178",
       "subPhase": "21",
       "plan": "2026Q4",
       "planDate": "2026-12-31",
-      "forecast": null,
-      "forecastDate": null,
-      "status": "pending",
-      "statusLabel": "▲ Auftrag noch hängig"
+      "forecast": "2027Q2",
+      "forecastDate": "2027-06-30",
+      "status": "late",
+      "statusLabel": "▲ 2 Quartale verspätet",
+      "impact": "Verzug durch Einsprache"
+    },
+    {
+      "id": "ms-178-3",
+      "code": "MS3",
+      "projectId": "pr178",
+      "subPhase": "31",
+      "plan": "2027Q2",
+      "planDate": "2027-06-30",
+      "forecast": "2027Q3",
+      "forecastDate": "2027-09-30",
+      "status": "late",
+      "statusLabel": "▲ 1 Quartal verspätet",
+      "impact": "Vergabe verschoben"
+    },
+    {
+      "id": "ms-178-4",
+      "code": "MS4",
+      "projectId": "pr178",
+      "subPhase": "33",
+      "plan": "2028Q2",
+      "planDate": "2028-06-30",
+      "forecast": "2028Q2",
+      "forecastDate": "2028-06-30",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
+      "id": "ms-179-3",
+      "code": "MS3",
+      "projectId": "pr179",
+      "subPhase": "31",
+      "plan": "2027Q1",
+      "planDate": "2027-03-31",
+      "forecast": "2027Q3",
+      "forecastDate": "2027-09-30",
+      "status": "late",
+      "statusLabel": "▲ 2 Quartale verspätet",
+      "impact": "Verzug durch Statikprüfung"
+    },
+    {
+      "id": "ms-179-4",
+      "code": "MS4",
+      "projectId": "pr179",
+      "subPhase": "33",
+      "plan": "2028Q1",
+      "planDate": "2028-03-31",
+      "forecast": "2028Q1",
+      "forecastDate": "2028-03-31",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
+      "id": "ms-179-5",
+      "code": "MS5",
+      "projectId": "pr179",
+      "subPhase": "41",
+      "plan": "2028Q2",
+      "planDate": "2028-06-30",
+      "forecast": "2028Q2",
+      "forecastDate": "2028-06-30",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
     },
     {
       "id": "ms-180-4",
@@ -933,6 +1854,30 @@
       "planDate": "2027-06-30",
       "forecast": "2027Q2",
       "forecastDate": "2027-06-30",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
+      "id": "ms-180-5",
+      "code": "MS5",
+      "projectId": "pr180",
+      "subPhase": "41",
+      "plan": "2027Q4",
+      "planDate": "2027-12-31",
+      "forecast": "2027Q4",
+      "forecastDate": "2027-12-31",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
+      "id": "ms-181-4",
+      "code": "MS4",
+      "projectId": "pr181",
+      "subPhase": "33",
+      "plan": "2026Q4",
+      "planDate": "2026-12-31",
+      "forecast": "2026Q4",
+      "forecastDate": "2026-12-31",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -949,6 +1894,30 @@
       "statusLabel": "Termin gehalten"
     },
     {
+      "id": "ms-182-5",
+      "code": "MS5",
+      "projectId": "pr182",
+      "subPhase": "41",
+      "plan": "2026Q3",
+      "planDate": "2026-09-30",
+      "forecast": "2026Q3",
+      "forecastDate": "2026-09-30",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
+      "id": "ms-182-6",
+      "code": "MS6",
+      "projectId": "pr182",
+      "subPhase": "53",
+      "plan": "2027Q4",
+      "planDate": "2027-12-31",
+      "forecast": "2027Q4",
+      "forecastDate": "2027-12-31",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
       "id": "ms-183-3",
       "code": "MS3",
       "projectId": "pr183",
@@ -959,6 +1928,31 @@
       "forecastDate": "2026-12-31",
       "status": "ok",
       "statusLabel": "Termin gehalten"
+    },
+    {
+      "id": "ms-183-4",
+      "code": "MS4",
+      "projectId": "pr183",
+      "subPhase": "33",
+      "plan": "2027Q4",
+      "planDate": "2027-12-31",
+      "forecast": null,
+      "forecastDate": null,
+      "status": "pending",
+      "statusLabel": "▲ Auftrag noch hängig"
+    },
+    {
+      "id": "ms-183-5",
+      "code": "MS5",
+      "projectId": "pr183",
+      "subPhase": "41",
+      "plan": "2028Q1",
+      "planDate": "2028-03-31",
+      "forecast": "2028Q2",
+      "forecastDate": "2028-06-30",
+      "status": "late",
+      "statusLabel": "▲ 1 Quartal verspätet",
+      "impact": "Abstimmung mit Nutzer offen"
     },
     {
       "id": "ms-184-3",
@@ -973,16 +1967,114 @@
       "statusLabel": "Termin gehalten"
     },
     {
+      "id": "ms-184-4",
+      "code": "MS4",
+      "projectId": "pr184",
+      "subPhase": "33",
+      "plan": "2027Q4",
+      "planDate": "2027-12-31",
+      "forecast": "2027Q4",
+      "forecastDate": "2027-12-31",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
+      "id": "ms-184-5",
+      "code": "MS5",
+      "projectId": "pr184",
+      "subPhase": "41",
+      "plan": "2028Q1",
+      "planDate": "2028-03-31",
+      "forecast": "2028Q1",
+      "forecastDate": "2028-03-31",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
+      "id": "ms-185-2",
+      "code": "MS2",
+      "projectId": "pr185",
+      "subPhase": "21",
+      "plan": "2026Q4",
+      "planDate": "2026-12-31",
+      "forecast": "2027Q1",
+      "forecastDate": "2027-03-31",
+      "status": "late",
+      "statusLabel": "▲ 1 Quartal verspätet",
+      "impact": "Bewilligung ausstehend"
+    },
+    {
+      "id": "ms-185-3",
+      "code": "MS3",
+      "projectId": "pr185",
+      "subPhase": "31",
+      "plan": "2027Q4",
+      "planDate": "2027-12-31",
+      "forecast": "2027Q4",
+      "forecastDate": "2027-12-31",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
       "id": "ms-186-1",
       "code": "MS1",
       "projectId": "pr186",
       "subPhase": "11",
       "plan": "2026Q4",
       "planDate": "2026-12-31",
+      "forecast": "2026Q4",
+      "forecastDate": "2026-12-31",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
+      "id": "ms-186-2",
+      "code": "MS2",
+      "projectId": "pr186",
+      "subPhase": "21",
+      "plan": "2027Q1",
+      "planDate": "2027-03-31",
       "forecast": null,
       "forecastDate": null,
       "status": "pending",
       "statusLabel": "▲ Auftrag noch hängig"
+    },
+    {
+      "id": "ms-186-3",
+      "code": "MS3",
+      "projectId": "pr186",
+      "subPhase": "31",
+      "plan": "2028Q1",
+      "planDate": "2028-03-31",
+      "forecast": "2028Q1",
+      "forecastDate": "2028-03-31",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
+      "id": "ms-187-4",
+      "code": "MS4",
+      "projectId": "pr187",
+      "subPhase": "33",
+      "plan": "2027Q1",
+      "planDate": "2027-03-31",
+      "forecast": "2027Q2",
+      "forecastDate": "2027-06-30",
+      "status": "late",
+      "statusLabel": "▲ 1 Quartal verspätet",
+      "impact": "Abstimmung mit Nutzer offen"
+    },
+    {
+      "id": "ms-187-5",
+      "code": "MS5",
+      "projectId": "pr187",
+      "subPhase": "41",
+      "plan": "2027Q2",
+      "planDate": "2027-06-30",
+      "forecast": "2027Q2",
+      "forecastDate": "2027-06-30",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
     },
     {
       "id": "ms-188-2",
@@ -991,11 +2083,47 @@
       "subPhase": "21",
       "plan": "2026Q3",
       "planDate": "2026-09-30",
+      "forecast": "2026Q3",
+      "forecastDate": "2026-09-30",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
+      "id": "ms-188-3",
+      "code": "MS3",
+      "projectId": "pr188",
+      "subPhase": "31",
+      "plan": "2027Q2",
+      "planDate": "2027-06-30",
+      "forecast": "2027Q2",
+      "forecastDate": "2027-06-30",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
+      "id": "ms-188-4",
+      "code": "MS4",
+      "projectId": "pr188",
+      "subPhase": "33",
+      "plan": "2028Q2",
+      "planDate": "2028-06-30",
+      "forecast": "2028Q2",
+      "forecastDate": "2028-06-30",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
+      "id": "ms-189-4",
+      "code": "MS4",
+      "projectId": "pr189",
+      "subPhase": "33",
+      "plan": "2026Q4",
+      "planDate": "2026-12-31",
       "forecast": "2027Q1",
       "forecastDate": "2027-03-31",
       "status": "late",
-      "statusLabel": "▲ 2 Quartale verspätet",
-      "impact": "Vergabe verschoben"
+      "statusLabel": "▲ 1 Quartal verspätet",
+      "impact": "Kreditfreigabe verschoben"
     },
     {
       "id": "ms-189-5",
@@ -1016,10 +2144,60 @@
       "subPhase": "31",
       "plan": "2027Q1",
       "planDate": "2027-03-31",
-      "forecast": "2027Q1",
-      "forecastDate": "2027-03-31",
+      "forecast": "2027Q2",
+      "forecastDate": "2027-06-30",
+      "status": "late",
+      "statusLabel": "▲ 1 Quartal verspätet",
+      "impact": "Verzug durch Statikprüfung"
+    },
+    {
+      "id": "ms-190-4",
+      "code": "MS4",
+      "projectId": "pr190",
+      "subPhase": "33",
+      "plan": "2027Q4",
+      "planDate": "2027-12-31",
+      "forecast": "2027Q4",
+      "forecastDate": "2027-12-31",
       "status": "ok",
       "statusLabel": "Termin gehalten"
+    },
+    {
+      "id": "ms-190-5",
+      "code": "MS5",
+      "projectId": "pr190",
+      "subPhase": "41",
+      "plan": "2028Q2",
+      "planDate": "2028-06-30",
+      "forecast": "2028Q2",
+      "forecastDate": "2028-06-30",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
+      "id": "ms-191-4",
+      "code": "MS4",
+      "projectId": "pr191",
+      "subPhase": "33",
+      "plan": "2026Q3",
+      "planDate": "2026-09-30",
+      "forecast": "2026Q3",
+      "forecastDate": "2026-09-30",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
+      "id": "ms-191-5",
+      "code": "MS5",
+      "projectId": "pr191",
+      "subPhase": "41",
+      "plan": "2026Q4",
+      "planDate": "2026-12-31",
+      "forecast": "2027Q1",
+      "forecastDate": "2027-03-31",
+      "status": "late",
+      "statusLabel": "▲ 1 Quartal verspätet",
+      "impact": "Vergabe verschoben"
     },
     {
       "id": "ms-191-6",
@@ -1030,9 +2208,46 @@
       "planDate": "2028-06-30",
       "forecast": "2028Q2",
       "forecastDate": "2028-06-30",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
+      "id": "ms-192-6",
+      "code": "MS6",
+      "projectId": "pr192",
+      "subPhase": "53",
+      "plan": "2027Q3",
+      "planDate": "2027-09-30",
+      "forecast": "2027Q3",
+      "forecastDate": "2027-09-30",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
+      "id": "ms-193-6",
+      "code": "MS6",
+      "projectId": "pr193",
+      "subPhase": "53",
+      "plan": "2027Q2",
+      "planDate": "2027-06-30",
+      "forecast": "2027Q3",
+      "forecastDate": "2027-09-30",
       "status": "late",
       "statusLabel": "▲ 1 Quartal verspätet",
-      "impact": "Vergabe verschoben"
+      "impact": "Lieferfristen Haustechnik"
+    },
+    {
+      "id": "ms-194-3",
+      "code": "MS3",
+      "projectId": "pr194",
+      "subPhase": "31",
+      "plan": "2026Q4",
+      "planDate": "2026-12-31",
+      "forecast": "2027Q2",
+      "forecastDate": "2027-06-30",
+      "status": "late",
+      "statusLabel": "▲ 2 Quartale verspätet",
+      "impact": "Verzug durch Einsprache"
     },
     {
       "id": "ms-194-4",
@@ -1047,6 +2262,19 @@
       "statusLabel": "Termin gehalten"
     },
     {
+      "id": "ms-194-5",
+      "code": "MS5",
+      "projectId": "pr194",
+      "subPhase": "41",
+      "plan": "2028Q2",
+      "planDate": "2028-06-30",
+      "forecast": "2028Q2",
+      "forecastDate": "2028-06-30",
+      "status": "late",
+      "statusLabel": "▲ 1 Quartal verspätet",
+      "impact": "Lieferfristen Haustechnik"
+    },
+    {
       "id": "ms-195-5",
       "code": "MS5",
       "projectId": "pr195",
@@ -1057,7 +2285,43 @@
       "forecastDate": "2027-09-30",
       "status": "late",
       "statusLabel": "▲ 2 Quartale verspätet",
-      "impact": "Verzug durch Einsprache"
+      "impact": "Vergabe verschoben"
+    },
+    {
+      "id": "ms-195-6",
+      "code": "MS6",
+      "projectId": "pr195",
+      "subPhase": "53",
+      "plan": "2028Q2",
+      "planDate": "2028-06-30",
+      "forecast": null,
+      "forecastDate": null,
+      "status": "pending",
+      "statusLabel": "▲ Auftrag noch hängig"
+    },
+    {
+      "id": "ms-196-4",
+      "code": "MS4",
+      "projectId": "pr196",
+      "subPhase": "33",
+      "plan": "2027Q3",
+      "planDate": "2027-09-30",
+      "forecast": "2027Q3",
+      "forecastDate": "2027-09-30",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
+      "id": "ms-196-5",
+      "code": "MS5",
+      "projectId": "pr196",
+      "subPhase": "41",
+      "plan": "2028Q1",
+      "planDate": "2028-03-31",
+      "forecast": "2028Q1",
+      "forecastDate": "2028-03-31",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
     },
     {
       "id": "ms-197-6",
@@ -1078,11 +2342,10 @@
       "subPhase": "53",
       "plan": "2027Q1",
       "planDate": "2027-03-31",
-      "forecast": "2027Q2",
-      "forecastDate": "2027-06-30",
-      "status": "late",
-      "statusLabel": "▲ 1 Quartal verspätet",
-      "impact": "Verzug durch Statikprüfung"
+      "forecast": "2027Q1",
+      "forecastDate": "2027-03-31",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
     },
     {
       "id": "ms-199-6",
@@ -1091,10 +2354,10 @@
       "subPhase": "53",
       "plan": "2026Q4",
       "planDate": "2026-12-31",
-      "forecast": null,
-      "forecastDate": null,
-      "status": "pending",
-      "statusLabel": "▲ Auftrag noch hängig"
+      "forecast": "2026Q4",
+      "forecastDate": "2026-12-31",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
     }
   ]
 }

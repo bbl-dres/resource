@@ -178,8 +178,9 @@ function ganttRow(p, cols) {
     <div class="gantt__track">
       ${cols.map((col, n) => html`<span class="gantt__gridline ${col.yearStart ? 'is-yearstart' : ''}"
         style="grid-column:${n + 1}"></span>`)}
-      ${bars.map((b, i) => ganttBar(b, i, bars, cols))}
+      ${bars.map((b, i) => ganttBar(b, i, bars, cols, p))}
       ${bars.some(b => b.openEnd) && openEndRail(bars.find(b => b.openEnd), cols)}
+      ${gates(p, cols)}
     </div>
   </div>`;
 }
@@ -192,7 +193,7 @@ function span(cols, from, to) {
   return hits.length ? { from: hits[0] + 1, to: hits[hits.length - 1] + 2 } : null;
 }
 
-function ganttBar(b, i, bars, cols) {
+function ganttBar(b, i, bars, cols, p) {
   const at = span(cols, b.from, b.to);
   if (!at) return '';
   const startsChain = !bars.some((o, j) => j !== i && o.to === b.from);
@@ -205,13 +206,56 @@ function ganttBar(b, i, bars, cols) {
     b.continues ? 'is-open' : ''
   ].join(' ');
 
-  return html`<div class="${cls}" style="grid-column:${at.from} / ${at.to}"
-      title="${b.milestone ?? b.label}">
+  return html`<button type="button" class="${cls}" style="grid-column:${at.from} / ${at.to}"
+      data-act="open-phase" data-val="${p.id}:${b.from}"
+      title="${b.milestone ?? b.label}" aria-label="${p.title}: ${b.label}">
     <span class="gantt__barlabel">${b.label}</span>
-    ${b.milestone && html`<span class="diamond ${b.delay ? 'is-late' : b.milestoneOpen ? 'is-open' : ''}"
-      role="img" aria-label="${b.milestone}" title="${b.milestone}"></span>`}
     ${b.continues && html`<span class="gantt__more" aria-hidden="true">${icons.chevronRight(13)}</span>`}
-  </div>`;
+  </button>`;
+}
+
+/**
+ * A gate sits at the end of the quarter it falls due in. Reading them from the
+ * milestone data rather than from a label baked into a bar means every one of
+ * the 189 shows up, and each can be opened.
+ */
+function gates(p, cols) {
+  const list = data.milestones.items.filter(m => m.projectId === p.id);
+  if (!list.length) return '';
+
+  /*
+   * Two gates due in the same period land on the same pixel, and the second one
+   * is then invisible and unclickable. They fan out to the left instead, so a
+   * quarter with MS5 and MS6 in it reads as two marks in sequence.
+   */
+  const placed = [];
+  for (const m of list) {
+    const qi = data.quarterIndex[m.forecast ?? m.plan];
+    if (qi === undefined) continue;
+    const at = cols.findIndex(c => c.quarters.includes(qi));
+    if (at < 0) continue;
+    placed.push({ m, at });
+  }
+  placed.sort((a, b) => a.at - b.at || a.m.code.localeCompare(b.m.code));
+
+  const perColumn = placed.reduce((a, g) => ((a[g.at] = (a[g.at] ?? 0) + 1), a), {});
+  const seen = {};
+
+  return html`${placed.map(({ m, at }) => {
+    const rank = seen[at] = (seen[at] ?? 0) + 1;
+    // Earliest of a stack sits leftmost, so the sequence still reads forwards.
+    const shift = (perColumn[at] - rank) * 13;
+    const cat = data.milestones.catalog.find(c => c.code === m.code);
+    const state = m.forecast === null ? 'is-open' : m.status === 'late' ? 'is-late' : '';
+    const label = `${m.code} ${cat ? t(cat.name) : ''} · ${data.quarters[data.quarterIndex[m.forecast ?? m.plan]].label}`;
+    return html`<button type="button" class="gantt__gate ${at === cols.length - 1 ? 'is-last' : ''}"
+        style="grid-column:${at + 1}; --gate-shift:${shift}px"
+        data-act="open-milestone" data-val="${m.id}"
+        title="${label} — ${t(m.statusLabel)}"
+        aria-label="${p.title}: ${label} — ${t(m.statusLabel)}">
+      <span class="diamond ${state}"></span>
+    </button>`;
+  })}`;
 }
 
 function openEndRail(b, cols) {

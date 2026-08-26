@@ -113,19 +113,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-24",
-    "date": "2026-08-20",
-    "dateLabel": "20.08.2026",
-    "actor": "Sonja Beispiel",
-    "projectId": "pr57",
-    "projectLabel": "Musterlingen, Werkhof Ost",
-    "field": "Pensum",
-    "change": "Bauleitung Etappe 2 vorgezogen",
-    "value": "50 % → 65 %",
-    "onLanding": false
-  },
-  {
-    "id": "c-gen-154",
+    "id": "c-gen-140",
     "date": "2026-08-20",
     "dateLabel": "20.08.2026",
     "actor": "Olivia Musterli",
@@ -137,7 +125,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-57",
+    "id": "c-gen-43",
     "date": "2026-08-19",
     "dateLabel": "19.08.2026",
     "actor": "Reto Beispieler",
@@ -149,7 +137,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-224",
+    "id": "c-gen-210",
     "date": "2026-08-19",
     "dateLabel": "19.08.2026",
     "actor": "Tobias Muster",
@@ -161,43 +149,31 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-32",
-    "date": "2026-08-18",
-    "dateLabel": "18.08.2026",
-    "actor": "Anna Muster",
-    "projectId": "pr199",
-    "projectLabel": "Beispielbach, Ahornweg 70",
-    "field": "Abwesenheiten",
-    "change": "Weiterbildung erfasst",
-    "value": "+10 %",
-    "onLanding": false
-  },
-  {
-    "id": "c-gen-35",
-    "date": "2026-08-18",
-    "dateLabel": "18.08.2026",
-    "actor": "Aline Mustermann",
-    "projectId": "pr123",
-    "projectLabel": "Musterthal, Hauptstrasse 56",
+    "id": "c-gen-239",
+    "date": "2026-08-19",
+    "dateLabel": "19.08.2026",
+    "actor": "Damian Beispiel",
+    "projectId": "pr173",
+    "projectLabel": "Musterau, Talstrasse 91",
     "field": "Pensum",
-    "change": "Begleitung Bauherr reduziert",
-    "value": "75 % → 90 %",
+    "change": "Aufwand Ausschreibung neu geschätzt",
+    "value": "50 % → 35 %",
     "onLanding": false
   },
   {
-    "id": "c-gen-43",
+    "id": "c-gen-11",
     "date": "2026-08-18",
     "dateLabel": "18.08.2026",
-    "actor": "Fabio Beispieler",
-    "projectId": "pr108",
-    "projectLabel": "Musteregg, Seestrasse 20",
+    "actor": "Bruno Beispiel",
+    "projectId": "pr117",
+    "projectLabel": "Beispielegg, Rebbergweg 34+41",
     "field": "Pensum",
-    "change": "Aufwand nach Einsprache erhöht",
-    "value": "45 % → 25 %",
+    "change": "Aufwand Submission nach unten korrigiert",
+    "value": "35 % → 40 %",
     "onLanding": false
   },
   {
-    "id": "c-gen-87",
+    "id": "c-gen-73",
     "date": "2026-08-18",
     "dateLabel": "18.08.2026",
     "actor": "Leon Beispielmann",
@@ -209,7 +185,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-124",
+    "id": "c-gen-110",
     "date": "2026-08-18",
     "dateLabel": "18.08.2026",
     "actor": "Zoe Beispielmann",
@@ -221,7 +197,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-135",
+    "id": "c-gen-121",
     "date": "2026-08-18",
     "dateLabel": "18.08.2026",
     "actor": "Simon Beispiel",
@@ -233,7 +209,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-203",
+    "id": "c-gen-189",
     "date": "2026-08-18",
     "dateLabel": "18.08.2026",
     "actor": "Anna Muster",
@@ -245,43 +221,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-13",
-    "date": "2026-08-17",
-    "dateLabel": "17.08.2026",
-    "actor": "Jan Beispiel",
-    "projectId": "pr130",
-    "projectLabel": "Musterbach, Hauptstrasse 44",
-    "field": "Abwesenheiten",
-    "change": "Ferien erfasst",
-    "value": "+15 %",
-    "onLanding": false
-  },
-  {
-    "id": "c-gen-22",
-    "date": "2026-08-17",
-    "dateLabel": "17.08.2026",
-    "actor": "Jonas Beispiel",
-    "projectId": "pr129",
-    "projectLabel": "Musteregg, Alte Landstrasse 12",
-    "field": "Begründung",
-    "change": "Überlast freigegeben",
-    "value": "erfasst",
-    "onLanding": false
-  },
-  {
-    "id": "c-gen-27",
-    "date": "2026-08-17",
-    "dateLabel": "17.08.2026",
-    "actor": "Marta Mustermann",
-    "projectId": "pr144",
-    "projectLabel": "Musterwil, Werkhof Ost 41",
-    "field": "Pensum",
-    "change": "Aufwand Ausschreibung neu geschätzt",
-    "value": "25 % → 30 %",
-    "onLanding": false
-  },
-  {
-    "id": "c-gen-62",
+    "id": "c-gen-48",
     "date": "2026-08-17",
     "dateLabel": "17.08.2026",
     "actor": "Jan Beispiel",
@@ -293,7 +233,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-144",
+    "id": "c-gen-130",
     "date": "2026-08-17",
     "dateLabel": "17.08.2026",
     "actor": "Elena Mustermann",
@@ -305,31 +245,31 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-3",
-    "date": "2026-08-16",
-    "dateLabel": "16.08.2026",
-    "actor": "Carla Muster",
-    "projectId": "pr113",
-    "projectLabel": "Musterberg, Via Motta 9",
+    "id": "c-gen-236",
+    "date": "2026-08-17",
+    "dateLabel": "17.08.2026",
+    "actor": "Nico Beispieler",
+    "projectId": "pr106",
+    "projectLabel": "Beispielwil, Feldweg 32+57",
     "field": "Pensum",
-    "change": "Mehraufwand Koordination Haustechnik",
-    "value": "40 % → 60 %",
+    "change": "Zusatzaufwand Schadstoffsanierung",
+    "value": "30 % → 50 %",
     "onLanding": false
   },
   {
-    "id": "c-gen-52",
+    "id": "c-gen-35",
     "date": "2026-08-16",
     "dateLabel": "16.08.2026",
-    "actor": "Lars Muster",
-    "projectId": "pr185",
-    "projectLabel": "Beispielbach, Kasernenstrasse 45",
-    "field": "Begründung",
-    "change": "Überlast freigegeben",
-    "value": "erfasst",
+    "actor": "Luca Beispielmann",
+    "projectId": "pr115",
+    "projectLabel": "Beispielbrunn, Mühleweg 69",
+    "field": "Pensum",
+    "change": "Aufwand Ausschreibung neu geschätzt",
+    "value": "100 % → 95 %",
     "onLanding": false
   },
   {
-    "id": "c-gen-67",
+    "id": "c-gen-53",
     "date": "2026-08-16",
     "dateLabel": "16.08.2026",
     "actor": "Lars Muster",
@@ -341,7 +281,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-132",
+    "id": "c-gen-118",
     "date": "2026-08-16",
     "dateLabel": "16.08.2026",
     "actor": "Andrea Musterli",
@@ -353,7 +293,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-175",
+    "id": "c-gen-161",
     "date": "2026-08-16",
     "dateLabel": "16.08.2026",
     "actor": "Lars Muster",
@@ -365,7 +305,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-210",
+    "id": "c-gen-196",
     "date": "2026-08-16",
     "dateLabel": "16.08.2026",
     "actor": "Corina Musterli",
@@ -377,7 +317,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-232",
+    "id": "c-gen-218",
     "date": "2026-08-16",
     "dateLabel": "16.08.2026",
     "actor": "Luca Beispielmann",
@@ -389,19 +329,19 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-19",
-    "date": "2026-08-13",
-    "dateLabel": "13.08.2026",
-    "actor": "Nico Beispieler",
-    "projectId": "pr166",
-    "projectLabel": "Musterbach, Seestrasse 35",
+    "id": "c-gen-229",
+    "date": "2026-08-16",
+    "dateLabel": "16.08.2026",
+    "actor": "Timo Beispiel",
+    "projectId": "pr149",
+    "projectLabel": "Mustersee, Werkhof West 50",
     "field": "Pensum",
-    "change": "Begleitung Bauherr reduziert",
-    "value": "45 % → 30 %",
+    "change": "Zusatzaufwand Schadstoffsanierung",
+    "value": "50 % → 60 %",
     "onLanding": false
   },
   {
-    "id": "c-gen-78",
+    "id": "c-gen-64",
     "date": "2026-08-13",
     "dateLabel": "13.08.2026",
     "actor": "Hans Beispiel",
@@ -413,7 +353,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-89",
+    "id": "c-gen-75",
     "date": "2026-08-13",
     "dateLabel": "13.08.2026",
     "actor": "Sara Musterli",
@@ -425,7 +365,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-97",
+    "id": "c-gen-83",
     "date": "2026-08-13",
     "dateLabel": "13.08.2026",
     "actor": "Sonja Beispiel",
@@ -437,7 +377,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-149",
+    "id": "c-gen-135",
     "date": "2026-08-13",
     "dateLabel": "13.08.2026",
     "actor": "Sonja Beispiel",
@@ -449,7 +389,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-170",
+    "id": "c-gen-156",
     "date": "2026-08-13",
     "dateLabel": "13.08.2026",
     "actor": "Walter Beispieler",
@@ -461,7 +401,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-181",
+    "id": "c-gen-167",
     "date": "2026-08-13",
     "dateLabel": "13.08.2026",
     "actor": "Aline Mustermann",
@@ -473,7 +413,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-198",
+    "id": "c-gen-184",
     "date": "2026-08-13",
     "dateLabel": "13.08.2026",
     "actor": "Anna Muster",
@@ -485,7 +425,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-207",
+    "id": "c-gen-193",
     "date": "2026-08-13",
     "dateLabel": "13.08.2026",
     "actor": "Aline Mustermann",
@@ -497,7 +437,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-209",
+    "id": "c-gen-195",
     "date": "2026-08-13",
     "dateLabel": "13.08.2026",
     "actor": "Eva Mustermann",
@@ -509,7 +449,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-211",
+    "id": "c-gen-197",
     "date": "2026-08-13",
     "dateLabel": "13.08.2026",
     "actor": "Daniel Beispielmann",
@@ -521,7 +461,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-137",
+    "id": "c-gen-123",
     "date": "2026-08-12",
     "dateLabel": "12.08.2026",
     "actor": "Lars Muster",
@@ -533,31 +473,19 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-11",
-    "date": "2026-08-11",
-    "dateLabel": "11.08.2026",
-    "actor": "Zeno Beispieler",
-    "projectId": "pr192",
-    "projectLabel": "Musteregg, Hauptstrasse 86",
+    "id": "c-gen-232",
+    "date": "2026-08-12",
+    "dateLabel": "12.08.2026",
+    "actor": "Bruno Beispiel",
+    "projectId": "pr193",
+    "projectLabel": "Beispielheim, Industriestrasse 44",
     "field": "Pensum",
-    "change": "Betreuung nach Vergabe reduziert",
-    "value": "25 % → 45 %",
+    "change": "Planungsaufwand nach Vorprojekt angepasst",
+    "value": "40 % → 45 %",
     "onLanding": false
   },
   {
-    "id": "c-gen-28",
-    "date": "2026-08-11",
-    "dateLabel": "11.08.2026",
-    "actor": "Katja Muster",
-    "projectId": "pr107",
-    "projectLabel": "Beispielau, Talstrasse 32",
-    "field": "Meilenstein",
-    "change": "MS6 Abnahme neu terminiert",
-    "value": "Q3/26 → Q4/26",
-    "onLanding": false
-  },
-  {
-    "id": "c-gen-104",
+    "id": "c-gen-90",
     "date": "2026-08-11",
     "dateLabel": "11.08.2026",
     "actor": "Alina Beispiel",
@@ -569,7 +497,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-187",
+    "id": "c-gen-173",
     "date": "2026-08-11",
     "dateLabel": "11.08.2026",
     "actor": "Karin Muster",
@@ -581,7 +509,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-112",
+    "id": "c-gen-98",
     "date": "2026-08-10",
     "dateLabel": "10.08.2026",
     "actor": "Bruno Beispiel",
@@ -593,7 +521,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-194",
+    "id": "c-gen-180",
     "date": "2026-08-10",
     "dateLabel": "10.08.2026",
     "actor": "Bernhard Beispieler",
@@ -605,7 +533,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-213",
+    "id": "c-gen-199",
     "date": "2026-08-10",
     "dateLabel": "10.08.2026",
     "actor": "Daniel Beispielmann",
@@ -617,19 +545,43 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-44",
+    "id": "c-gen-0",
     "date": "2026-08-09",
     "dateLabel": "09.08.2026",
-    "actor": "Andrea Musterli",
-    "projectId": "pr126",
-    "projectLabel": "Musterhofen, Alte Landstrasse 30",
-    "field": "Abwesenheiten",
-    "change": "Militärdienst erfasst",
-    "value": "+20 %",
+    "actor": "Tobias Muster",
+    "projectId": "pr44",
+    "projectLabel": "Musterbiel, Industriestrasse 22",
+    "field": "Termin",
+    "change": "Etappierung angepasst",
+    "value": "Q3/26 → Q4/26",
     "onLanding": false
   },
   {
-    "id": "c-gen-151",
+    "id": "c-gen-15",
+    "date": "2026-08-09",
+    "dateLabel": "09.08.2026",
+    "actor": "Lars Muster",
+    "projectId": "pr10",
+    "projectLabel": "Musterthal, Seestrasse 95",
+    "field": "Meilenstein",
+    "change": "MS3 Vorprojekt neu terminiert",
+    "value": "Q2/27 → Q3/27",
+    "onLanding": false
+  },
+  {
+    "id": "c-gen-29",
+    "date": "2026-08-09",
+    "dateLabel": "09.08.2026",
+    "actor": "Bernhard Beispieler",
+    "projectId": "pr122",
+    "projectLabel": "Beispielhofen, Ringstrasse 96",
+    "field": "Projektleitung",
+    "change": "Übergabe nach Pensionierung",
+    "value": "Alina B. → Bernhard B.",
+    "onLanding": false
+  },
+  {
+    "id": "c-gen-137",
     "date": "2026-08-09",
     "dateLabel": "09.08.2026",
     "actor": "Heinz Beispieler",
@@ -641,7 +593,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-165",
+    "id": "c-gen-151",
     "date": "2026-08-09",
     "dateLabel": "09.08.2026",
     "actor": "Reto Beispieler",
@@ -653,31 +605,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-25",
-    "date": "2026-08-06",
-    "dateLabel": "06.08.2026",
-    "actor": "Dario Beispielmann",
-    "projectId": "pr175",
-    "projectLabel": "Musterlingen, Werkhof Ost 96",
-    "field": "Pensum",
-    "change": "Zusatzaufwand Schadstoffsanierung",
-    "value": "20 % → 25 %",
-    "onLanding": false
-  },
-  {
-    "id": "c-gen-33",
-    "date": "2026-08-06",
-    "dateLabel": "06.08.2026",
-    "actor": "Lars Muster",
-    "projectId": "pr185",
-    "projectLabel": "Beispielbach, Kasernenstrasse 45",
-    "field": "Pensum",
-    "change": "Planungsaufwand nach Vorprojekt angepasst",
-    "value": "20 % → 25 %",
-    "onLanding": false
-  },
-  {
-    "id": "c-gen-114",
+    "id": "c-gen-100",
     "date": "2026-08-06",
     "dateLabel": "06.08.2026",
     "actor": "Aline Mustermann",
@@ -689,7 +617,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-131",
+    "id": "c-gen-117",
     "date": "2026-08-06",
     "dateLabel": "06.08.2026",
     "actor": "Timo Beispiel",
@@ -701,7 +629,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-173",
+    "id": "c-gen-159",
     "date": "2026-08-06",
     "dateLabel": "06.08.2026",
     "actor": "Daniel Beispielmann",
@@ -713,7 +641,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-223",
+    "id": "c-gen-209",
     "date": "2026-08-06",
     "dateLabel": "06.08.2026",
     "actor": "Jonas Beispiel",
@@ -725,7 +653,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-229",
+    "id": "c-gen-215",
     "date": "2026-08-06",
     "dateLabel": "06.08.2026",
     "actor": "Damian Beispiel",
@@ -737,19 +665,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-30",
-    "date": "2026-08-05",
-    "dateLabel": "05.08.2026",
-    "actor": "Luca Beispielmann",
-    "projectId": "pr115",
-    "projectLabel": "Beispielbrunn, Mühleweg 69",
-    "field": "Begründung",
-    "change": "Abweichung dokumentiert",
-    "value": "erfasst",
-    "onLanding": false
-  },
-  {
-    "id": "c-gen-81",
+    "id": "c-gen-67",
     "date": "2026-08-05",
     "dateLabel": "05.08.2026",
     "actor": "Daniel Beispielmann",
@@ -761,7 +677,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-96",
+    "id": "c-gen-82",
     "date": "2026-08-05",
     "dateLabel": "05.08.2026",
     "actor": "Karin Muster",
@@ -773,7 +689,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-106",
+    "id": "c-gen-92",
     "date": "2026-08-05",
     "dateLabel": "05.08.2026",
     "actor": "Ines Musterli",
@@ -785,31 +701,19 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-10",
+    "id": "c-gen-33",
     "date": "2026-08-04",
     "dateLabel": "04.08.2026",
-    "actor": "Lars Muster",
-    "projectId": "pr06",
-    "projectLabel": "Beispielhofen, Mühleweg 6",
-    "field": "Meilenstein",
-    "change": "MS6 Abnahme neu terminiert",
-    "value": "Q4/27 → Q1/28",
+    "actor": "Eva Mustermann",
+    "projectId": "pr102",
+    "projectLabel": "Musterdorf, Alte Landstrasse 32+42",
+    "field": "Begründung",
+    "change": "Abweichung dokumentiert",
+    "value": "erfasst",
     "onLanding": false
   },
   {
-    "id": "c-gen-41",
-    "date": "2026-08-04",
-    "dateLabel": "04.08.2026",
-    "actor": "Gina Musterli",
-    "projectId": "pr190",
-    "projectLabel": "Musterberg, Amtshausgasse 42",
-    "field": "Pensum",
-    "change": "Betreuung nach Vergabe reduziert",
-    "value": "30 % → 45 %",
-    "onLanding": false
-  },
-  {
-    "id": "c-gen-73",
+    "id": "c-gen-59",
     "date": "2026-08-04",
     "dateLabel": "04.08.2026",
     "actor": "Nico Beispieler",
@@ -821,7 +725,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-174",
+    "id": "c-gen-160",
     "date": "2026-08-04",
     "dateLabel": "04.08.2026",
     "actor": "Fabio Beispieler",
@@ -833,7 +737,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-184",
+    "id": "c-gen-170",
     "date": "2026-08-04",
     "dateLabel": "04.08.2026",
     "actor": "Jan Beispiel",
@@ -845,7 +749,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-215",
+    "id": "c-gen-201",
     "date": "2026-08-04",
     "dateLabel": "04.08.2026",
     "actor": "Damian Beispiel",
@@ -857,7 +761,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-219",
+    "id": "c-gen-205",
     "date": "2026-08-04",
     "dateLabel": "04.08.2026",
     "actor": "Simon Beispiel",
@@ -869,19 +773,19 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-29",
+    "id": "c-gen-21",
     "date": "2026-08-03",
     "dateLabel": "03.08.2026",
-    "actor": "Leon Beispielmann",
-    "projectId": "pr188",
-    "projectLabel": "Musterlingen, Feldweg 46",
+    "actor": "Ursina Muster",
+    "projectId": "pr105",
+    "projectLabel": "Beispielau, Amtshausgasse 83",
     "field": "Pensum",
-    "change": "Mehraufwand Koordination Haustechnik",
-    "value": "15 % → 35 %",
+    "change": "Planungsaufwand nach Vorprojekt angepasst",
+    "value": "40 % → 60 %",
     "onLanding": false
   },
   {
-    "id": "c-gen-195",
+    "id": "c-gen-181",
     "date": "2026-08-03",
     "dateLabel": "03.08.2026",
     "actor": "Elena Mustermann",
@@ -893,7 +797,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-230",
+    "id": "c-gen-216",
     "date": "2026-08-03",
     "dateLabel": "03.08.2026",
     "actor": "Paula Beispiel",
@@ -905,7 +809,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-236",
+    "id": "c-gen-222",
     "date": "2026-08-03",
     "dateLabel": "03.08.2026",
     "actor": "Anna Muster",
@@ -917,19 +821,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-21",
-    "date": "2026-08-02",
-    "dateLabel": "02.08.2026",
-    "actor": "Dario Beispielmann",
-    "projectId": "pr194",
-    "projectLabel": "Beispielbrunn, Via Motta 68",
-    "field": "Pensum",
-    "change": "Mehraufwand Koordination Haustechnik",
-    "value": "20 % → 40 %",
-    "onLanding": false
-  },
-  {
-    "id": "c-gen-109",
+    "id": "c-gen-95",
     "date": "2026-08-02",
     "dateLabel": "02.08.2026",
     "actor": "Damian Beispiel",
@@ -941,7 +833,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-167",
+    "id": "c-gen-153",
     "date": "2026-08-02",
     "dateLabel": "02.08.2026",
     "actor": "Eva Mustermann",
@@ -953,7 +845,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-234",
+    "id": "c-gen-220",
     "date": "2026-08-02",
     "dateLabel": "02.08.2026",
     "actor": "Sonja Beispiel",
@@ -965,55 +857,43 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-16",
-    "date": "2026-07-30",
-    "dateLabel": "30.07.2026",
-    "actor": "Simon Beispiel",
-    "projectId": "pr121",
-    "projectLabel": "Musterthal, Industriestrasse 66",
-    "field": "Pensum",
-    "change": "Mehraufwand Koordination Haustechnik",
-    "value": "20 % → 30 %",
+    "id": "c-gen-227",
+    "date": "2026-08-02",
+    "dateLabel": "02.08.2026",
+    "actor": "Olivia Musterli",
+    "projectId": "pr139",
+    "projectLabel": "Beispielwil, Industriestrasse 2+48",
+    "field": "Abwesenheiten",
+    "change": "Militärdienst erfasst",
+    "value": "+10 %",
     "onLanding": false
   },
   {
-    "id": "c-gen-20",
+    "id": "c-gen-2",
     "date": "2026-07-30",
     "dateLabel": "30.07.2026",
-    "actor": "Zoe Beispielmann",
-    "projectId": "pr165",
-    "projectLabel": "Musterwil, Ringstrasse 60",
+    "actor": "Damian Beispiel",
+    "projectId": "pr104",
+    "projectLabel": "Musterau, Via Sempione 50",
     "field": "Pensum",
-    "change": "Begleitung Bauherr reduziert",
-    "value": "25 % → 10 %",
+    "change": "Aufwand Submission nach unten korrigiert",
+    "value": "45 % → 55 %",
     "onLanding": false
   },
   {
-    "id": "c-gen-31",
+    "id": "c-gen-22",
     "date": "2026-07-30",
     "dateLabel": "30.07.2026",
-    "actor": "Bruno Beispiel",
-    "projectId": "pr179",
-    "projectLabel": "Beispielbrunn, Feldweg 52",
+    "actor": "Jan Beispiel",
+    "projectId": "pr138",
+    "projectLabel": "Musterlingen, Chemin du Parc 25+44",
     "field": "Meilenstein",
-    "change": "MS2 Machbarkeit bestätigt",
-    "value": "Q4/27 → Q1/28",
+    "change": "MS3 Vorprojekt neu terminiert",
+    "value": "Q3/26 → Q4/26",
     "onLanding": false
   },
   {
     "id": "c-gen-42",
-    "date": "2026-07-30",
-    "dateLabel": "30.07.2026",
-    "actor": "Chiara Muster",
-    "projectId": "pr147",
-    "projectLabel": "Musterbiel, Via Cantonale 21+52",
-    "field": "Begründung",
-    "change": "Freigabe Bereichsleitung erfasst",
-    "value": "erfasst",
-    "onLanding": false
-  },
-  {
-    "id": "c-gen-56",
     "date": "2026-07-30",
     "dateLabel": "30.07.2026",
     "actor": "Tanja Muster",
@@ -1025,7 +905,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-61",
+    "id": "c-gen-47",
     "date": "2026-07-30",
     "dateLabel": "30.07.2026",
     "actor": "Andrea Musterli",
@@ -1037,7 +917,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-93",
+    "id": "c-gen-79",
     "date": "2026-07-30",
     "dateLabel": "30.07.2026",
     "actor": "Lars Muster",
@@ -1049,7 +929,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-94",
+    "id": "c-gen-80",
     "date": "2026-07-30",
     "dateLabel": "30.07.2026",
     "actor": "Elena Mustermann",
@@ -1061,7 +941,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-118",
+    "id": "c-gen-104",
     "date": "2026-07-30",
     "dateLabel": "30.07.2026",
     "actor": "Tanja Muster",
@@ -1073,7 +953,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-129",
+    "id": "c-gen-115",
     "date": "2026-07-30",
     "dateLabel": "30.07.2026",
     "actor": "Tanja Muster",
@@ -1085,7 +965,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-157",
+    "id": "c-gen-143",
     "date": "2026-07-30",
     "dateLabel": "30.07.2026",
     "actor": "Sara Musterli",
@@ -1097,7 +977,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-172",
+    "id": "c-gen-158",
     "date": "2026-07-30",
     "dateLabel": "30.07.2026",
     "actor": "Ines Musterli",
@@ -1109,7 +989,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-177",
+    "id": "c-gen-163",
     "date": "2026-07-30",
     "dateLabel": "30.07.2026",
     "actor": "Katja Muster",
@@ -1121,7 +1001,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-182",
+    "id": "c-gen-168",
     "date": "2026-07-30",
     "dateLabel": "30.07.2026",
     "actor": "Tobias Muster",
@@ -1133,7 +1013,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-192",
+    "id": "c-gen-178",
     "date": "2026-07-30",
     "dateLabel": "30.07.2026",
     "actor": "Reto Beispieler",
@@ -1145,7 +1025,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-222",
+    "id": "c-gen-208",
     "date": "2026-07-30",
     "dateLabel": "30.07.2026",
     "actor": "Tanja Muster",
@@ -1157,19 +1037,31 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-8",
-    "date": "2026-07-29",
-    "dateLabel": "29.07.2026",
-    "actor": "Daniel Beispielmann",
-    "projectId": "pr181",
-    "projectLabel": "Mustersee, Rue des Alpes 62",
-    "field": "Termin",
-    "change": "Baubeginn vorgezogen",
-    "value": "Q2/27 → Q3/27",
+    "id": "c-gen-231",
+    "date": "2026-07-30",
+    "dateLabel": "30.07.2026",
+    "actor": "Hans Beispiel",
+    "projectId": "pr103",
+    "projectLabel": "Musterbiel, Kasernenstrasse 31",
+    "field": "Projektleitung",
+    "change": "Übergabe nach Pensionierung",
+    "value": "Olivia M. → Hans B.",
     "onLanding": false
   },
   {
-    "id": "c-gen-54",
+    "id": "c-gen-235",
+    "date": "2026-07-30",
+    "dateLabel": "30.07.2026",
+    "actor": "Gina Musterli",
+    "projectId": "pr190",
+    "projectLabel": "Musterberg, Amtshausgasse 42",
+    "field": "Pensum",
+    "change": "Betreuung nach Vergabe reduziert",
+    "value": "50 % → 65 %",
+    "onLanding": false
+  },
+  {
+    "id": "c-gen-40",
     "date": "2026-07-29",
     "dateLabel": "29.07.2026",
     "actor": "Tanja Muster",
@@ -1181,7 +1073,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-60",
+    "id": "c-gen-46",
     "date": "2026-07-29",
     "dateLabel": "29.07.2026",
     "actor": "Karin Muster",
@@ -1193,7 +1085,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-225",
+    "id": "c-gen-211",
     "date": "2026-07-29",
     "dateLabel": "29.07.2026",
     "actor": "Dario Beispielmann",
@@ -1205,43 +1097,43 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-37",
-    "date": "2026-07-28",
-    "dateLabel": "28.07.2026",
-    "actor": "Vera Mustermann",
-    "projectId": "pr133",
-    "projectLabel": "Beispielau, Bahnhofstrasse 17",
-    "field": "Begründung",
-    "change": "Abweichung dokumentiert",
-    "value": "erfasst",
+    "id": "c-gen-230",
+    "date": "2026-07-29",
+    "dateLabel": "29.07.2026",
+    "actor": "Zoe Beispielmann",
+    "projectId": "pr152",
+    "projectLabel": "Beispielbrunn, Kasernenstrasse 33+56",
+    "field": "Abwesenheiten",
+    "change": "Weiterbildung erfasst",
+    "value": "+20 %",
     "onLanding": false
   },
   {
-    "id": "c-gen-50",
+    "id": "c-gen-24",
     "date": "2026-07-28",
     "dateLabel": "28.07.2026",
-    "actor": "Corina Musterli",
-    "projectId": "pr187",
-    "projectLabel": "Musterried, Ahornweg 42",
+    "actor": "Damian Beispiel",
+    "projectId": "pr104",
+    "projectLabel": "Musterau, Via Sempione 50",
+    "field": "Abwesenheiten",
+    "change": "Weiterbildung erfasst",
+    "value": "+5 %",
+    "onLanding": false
+  },
+  {
+    "id": "c-gen-32",
+    "date": "2026-07-28",
+    "dateLabel": "28.07.2026",
+    "actor": "Marta Mustermann",
+    "projectId": "pr191",
+    "projectLabel": "Musterau, Schulhausplatz 85",
     "field": "Meilenstein",
     "change": "MS5 Vergabe neu terminiert",
-    "value": "Q3/26 → Q4/26",
+    "value": "Q1/27 → Q2/27",
     "onLanding": false
   },
   {
-    "id": "c-gen-51",
-    "date": "2026-07-28",
-    "dateLabel": "28.07.2026",
-    "actor": "Bernhard Beispieler",
-    "projectId": "pr116",
-    "projectLabel": "Beispielbach, Rue des Alpes 26+57",
-    "field": "Pensum",
-    "change": "Aufwand Ausschreibung neu geschätzt",
-    "value": "15 % → 5 %",
-    "onLanding": false
-  },
-  {
-    "id": "c-gen-140",
+    "id": "c-gen-126",
     "date": "2026-07-28",
     "dateLabel": "28.07.2026",
     "actor": "Fabio Beispieler",
@@ -1253,7 +1145,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-188",
+    "id": "c-gen-174",
     "date": "2026-07-27",
     "dateLabel": "27.07.2026",
     "actor": "Timo Beispiel",
@@ -1265,7 +1157,19 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-113",
+    "id": "c-gen-238",
+    "date": "2026-07-27",
+    "dateLabel": "27.07.2026",
+    "actor": "Dario Beispielmann",
+    "projectId": "pr110",
+    "projectLabel": "Beispielbach, Werkhof West 9",
+    "field": "Termin",
+    "change": "Etappierung angepasst",
+    "value": "Q1/27 → Q2/27",
+    "onLanding": false
+  },
+  {
+    "id": "c-gen-99",
     "date": "2026-07-26",
     "dateLabel": "26.07.2026",
     "actor": "Anna Muster",
@@ -1277,7 +1181,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-116",
+    "id": "c-gen-102",
     "date": "2026-07-26",
     "dateLabel": "26.07.2026",
     "actor": "Heinz Beispieler",
@@ -1289,7 +1193,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-171",
+    "id": "c-gen-157",
     "date": "2026-07-26",
     "dateLabel": "26.07.2026",
     "actor": "Zeno Beispieler",
@@ -1301,19 +1205,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-12",
-    "date": "2026-07-23",
-    "dateLabel": "23.07.2026",
-    "actor": "Reto Beispieler",
-    "projectId": "pr119",
-    "projectLabel": "Musterwil, Alte Landstrasse 37",
-    "field": "Termin",
-    "change": "Baubeginn vorgezogen",
-    "value": "Q4/26 → Q1/27",
-    "onLanding": false
-  },
-  {
-    "id": "c-gen-55",
+    "id": "c-gen-41",
     "date": "2026-07-23",
     "dateLabel": "23.07.2026",
     "actor": "Hans Beispiel",
@@ -1325,7 +1217,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-65",
+    "id": "c-gen-51",
     "date": "2026-07-23",
     "dateLabel": "23.07.2026",
     "actor": "Leon Beispielmann",
@@ -1337,7 +1229,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-71",
+    "id": "c-gen-57",
     "date": "2026-07-23",
     "dateLabel": "23.07.2026",
     "actor": "Leon Beispielmann",
@@ -1349,7 +1241,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-80",
+    "id": "c-gen-66",
     "date": "2026-07-23",
     "dateLabel": "23.07.2026",
     "actor": "Dario Beispielmann",
@@ -1361,7 +1253,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-86",
+    "id": "c-gen-72",
     "date": "2026-07-23",
     "dateLabel": "23.07.2026",
     "actor": "Dario Beispielmann",
@@ -1373,7 +1265,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-100",
+    "id": "c-gen-86",
     "date": "2026-07-23",
     "dateLabel": "23.07.2026",
     "actor": "Heinz Beispieler",
@@ -1385,7 +1277,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-143",
+    "id": "c-gen-129",
     "date": "2026-07-23",
     "dateLabel": "23.07.2026",
     "actor": "Reto Beispieler",
@@ -1397,7 +1289,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-146",
+    "id": "c-gen-132",
     "date": "2026-07-23",
     "dateLabel": "23.07.2026",
     "actor": "Dario Beispielmann",
@@ -1409,7 +1301,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-164",
+    "id": "c-gen-150",
     "date": "2026-07-23",
     "dateLabel": "23.07.2026",
     "actor": "Alina Beispiel",
@@ -1421,7 +1313,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-168",
+    "id": "c-gen-154",
     "date": "2026-07-23",
     "dateLabel": "23.07.2026",
     "actor": "Simon Beispiel",
@@ -1433,7 +1325,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-220",
+    "id": "c-gen-206",
     "date": "2026-07-23",
     "dateLabel": "23.07.2026",
     "actor": "Reto Beispieler",
@@ -1445,7 +1337,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-221",
+    "id": "c-gen-207",
     "date": "2026-07-23",
     "dateLabel": "23.07.2026",
     "actor": "Tanja Muster",
@@ -1457,7 +1349,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-226",
+    "id": "c-gen-212",
     "date": "2026-07-23",
     "dateLabel": "23.07.2026",
     "actor": "Bruno Beispiel",
@@ -1469,7 +1361,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-227",
+    "id": "c-gen-213",
     "date": "2026-07-23",
     "dateLabel": "23.07.2026",
     "actor": "Bruno Beispiel",
@@ -1481,7 +1373,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-233",
+    "id": "c-gen-219",
     "date": "2026-07-23",
     "dateLabel": "23.07.2026",
     "actor": "Lars Muster",
@@ -1493,7 +1385,19 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-58",
+    "id": "c-gen-226",
+    "date": "2026-07-23",
+    "dateLabel": "23.07.2026",
+    "actor": "Elena Mustermann",
+    "projectId": "pr171",
+    "projectLabel": "Beispielau, Postplatz 55",
+    "field": "Termin",
+    "change": "Bezug neu terminiert",
+    "value": "Q2/27 → Q3/27",
+    "onLanding": false
+  },
+  {
+    "id": "c-gen-44",
     "date": "2026-07-22",
     "dateLabel": "22.07.2026",
     "actor": "Lars Muster",
@@ -1505,7 +1409,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-59",
+    "id": "c-gen-45",
     "date": "2026-07-22",
     "dateLabel": "22.07.2026",
     "actor": "Urs Beispielmann",
@@ -1517,7 +1421,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-66",
+    "id": "c-gen-52",
     "date": "2026-07-21",
     "dateLabel": "21.07.2026",
     "actor": "Alina Beispiel",
@@ -1529,7 +1433,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-122",
+    "id": "c-gen-108",
     "date": "2026-07-21",
     "dateLabel": "21.07.2026",
     "actor": "Fabio Beispieler",
@@ -1541,7 +1445,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-128",
+    "id": "c-gen-114",
     "date": "2026-07-21",
     "dateLabel": "21.07.2026",
     "actor": "Timo Beispiel",
@@ -1553,7 +1457,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-155",
+    "id": "c-gen-141",
     "date": "2026-07-21",
     "dateLabel": "21.07.2026",
     "actor": "Leon Beispielmann",
@@ -1565,7 +1469,31 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-111",
+    "id": "c-gen-6",
+    "date": "2026-07-20",
+    "dateLabel": "20.07.2026",
+    "actor": "Daniel Beispielmann",
+    "projectId": "pr142",
+    "projectLabel": "Beispielstadt, Via Motta 76",
+    "field": "Termin",
+    "change": "Etappierung angepasst",
+    "value": "Q3/26 → Q4/26",
+    "onLanding": false
+  },
+  {
+    "id": "c-gen-37",
+    "date": "2026-07-20",
+    "dateLabel": "20.07.2026",
+    "actor": "Zoe Beispielmann",
+    "projectId": "pr152",
+    "projectLabel": "Beispielbrunn, Kasernenstrasse 33+56",
+    "field": "Pensum",
+    "change": "Begleitung Bauherr reduziert",
+    "value": "5 % → 20 %",
+    "onLanding": false
+  },
+  {
+    "id": "c-gen-97",
     "date": "2026-07-20",
     "dateLabel": "20.07.2026",
     "actor": "Walter Beispieler",
@@ -1577,7 +1505,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-142",
+    "id": "c-gen-128",
     "date": "2026-07-20",
     "dateLabel": "20.07.2026",
     "actor": "Sara Musterli",
@@ -1589,7 +1517,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-152",
+    "id": "c-gen-138",
     "date": "2026-07-20",
     "dateLabel": "20.07.2026",
     "actor": "Gina Musterli",
@@ -1601,19 +1529,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-46",
-    "date": "2026-07-19",
-    "dateLabel": "19.07.2026",
-    "actor": "Andrea Musterli",
-    "projectId": "pr126",
-    "projectLabel": "Musterhofen, Alte Landstrasse 30",
-    "field": "Meilenstein",
-    "change": "MS2 Machbarkeit bestätigt",
-    "value": "Q3/26 → Q4/26",
-    "onLanding": false
-  },
-  {
-    "id": "c-gen-189",
+    "id": "c-gen-175",
     "date": "2026-07-19",
     "dateLabel": "19.07.2026",
     "actor": "Karin Muster",
@@ -1625,7 +1541,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-238",
+    "id": "c-gen-224",
     "date": "2026-07-19",
     "dateLabel": "19.07.2026",
     "actor": "Elena Mustermann",
@@ -1637,7 +1553,43 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-53",
+    "id": "c-gen-7",
+    "date": "2026-07-16",
+    "dateLabel": "16.07.2026",
+    "actor": "Bruno Beispiel",
+    "projectId": "pr179",
+    "projectLabel": "Beispielbrunn, Feldweg 52",
+    "field": "Meilenstein",
+    "change": "MS5 Vergabe neu terminiert",
+    "value": "Q3/27 → Q4/27",
+    "onLanding": false
+  },
+  {
+    "id": "c-gen-14",
+    "date": "2026-07-16",
+    "dateLabel": "16.07.2026",
+    "actor": "Karin Muster",
+    "projectId": "pr155",
+    "projectLabel": "Beispielstadt, Werkhof Ost 45",
+    "field": "Pensum",
+    "change": "Begleitung Bauherr reduziert",
+    "value": "5 % → 20 %",
+    "onLanding": false
+  },
+  {
+    "id": "c-gen-25",
+    "date": "2026-07-16",
+    "dateLabel": "16.07.2026",
+    "actor": "Jonas Beispiel",
+    "projectId": "pr174",
+    "projectLabel": "Beispielbach, Alte Landstrasse 1",
+    "field": "Pensum",
+    "change": "Bauleitung Etappe 2 vorgezogen",
+    "value": "45 % → 65 %",
+    "onLanding": false
+  },
+  {
+    "id": "c-gen-39",
     "date": "2026-07-16",
     "dateLabel": "16.07.2026",
     "actor": "Aline Mustermann",
@@ -1649,7 +1601,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-88",
+    "id": "c-gen-74",
     "date": "2026-07-16",
     "dateLabel": "16.07.2026",
     "actor": "Andrea Musterli",
@@ -1661,7 +1613,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-98",
+    "id": "c-gen-84",
     "date": "2026-07-16",
     "dateLabel": "16.07.2026",
     "actor": "Marta Mustermann",
@@ -1673,7 +1625,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-141",
+    "id": "c-gen-127",
     "date": "2026-07-16",
     "dateLabel": "16.07.2026",
     "actor": "Zoe Beispielmann",
@@ -1685,7 +1637,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-176",
+    "id": "c-gen-162",
     "date": "2026-07-16",
     "dateLabel": "16.07.2026",
     "actor": "Olivia Musterli",
@@ -1697,7 +1649,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-199",
+    "id": "c-gen-185",
     "date": "2026-07-16",
     "dateLabel": "16.07.2026",
     "actor": "Leon Beispielmann",
@@ -1709,7 +1661,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-228",
+    "id": "c-gen-214",
     "date": "2026-07-16",
     "dateLabel": "16.07.2026",
     "actor": "Andrea Musterli",
@@ -1721,19 +1673,31 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-40",
-    "date": "2026-07-15",
-    "dateLabel": "15.07.2026",
+    "id": "c-gen-237",
+    "date": "2026-07-16",
+    "dateLabel": "16.07.2026",
     "actor": "Urs Beispielmann",
     "projectId": "pr148",
     "projectLabel": "Musterdorf, Seestrasse 89",
     "field": "Pensum",
-    "change": "Mehraufwand Koordination Haustechnik",
-    "value": "95 % → 75 %",
+    "change": "Zusatzaufwand Schadstoffsanierung",
+    "value": "80 % → 100 %",
     "onLanding": false
   },
   {
-    "id": "c-gen-105",
+    "id": "c-gen-28",
+    "date": "2026-07-15",
+    "dateLabel": "15.07.2026",
+    "actor": "Anna Muster",
+    "projectId": "pr114",
+    "projectLabel": "Mustersee, Avenue de la Gare 46",
+    "field": "Pensum",
+    "change": "Betreuung nach Vergabe reduziert",
+    "value": "50 % → 35 %",
+    "onLanding": false
+  },
+  {
+    "id": "c-gen-91",
     "date": "2026-07-15",
     "dateLabel": "15.07.2026",
     "actor": "Corina Musterli",
@@ -1745,7 +1709,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-183",
+    "id": "c-gen-169",
     "date": "2026-07-15",
     "dateLabel": "15.07.2026",
     "actor": "Leon Beispielmann",
@@ -1757,7 +1721,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-204",
+    "id": "c-gen-190",
     "date": "2026-07-15",
     "dateLabel": "15.07.2026",
     "actor": "Karin Muster",
@@ -1769,7 +1733,19 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-120",
+    "id": "c-gen-9",
+    "date": "2026-07-14",
+    "dateLabel": "14.07.2026",
+    "actor": "Bruno Beispiel",
+    "projectId": "pr117",
+    "projectLabel": "Beispielegg, Rebbergweg 34+41",
+    "field": "Pensum",
+    "change": "Aufwand nach Einsprache erhöht",
+    "value": "60 % → 50 %",
+    "onLanding": false
+  },
+  {
+    "id": "c-gen-106",
     "date": "2026-07-14",
     "dateLabel": "14.07.2026",
     "actor": "Fabio Beispieler",
@@ -1781,7 +1757,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-214",
+    "id": "c-gen-200",
     "date": "2026-07-14",
     "dateLabel": "14.07.2026",
     "actor": "Carla Muster",
@@ -1793,7 +1769,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-133",
+    "id": "c-gen-119",
     "date": "2026-07-13",
     "dateLabel": "13.07.2026",
     "actor": "Aline Mustermann",
@@ -1805,7 +1781,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-217",
+    "id": "c-gen-203",
     "date": "2026-07-13",
     "dateLabel": "13.07.2026",
     "actor": "Elena Mustermann",
@@ -1817,7 +1793,19 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-119",
+    "id": "c-gen-18",
+    "date": "2026-07-12",
+    "dateLabel": "12.07.2026",
+    "actor": "Olivia Musterli",
+    "projectId": "pr139",
+    "projectLabel": "Beispielwil, Industriestrasse 2+48",
+    "field": "Begründung",
+    "change": "Überlast freigegeben",
+    "value": "erfasst",
+    "onLanding": false
+  },
+  {
+    "id": "c-gen-105",
     "date": "2026-07-12",
     "dateLabel": "12.07.2026",
     "actor": "Alina Beispiel",
@@ -1829,7 +1817,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-148",
+    "id": "c-gen-134",
     "date": "2026-07-12",
     "dateLabel": "12.07.2026",
     "actor": "Aline Mustermann",
@@ -1841,7 +1829,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-160",
+    "id": "c-gen-146",
     "date": "2026-07-12",
     "dateLabel": "12.07.2026",
     "actor": "Ines Musterli",
@@ -1853,7 +1841,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-201",
+    "id": "c-gen-187",
     "date": "2026-07-12",
     "dateLabel": "12.07.2026",
     "actor": "Fabio Beispieler",
@@ -1865,55 +1853,55 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-1",
+    "id": "c-gen-3",
     "date": "2026-07-09",
     "dateLabel": "09.07.2026",
-    "actor": "Elena Mustermann",
-    "projectId": "pr164",
-    "projectLabel": "Beispielbach, Postplatz 35",
+    "actor": "Olivia Musterli",
+    "projectId": "pr139",
+    "projectLabel": "Beispielwil, Industriestrasse 2+48",
     "field": "Meilenstein",
-    "change": "MS5 Vergabe neu terminiert",
-    "value": "Q3/27 → Q4/27",
+    "change": "MS6 Abnahme neu terminiert",
+    "value": "Q4/26 → Q1/27",
     "onLanding": false
   },
   {
-    "id": "c-gen-4",
+    "id": "c-gen-8",
     "date": "2026-07-09",
     "dateLabel": "09.07.2026",
-    "actor": "Ursina Muster",
-    "projectId": "pr156",
-    "projectLabel": "Musterbiel, Avenue de la Gare 20",
+    "actor": "Simon Beispiel",
+    "projectId": "pr121",
+    "projectLabel": "Musterthal, Industriestrasse 66",
+    "field": "Pensum",
+    "change": "Zusatzaufwand Schadstoffsanierung",
+    "value": "20 % → 40 %",
+    "onLanding": false
+  },
+  {
+    "id": "c-gen-27",
+    "date": "2026-07-09",
+    "dateLabel": "09.07.2026",
+    "actor": "Leon Beispielmann",
+    "projectId": "pr145",
+    "projectLabel": "Beispielried, Mühleweg 36+60",
+    "field": "Pensum",
+    "change": "Pensum nach Rückmeldung Nutzer erhöht",
+    "value": "30 % → 10 %",
+    "onLanding": false
+  },
+  {
+    "id": "c-gen-36",
+    "date": "2026-07-09",
+    "dateLabel": "09.07.2026",
+    "actor": "Jonas Beispiel",
+    "projectId": "pr159",
+    "projectLabel": "Musteregg, Kasernenstrasse 79",
     "field": "Projektleitung",
-    "change": "Übergabe wegen Überlast",
-    "value": "Zoe B. → Ursina M.",
+    "change": "Übergabe nach Pensionierung",
+    "value": "Nico B. → Jonas B.",
     "onLanding": false
   },
   {
-    "id": "c-gen-6",
-    "date": "2026-07-09",
-    "dateLabel": "09.07.2026",
-    "actor": "Eva Mustermann",
-    "projectId": "pr168",
-    "projectLabel": "Beispielwil, Avenue de la Gare 70",
-    "field": "Meilenstein",
-    "change": "MS3 Vorprojekt neu terminiert",
-    "value": "Q3/27 → Q4/27",
-    "onLanding": false
-  },
-  {
-    "id": "c-gen-39",
-    "date": "2026-07-09",
-    "dateLabel": "09.07.2026",
-    "actor": "Luca Beispielmann",
-    "projectId": "pr115",
-    "projectLabel": "Beispielbrunn, Mühleweg 69",
-    "field": "Begründung",
-    "change": "Überlast freigegeben",
-    "value": "erfasst",
-    "onLanding": false
-  },
-  {
-    "id": "c-gen-79",
+    "id": "c-gen-65",
     "date": "2026-07-09",
     "dateLabel": "09.07.2026",
     "actor": "Walter Beispieler",
@@ -1925,7 +1913,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-101",
+    "id": "c-gen-87",
     "date": "2026-07-09",
     "dateLabel": "09.07.2026",
     "actor": "Bruno Beispiel",
@@ -1937,7 +1925,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-134",
+    "id": "c-gen-120",
     "date": "2026-07-09",
     "dateLabel": "09.07.2026",
     "actor": "Elena Mustermann",
@@ -1949,7 +1937,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-136",
+    "id": "c-gen-122",
     "date": "2026-07-09",
     "dateLabel": "09.07.2026",
     "actor": "Sara Musterli",
@@ -1961,7 +1949,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-163",
+    "id": "c-gen-149",
     "date": "2026-07-09",
     "dateLabel": "09.07.2026",
     "actor": "Andrea Musterli",
@@ -1973,7 +1961,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-190",
+    "id": "c-gen-176",
     "date": "2026-07-09",
     "dateLabel": "09.07.2026",
     "actor": "Karin Muster",
@@ -1985,7 +1973,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-200",
+    "id": "c-gen-186",
     "date": "2026-07-09",
     "dateLabel": "09.07.2026",
     "actor": "Bruno Beispiel",
@@ -1997,7 +1985,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-212",
+    "id": "c-gen-198",
     "date": "2026-07-09",
     "dateLabel": "09.07.2026",
     "actor": "Bernhard Beispieler",
@@ -2009,7 +1997,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-237",
+    "id": "c-gen-223",
     "date": "2026-07-09",
     "dateLabel": "09.07.2026",
     "actor": "Karin Muster",
@@ -2021,7 +2009,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-239",
+    "id": "c-gen-225",
     "date": "2026-07-09",
     "dateLabel": "09.07.2026",
     "actor": "Bernhard Beispieler",
@@ -2033,31 +2021,19 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-7",
+    "id": "c-gen-4",
     "date": "2026-07-08",
     "dateLabel": "08.07.2026",
-    "actor": "Corina Musterli",
-    "projectId": "pr109",
-    "projectLabel": "Musterdorf, Quai du Lac 28",
-    "field": "Termin",
-    "change": "Etappierung angepasst",
-    "value": "Q4/26 → Q1/27",
+    "actor": "Carla Muster",
+    "projectId": "pr177",
+    "projectLabel": "Musterhofen, Rebbergweg 45",
+    "field": "Projektleitung",
+    "change": "Übergabe wegen Überlast",
+    "value": "Eva M. → Carla M.",
     "onLanding": false
   },
   {
-    "id": "c-gen-2",
-    "date": "2026-07-07",
-    "dateLabel": "07.07.2026",
-    "actor": "Nico Beispieler",
-    "projectId": "pr166",
-    "projectLabel": "Musterbach, Seestrasse 35",
-    "field": "Pensum",
-    "change": "Mehraufwand Koordination Haustechnik",
-    "value": "40 % → 20 %",
-    "onLanding": false
-  },
-  {
-    "id": "c-gen-139",
+    "id": "c-gen-125",
     "date": "2026-07-07",
     "dateLabel": "07.07.2026",
     "actor": "Elena Mustermann",
@@ -2069,7 +2045,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-102",
+    "id": "c-gen-88",
     "date": "2026-07-06",
     "dateLabel": "06.07.2026",
     "actor": "Reto Beispieler",
@@ -2081,7 +2057,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-197",
+    "id": "c-gen-183",
     "date": "2026-07-06",
     "dateLabel": "06.07.2026",
     "actor": "Sonja Beispiel",
@@ -2093,7 +2069,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-202",
+    "id": "c-gen-188",
     "date": "2026-07-06",
     "dateLabel": "06.07.2026",
     "actor": "Simon Beispiel",
@@ -2105,7 +2081,19 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-147",
+    "id": "c-gen-233",
+    "date": "2026-07-06",
+    "dateLabel": "06.07.2026",
+    "actor": "Olivia Musterli",
+    "projectId": "pr139",
+    "projectLabel": "Beispielwil, Industriestrasse 2+48",
+    "field": "Pensum",
+    "change": "Aufwand Submission nach unten korrigiert",
+    "value": "30 % → 45 %",
+    "onLanding": false
+  },
+  {
+    "id": "c-gen-133",
     "date": "2026-07-05",
     "dateLabel": "05.07.2026",
     "actor": "Bruno Beispiel",
@@ -2117,19 +2105,19 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-5",
+    "id": "c-gen-13",
     "date": "2026-07-02",
     "dateLabel": "02.07.2026",
-    "actor": "Paula Beispiel",
-    "projectId": "pr39",
-    "projectLabel": "Beispielheim, Aussenstelle",
-    "field": "Begründung",
-    "change": "Freigabe Bereichsleitung erfasst",
-    "value": "erfasst",
+    "actor": "Corina Musterli",
+    "projectId": "pr109",
+    "projectLabel": "Musterdorf, Quai du Lac 28",
+    "field": "Pensum",
+    "change": "Aufwand nach Einsprache erhöht",
+    "value": "75 % → 55 %",
     "onLanding": false
   },
   {
-    "id": "c-gen-99",
+    "id": "c-gen-85",
     "date": "2026-07-02",
     "dateLabel": "02.07.2026",
     "actor": "Bruno Beispiel",
@@ -2141,7 +2129,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-156",
+    "id": "c-gen-142",
     "date": "2026-07-02",
     "dateLabel": "02.07.2026",
     "actor": "Anna Muster",
@@ -2153,7 +2141,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-185",
+    "id": "c-gen-171",
     "date": "2026-07-02",
     "dateLabel": "02.07.2026",
     "actor": "Simon Beispiel",
@@ -2165,7 +2153,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-193",
+    "id": "c-gen-179",
     "date": "2026-07-02",
     "dateLabel": "02.07.2026",
     "actor": "Karin Muster",
@@ -2177,7 +2165,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-205",
+    "id": "c-gen-191",
     "date": "2026-07-02",
     "dateLabel": "02.07.2026",
     "actor": "Elena Mustermann",
@@ -2189,19 +2177,43 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-45",
-    "date": "2026-07-01",
-    "dateLabel": "01.07.2026",
-    "actor": "Dario Beispielmann",
-    "projectId": "pr194",
-    "projectLabel": "Beispielbrunn, Via Motta 68",
-    "field": "Termin",
-    "change": "Bezug neu terminiert",
-    "value": "Q4/27 → Q1/28",
+    "id": "c-gen-228",
+    "date": "2026-07-02",
+    "dateLabel": "02.07.2026",
+    "actor": "Gina Musterli",
+    "projectId": "pr131",
+    "projectLabel": "Beispielau, Sonnhalde 61",
+    "field": "Begründung",
+    "change": "Überlast freigegeben",
+    "value": "erfasst",
     "onLanding": false
   },
   {
-    "id": "c-gen-123",
+    "id": "c-gen-234",
+    "date": "2026-07-02",
+    "dateLabel": "02.07.2026",
+    "actor": "Jonas Beispiel",
+    "projectId": "pr129",
+    "projectLabel": "Musteregg, Alte Landstrasse 12",
+    "field": "Pensum",
+    "change": "Begleitung Bauherr reduziert",
+    "value": "40 % → 60 %",
+    "onLanding": false
+  },
+  {
+    "id": "c-gen-23",
+    "date": "2026-07-01",
+    "dateLabel": "01.07.2026",
+    "actor": "Leon Beispielmann",
+    "projectId": "pr188",
+    "projectLabel": "Musterlingen, Feldweg 46",
+    "field": "Pensum",
+    "change": "Aufwand nach Einsprache erhöht",
+    "value": "15 % → 5 %",
+    "onLanding": false
+  },
+  {
+    "id": "c-gen-109",
     "date": "2026-07-01",
     "dateLabel": "01.07.2026",
     "actor": "Walter Beispieler",
@@ -2213,7 +2225,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-138",
+    "id": "c-gen-124",
     "date": "2026-07-01",
     "dateLabel": "01.07.2026",
     "actor": "Tobias Muster",
@@ -2225,7 +2237,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-153",
+    "id": "c-gen-139",
     "date": "2026-07-01",
     "dateLabel": "01.07.2026",
     "actor": "Andrea Musterli",
@@ -2237,7 +2249,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-196",
+    "id": "c-gen-182",
     "date": "2026-07-01",
     "dateLabel": "01.07.2026",
     "actor": "Nico Beispieler",
@@ -2249,7 +2261,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-103",
+    "id": "c-gen-89",
     "date": "2026-06-30",
     "dateLabel": "30.06.2026",
     "actor": "Sonja Beispiel",
@@ -2261,7 +2273,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-161",
+    "id": "c-gen-147",
     "date": "2026-06-30",
     "dateLabel": "30.06.2026",
     "actor": "Luca Beispielmann",
@@ -2273,7 +2285,31 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-63",
+    "id": "c-gen-5",
+    "date": "2026-06-29",
+    "dateLabel": "29.06.2026",
+    "actor": "Fabio Beispieler",
+    "projectId": "pr108",
+    "projectLabel": "Musteregg, Seestrasse 20",
+    "field": "Projektleitung",
+    "change": "Übergabe nach Pensionierung",
+    "value": "Corina M. → Fabio B.",
+    "onLanding": false
+  },
+  {
+    "id": "c-gen-10",
+    "date": "2026-06-29",
+    "dateLabel": "29.06.2026",
+    "actor": "Alina Beispiel",
+    "projectId": "pr03",
+    "projectLabel": "Beispielgrund, Via Sempione 3",
+    "field": "Pensum",
+    "change": "Bauleitung Etappe 2 vorgezogen",
+    "value": "15 % → 10 %",
+    "onLanding": false
+  },
+  {
+    "id": "c-gen-49",
     "date": "2026-06-29",
     "dateLabel": "29.06.2026",
     "actor": "Alina Beispiel",
@@ -2285,7 +2321,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-68",
+    "id": "c-gen-54",
     "date": "2026-06-29",
     "dateLabel": "29.06.2026",
     "actor": "Jan Beispiel",
@@ -2297,7 +2333,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-191",
+    "id": "c-gen-177",
     "date": "2026-06-29",
     "dateLabel": "29.06.2026",
     "actor": "Bruno Beispiel",
@@ -2312,16 +2348,16 @@
     "id": "c-gen-26",
     "date": "2026-06-28",
     "dateLabel": "28.06.2026",
-    "actor": "Nico Beispieler",
-    "projectId": "pr166",
-    "projectLabel": "Musterbach, Seestrasse 35",
+    "actor": "Walter Beispieler",
+    "projectId": "pr101",
+    "projectLabel": "Beispielwil, Via Sempione 54",
     "field": "Pensum",
-    "change": "Bauleitung Etappe 2 vorgezogen",
-    "value": "55 % → 40 %",
+    "change": "Aufwand Submission nach unten korrigiert",
+    "value": "30 % → 45 %",
     "onLanding": false
   },
   {
-    "id": "c-gen-69",
+    "id": "c-gen-55",
     "date": "2026-06-28",
     "dateLabel": "28.06.2026",
     "actor": "Andrea Musterli",
@@ -2333,7 +2369,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-76",
+    "id": "c-gen-62",
     "date": "2026-06-28",
     "dateLabel": "28.06.2026",
     "actor": "Daniel Beispielmann",
@@ -2345,7 +2381,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-110",
+    "id": "c-gen-96",
     "date": "2026-06-28",
     "dateLabel": "28.06.2026",
     "actor": "Fabio Beispieler",
@@ -2357,7 +2393,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-121",
+    "id": "c-gen-107",
     "date": "2026-06-28",
     "dateLabel": "28.06.2026",
     "actor": "Tobias Muster",
@@ -2369,7 +2405,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-145",
+    "id": "c-gen-131",
     "date": "2026-06-28",
     "dateLabel": "28.06.2026",
     "actor": "Ines Musterli",
@@ -2381,31 +2417,31 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-0",
+    "id": "c-gen-12",
     "date": "2026-06-25",
     "dateLabel": "25.06.2026",
-    "actor": "Karin Muster",
-    "projectId": "pr155",
-    "projectLabel": "Beispielstadt, Werkhof Ost 45",
-    "field": "Meilenstein",
-    "change": "MS6 Abnahme neu terminiert",
-    "value": "Q3/26 → Q4/26",
+    "actor": "Timo Beispiel",
+    "projectId": "pr149",
+    "projectLabel": "Mustersee, Werkhof West 50",
+    "field": "Pensum",
+    "change": "Pensum nach Rückmeldung Nutzer erhöht",
+    "value": "35 % → 45 %",
     "onLanding": false
   },
   {
-    "id": "c-gen-36",
+    "id": "c-gen-34",
     "date": "2026-06-25",
     "dateLabel": "25.06.2026",
     "actor": "Daniel Beispielmann",
-    "projectId": "pr178",
-    "projectLabel": "Beispielried, Rebbergweg 82",
+    "projectId": "pr181",
+    "projectLabel": "Mustersee, Rue des Alpes 62",
     "field": "Pensum",
-    "change": "Bauleitung Etappe 2 vorgezogen",
-    "value": "10 % → 5 %",
+    "change": "Pensum nach Rückmeldung Nutzer erhöht",
+    "value": "35 % → 55 %",
     "onLanding": false
   },
   {
-    "id": "c-gen-95",
+    "id": "c-gen-81",
     "date": "2026-06-25",
     "dateLabel": "25.06.2026",
     "actor": "Gina Musterli",
@@ -2417,7 +2453,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-108",
+    "id": "c-gen-94",
     "date": "2026-06-25",
     "dateLabel": "25.06.2026",
     "actor": "Fabio Beispieler",
@@ -2429,7 +2465,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-162",
+    "id": "c-gen-148",
     "date": "2026-06-25",
     "dateLabel": "25.06.2026",
     "actor": "Corina Musterli",
@@ -2441,7 +2477,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-166",
+    "id": "c-gen-152",
     "date": "2026-06-25",
     "dateLabel": "25.06.2026",
     "actor": "Gina Musterli",
@@ -2453,7 +2489,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-169",
+    "id": "c-gen-155",
     "date": "2026-06-25",
     "dateLabel": "25.06.2026",
     "actor": "Leon Beispielmann",
@@ -2465,43 +2501,19 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-15",
-    "date": "2026-06-23",
-    "dateLabel": "23.06.2026",
-    "actor": "Marta Mustermann",
-    "projectId": "pr191",
-    "projectLabel": "Musterau, Schulhausplatz 85",
-    "field": "Pensum",
-    "change": "Bauleitung Etappe 2 vorgezogen",
-    "value": "20 % → 25 %",
+    "id": "c-gen-38",
+    "date": "2026-06-24",
+    "dateLabel": "24.06.2026",
+    "actor": "Karin Muster",
+    "projectId": "pr158",
+    "projectLabel": "Musterbach, Via Sempione 54",
+    "field": "Projektleitung",
+    "change": "Übergabe nach Pensionierung",
+    "value": "Alina B. → Karin M.",
     "onLanding": false
   },
   {
-    "id": "c-gen-47",
-    "date": "2026-06-23",
-    "dateLabel": "23.06.2026",
-    "actor": "Anna Muster",
-    "projectId": "pr114",
-    "projectLabel": "Mustersee, Avenue de la Gare 46",
-    "field": "Meilenstein",
-    "change": "MS6 Abnahme neu terminiert",
-    "value": "Q4/26 → Q1/27",
-    "onLanding": false
-  },
-  {
-    "id": "c-gen-48",
-    "date": "2026-06-23",
-    "dateLabel": "23.06.2026",
-    "actor": "Aline Mustermann",
-    "projectId": "pr123",
-    "projectLabel": "Musterthal, Hauptstrasse 56",
-    "field": "Meilenstein",
-    "change": "MS4 Baukredit neu terminiert",
-    "value": "Q3/26 → Q4/26",
-    "onLanding": false
-  },
-  {
-    "id": "c-gen-75",
+    "id": "c-gen-61",
     "date": "2026-06-23",
     "dateLabel": "23.06.2026",
     "actor": "Lars Muster",
@@ -2513,7 +2525,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-84",
+    "id": "c-gen-70",
     "date": "2026-06-23",
     "dateLabel": "23.06.2026",
     "actor": "Tanja Muster",
@@ -2525,7 +2537,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-126",
+    "id": "c-gen-112",
     "date": "2026-06-23",
     "dateLabel": "23.06.2026",
     "actor": "Olivia Musterli",
@@ -2537,7 +2549,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-150",
+    "id": "c-gen-136",
     "date": "2026-06-23",
     "dateLabel": "23.06.2026",
     "actor": "Jonas Beispiel",
@@ -2549,7 +2561,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-180",
+    "id": "c-gen-166",
     "date": "2026-06-23",
     "dateLabel": "23.06.2026",
     "actor": "Olivia Musterli",
@@ -2561,19 +2573,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-23",
-    "date": "2026-06-22",
-    "dateLabel": "22.06.2026",
-    "actor": "Luca Beispielmann",
-    "projectId": "pr170",
-    "projectLabel": "Musteregg, Amtshausgasse 12",
-    "field": "Pensum",
-    "change": "Zusatzaufwand Schadstoffsanierung",
-    "value": "75 % → 85 %",
-    "onLanding": false
-  },
-  {
-    "id": "c-gen-70",
+    "id": "c-gen-56",
     "date": "2026-06-22",
     "dateLabel": "22.06.2026",
     "actor": "Leon Beispielmann",
@@ -2585,7 +2585,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-130",
+    "id": "c-gen-116",
     "date": "2026-06-22",
     "dateLabel": "22.06.2026",
     "actor": "Jonas Beispiel",
@@ -2597,31 +2597,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-17",
-    "date": "2026-06-21",
-    "dateLabel": "21.06.2026",
-    "actor": "Zoe Beispielmann",
-    "projectId": "pr152",
-    "projectLabel": "Beispielbrunn, Kasernenstrasse 33+56",
-    "field": "Pensum",
-    "change": "Aufwand Submission nach unten korrigiert",
-    "value": "5 % → 5 %",
-    "onLanding": false
-  },
-  {
-    "id": "c-gen-49",
-    "date": "2026-06-21",
-    "dateLabel": "21.06.2026",
-    "actor": "Luca Beispielmann",
-    "projectId": "pr115",
-    "projectLabel": "Beispielbrunn, Mühleweg 69",
-    "field": "Pensum",
-    "change": "Aufwand Ausschreibung neu geschätzt",
-    "value": "90 % → 105 %",
-    "onLanding": false
-  },
-  {
-    "id": "c-gen-72",
+    "id": "c-gen-58",
     "date": "2026-06-21",
     "dateLabel": "21.06.2026",
     "actor": "Jonas Beispiel",
@@ -2633,7 +2609,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-186",
+    "id": "c-gen-172",
     "date": "2026-06-21",
     "dateLabel": "21.06.2026",
     "actor": "Nico Beispieler",
@@ -2645,7 +2621,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-216",
+    "id": "c-gen-202",
     "date": "2026-06-21",
     "dateLabel": "21.06.2026",
     "actor": "Lars Muster",
@@ -2657,19 +2633,43 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-14",
+    "id": "c-gen-16",
     "date": "2026-06-18",
     "dateLabel": "18.06.2026",
-    "actor": "Tobias Muster",
-    "projectId": "pr44",
-    "projectLabel": "Musterbiel, Industriestrasse 22",
-    "field": "Begründung",
-    "change": "Überlast freigegeben",
-    "value": "erfasst",
+    "actor": "Lars Muster",
+    "projectId": "pr10",
+    "projectLabel": "Musterthal, Seestrasse 95",
+    "field": "Projektleitung",
+    "change": "Übergabe nach Pensionierung",
+    "value": "Leon B. → Lars M.",
     "onLanding": false
   },
   {
-    "id": "c-gen-77",
+    "id": "c-gen-20",
+    "date": "2026-06-18",
+    "dateLabel": "18.06.2026",
+    "actor": "Vera Mustermann",
+    "projectId": "pr133",
+    "projectLabel": "Beispielau, Bahnhofstrasse 17",
+    "field": "Termin",
+    "change": "Baubeginn vorgezogen",
+    "value": "Q3/26 → Q4/26",
+    "onLanding": false
+  },
+  {
+    "id": "c-gen-31",
+    "date": "2026-06-18",
+    "dateLabel": "18.06.2026",
+    "actor": "Elena Mustermann",
+    "projectId": "pr197",
+    "projectLabel": "Musterbiel, Feldweg 34",
+    "field": "Pensum",
+    "change": "Betreuung nach Vergabe reduziert",
+    "value": "25 % → 10 %",
+    "onLanding": false
+  },
+  {
+    "id": "c-gen-63",
     "date": "2026-06-18",
     "dateLabel": "18.06.2026",
     "actor": "Alina Beispiel",
@@ -2681,7 +2681,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-82",
+    "id": "c-gen-68",
     "date": "2026-06-18",
     "dateLabel": "18.06.2026",
     "actor": "Nico Beispieler",
@@ -2693,7 +2693,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-83",
+    "id": "c-gen-69",
     "date": "2026-06-18",
     "dateLabel": "18.06.2026",
     "actor": "Karin Muster",
@@ -2705,7 +2705,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-90",
+    "id": "c-gen-76",
     "date": "2026-06-18",
     "dateLabel": "18.06.2026",
     "actor": "Simon Beispiel",
@@ -2717,7 +2717,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-91",
+    "id": "c-gen-77",
     "date": "2026-06-18",
     "dateLabel": "18.06.2026",
     "actor": "Dario Beispielmann",
@@ -2729,7 +2729,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-206",
+    "id": "c-gen-192",
     "date": "2026-06-18",
     "dateLabel": "18.06.2026",
     "actor": "Lars Muster",
@@ -2741,7 +2741,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-231",
+    "id": "c-gen-217",
     "date": "2026-06-18",
     "dateLabel": "18.06.2026",
     "actor": "Elena Mustermann",
@@ -2753,31 +2753,19 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-9",
+    "id": "c-gen-1",
     "date": "2026-06-17",
     "dateLabel": "17.06.2026",
-    "actor": "Tanja Muster",
-    "projectId": "pr151",
-    "projectLabel": "Beispielwil, Talstrasse 62",
-    "field": "Meilenstein",
-    "change": "MS6 Abnahme neu terminiert",
-    "value": "Q4/27 → Q1/28",
-    "onLanding": false
-  },
-  {
-    "id": "c-gen-18",
-    "date": "2026-06-17",
-    "dateLabel": "17.06.2026",
-    "actor": "Olivia Musterli",
-    "projectId": "pr143",
-    "projectLabel": "Musterberg, Quai du Lac 41",
+    "actor": "Lars Muster",
+    "projectId": "pr186",
+    "projectLabel": "Beispielbach, Industriestrasse 51",
     "field": "Pensum",
-    "change": "Begleitung Bauherr reduziert",
-    "value": "65 % → 70 %",
+    "change": "Pensum nach Rückmeldung Nutzer erhöht",
+    "value": "55 % → 50 %",
     "onLanding": false
   },
   {
-    "id": "c-gen-92",
+    "id": "c-gen-78",
     "date": "2026-06-17",
     "dateLabel": "17.06.2026",
     "actor": "Walter Beispieler",
@@ -2789,7 +2777,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-127",
+    "id": "c-gen-113",
     "date": "2026-06-17",
     "dateLabel": "17.06.2026",
     "actor": "Gina Musterli",
@@ -2801,7 +2789,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-218",
+    "id": "c-gen-204",
     "date": "2026-06-17",
     "dateLabel": "17.06.2026",
     "actor": "Elena Mustermann",
@@ -2813,7 +2801,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-125",
+    "id": "c-gen-111",
     "date": "2026-06-16",
     "dateLabel": "16.06.2026",
     "actor": "Anna Muster",
@@ -2825,7 +2813,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-179",
+    "id": "c-gen-165",
     "date": "2026-06-16",
     "dateLabel": "16.06.2026",
     "actor": "Walter Beispieler",
@@ -2837,7 +2825,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-64",
+    "id": "c-gen-50",
     "date": "2026-06-15",
     "dateLabel": "15.06.2026",
     "actor": "Karin Muster",
@@ -2849,7 +2837,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-117",
+    "id": "c-gen-103",
     "date": "2026-06-15",
     "dateLabel": "15.06.2026",
     "actor": "Elena Mustermann",
@@ -2861,7 +2849,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-235",
+    "id": "c-gen-221",
     "date": "2026-06-15",
     "dateLabel": "15.06.2026",
     "actor": "Elena Mustermann",
@@ -2873,19 +2861,19 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-34",
+    "id": "c-gen-30",
     "date": "2026-06-14",
     "dateLabel": "14.06.2026",
-    "actor": "Heinz Beispieler",
-    "projectId": "pr124",
-    "projectLabel": "Musterbiel, Seestrasse 26",
-    "field": "Projektleitung",
-    "change": "Übergabe wegen Überlast",
-    "value": "Corina M. → Heinz B.",
+    "actor": "Jan Beispiel",
+    "projectId": "pr138",
+    "projectLabel": "Musterlingen, Chemin du Parc 25+44",
+    "field": "Meilenstein",
+    "change": "MS4 Baukredit neu terminiert",
+    "value": "Q3/27 → Q4/27",
     "onLanding": false
   },
   {
-    "id": "c-gen-74",
+    "id": "c-gen-60",
     "date": "2026-06-14",
     "dateLabel": "14.06.2026",
     "actor": "Bruno Beispiel",
@@ -2897,7 +2885,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-107",
+    "id": "c-gen-93",
     "date": "2026-06-14",
     "dateLabel": "14.06.2026",
     "actor": "Corina Musterli",
@@ -2909,7 +2897,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-178",
+    "id": "c-gen-164",
     "date": "2026-06-14",
     "dateLabel": "14.06.2026",
     "actor": "Lars Muster",
@@ -2921,19 +2909,31 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-38",
+    "id": "c-gen-17",
     "date": "2026-06-11",
     "dateLabel": "11.06.2026",
-    "actor": "Sara Musterli",
-    "projectId": "pr183",
-    "projectLabel": "Musteregg, Via Motta 76",
-    "field": "Meilenstein",
-    "change": "MS3 Vorprojekt neu terminiert",
-    "value": "Q3/26 → Q4/26",
+    "actor": "Jan Beispiel",
+    "projectId": "pr130",
+    "projectLabel": "Musterbach, Hauptstrasse 44",
+    "field": "Pensum",
+    "change": "Aufwand Submission nach unten korrigiert",
+    "value": "25 % → 45 %",
     "onLanding": false
   },
   {
-    "id": "c-gen-85",
+    "id": "c-gen-19",
+    "date": "2026-06-11",
+    "dateLabel": "11.06.2026",
+    "actor": "Gina Musterli",
+    "projectId": "pr190",
+    "projectLabel": "Musterberg, Amtshausgasse 42",
+    "field": "Termin",
+    "change": "Bauende verschoben",
+    "value": "Q4/27 → Q1/28",
+    "onLanding": false
+  },
+  {
+    "id": "c-gen-71",
     "date": "2026-06-11",
     "dateLabel": "11.06.2026",
     "actor": "Sara Musterli",
@@ -2945,7 +2945,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-115",
+    "id": "c-gen-101",
     "date": "2026-06-11",
     "dateLabel": "11.06.2026",
     "actor": "Jan Beispiel",
@@ -2957,7 +2957,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-158",
+    "id": "c-gen-144",
     "date": "2026-06-11",
     "dateLabel": "11.06.2026",
     "actor": "Carla Muster",
@@ -2969,7 +2969,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-159",
+    "id": "c-gen-145",
     "date": "2026-06-11",
     "dateLabel": "11.06.2026",
     "actor": "Sonja Beispiel",
@@ -2981,7 +2981,7 @@
     "onLanding": false
   },
   {
-    "id": "c-gen-208",
+    "id": "c-gen-194",
     "date": "2026-06-11",
     "dateLabel": "11.06.2026",
     "actor": "Tanja Muster",

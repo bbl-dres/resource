@@ -7,7 +7,7 @@
    ============================================================================= */
 
 import {
-  data, state, t, num, fmt, cellValue, projectDemand, heatStep, personUtilisation
+  data, state, t, num, fmt, unitSuffix, cellValue, projectDemand, heatStep, personUtilisation
 } from './store.js';
 
 import { html, icons, phaseOf, attr } from './ui.js';
@@ -30,7 +30,9 @@ function modalHead(kicker, title, meta = '') {
 
 export function renderModal() {
   if (!state.modal) return '';
-  const body = state.modal.type === 'project' ? projectModal(state.modal)
+  const body = state.modal.type === 'phase' ? phaseModal(state.modal)
+    : state.modal.type === 'milestone' ? milestoneModal(state.modal)
+    : state.modal.type === 'project' ? projectModal(state.modal)
     : state.modal.type === 'share' ? shareModal(state.modal)
       : state.modal.type === 'assign' ? assignModal(state.modal)
         : rebookModal(state.modal);
@@ -94,6 +96,103 @@ function shareModal({ copied }) {
         ${copied ? icons.check(15) : icons.externalLink(15)}${copied ? t('Kopiert') : t('Link kopieren')}
       </button>
     </div>`;
+}
+
+/**
+ * A gate is a date and a consequence, so the dialog stays at that: what it is,
+ * when it was planned, when it is now expected, and why if those differ.
+ */
+function milestoneModal({ milestoneId }) {
+  const m = data.milestones.items.find(x => x.id === milestoneId);
+  if (!m) return '';
+  const p = data.projectsById[m.projectId];
+  const cat = data.milestones.catalog.find(c => c.code === m.code);
+  const lead = p.leadId ? data.peopleById[p.leadId] : null;
+  const planQ = data.quarters[data.quarterIndex[m.plan]];
+  const foreQ = m.forecast ? data.quarters[data.quarterIndex[m.forecast]] : null;
+  const moved = m.forecast && m.forecast !== m.plan;
+
+  const facts = [
+    { term: 'Projekt', value: p.title, sub: `${p.number} · ${t(data.portfoliosById[p.portfolio].label)}` },
+    { term: 'SIA-Teilphase', value: phaseOf(m.subPhase).label },
+    { term: 'Plantermin', value: `${planQ.label} · ${deDate(m.planDate)}` },
+    {
+      term: 'Prognose',
+      value: foreQ ? `${foreQ.label} · ${deDate(m.forecastDate)}` : t('offen'),
+      sub: m.impact ? t(m.impact) : null,
+      tone: moved || !foreQ ? 'danger' : null
+    },
+    { term: 'Projektleitung', value: lead ? lead.name : t('nicht zugewiesen') }
+  ];
+
+  return html`
+    ${modalHead(`${m.code} · ${t(m.statusLabel)}`, cat ? t(cat.name) : m.code)}
+
+    <dl class="facts">
+      ${facts.map(f => html`<div class="facts__row">
+        <dt>${t(f.term)}</dt>
+        <dd class="${f.tone ? `is-${f.tone}` : ''}">${f.value}
+          ${f.sub ? html`<span class="facts__sub">${f.sub}</span>` : ''}</dd>
+      </div>`)}
+    </dl>
+
+    <footer class="modal__foot">
+      <button type="button" class="btn" data-act="open-project" data-val="${p.id}">${t('Projekt öffnen')}</button>
+      <button type="button" class="btn btn--primary" data-act="noop">${t('Im ePPM öffnen')}</button>
+    </footer>`;
+}
+
+/**
+ * A phase is a stretch of time with a workload attached, so the dialog answers
+ * exactly that — and says plainly when the stretch is a delay rather than work.
+ */
+function phaseModal({ projectId, from }) {
+  const p = data.projectsById[projectId];
+  const bar = p?.bars.find(x => x.from === from);
+  if (!bar) return '';
+  const lead = p.leadId ? data.peopleById[p.leadId] : null;
+  const sub = data.phases.sub[bar.phase];
+  const cells = projectDemand(p);
+
+  const first = Math.max(0, bar.from);
+  const last = Math.min(data.quarters.length - 1, bar.to - 1);
+  const within = cells.slice(first, last + 1);
+  const peak = within.length ? Math.max(...within) : 0;
+  const quarters = bar.to - bar.from;
+
+  const facts = [
+    { term: 'Projekt', value: p.title, sub: `${p.number} · ${t(data.portfoliosById[p.portfolio].label)}` },
+    {
+      term: 'Zeitraum',
+      value: `${data.quarters[first].label} – ${data.quarters[last].label}`,
+      sub: `${quarters} ${t(quarters === 1 ? 'Quartal' : 'Quartale')}${bar.continues ? ` · ${t('läuft weiter')}` : ''}`
+    },
+    {
+      term: 'Pensum in dieser Phase',
+      value: within.length ? `${t('Spitze')} ${num(peak)}${unitSuffix()}` : '—',
+      sub: within.length ? within.map(v => num(v)).join(' · ') : null
+    },
+    { term: 'Projektleitung', value: lead ? lead.name : t('nicht zugewiesen') }
+  ];
+
+  // The number is already in the title; the kicker names the kind of thing.
+  const kicker = bar.delay ? t('Verzug') : t('SIA-Teilphase');
+  const title = bar.delay ? bar.label : (sub ? t(sub.label) : bar.label);
+
+  return html`
+    ${modalHead(kicker, title)}
+
+    <dl class="facts">
+      ${facts.map(f => html`<div class="facts__row">
+        <dt>${t(f.term)}</dt>
+        <dd>${f.value}${f.sub ? html`<span class="facts__sub">${f.sub}</span>` : ''}</dd>
+      </div>`)}
+    </dl>
+
+    <footer class="modal__foot">
+      <button type="button" class="btn" data-act="open-project" data-val="${p.id}">${t('Projekt öffnen')}</button>
+      <button type="button" class="btn btn--primary" data-act="noop">${t('Im ePPM öffnen')}</button>
+    </footer>`;
 }
 
 function projectModal({ projectId }) {
