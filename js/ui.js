@@ -6,7 +6,7 @@
    ============================================================================= */
 
 import {
-  data, state, t, activeFilters, kpis, filteredProjects, sortKey, canStep
+  data, state, t, activeFilters, kpis, filteredProjects, sortKey, canStep, notifications
 } from './store.js';
 import { toggleableColumns } from './columns.js';
 import { icon } from './icons.js';
@@ -73,7 +73,6 @@ export const icons = {
   chevronLeft: (s = 15) => ico('chevron-left', s),
   chevronRight: (s = 15) => ico('chevron-right', s),
   arrowRight: (s = 15) => ico('arrow-right', s),
-  arrowUpRight: (s = 13) => ico('arrow-up-right', s),
   close: (s = 15) => ico('x', s),
   bell: (s = 15) => ico('bell', s),
   kebab: (s = 15) => ico('ellipsis-vertical', s),
@@ -82,16 +81,12 @@ export const icons = {
   minus: (s = 15) => ico('minus', s),
   warn: (s = 13) => ico('triangle-alert', s),
   info: (s = 15) => ico('info', s),
-  calendar: (s = 15) => ico('calendar-days', s),
-  list: (s = 15) => ico('list', s),
-  gantt: (s = 15) => ico('chart-gantt', s),
   pencil: (s = 15) => ico('pencil', s),
   share: (s = 15) => ico('share-2', s),
   sortAsc: (s = 15) => ico('arrow-up-narrow-wide', s),
   sortDesc: (s = 15) => ico('arrow-down-wide-narrow', s),
   grid: (s = 15) => ico('layout-grid', s),
   download: (s = 15) => ico('download', s),
-  users: (s = 15) => ico('users', s),
   externalLink: (s = 13) => ico('external-link', s)
 };
 
@@ -123,6 +118,11 @@ export function tokenPx(name) {
 
 /** The rule that separates one year from the next, drawn on its first column. */
 export const yearRule = period => (period.yearStart ? 'is-yearstart' : '');
+
+/** The project cell of a change row: a link when the entry names a project. */
+export const changeProject = (c) => (c.projectId
+  ? html`<button type="button" class="linkbtn" data-act="open-project" data-val="${c.projectId}">${c.projectLabel}</button>`
+  : c.projectLabel);
 
 /*
  * Only the time axis scrolls; the master data stays where it is. A pinned
@@ -268,16 +268,58 @@ export function appHeader() {
           </div>`}
         </div>
 
-        <div class="hdr-notify">
-          <button type="button" class="hdr-btn hdr-btn--icon" title="${m.notificationsTitle}"
-                  aria-label="${t('Benachrichtigungen')}, ${m.notifications} ungelesen">${icons.bell()}</button>
-          <span class="hdr-notify__badge" aria-hidden="true">${m.notifications}</span>
-        </div>
+        ${notifyBell()}
 
         <span class="avatar" title="${t('Angemeldet')}: ${m.user.name}">${m.user.initials}</span>
       </div>
     </div>
   </header>`;
+}
+
+/**
+ * The bell. Its badge is the length of the derived list, so the number in the
+ * header and the rows behind it are one fact stated twice — they cannot drift
+ * apart the way the hand-written summary before them had.
+ *
+ * The mark on the left reuses the Ampel shapes, which carry their meaning
+ * without hue: a diamond for own overload, a ring for a gate that moved, an
+ * outline for a change somebody else made.
+ */
+export function notifyBell() {
+  const items = notifications();
+  const open = state.menu === 'notify';
+  return html`<div class="dd hdr-notify" data-menu="notify">
+    <button type="button" class="hdr-btn hdr-btn--icon ${open ? 'is-open' : ''}"
+        data-act="menu" data-val="notify" aria-expanded="${open}" aria-haspopup="menu"
+        aria-label="${t('Benachrichtigungen')}: ${items.length}">${icons.bell()}</button>
+    ${items.length ? html`<span class="hdr-notify__badge" aria-hidden="true">${items.length}</span>` : ''}
+    ${open && menuPanel({
+      align: 'right', width: 348, label: t('Benachrichtigungen'), body: notifyList(items)
+    })}
+  </div>`;
+}
+
+function notifyList(items) {
+  return html`<div class="notify__head">
+    <span>${t('Benachrichtigungen')}</span>
+    <span class="dd__meta">${t('seit')} ${data.meta.lastVisit}</span>
+  </div>
+  ${items.length
+    ? items.map(n => html`<button type="button" class="dd__item notify" role="menuitem"
+        data-act="${n.act}" data-val="${n.val}">
+        <span class="ampel ampel--${n.mark} notify__mark"></span>
+        <span class="notify__body">
+          <span class="notify__line">
+            <span class="notify__title">${t(n.title)}</span>
+            <span class="dd__meta">${n.meta}</span>
+          </span>
+          <span class="notify__text">${n.text}</span>
+        </span>
+      </button>`)
+    : html`<p class="notify__none">${t('Nichts Offenes für Sie.')}</p>`}
+  <button type="button" class="dd__item notify__all" role="menuitem" data-act="tab" data-val="history">
+    <span>${t('Alle Änderungen anzeigen')}</span>${icons.arrowRight()}
+  </button>`;
 }
 
 /**

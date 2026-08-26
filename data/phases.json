@@ -8,18 +8,18 @@
     { "id": "6", "label": "6 Bewirtschaftung", "short": "6 Bewirtschaftung", "sub": "61–63", "family": "cyan" }
   ],
   "sub": {
-    "11": { "code": "11", "label": "11 Strat. Planung", "shortLabel": "Strat. Planung", "main": "1", "family": "neutral" },
-    "21": { "code": "21", "label": "21 Machbarkeit", "shortLabel": "Machbarkeit", "main": "2", "family": "info" },
-    "22": { "code": "22", "label": "22 Auswahlverfahren", "shortLabel": "Auswahlverfahren", "main": "2", "family": "info" },
-    "31": { "code": "31", "label": "31 Vorprojekt", "shortLabel": "Vorprojekt", "main": "3", "family": "ok" },
-    "32": { "code": "32", "label": "32 Bauprojekt", "shortLabel": "Bauprojekt", "main": "3", "family": "ok" },
-    "33": { "code": "33", "label": "33 Bewilligungsverf.", "shortLabel": "Bewilligungsverf.", "main": "3", "family": "ok" },
-    "41": { "code": "41", "label": "41 Ausschreibung", "shortLabel": "Ausschreibung", "main": "4", "family": "warn" },
-    "51": { "code": "51", "label": "51 Ausführungsproj.", "shortLabel": "Ausf.-projekt", "main": "5", "family": "violet" },
-    "52": { "code": "52", "label": "52 Ausführung", "shortLabel": "Ausführung", "main": "5", "family": "violet" },
-    "53": { "code": "53", "label": "53 Inbetriebnahme", "shortLabel": "Inbetriebnahme", "main": "5", "family": "violet" },
-    "61": { "code": "61", "label": "61 Betrieb", "shortLabel": "Betrieb", "main": "6", "family": "cyan" },
-    "62": { "code": "62", "label": "62 Überwachung", "shortLabel": "Überwachung", "main": "6", "family": "cyan" },
-    "63": { "code": "63", "label": "63 Erhaltung", "shortLabel": "Erhaltung", "main": "6", "family": "cyan" }
+    "11": { "code": "11", "label": "11 Strategische Planung", "main": "1", "family": "neutral" },
+    "21": { "code": "21", "label": "21 Machbarkeit", "main": "2", "family": "info" },
+    "22": { "code": "22", "label": "22 Auswahlverfahren", "main": "2", "family": "info" },
+    "31": { "code": "31", "label": "31 Vorprojekt", "main": "3", "family": "ok" },
+    "32": { "code": "32", "label": "32 Bauprojekt", "main": "3", "family": "ok" },
+    "33": { "code": "33", "label": "33 Bewilligungsverfahren", "main": "3", "family": "ok" },
+    "41": { "code": "41", "label": "41 Ausschreibung", "main": "4", "family": "warn" },
+    "51": { "code": "51", "label": "51 Ausführungsprojekt", "main": "5", "family": "violet" },
+    "52": { "code": "52", "label": "52 Ausführung", "main": "5", "family": "violet" },
+    "53": { "code": "53", "label": "53 Inbetriebnahme", "main": "5", "family": "violet" },
+    "61": { "code": "61", "label": "61 Betrieb", "main": "6", "family": "cyan" },
+    "62": { "code": "62", "label": "62 Überwachung", "main": "6", "family": "cyan" },
+    "63": { "code": "63", "label": "63 Erhaltung", "main": "6", "family": "cyan" }
   }
 }

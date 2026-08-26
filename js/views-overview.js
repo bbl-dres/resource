@@ -14,7 +14,7 @@ import {
   html, raw, icons, pageHeader, pageActions, toolbar, activeFilterRow,
   timeControls, columnChart, noResults, ampelLegend,
   legendBlock, legendItem, attr,
-  tokenPx, yearRule, pinCls, pinLeft, sortableHead
+  tokenPx, yearRule, pinCls, pinLeft, sortableHead, changeProject
 } from './ui.js';
 
 import { fittingColumns, column } from './columns.js';
@@ -45,7 +45,6 @@ function utilisationChartRows() {
 
 export function renderLanding() {
   const tot = totals();
-  const k = kpis();
   const ms = milestoneStats();
   const grossCap = data.people.reduce((a, p) => a + p.employment, 0);
   const overPeople = data.people.filter(p => personLoad(p.id, 0) > 100);
@@ -227,18 +226,16 @@ function recentChangesBlock() {
     <h2 class="changes__title">${t('Letzte Änderungen')}
       <span>· ${t('seit letztem Besuch')}, ${data.meta.lastVisit}</span></h2>
     <div class="table-card">
-      <div class="chg chg--head">
+      <div class="log log--changes log--head">
         <span>${t('Projekt')}</span><span>${t('Feld')}</span><span>${t('Person')}</span>
         <span>${t('Änderung')}</span><span>${t('Geändert')}</span>
       </div>
-      ${rows.map((c, i) => html`<div class="chg ${i % 2 === 1 ? 'is-zebra' : ''}">
-        <span class="chg__project">${c.projectId
-          ? html`<button type="button" class="linkbtn" data-act="open-project" data-val="${c.projectId}">${c.projectLabel}</button>`
-          : c.projectLabel}</span>
+      ${rows.map((c, i) => html`<div class="log log--changes ${i % 2 === 1 ? 'is-zebra' : ''}">
+        <span class="log__project">${changeProject(c)}</span>
         <span>${t(c.field)}</span>
         <span>${c.landingActor ?? c.actor}</span>
-        <span class="chg__change">${c.summary ?? c.change}</span>
-        <span class="chg__date">${c.dateLabel}</span>
+        <span class="log__change">${c.summary ?? c.change}</span>
+        <span class="log__date">${c.dateLabel}</span>
       </div>`)}
     </div>
     <button type="button" class="more-link" data-act="tab" data-val="history">
@@ -331,7 +328,7 @@ function gridLayout() {
 function droppedNote(hidden) {
   if (!hidden.length) return '';
   return html`<p class="dropped-note">
-    ${icons.info(14)}
+    ${icons.info()}
     ${hidden.length} ${t(hidden.length === 1 ? 'Spalte ausgeblendet' : 'Spalten ausgeblendet')},
     ${t('das Fenster ist zu schmal')}: ${hidden.map(c => t(c.label)).join(', ')}.
   </p>`;
@@ -339,7 +336,7 @@ function droppedNote(hidden) {
 
 /** How much width the card actually has, before it is in the DOM to measure. */
 function cardWidth() {
-  return Math.min(1440, document.documentElement.clientWidth) - 2 * tokenPx('--space-12');
+  return Math.min(1440, document.documentElement.clientWidth) - 2 * tokenPx('--shell-pad-x');
 }
 
 function pensumGrid() {
@@ -482,7 +479,7 @@ const CELL_BODY = {
   },
 
   ampel: (p) => {
-    const a = ampel(p.leadId, 0);
+    const a = ampel(p.leadId);
     return html`<span class="ampel ampel--${a.key}" role="img" aria-label="${a.title}" title="${a.title}"></span>`;
   },
 
@@ -518,7 +515,7 @@ function columnHeader(tpl, sticky, cols) {
         if (!col.sort) {
           return html`<span class="pcell--text ${col.key === 'ampel' ? 'pcell--ampelhead' : ''} ${pinCls(sticky, col.key, extra)}"
               style="${pinLeft(sticky, col.key)}"
-              title="${col.key === 'ampel' ? t('Auslastung der Projektleitung im laufenden Quartal') : ''}"
+              title="${col.key === 'ampel' ? t('Höchste Auslastung der Projektleitung im sichtbaren Zeitraum') : ''}"
             >${headLabel(col)}</span>`;
         }
         return sortHead(col.sort, headLabel(col), pin(sticky, col.key, extra));

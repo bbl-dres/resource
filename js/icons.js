@@ -43,12 +43,12 @@ export async function loadIcons() {
 }
 
 /**
- * Render an icon reference. `stroke` is scaled so a 14px icon keeps the same
- * optical weight as a 20px one — Lucide is drawn on a 24px grid at 2px.
+ * Render an icon reference. The sprite already carries stroke-width 2, which is
+ * right for every size the app uses (13–15px on Lucide's 24px grid); `stroke`
+ * overrides it for a size far outside that range, where 2px would read heavy.
  */
 export function icon(name, size = 16, { stroke, cls = '' } = {}) {
   if (!symbols.has(name)) return '';
-  const sw = stroke ?? (size <= 12 ? 2.4 : size <= 16 ? 2 : 1.75);
   return `<svg class="icon ${cls}" width="${size}" height="${size}" aria-hidden="true"
-    style="stroke-width:${sw}"><use href="#i-${name}"></use></svg>`;
+    ${stroke ? `style="stroke-width:${stroke}"` : ''}><use href="#i-${name}"></use></svg>`;
 }

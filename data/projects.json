@@ -394,7 +394,7 @@
         "phase": "11",
         "from": 0,
         "to": 2,
-        "label": "11 Strat. Planung",
+        "label": "11 Strategische Planung",
         "milestone": "MS1 Bedürfnis freigegeben, Q4/2026",
         "milestoneOpen": true
       },
@@ -593,7 +593,7 @@
         "phase": "33",
         "from": 5,
         "to": 7,
-        "label": "33 Bewilligungsverf."
+        "label": "33 Bewilligungsverfahren"
       },
       {
         "phase": "41",
@@ -746,7 +746,7 @@
         "phase": "51",
         "from": 5,
         "to": 7,
-        "label": "51 Ausführungsproj."
+        "label": "51 Ausführungsprojekt"
       },
       {
         "phase": "52",
@@ -810,7 +810,7 @@
         "phase": "51",
         "from": 6,
         "to": 8,
-        "label": "51 Ausführungsproj."
+        "label": "51 Ausführungsprojekt"
       }
     ]
   },
@@ -849,7 +849,7 @@
         "phase": "51",
         "from": 1,
         "to": 3,
-        "label": "51 Ausführungsproj."
+        "label": "51 Ausführungsprojekt"
       },
       {
         "phase": "52",
@@ -1053,7 +1053,7 @@
         "phase": "33",
         "from": 1,
         "to": 3,
-        "label": "33 Bewilligungsverf."
+        "label": "33 Bewilligungsverfahren"
       },
       {
         "phase": "41",
@@ -1065,7 +1065,7 @@
         "phase": "51",
         "from": 4,
         "to": 6,
-        "label": "51 Ausführungsproj."
+        "label": "51 Ausführungsprojekt"
       },
       {
         "phase": "52",
@@ -1110,7 +1110,7 @@
         "phase": "51",
         "from": 1,
         "to": 3,
-        "label": "51 Ausführungsproj."
+        "label": "51 Ausführungsprojekt"
       },
       {
         "phase": "52",
@@ -1559,7 +1559,7 @@
         "phase": "33",
         "from": 2,
         "to": 4,
-        "label": "33 Bewilligungsverf."
+        "label": "33 Bewilligungsverfahren"
       },
       {
         "phase": "41",
@@ -1571,7 +1571,7 @@
         "phase": "51",
         "from": 6,
         "to": 8,
-        "label": "51 Ausführungsproj."
+        "label": "51 Ausführungsprojekt"
       }
     ]
   },
@@ -1610,7 +1610,7 @@
         "phase": "33",
         "from": 2,
         "to": 4,
-        "label": "33 Bewilligungsverf."
+        "label": "33 Bewilligungsverfahren"
       },
       {
         "phase": "41",
@@ -1720,7 +1720,7 @@
         "phase": "33",
         "from": 0,
         "to": 2,
-        "label": "33 Bewilligungsverf."
+        "label": "33 Bewilligungsverfahren"
       },
       {
         "phase": "41",
@@ -1732,7 +1732,7 @@
         "phase": "51",
         "from": 3,
         "to": 5,
-        "label": "51 Ausführungsproj."
+        "label": "51 Ausführungsprojekt"
       },
       {
         "phase": "52",
@@ -1828,7 +1828,7 @@
         "phase": "51",
         "from": 3,
         "to": 5,
-        "label": "51 Ausführungsproj."
+        "label": "51 Ausführungsprojekt"
       },
       {
         "phase": "52",
@@ -1957,7 +1957,7 @@
         "phase": "51",
         "from": 3,
         "to": 5,
-        "label": "51 Ausführungsproj."
+        "label": "51 Ausführungsprojekt"
       },
       {
         "phase": "52",
@@ -2194,7 +2194,7 @@
         "phase": "33",
         "from": 5,
         "to": 7,
-        "label": "33 Bewilligungsverf."
+        "label": "33 Bewilligungsverfahren"
       },
       {
         "phase": "41",
@@ -2355,7 +2355,7 @@
         "phase": "51",
         "from": 2,
         "to": 4,
-        "label": "51 Ausführungsproj."
+        "label": "51 Ausführungsprojekt"
       },
       {
         "phase": "52",
@@ -2433,7 +2433,7 @@
         "phase": "51",
         "from": 0,
         "to": 2,
-        "label": "51 Ausführungsproj."
+        "label": "51 Ausführungsprojekt"
       },
       {
         "phase": "52",
@@ -2517,7 +2517,7 @@
         "phase": "51",
         "from": 1,
         "to": 3,
-        "label": "51 Ausführungsproj."
+        "label": "51 Ausführungsprojekt"
       },
       {
         "phase": "52",
@@ -2607,7 +2607,7 @@
         "phase": "51",
         "from": 1,
         "to": 3,
-        "label": "51 Ausführungsproj."
+        "label": "51 Ausführungsprojekt"
       },
       {
         "phase": "52",
@@ -2652,7 +2652,7 @@
         "phase": "51",
         "from": 2,
         "to": 4,
-        "label": "51 Ausführungsproj."
+        "label": "51 Ausführungsprojekt"
       },
       {
         "phase": "52",
@@ -2781,7 +2781,7 @@
         "phase": "33",
         "from": 1,
         "to": 3,
-        "label": "33 Bewilligungsverf."
+        "label": "33 Bewilligungsverfahren"
       },
       {
         "phase": "41",
@@ -2793,7 +2793,7 @@
         "phase": "51",
         "from": 5,
         "to": 7,
-        "label": "51 Ausführungsproj."
+        "label": "51 Ausführungsprojekt"
       },
       {
         "phase": "52",
@@ -2954,7 +2954,7 @@
         "phase": "33",
         "from": 5,
         "to": 7,
-        "label": "33 Bewilligungsverf."
+        "label": "33 Bewilligungsverfahren"
       },
       {
         "phase": "41",
@@ -3026,7 +3026,7 @@
         "phase": "51",
         "from": 2,
         "to": 4,
-        "label": "51 Ausführungsproj."
+        "label": "51 Ausführungsprojekt"
       },
       {
         "phase": "52",
@@ -3136,7 +3136,7 @@
         "phase": "51",
         "from": 0,
         "to": 2,
-        "label": "51 Ausführungsproj."
+        "label": "51 Ausführungsprojekt"
       },
       {
         "phase": "52",
@@ -3187,7 +3187,7 @@
         "phase": "33",
         "from": 4,
         "to": 6,
-        "label": "33 Bewilligungsverf."
+        "label": "33 Bewilligungsverfahren"
       },
       {
         "phase": "41",
@@ -3244,7 +3244,7 @@
         "phase": "33",
         "from": 5,
         "to": 7,
-        "label": "33 Bewilligungsverf."
+        "label": "33 Bewilligungsverfahren"
       },
       {
         "phase": "41",
@@ -3329,7 +3329,7 @@
         "phase": "33",
         "from": 3,
         "to": 5,
-        "label": "33 Bewilligungsverf."
+        "label": "33 Bewilligungsverfahren"
       },
       {
         "phase": "41",
@@ -3495,7 +3495,7 @@
         "phase": "51",
         "from": 6,
         "to": 8,
-        "label": "51 Ausführungsproj."
+        "label": "51 Ausführungsprojekt"
       }
     ]
   },
@@ -3630,7 +3630,7 @@
         "phase": "33",
         "from": 4,
         "to": 6,
-        "label": "33 Bewilligungsverf."
+        "label": "33 Bewilligungsverfahren"
       },
       {
         "phase": "41",
@@ -3708,7 +3708,7 @@
         "phase": "33",
         "from": 2,
         "to": 4,
-        "label": "33 Bewilligungsverf."
+        "label": "33 Bewilligungsverfahren"
       },
       {
         "phase": "41",
@@ -3720,7 +3720,7 @@
         "phase": "51",
         "from": 6,
         "to": 8,
-        "label": "51 Ausführungsproj."
+        "label": "51 Ausführungsprojekt"
       }
     ]
   },
@@ -3798,7 +3798,7 @@
         "phase": "33",
         "from": 2,
         "to": 4,
-        "label": "33 Bewilligungsverf."
+        "label": "33 Bewilligungsverfahren"
       },
       {
         "phase": "41",
@@ -3810,7 +3810,7 @@
         "phase": "51",
         "from": 5,
         "to": 7,
-        "label": "51 Ausführungsproj."
+        "label": "51 Ausführungsprojekt"
       },
       {
         "phase": "52",
@@ -3985,7 +3985,7 @@
         "phase": "51",
         "from": 1,
         "to": 3,
-        "label": "51 Ausführungsproj."
+        "label": "51 Ausführungsprojekt"
       },
       {
         "phase": "52",
@@ -4196,7 +4196,7 @@
         "phase": "33",
         "from": 6,
         "to": 8,
-        "label": "33 Bewilligungsverf."
+        "label": "33 Bewilligungsverfahren"
       }
     ]
   },
@@ -4247,7 +4247,7 @@
         "phase": "33",
         "from": 5,
         "to": 7,
-        "label": "33 Bewilligungsverf."
+        "label": "33 Bewilligungsverfahren"
       },
       {
         "phase": "41",
@@ -4292,7 +4292,7 @@
         "phase": "33",
         "from": 2,
         "to": 4,
-        "label": "33 Bewilligungsverf."
+        "label": "33 Bewilligungsverfahren"
       },
       {
         "phase": "41",
@@ -4304,7 +4304,7 @@
         "phase": "51",
         "from": 6,
         "to": 8,
-        "label": "51 Ausführungsproj."
+        "label": "51 Ausführungsprojekt"
       }
     ]
   },
@@ -4457,7 +4457,7 @@
         "phase": "33",
         "from": 4,
         "to": 6,
-        "label": "33 Bewilligungsverf."
+        "label": "33 Bewilligungsverfahren"
       },
       {
         "phase": "41",
@@ -4515,7 +4515,7 @@
         "phase": "33",
         "from": 4,
         "to": 6,
-        "label": "33 Bewilligungsverf."
+        "label": "33 Bewilligungsverfahren"
       },
       {
         "phase": "41",
@@ -4611,7 +4611,7 @@
         "phase": "11",
         "from": 0,
         "to": 2,
-        "label": "11 Strat. Planung"
+        "label": "11 Strategische Planung"
       },
       {
         "phase": "21",
@@ -4675,7 +4675,7 @@
         "phase": "33",
         "from": 1,
         "to": 3,
-        "label": "33 Bewilligungsverf."
+        "label": "33 Bewilligungsverfahren"
       },
       {
         "phase": "41",
@@ -4687,7 +4687,7 @@
         "phase": "51",
         "from": 4,
         "to": 6,
-        "label": "51 Ausführungsproj."
+        "label": "51 Ausführungsprojekt"
       },
       {
         "phase": "52",
@@ -4751,7 +4751,7 @@
         "phase": "33",
         "from": 6,
         "to": 8,
-        "label": "33 Bewilligungsverf."
+        "label": "33 Bewilligungsverfahren"
       }
     ]
   },
@@ -4784,7 +4784,7 @@
         "phase": "33",
         "from": 0,
         "to": 2,
-        "label": "33 Bewilligungsverf."
+        "label": "33 Bewilligungsverfahren"
       },
       {
         "phase": "41",
@@ -4796,7 +4796,7 @@
         "phase": "51",
         "from": 3,
         "to": 5,
-        "label": "51 Ausführungsproj."
+        "label": "51 Ausführungsprojekt"
       },
       {
         "phase": "52",
@@ -5046,7 +5046,7 @@
         "phase": "33",
         "from": 4,
         "to": 6,
-        "label": "33 Bewilligungsverf."
+        "label": "33 Bewilligungsverfahren"
       },
       {
         "phase": "41",
@@ -5142,7 +5142,7 @@
         "phase": "33",
         "from": 3,
         "to": 5,
-        "label": "33 Bewilligungsverf."
+        "label": "33 Bewilligungsverfahren"
       },
       {
         "phase": "41",

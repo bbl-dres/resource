@@ -67,7 +67,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 
 /* Numbers are tabular everywhere — a system rule, not an option. */
 .kpi__value, .pcell, .capband__value, .barlist__value, .colchart__val,
-.log__date, .chg__date, .log__value, .sorthead__label, .capband__cell,
+.log__date, .log__value, .sorthead__label, .capband__cell,
 .entry__metric, .minigrid__v { font-variant-numeric: tabular-nums; }
 
 /* ==========================================================================
@@ -91,7 +91,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 }
 .boot__spinner {
   width: 16px; height: 16px; border-radius: var(--radius-pill);
-  border: 2px solid var(--color-border-strong); border-top-color: var(--color-accent);
+  border: 2px solid var(--color-border-rule); border-top-color: var(--color-accent);
   animation: spin var(--dur-spin) linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
@@ -161,7 +161,48 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .hdr-btn--icon { width: var(--control-height-lg); padding: 0; justify-content: center; color: var(--color-brand-fg-muted); }
 .hdr-btn--icon:hover { color: var(--color-brand-fg); }
 
-.hdr-notify { position: relative; flex: 0 0 auto; }
+/* .dd already supplies the positioning context the badge anchors to. */
+.hdr-notify { flex: 0 0 auto; }
+
+/*
+ * A notification row is wider than a menu item: a mark, two lines of text and a
+ * date. It keeps .dd__item's hover, focus and press states — only the inside
+ * differs — so the panel stays one system.
+ */
+/* .dd__item centres its children and is declared later, so this needs the
+   extra class to win — a two-line row must hang its mark on the title. */
+.dd__item.notify {
+  align-items: flex-start; gap: var(--space-6); padding: var(--space-6) var(--space-5);
+  border-radius: 0;
+}
+.notify + .notify { border-top: var(--border-hairline) solid var(--color-border-subtle); }
+.notify__mark { margin-top: 5px; }   /* optical centre of the title line */
+.notify__mark { flex: 0 0 auto; }
+.notify__body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+/* Title and date share a line so the message below gets the panel's full width. */
+.notify__line {
+  display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-5);
+}
+.notify__title {
+  font-weight: var(--font-semibold); color: var(--color-text-strong);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.notify__text { color: var(--color-text-secondary); font-size: var(--text-sm); white-space: normal; }
+.notify__head {
+  display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-5);
+  padding: var(--space-3) var(--space-5) var(--space-5);
+  font-size: var(--text-sm); font-weight: var(--font-semibold); color: var(--color-text-muted);
+}
+.notify__none {
+  margin: 0; padding: var(--space-8) var(--space-5);
+  color: var(--color-text-muted); text-align: center;
+}
+.notify__all {
+  margin-top: var(--space-3); border-top: var(--border-hairline) solid var(--color-border);
+  border-radius: 0 0 var(--radius) var(--radius);
+  color: var(--color-text-link);
+}
+.notify__all > span { flex: 1; }
 .hdr-notify__badge {
   position: absolute; top: -6px; right: -6px;
   display: inline-flex; align-items: center; justify-content: center;
@@ -251,7 +292,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
   background: var(--color-surface);
   border-bottom: var(--border-hairline) solid var(--color-border);
 }
-.crumbbar .crumbs { min-height: 36px; }
+.crumbbar .crumbs { min-height: var(--control-height-xl); }
 
 .shell-footer {
   margin-top: auto;
@@ -291,9 +332,14 @@ h1, h2, h3,
 .page-title, .entry__title, .card__title, .bi-card__title, .changes__title,
 .modal__title, .kpi__value, .sheet__title { line-height: var(--leading-snug); }
 
+/* Below ~20px the correction is under a fifth of a pixel per character and
+   buys nothing but an inconsistency, so only the two top steps carry it. */
+.page-title { letter-spacing: var(--tracking-h2); }
+.modal__title, .kpi__value { letter-spacing: var(--tracking-h3); }
+
 .page-title {
   font-size: var(--text-2xl); font-weight: var(--font-semibold);
-  color: var(--color-text-strong); letter-spacing: var(--tracking-h2);
+  color: var(--color-text-strong);
 }
 .page-header__actions { display: flex; align-items: center; gap: var(--space-5); flex: 0 0 auto; }
 
@@ -383,7 +429,6 @@ h1, h2, h3,
   color: var(--color-text-muted); cursor: not-allowed;
 }
 
-.btn--icon { padding: 0 var(--space-5); color: var(--color-text-secondary); }
 .btn--square { width: var(--control-height); height: var(--control-height); padding: 0; justify-content: center; }
 .toolbar .btn, .timebar .btn, .sheetbar .btn { height: var(--control-height-lg); }
 .timebar .btn--square { width: var(--control-height-lg); height: var(--control-height-lg); }
@@ -436,8 +481,6 @@ h1, h2, h3,
   display: inline-flex; align-items: center; gap: 4px;
 }
 .linkbtn:hover { color: var(--color-text-link-hover); }
-.linkbtn--danger { color: var(--color-danger-solid); }
-.linkbtn--danger:hover { color: var(--color-danger-fg); }
 
 .switch {
   position: relative; flex: 0 0 auto;
@@ -529,7 +572,7 @@ h1, h2, h3,
   background: transparent; color: var(--color-text);
   font-size: var(--text-base); text-align: left; cursor: pointer;
 }
-.dd__item > span:first-child:not(.dd__tickbox) { flex: 1; min-width: 0; }
+.dd__item > span:first-child:not(.dd__tickbox):not(.notify__mark) { flex: 1; min-width: 0; }
 .dd__item:hover { background: var(--color-surface-hover); }
 .dd__item.is-checked:hover { background: var(--blue-100); }
 .dd__item.is-checked {
@@ -665,7 +708,7 @@ h1, h2, h3,
 
 .entry {
   display: flex; flex-direction: column; gap: var(--space-7); text-align: left;
-  padding: var(--space-11);
+  padding: var(--space-10);
   border: 0; border-radius: var(--radius-lg); background: var(--color-surface);
   cursor: pointer;
 }
@@ -721,7 +764,8 @@ h1, h2, h3,
  * whether that means unfolding the block or opening the tab that holds it all.
  */
 .more-link {
-  align-self: start; min-height: 32px; padding: 0 var(--space-4);
+  align-self: start; min-height: var(--control-height);
+  margin-left: calc(var(--space-4) * -1); padding: 0 var(--space-4);
   border: 0; border-radius: var(--radius); background: none;
   color: var(--color-text-link); font: inherit; font-size: var(--text-base);
   cursor: pointer; text-align: left;
@@ -747,7 +791,7 @@ h1, h2, h3,
 .changes { display: flex; flex-direction: column; gap: var(--space-7); }
 .changes__title {
   font-size: var(--text-sub); font-weight: var(--font-semibold);
-  color: var(--color-text-strong); letter-spacing: var(--tracking-h3);
+  color: var(--color-text-strong);
 }
 .changes__title span {
   font-size: var(--text-base); font-weight: var(--font-regular);
@@ -759,27 +803,6 @@ h1, h2, h3,
   border-radius: var(--radius-lg); background: var(--color-surface); overflow: hidden;
   box-shadow: var(--shadow-raised);
 }
-
-.chg {
-  display: grid;
-  grid-template-columns:
-    minmax(0, 1.6fr) minmax(0, 120px) minmax(0, 140px) minmax(0, 1.4fr) minmax(0, 110px);
-  align-items: center; gap: var(--space-6);
-  min-height: var(--row-height-list); padding: var(--space-4) var(--space-8);
-  border-top: var(--border-hairline) solid var(--color-border);
-  font-size: var(--text-base);
-}
-.chg--head {
-  min-height: 40px; border-top: 0; background: var(--color-surface-frame);
-  font-size: var(--text-sm); font-weight: var(--font-semibold); color: var(--color-text-muted);
-}
-.chg.is-zebra { background: var(--color-surface-alt); }
-/* Six columns wide, so the row needs a way to hold the eye across them. */
-.chg:hover:not(.chg--head) { background: var(--color-surface-hover); }
-.chg__change { color: var(--color-text-secondary); }
-.chg__date { color: var(--color-text-secondary); }
-.chg__project { min-width: 0; }
-.chg__project .linkbtn { font-size: var(--text-btn); font-weight: var(--font-regular); }
 
 /* ==========================================================================
    8 · Pensum grid
@@ -872,7 +895,7 @@ h1, h2, h3,
 
 .prow--head {
   min-height: 30px; --row-bg: var(--color-surface);
-  border-bottom: var(--border-hairline) solid var(--color-border-strong);
+  border-bottom: var(--border-hairline) solid var(--color-border-rule);
   font-size: var(--text-sm); font-weight: var(--font-semibold); color: var(--color-text-secondary);
 }
 .prow > .pcell:first-child,
@@ -904,7 +927,7 @@ h1, h2, h3,
 .pgrouphead { margin: 0; padding-bottom: var(--space-6); font-weight: inherit; }
 .pgrouphead__toggle {
   display: flex; align-items: center; gap: var(--space-5);
-  width: 100%; min-height: 32px;
+  width: 100%; min-height: var(--control-height);
   border: 0; padding: 0 var(--space-4); border-radius: var(--radius);
   background: none; cursor: pointer; text-align: left;
 }
@@ -1042,7 +1065,7 @@ h1, h2, h3,
 .prow--sum, .prow--foot, .prow--load { --row-bg: var(--color-surface-frame); }
 .prow--sum {
   min-height: var(--row-height-sum);
-  border-top: var(--border-hairline) solid var(--color-border-strong);
+  border-top: var(--border-hairline) solid var(--color-border-rule);
   font-size: var(--text-base); font-weight: var(--font-semibold); color: var(--color-text-strong);
 }
 .prow--foot { min-height: 30px; font-size: var(--text-sm); color: var(--color-text-secondary); }
@@ -1128,7 +1151,7 @@ h1, h2, h3,
 .legend__item { display: inline-flex; align-items: center; gap: var(--space-3); }
 .legend__swatch {
   width: 11px; height: 11px; flex: 0 0 auto;
-  border: var(--border-hairline) solid var(--color-border-strong);
+  border: var(--border-hairline) solid var(--color-border-rule);
 }
 .legend__swatch.is-nolead { background: var(--pattern-no-lead); border-color: var(--color-warn-solid); }
 .legend__swatch.is-delay { background: var(--pattern-delay); border-color: var(--color-danger-solid); }
@@ -1177,8 +1200,6 @@ h1, h2, h3,
   border: var(--border-hairline) solid; border-radius: var(--radius);
   font-size: var(--text-sm); line-height: var(--leading-compact); font-weight: var(--font-semibold);
 }
-.pop__warn.is-over { background: var(--color-danger-bg-subtle); border-color: var(--color-danger-border-subtle); color: var(--color-danger-fg); }
-.pop__warn.is-ok   { background: var(--color-ok-bg-subtle);     border-color: var(--color-ok-border);            color: var(--color-ok-fg); }
 .pop__warn.is-none { background: var(--color-warn-bg-subtle);   border-color: var(--color-warn-border);          color: var(--color-warn-fg); }
 
 .pop__reason { display: block; margin-top: var(--space-5); }
@@ -1219,7 +1240,7 @@ h1, h2, h3,
 .modal__kicker { font-size: var(--text-sm); font-weight: var(--font-semibold); color: var(--color-text-muted); }
 .modal__title {
   margin-top: var(--space-4); font-size: var(--text-xl); font-weight: var(--font-semibold);
-  color: var(--color-text-strong); letter-spacing: var(--tracking-h3);
+  color: var(--color-text-strong);
 }
 .modal__close {
   display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto;
@@ -1239,9 +1260,11 @@ h1, h2, h3,
 .minigrid { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: var(--space-2); }
 .minigrid__col { display: flex; flex-direction: column; gap: var(--space-2); text-align: center; }
 .minigrid__q { font-size: var(--text-xs); font-weight: var(--font-semibold); color: var(--color-text-muted); }
-.minigrid__q span { color: var(--color-text-subtle); font-weight: var(--font-regular); }
+/* Live text, so it clears AA; --color-text-subtle is 2.54:1 and belongs to
+   disabled items, which the contrast rules exempt. */
+.minigrid__q span { color: var(--color-text-muted); font-weight: var(--font-regular); }
 .minigrid__v {
-  display: flex; align-items: center; justify-content: center; height: 34px;
+  display: flex; align-items: center; justify-content: center; height: var(--control-height-lg);
   border: var(--border-hairline) solid var(--color-border);
   border-radius: var(--radius-sm);
   font-size: var(--text-base); font-weight: var(--font-semibold);
@@ -1391,7 +1414,7 @@ h1, h2, h3,
 .gantt__axis {
   min-height: var(--row-height);
   background: var(--color-surface);
-  border-bottom: var(--border-hairline) solid var(--color-border-strong);
+  border-bottom: var(--border-hairline) solid var(--color-border-rule);
 }
 .gantt__axislabel {
   display: flex; align-items: center; padding: 0 var(--space-6);
@@ -1470,7 +1493,7 @@ h1, h2, h3,
   padding: 1px var(--space-3); border-radius: var(--radius-pill);
   background: var(--color-brand); color: var(--color-text-inverse);
   font-size: var(--text-2xs); font-weight: var(--font-bold);
-  letter-spacing: 0.02em; white-space: nowrap;
+  letter-spacing: var(--tracking-caption); white-space: nowrap;
 }
 
 .gantt__row { align-items: center; min-height: var(--row-height); }
@@ -1569,7 +1592,7 @@ h1, h2, h3,
 
 .gantt__rail {
   grid-row: 1; align-self: center; z-index: var(--z-base);
-  height: 1px; border-top: 2px dashed var(--color-border-strong);
+  height: 1px; border-top: 2px dashed var(--color-border-rule);
 }
 .gantt__railcaption {
   grid-row: 1; align-self: center; z-index: var(--z-raised);
@@ -1654,7 +1677,6 @@ h1, h2, h3,
   border-left: var(--border-hairline) solid var(--color-border);
   font-weight: var(--font-regular); color: var(--color-text-muted); font-size: var(--text-sm);
 }
-.capband__note { font-size: var(--text-sm); color: var(--color-text-muted); }
 
 .colchart { display: flex; flex-direction: column; gap: var(--space-4); }
 .colchart__plot { position: relative; height: var(--chart-h, 150px); }
@@ -1699,14 +1721,23 @@ h1, h2, h3,
    13 · Change log
    ========================================================================== */
 
+/*
+ * One row system for both change lists — the five recent entries on the landing
+ * page and the full history tab. Only the column set differs.
+ */
 .log {
-  display: grid;
-  grid-template-columns:
-    minmax(0, 110px) minmax(0, 150px) minmax(0, 1.4fr) minmax(0, 140px) minmax(0, 1.2fr) minmax(0, 150px);
-  align-items: center; gap: var(--space-6);
+  display: grid; align-items: center; gap: var(--space-6);
   min-height: var(--row-height-list); padding: var(--space-4) var(--space-8);
   border-top: var(--border-hairline) solid var(--color-border-subtle);
   font-size: var(--text-base);
+}
+.log--history {
+  grid-template-columns:
+    minmax(0, 110px) minmax(0, 150px) minmax(0, 1.4fr) minmax(0, 140px) minmax(0, 1.2fr) minmax(0, 150px);
+}
+.log--changes {
+  grid-template-columns:
+    minmax(0, 1.6fr) minmax(0, 120px) minmax(0, 140px) minmax(0, 1.4fr) minmax(0, 110px);
 }
 .log--head {
   min-height: 40px; border-top: 0; background: var(--color-surface-frame);
@@ -1849,7 +1880,7 @@ h1, h2, h3,
 .sheet__gantt .gantt__track { align-items: center; }
 
 /* The plan closes on the same figure the screen shows beneath it. */
-.sheet__gantt .gantt__row--load { border-top: 1px solid var(--color-border-strong); margin-top: 4px; }
+.sheet__gantt .gantt__row--load { border-top: 1px solid var(--color-border-rule); margin-top: 4px; }
 .sheet__gantt .gantt__track--load {
   display: grid; grid-template-columns: repeat(var(--gantt-cols, 8), minmax(0, 1fr));
 }
@@ -1887,7 +1918,7 @@ h1, h2, h3,
 .sheet__sub { margin-top: 3px; font-size: var(--sheet-lead); color: var(--color-text-secondary); }
 .sheet__meta {
   display: flex; flex-direction: column; flex: 0 0 auto; text-align: right;
-  font-size: var(--sheet-meta); line-height: 1.6; color: var(--color-text-secondary);
+  font-size: var(--sheet-text); line-height: var(--leading-relaxed); color: var(--color-text-secondary);
   white-space: nowrap;
 }
 
@@ -1899,7 +1930,7 @@ h1, h2, h3,
   font-size: var(--text-xs);
 }
 .sheet__row--head {
-  min-height: var(--target-min); border-bottom: 1px solid var(--color-border-strong);
+  min-height: var(--target-min); border-bottom: 1px solid var(--color-border-rule);
   font-size: var(--sheet-text); font-weight: var(--font-semibold); color: var(--color-text-muted);
 }
 .sheet__id { padding-left: 8px; color: var(--color-text-muted); font-variant-numeric: tabular-nums; }
@@ -1932,7 +1963,7 @@ h1, h2, h3,
 .sheet__row--more { border-bottom: 0; font-size: var(--sheet-text); color: var(--color-text-muted); font-style: italic; }
 .sheet__row--more span { padding-left: 8px; }
 .sheet__row--sum, .sheet__row--load {
-  border-top: 1px solid var(--color-border-strong); border-bottom: 0;
+  border-top: 1px solid var(--color-border-rule); border-bottom: 0;
   font-weight: var(--font-semibold);
 }
 .sheet__row--foot { border-bottom: 0; color: var(--color-text-secondary); }
@@ -1949,7 +1980,7 @@ h1, h2, h3,
   margin-top: var(--space-8);
   background: var(--color-surface-frame);
   font-weight: var(--font-bold); color: var(--color-text-strong);
-  border-top: var(--border-hairline) solid var(--color-border-strong);
+  border-top: var(--border-hairline) solid var(--color-border-rule);
 }
 .sheet__row--head + .sheet__row--group { margin-top: 0; }
 .sheet__groupcount {
@@ -1990,7 +2021,7 @@ h1, h2, h3,
 .sheet__foot {
   display: flex; align-items: center; justify-content: space-between; gap: 16px;
   margin-top: auto; padding-top: 8px;
-  border-top: 1px solid var(--color-border-strong);
+  border-top: 1px solid var(--color-border-rule);
   font-size: var(--sheet-text); color: var(--color-text-muted);
 }
 
@@ -1998,19 +2029,10 @@ h1, h2, h3,
    16 · Empty state, narrow notice, toast
    ========================================================================== */
 
-.narrow-note {
-  display: flex; flex-direction: column; gap: var(--space-5);
-  padding: var(--space-11);
-  border: 1px dashed var(--color-border-strong); border-radius: var(--radius-lg);
-  background: var(--color-surface); color: var(--color-text-secondary);
-}
-.narrow-note__lead { font-size: var(--text-btn); font-weight: var(--font-semibold); color: var(--color-text-strong); }
-.narrow-note__actions { display: flex; flex-wrap: wrap; gap: var(--space-4); margin-top: var(--space-2); }
-
 .empty {
   display: flex; flex-direction: column; align-items: center; gap: var(--space-5);
   padding: var(--space-13); text-align: center;
-  border: var(--border-hairline) dashed var(--color-border-strong); border-radius: var(--radius-lg);
+  border: var(--border-hairline) dashed var(--color-border-rule); border-radius: var(--radius-lg);
   background: var(--color-surface); color: var(--color-text-muted);
 }
 

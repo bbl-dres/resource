@@ -276,7 +276,7 @@ const METHOD = [
   ['Auslastung',
    'Bedarf des Gesamtportfolios abzüglich extern beauftragter Leistung, geteilt durch Kapazität netto. Die Zahl beschreibt immer die ganze Abteilung — auch wenn ein Filter gesetzt ist, denn Kapazität lässt sich nicht filtern.'],
   ['Ampel',
-   'Auslastung der Projektleitung gegen die eigene Anstellung im laufenden Quartal. Die Form trägt die Aussage, damit sie auch auf einer Fotokopie lesbar bleibt.'],
+   'Höchste Auslastung der Projektleitung gegen die eigene Anstellung im dargestellten Zeitraum. Die Form trägt die Aussage, damit sie auch auf einer Fotokopie lesbar bleibt.'],
   ['Blaustufen',
    'Sie kodieren die Grösse eines Pensums, nicht seinen Status. Rot und das Dreieck ▲ kennzeichnen Überlast.']
 ];
@@ -356,10 +356,10 @@ function sheetColumns(sheet) {
  * One project's value for a lead column, already formatted for paper. Most
  * columns are the registry's plain text; only these three draw something.
  */
-function sheetCell(col, p) {
+function sheetCell(col, p, range) {
   switch (col.key) {
     case 'ampel': {
-      const a = ampel(p.leadId, 0);
+      const a = ampel(p.leadId, range);
       return html`<span class="ampel ampel--${a.key}" title="${a.title}"></span>`;
     }
     case 'target': return `${num(p.target)}${unitSuffix()}`;
@@ -513,7 +513,7 @@ function printSheet(sheet, report, { rows, all, block, page, total, last }) {
         const who = p.leadId ? data.peopleById[p.leadId] : null;   // only for the overload marker
         return html`<div class="sheet__row ${p.leadId ? '' : 'is-unassigned'}">
           ${lead.map(c => html`<span class="${c.key === 'title' ? 'sheet__project' : `sheet__lead ${c.cls ?? ''}`}"
-            >${sheetCell(c, p)}</span>`)}
+            >${sheetCell(c, p, { from: block[0], to: block.at(-1) })}</span>`)}
           ${block.map((q, i) => {
             const over = who && personUtilisation(p.leadId, q) > 100;
             return html`<span class="sheet__cell heat-${heatStep(cells[q])} ${yearBreak(quarters, i)}">${over && cells[q] > 0 ? '▲ ' : ''}${cells[q] ? num(cells[q]) : '–'}</span>`;

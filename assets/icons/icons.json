@@ -4,10 +4,7 @@
     "arrow-down-wide-narrow",
     "arrow-right",
     "arrow-up-narrow-wide",
-    "arrow-up-right",
     "bell",
-    "calendar-days",
-    "chart-gantt",
     "check",
     "chevron-down",
     "chevron-left",
@@ -17,14 +14,12 @@
     "external-link",
     "info",
     "layout-grid",
-    "list",
     "minus",
     "pencil",
     "plus",
     "search",
     "share-2",
     "triangle-alert",
-    "users",
     "x"
   ]
 }

@@ -19,12 +19,13 @@
   --grey-100: #f3f4f6;
   --line-subtle: #e3e9f3;   /* 1.18:1 — grid hairlines */
   --line:        #ced3dd;   /* 1.45:1 — dividers and card edges */
-  --line-strong: #a4a8b0;   /* 2.30:1 — outlines that identify a control */
+  --line-rule:   #a4a8b0;   /* structural rules — table head, totals, sheet     */
+  --line-strong: #83878f;   /* 3.18:1 on the page ground — control outlines,
+                               the level WCAG 1.4.11 asks of them            */
   --fill-chip:   #d9dee8;   /* 1.30:1 — a chip has to read as an object */
   --grey-200: #e5e7eb;
   --grey-300: #d1d5db;
   --grey-400: #9ca3af;
-  --grey-500: #6b7280;
   --grey-550: #636b7a;   /* the lightest grey that clears AA on white and on the page ground */
   --grey-600: #4b5563;
   --grey-700: #374151;
@@ -41,10 +42,8 @@
   --blue-100: #dbeafe;
   --blue-200: #c7d2fe;
   --blue-300: #93c5fd;
-  --blue-500: #3b82f6;
   --blue-600: #2563eb;
   --blue-700: #1d4ed8;
-  --blue-800: #1e40af;
 
   /* ==========================================================================
      3 · PRIMITIVES — "steel", a second blue-shifted neutral family
@@ -58,9 +57,7 @@
   --steel-125: #eef1f6;
   --steel-150: #edf1f7;
   --steel-200: #e7eef8;
-  --steel-250: #dbe3f5;
   --steel-300: #d6e3f3;
-  --steel-350: #d0d5dd;
   --steel-400: #c4d0e0;
   --steel-450: #c2d5ec;
   --steel-500: #9cb8de;
@@ -88,7 +85,6 @@
   --green-200: #bbf7d0;
   --green-400: #4ade80;
   --green-600: #16a34a;
-  --green-700: #15803d;
   --green-800: #166534;
 
   /* ==========================================================================
@@ -118,6 +114,7 @@
      ========================================================================== */
   --color-border-subtle:   var(--line-subtle);   /* inner grid column hairlines */
   --color-border:          var(--line);          /* default card / row divider  */
+  --color-border-rule:     var(--line-rule);     /* table head, totals, sheet   */
   --color-border-strong:   var(--line-strong);   /* inputs, buttons             */
   --color-border-emphasis: var(--grey-400);   /* 1.5px marker rings          */
   --color-border-contrast: var(--grey-900);   /* open / active menu button   */
@@ -145,7 +142,6 @@
   --color-brand-control-bg:            var(--alpha-white-10);
   --color-brand-control-bg-strong:     var(--alpha-white-12);
   --color-brand-control-border:        var(--alpha-white-22);
-  --color-brand-control-border-strong: var(--alpha-white-25);
 
   --color-accent:        var(--blue-600);
   --color-accent-fg:     var(--white);
@@ -182,7 +178,6 @@
   --color-ok-solid:     var(--green-600);
   --color-ok-bg-subtle: var(--green-50);
 
-  --color-info-border: var(--blue-300);
 
   --color-neutral-bg:     var(--grey-50);   /* greyscale 251 — the lightest */
   --color-neutral-fg:     var(--grey-600);
@@ -260,6 +255,7 @@
 
   --tracking-h2: -0.015em;
   --tracking-h3: -0.01em;
+  --tracking-caption: 0.02em;   /* 10px badges — tiny text set solid reads as a blur */
 
   /* ==========================================================================
      14 · Spacing
@@ -356,7 +352,7 @@
   --grid-col-ampel:     62px;
   --grid-col-id:        62px;
   --grid-col-title:     285px;   /* the floor; the column takes the slack */
-  --grid-col-phase:     128px;
+  --grid-col-phase:     152px;  /* «33 Bewilligungsverfahren» in full, 144px + padding */
   --grid-col-lead:      132px;
   --grid-col-portfolio: 110px;
   --grid-col-priority:  90px;
@@ -396,8 +392,7 @@
      fixed physical thing and does not scale with the viewport. Naming the
      scale keeps it reviewable next to the screen one.
      ========================================================================== */
-  --sheet-text:    10px;     /* column heads, footnotes, continuation note   */
-  --sheet-meta:    10.5px;   /* document metadata line                       */
+  --sheet-text:    10px;     /* column heads, footnotes, metadata line       */
   --sheet-lead:    11px;     /* sender block and subtitle                    */
   --sheet-title:   16px;     /* the document title                           */
   --color-paper:   var(--white);

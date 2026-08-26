@@ -56,10 +56,10 @@
       "fr": "1 Planification stratégique",
       "it": "1 Pianificazione strategica"
     },
-    "11 Strat. Planung": {
+    "11 Strategische Planung": {
       "en": "11 Strategic planning",
-      "fr": "11 Planif. stratégique",
-      "it": "11 Pian. strategica"
+      "fr": "11 Planification stratégique",
+      "it": "11 Pianificazione strategica"
     },
     "2 Vorstudien": {
       "en": "2 Preliminary studies",
@@ -91,7 +91,7 @@
       "fr": "32 Projet de l'ouvrage",
       "it": "32 Progetto dell'opera"
     },
-    "33 Bewilligungsverf.": {
+    "33 Bewilligungsverfahren": {
       "en": "33 Approval procedure",
       "fr": "33 Procédure d'autorisation",
       "it": "33 Procedura di autorizzazione"
@@ -116,7 +116,7 @@
       "fr": "5 Réalisation",
       "it": "5 Realizzazione"
     },
-    "51 Ausführungsproj.": {
+    "51 Ausführungsprojekt": {
       "en": "51 Detailed design",
       "fr": "51 Projet d'exécution",
       "it": "51 Progetto esecutivo"
@@ -310,11 +310,6 @@
       "en": "Utilisation",
       "fr": "Taux de charge",
       "it": "Grado di utilizzo"
-    },
-    "Auslastung der Projektleitung im laufenden Quartal": {
-      "en": "Project lead utilisation in the current quarter",
-      "fr": "Taux de charge de la direction de projet au trimestre en cours",
-      "it": "Grado di utilizzo della direzione del progetto nel trimestre corrente"
     },
     "Auslastung nach Person": {
       "en": "Utilisation by person",
@@ -1530,6 +1525,41 @@
       "en": "Remove assignment",
       "fr": "Retirer l'attribution",
       "it": "Revoca assegnazione"
+    },
+    "Höchste Auslastung der Projektleitung im sichtbaren Zeitraum": {
+      "en": "Highest workload of the project lead in the visible period",
+      "fr": "Charge maximale de la direction de projet sur la période affichée",
+      "it": "Carico massimo della direzione di progetto nel periodo visualizzato"
+    },
+    "Höchste Auslastung der Projektleitung gegen die eigene Anstellung im dargestellten Zeitraum. Die Form trägt die Aussage, damit sie auch auf einer Fotokopie lesbar bleibt.": {
+      "en": "Highest workload of the project lead against their own contract over the period shown. The shape carries the message so it stays legible on a photocopy.",
+      "fr": "Charge maximale de la direction de projet par rapport à son propre taux d'engagement sur la période affichée. La forme porte le message afin qu'il reste lisible sur une photocopie.",
+      "it": "Carico massimo della direzione di progetto rispetto al proprio grado di occupazione nel periodo rappresentato. La forma veicola il messaggio, così resta leggibile anche su una fotocopia."
+    },
+    "Überlast in": {
+      "en": "overload in",
+      "fr": "surcharge sur",
+      "it": "sovraccarico in"
+    },
+    "Quartalen": {
+      "en": "quarters",
+      "fr": "trimestres",
+      "it": "trimestri"
+    },
+    "Ihre Auslastung": {
+      "en": "Your workload",
+      "fr": "Votre charge",
+      "it": "Il vostro carico"
+    },
+    "seit": {
+      "en": "since",
+      "fr": "depuis",
+      "it": "dal"
+    },
+    "Nichts Offenes für Sie.": {
+      "en": "Nothing open for you.",
+      "fr": "Rien en attente pour vous.",
+      "it": "Nulla in sospeso per voi."
     }
   }
 }

@@ -12,7 +12,7 @@ import {
 import {
   html, raw, icons, pageHeader, pageActions, toolbar, activeFilterRow,
   columnChart, barList, kpiStrip, segmented,
-  tokenPx, yearRule, pinCls, pinLeft, sortableHead, attr, dropdown, menuRadio
+  tokenPx, yearRule, pinCls, pinLeft, sortableHead, attr, dropdown, menuRadio, changeProject
 } from './ui.js';
 
 /* =============================================================================
@@ -264,7 +264,7 @@ function portfolioCard() {
     .sort((a, b) => b.value - a.value);
   return biCard('portfolio', 'Bedarf nach Teilportfolio',
     `${data.quarters[0].label} · ${t('Pensum in %')}`,
-    barList(rows, { gap: 10 }), { wide: true });
+    barList(rows), { wide: true });
 }
 
 function creditYearCard() {
@@ -286,7 +286,7 @@ function creditPhaseCard() {
     .sort((a, b) => b.value - a.value);
   return biCard('kreditphase', 'Kredit nach SIA-Phase',
     `${t('Gesamt')} ${fmtMio(total)} CHF · ${t('gebundene Mittel')}`,
-    barList(rows, { gap: 10 }), { wide: true });
+    barList(rows), { wide: true });
 }
 
 /* =============================================================================
@@ -307,20 +307,18 @@ export function renderHistory() {
       ${activeFilterRow()}
 
       <section class="table-card">
-        <div class="log log--head">
+        <div class="log log--history log--head">
           <span>${t('Datum')}</span><span>${t('Person')}</span><span>${t('Projekt')}</span>
           <span>${t('Feld')}</span><span>${t('Änderung')}</span><span>${t('Wert')}</span>
         </div>
-        ${page.rows.length ? page.rows.map((c, i) => html`<div class="log ${i % 2 === 1 ? 'is-zebra' : ''}">
+        ${page.rows.length ? page.rows.map((c, i) => html`<div class="log log--history ${i % 2 === 1 ? 'is-zebra' : ''}">
           <span class="log__date">${c.dateLabel}</span>
           <span>${c.actor}</span>
-          <span class="log__project">${c.projectId
-            ? html`<button type="button" class="linkbtn" data-act="open-project" data-val="${c.projectId}">${c.projectLabel}</button>`
-            : c.projectLabel}</span>
+          <span class="log__project">${changeProject(c)}</span>
           <span><span class="fieldtag">${t(c.field)}</span></span>
           <span class="log__change">${t(c.change)}</span>
           <span class="log__value">${t(c.value)}</span>
-        </div>`) : html`<div class="log log--empty">${t('Keine Einträge im gesetzten Umfang.')}</div>`}
+        </div>`) : html`<div class="log log--history log--empty">${t('Keine Einträge im gesetzten Umfang.')}</div>`}
         ${logFoot(page)}
       </section>
     </div></div>`;

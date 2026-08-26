@@ -42,7 +42,7 @@ export const COLUMNS = [
   },
   {
     key: 'phase', label: 'SIA-Phase', flag: ['cols', 'phase'], sort: 'phase', width: '--grid-col-phase',
-    cls: 'pcell--phase', sheet: { w: [88, 112], cls: 'sheet__muted', label: 'SIA-Teilphase' },
+    cls: 'pcell--phase', sheet: { w: [124, 128], cls: 'sheet__muted', label: 'SIA-Teilphase' },
     xls: { type: 'text', width: 20 },
     text: p => t(phaseOf(p.phase).label)
   },
@@ -56,7 +56,7 @@ export const COLUMNS = [
     key: 'ampel', label: 'Ampel', flag: ['state', 'ampel'], sort: null, width: '--grid-col-ampel',
     cls: 'pcell--ampel', sheet: { w: [34, 38], cls: 'sheet__mark' }, xls: { type: 'text', width: 14 },
     // A coloured dot carries nothing in a spreadsheet, so it exports as its word.
-    text: p => t(ampel(p.leadId, 0).word)
+    text: p => t(ampel(p.leadId).word)
   },
   {
     key: 'portfolio', label: 'Teilportfolio', flag: ['cols', 'portfolio'], sort: 'portfolio',

@@ -365,17 +365,29 @@ export function heatStep(v) {
   return '4';
 }
 
-/** Traffic light for the row's project lead, based on the current quarter. */
-export function ampel(personId, q = 0) {
+/**
+ * Traffic light for the row's project lead: their worst quarter in the period
+ * the table is showing.
+ *
+ * The period matters. While this read quarter 0 alone and «Nur Überlast» spanned
+ * the whole plan, that filter kept 84 rows of which 29 showed a green or amber
+ * light — a filter contradicting the column beside it. Everything else in the
+ * tab (totals, chart, KPI) already reports on the visible window, so the light
+ * follows it too, and the filter below is now defined by the light.
+ */
+export function ampel(personId, range = windowQuarters()) {
   const person = data.peopleById[personId];
   if (!person) {
     return { key: 'none', word: 'ohne Projektleitung', title: 'Keine Projektleitung zugewiesen — keine Ampel' };
   }
-  const pct = personUtilisation(personId, q);
+  let peak = range.from;
+  for (let q = range.from + 1; q <= range.to; q++) {
+    if (personUtilisation(personId, q) > personUtilisation(personId, peak)) peak = q;
+  }
+  const pct = personUtilisation(personId, peak);
   const key = pct > 100 ? 'over' : pct >= 95 ? 'tight' : 'ok';
   const word = key === 'over' ? 'Überlast' : key === 'tight' ? 'knapp' : 'im Rahmen';
-  const label = data.quarters[q].label;
-  return { key, pct, word, title: `${person.name}: ${pct} % der Anstellung in ${label} — ${word}` };
+  return { key, pct, peak, word, title: `${person.name}: ${pct} % der Anstellung in ${data.quarters[peak].label} — ${word}` };
 }
 
 /**
@@ -392,6 +404,7 @@ export function phaseOf(subCode) {
 
 export function filteredProjects() {
   const q = state.search.trim().toLowerCase();
+  const range = state.overloadOnly ? windowQuarters() : null;
   let list = data.projects.filter(p => {
     if (state.phases.length && !state.phases.includes(p.phase[0])) return false;
     if (state.leads.length) {
@@ -399,11 +412,7 @@ export function filteredProjects() {
       if (!state.leads.includes(key)) return false;
     }
     if (state.portfolios.length && !state.portfolios.includes(p.portfolio)) return false;
-    if (state.overloadOnly) {
-      if (!p.leadId) return false;
-      const over = data.quarters.some((_, i) => personUtilisation(p.leadId, i) > 100);
-      if (!over) return false;
-    }
+    if (state.overloadOnly && ampel(p.leadId, range).key !== 'over') return false;
     if (q) {
       const lead = p.leadId ? data.peopleById[p.leadId].name : 'nicht zugewiesen';
       const hay = `${p.title} ${p.number} ${lead} ${p.kind}`.toLowerCase();
@@ -525,10 +534,13 @@ export function periodValue(values, period) {
  * Returned as an attribute fragment so a card can carry it without the view
  * having to spell the two flags out.
  */
+export function windowQuarters(cols = periods()) {
+  return { from: cols[0]?.quarters[0] ?? 0, to: cols.at(-1)?.quarters.at(-1) ?? 0 };
+}
+
 export function windowEdges(cols = periods()) {
-  const first = cols[0]?.quarters[0] ?? 0;
-  const last = cols.at(-1)?.quarters.at(-1) ?? 0;
-  return { before: first > 0, after: last < data.quarters.length - 1 };
+  const { from, to } = windowQuarters(cols);
+  return { before: from > 0, after: to < data.quarters.length - 1 };
 }
 
 /** How many quarters the window can still be stepped. */
@@ -657,6 +669,68 @@ export function toggleIn(key, id) {
 /* -----------------------------------------------------------------------------
    Derived: milestones
    -------------------------------------------------------------------------- */
+
+/**
+ * What the bell shows: the state of play addressed to the person signed in.
+ *
+ * Derived on every render and never stored, so the badge is this list's length
+ * and cannot disagree with the panel it opens. The hand-written summary it
+ * replaces had drifted from the data — it announced a moved gate that this
+ * lead does not have.
+ *
+ * The scope is deliberately personal. Across the division there are 59 late
+ * gates and 35 people over 100 %; a bell carrying those is a number, not a
+ * message. Three questions matter to one project lead: am I over my own
+ * contract, has a gate on one of my projects moved, and did somebody change my
+ * project while I was away.
+ */
+export function notifications() {
+  const me = data.meta.user.personId;
+  const mine = data.projects.filter(p => p.leadId === me);
+  const mineIds = new Set(mine.map(p => p.id));
+  const out = [];
+
+  const load = data.quarters.map((_, q) => personUtilisation(me, q));
+  const firstOver = load.findIndex(v => v > 100);
+  if (firstOver >= 0) {
+    out.push({
+      key: 'load', mark: 'over',
+      title: 'Ihre Auslastung',
+      text: `${load[firstOver]} % ${t('der Anstellung')} · ${t('Überlast in')} `
+        + `${load.filter(v => v > 100).length} ${t('Quartalen')}`,
+      meta: data.quarters[firstOver].label,
+      act: 'filter-lead', val: me
+    });
+  }
+
+  for (const m of data.milestones.items) {
+    if (!mineIds.has(m.projectId) || m.status === 'ok') continue;
+    out.push({
+      key: m.id, mark: 'tight',
+      title: `${m.code} ${data.milestoneCatalog[m.code]?.name ?? ''}`.trim(),
+      text: `${data.projectsById[m.projectId].title} · ${m.statusLabel}`,
+      meta: data.quarters[data.quarterIndex[m.forecast ?? m.plan]]?.label ?? '',
+      act: 'open-milestone', val: m.id
+    });
+  }
+
+  const since = isoDate(data.meta.lastVisit);
+  for (const c of data.changes) {
+    if (!mineIds.has(c.projectId) || c.actor === data.meta.user.name || c.date < since) continue;
+    out.push({
+      key: c.id, mark: 'none',
+      title: c.projectLabel,
+      text: `${c.actor} · ${t(c.field)}: ${t(c.change)}`,
+      meta: c.dateLabel,
+      act: 'open-project', val: c.projectId
+    });
+  }
+
+  return out;
+}
+
+/** «21.08.2026» as «2026-08-21», so change dates compare as plain strings. */
+const isoDate = (de) => String(de).split('.').reverse().join('-');
 
 export function milestones() {
   const projectIds = new Set(filteredProjects().map(p => p.id));
