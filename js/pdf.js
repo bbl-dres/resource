@@ -266,7 +266,7 @@ function linesOf(node) {
   const rects = range.getClientRects();
   if (rects.length <= 1) {
     const r = range.getBoundingClientRect();
-    return r.width ? [{ text: node.nodeValue, rect: r }] : [];
+    return r.width ? [{ text: node.nodeValue, rect: r, start: 0 }] : [];
   }
 
   const text = node.nodeValue;
@@ -281,7 +281,7 @@ function linesOf(node) {
     else if (Math.abs(r.top - top) > 1) {
       range.setStart(node, start);
       range.setEnd(node, i - 1);
-      out.push({ text: text.slice(start, i - 1), rect: range.getBoundingClientRect() });
+      out.push({ text: text.slice(start, i - 1), rect: range.getBoundingClientRect(), start });
       start = i - 1;
       top = r.top;
     }
@@ -289,7 +289,7 @@ function linesOf(node) {
   range.setStart(node, start);
   range.setEnd(node, text.length);
   const last = range.getBoundingClientRect();
-  if (last.width) out.push({ text: text.slice(start), rect: last });
+  if (last.width) out.push({ text: text.slice(start), rect: last, start });
   return out;
 }
 
@@ -358,29 +358,63 @@ function drawElement(el, page, origin) {
     for (const line of linesOf(node)) {
       const lx = line.rect.left - origin.left;
       const ly = baselineIn({ top: line.rect.top - origin.top, height: line.rect.height }, size);
-      let run = line.text;
-      if (run.includes(UP_TRIANGLE)) {
-        /* Draw the mark, then set the rest of the run after it. */
-        const s = size * 0.62;
-        const base = ly - s * 0.15;
-        page.shape([[lx, base], [lx + s, base], [lx + s / 2, base - s * 0.86]], colour, null, 0);
-        run = run.replace(UP_TRIANGLE, ' ');
+      const mark = line.text.indexOf(UP_TRIANGLE);
+      if (mark < 0) {
+        page.text(lx, ly, line.text, { size, bold, colour, width: line.rect.width });
+        continue;
       }
-      page.text(lx, ly, run, { size, bold, colour, width: line.rect.width });
+      /*
+       * The triangle is drawn, not set: WinAnsi has no room for it. Its box is
+       * measured off the document so the digits keep the gap the layout gave
+       * them — replacing the character with a space put them a third of an em
+       * too close.
+       */
+      const span = document.createRange();
+      span.setStart(node, line.start + mark);
+      span.setEnd(node, line.start + mark + 1);
+      const box = span.getBoundingClientRect();
+      const mx = box.left - origin.left;
+      const w = size * 0.72;
+      const h = size * 0.62;
+      const cx = mx + box.width / 2;
+      const base = ly - size * 0.06;
+      page.shape([[cx - w / 2, base], [cx + w / 2, base], [cx, base - h]], colour, null, 0);
+
+      const rest = line.text.slice(mark + 1);
+      const restX = box.right - origin.left;
+      page.text(restX, ly, rest, {
+        size, bold, colour, width: line.rect.right - box.right
+      });
     }
   }
 
   for (const kid of el.children) drawElement(kid, page, origin);
 }
 
-/** Every sheet in the preview, as one PDF file. */
+/**
+ * Every sheet in the preview, as one PDF file.
+ *
+ * The preview scale is lifted for the duration. Boxes are measured through it —
+ * getBoundingClientRect reports zoomed coordinates — but font sizes and border
+ * widths come from the computed style, which does not know about it. Walking a
+ * sheet shown at 43 % therefore drew 10px text onto a 43 %-size page, and an A0
+ * sheet came out as a heap.
+ */
 export function sheetsToPdf(sheets) {
-  const doc = createPdf();
-  for (const sheet of sheets) {
-    const box = sheet.getBoundingClientRect();
-    const page = pageStream(box.height);
-    drawElement(sheet, page, box);
-    doc.addPage(box.width, box.height, page.toString());
+  const mount = sheets[0]?.closest('.mount');
+  const zoom = mount?.style.getPropertyValue('--sheet-zoom');
+  if (mount) mount.style.setProperty('--sheet-zoom', '1');
+
+  try {
+    const doc = createPdf();
+    for (const sheet of sheets) {
+      const box = sheet.getBoundingClientRect();
+      const page = pageStream(box.height);
+      drawElement(sheet, page, box);
+      doc.addPage(box.width, box.height, page.toString());
+    }
+    return doc.build();
+  } finally {
+    if (mount) mount.style.setProperty('--sheet-zoom', zoom || '1');
   }
-  return doc.build();
 }
