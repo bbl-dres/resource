@@ -649,6 +649,27 @@ export function timeControls() {
    Footer + design notes
    -------------------------------------------------------------------------- */
 
+/**
+ * The prototype notice, acknowledged once per session.
+ *
+ * Over the page rather than in it, so dismissing it reflows nothing — and the
+ * shell carries its measured height as bottom padding while it is there, so it
+ * never covers the last row of a table.
+ */
+export function prototypeBar() {
+  if (state.noticeSeen) return '';
+  return html`<aside class="protobar" role="region" aria-label="${t('Hinweis')}">
+    <div class="wrap protobar__row">
+      <p class="protobar__text">
+        ${icons.info()}
+        <span><span class="protobar__lead">${t('Diese Anwendung ist ein Prototyp.')}</span>
+        ${t('Darstellung, Funktionalität und Inhalte dienen ausschliesslich der Demonstration; die verwendeten Daten sind fiktiv oder öffentlich zugänglich.')}</span>
+      </p>
+      <button type="button" class="btn" data-act="notice-ok">${icons.check()}${t('Verstanden')}</button>
+    </div>
+  </aside>`;
+}
+
 export function appFooter() {
   const m = data.meta;
   return html`<footer class="shell-footer"><div class="wrap shell-footer__inner">

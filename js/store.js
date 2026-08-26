@@ -72,6 +72,14 @@ const DEFAULT_STATE = {
   footDetails: false,
   bi: 'general',           // dashboard section, see VOCAB.bi
   zoom: 'fit',             // print preview, see VOCAB.zoom
+  /*
+   * The prototype notice, acknowledged for this browser session. Kept out of the
+   * URL: a shared link should not carry someone else's dismissal, and a reader
+   * who opens the app fresh is told once.
+   */
+  noticeSeen: (() => {
+    try { return sessionStorage.getItem('bbl-notice') === '1'; } catch { return false; }
+  })(),
   page: 1,                 // change log, 1-based
   pageSize: '25',          // see VOCAB.pageSize
   pSort: 'peak',           // person table: name | role | employment | projects | peak | q0…q7

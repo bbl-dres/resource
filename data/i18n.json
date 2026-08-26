@@ -1560,6 +1560,26 @@
       "en": "Workload and project lead editable · current quarter locked · changes are logged",
       "fr": "Charge et direction de projet modifiables · trimestre en cours verrouillé · modifications journalisées",
       "it": "Carico e direzione di progetto modificabili · trimestre corrente bloccato · modifiche registrate"
+    },
+    "Diese Anwendung ist ein Prototyp.": {
+      "en": "This application is a prototype.",
+      "fr": "Cette application est un prototype.",
+      "it": "Questa applicazione è un prototipo."
+    },
+    "Darstellung, Funktionalität und Inhalte dienen ausschliesslich der Demonstration; die verwendeten Daten sind fiktiv oder öffentlich zugänglich.": {
+      "en": "Presentation, functionality and content serve demonstration purposes only; the data used is fictitious or publicly available.",
+      "fr": "La présentation, les fonctionnalités et les contenus servent uniquement à la démonstration; les données utilisées sont fictives ou publiquement accessibles.",
+      "it": "Presentazione, funzionalità e contenuti servono unicamente a scopo dimostrativo; i dati utilizzati sono fittizi o pubblicamente accessibili."
+    },
+    "Verstanden": {
+      "en": "Understood",
+      "fr": "Compris",
+      "it": "Ho capito"
+    },
+    "Hinweis": {
+      "en": "Notice",
+      "fr": "Remarque",
+      "it": "Avviso"
     }
   }
 }

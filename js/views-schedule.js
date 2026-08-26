@@ -14,7 +14,7 @@ import {
   tokenPx, pinCls, pinLeft, ampelDot, droppedNote
 } from './ui.js';
 
-import { leadLayout } from './columns.js';
+import { leadLayout, titleWidth, alignCls } from './columns.js';
 
 /*
  * Below three quarters the axis stops being a plan, so the lead columns give
@@ -27,27 +27,18 @@ function ganttLayout() {
   const quarterW = tokenPx('--grid-quarter');
   const room = Math.min(tokenPx('--layout-width'), document.documentElement.clientWidth)
     - 2 * tokenPx('--shell-pad-x');
+  const cols = periods().length;
   const lay = leadLayout(columnSet(), {
-    room, axis: MIN_PERIODS * quarterW, widthOf: c => tokenPx(c.width)
+    room, axis: MIN_PERIODS * quarterW, widthOf: c => tokenPx(c.width),
+    titleW: titleWidth({ room, quarters: cols, px: tokenPx })
   });
 
   /*
-   * A wider window first lengthens the project name, up to the width at which
-   * the longest one fits — without this a 1920px screen showed every name in
-   * full in the table and truncated 29 of them here. Past that ceiling the
-   * surplus goes to the bars, which are what this grid is actually saying.
-   *
-   * The name is set to an exact width rather than a share: with two flexible
-   * tracks in one row they split the slack, and the frozen block would no
-   * longer be the width the capacity band below it is drawn to.
+   * Fixed widths throughout, and the bar track takes the rest. With two
+   * flexible tracks in one row they split the slack, and the frozen block would
+   * no longer be the width the capacity band below it is drawn to.
    */
-  const cols = periods().length;
-  const head = tokenPx('--grid-col-title-max') - tokenPx('--grid-col-title');
-  const extra = Math.max(0, Math.min(head, room - lay.width - cols * quarterW));
-  const parts = lay.parts.map((p, i) =>
-    (lay.shown[i].grow ? `${tokenPx(lay.shown[i].width) + extra}px` : p));
-
-  return { ...lay, width: lay.width + extra, tpl: [...parts, 'minmax(0, 1fr)'].join(' ') };
+  return { ...lay, tpl: [...lay.parts, 'minmax(0, 1fr)'].join(' ') };
 }
 
 
@@ -199,7 +190,7 @@ export function ganttLegend(cls = '') {
  * with no sort key is a label, not a control.
  */
 function leadHead(col, lay) {
-  const cls = `gantt__axislabel gantt__col--${col.key} ${pinCls(lay.sticky, col.key)}`;
+  const cls = `gantt__axislabel gantt__col--${col.key} ${alignCls(col)} ${pinCls(lay.sticky, col.key)}`;
   if (!col.sort) {
     return html`<span class="${cls}" style="${pinLeft(lay.sticky, col.key)}">${t(col.label)}</span>`;
   }
@@ -238,7 +229,7 @@ export function ganttRow(p, cols, lay) {
 
   return html`<div class="gantt__row ${rail}" style="grid-template-columns:${raw(lay.tpl)}">
     ${lay.shown.map(col => html`<div
-      class="gantt__rowlabel gantt__col--${col.key} ${pinCls(lay.sticky, col.key)}"
+      class="gantt__rowlabel gantt__col--${col.key} ${alignCls(col)} ${pinCls(lay.sticky, col.key)}"
       style="${pinLeft(lay.sticky, col.key)}">${leadCell(col, p)}</div>`)}
     <div class="gantt__track">
       ${cols.map((col, n) => html`<span class="gantt__gridline ${yearRule(col)}"

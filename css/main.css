@@ -927,7 +927,7 @@ h1, h2, h3,
  * No rule around the master-data headings either. A line that stops after one
  * row claims a structure the table does not have.
  */
-.prow--head .pcell--num { text-align: right; padding-right: var(--space-5); }
+.prow--head .pcell--num { padding-right: var(--space-4); }
 /*
  * The time axis is centred, in both grids and in every row that spans it. A
  * quarter column is a slot, not a number column: the label names the whole
@@ -984,7 +984,9 @@ h1, h2, h3,
 .pcell--title { padding-right: var(--space-4); }
 .prow__title {
   display: block; width: 100%; border: 0; padding: 0; background: none; text-align: left;
-  color: var(--color-text-strong); font-size: var(--text-base); font-weight: var(--font-semibold);
+  /* The darker ink already makes the name the row's anchor; the weight on top
+     of it only added mass to 111 rows. Its neighbours stay secondary. */
+  color: var(--color-text-strong); font-size: var(--text-base);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer;
 }
 .prow__title:hover { color: var(--color-text-link); text-decoration: underline; text-underline-offset: 2px; }
@@ -1013,14 +1015,14 @@ h1, h2, h3,
   border-radius: var(--radius-pill);
   border: 1.5px solid var(--color-warn-solid);
 }
+/* The same right padding every other column has, so a figure sits at the same
+   distance from its column edge in both grids. */
 .pcell--credit, .pcell--target {
-  justify-content: flex-end; padding-right: var(--space-5);
+  padding-right: var(--space-4);
   color: var(--color-text-secondary);
 }
 .pcell--target.is-over { color: var(--color-danger-fg-strong); font-weight: var(--font-semibold); }
-.pcell--ampel { justify-content: center; }
-.pcell--ampelhead { text-align: center; padding: 0; }
-.pcell--ampelhead .sorthead { justify-content: center; }
+.pcell--ampelhead { padding: 0; }
 
 /*
  * No rule between quarters. Every value sits in its own column, right-aligned
@@ -1601,7 +1603,7 @@ h1, h2, h3,
 .gantt__rowtitle {
   display: block; min-width: 0; flex: 1; min-height: var(--target-min);
   border: 0; padding: 0; background: none; text-align: left;
-  font-size: var(--text-base); font-weight: var(--font-semibold); color: var(--color-text-strong);
+  font-size: var(--text-base); color: var(--color-text-strong);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   cursor: pointer;
 }
@@ -1619,8 +1621,7 @@ h1, h2, h3,
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;
   line-height: var(--row-height);
 }
-.gantt__row .gantt__col--credit,
-.gantt__row .gantt__col--target { justify-content: flex-end; }
+
 
 .gantt__track {
   display: grid; grid-template-columns: repeat(var(--gantt-cols, 8), minmax(0, 1fr));
@@ -1904,6 +1905,51 @@ h1, h2, h3,
 #swagger .swagger-ui .btn.authorize { color: var(--method-auth); border-color: var(--method-auth); }
 #swagger .swagger-ui .btn.authorize svg { fill: var(--method-auth); }
 
+/* --------------------------------------------------------------------------
+ * The prototype notice
+ *
+ * Built from the same parts as the rest of the shell: the card surface, the
+ * hairline, the raised shadow, the info mark the dropped-columns note uses, and
+ * a plain button. It is not the page's main action, so it is not primary.
+ * -------------------------------------------------------------------------- */
+.protobar {
+  position: fixed; inset-inline: 0; bottom: 0; z-index: var(--z-popover);
+  border-top: var(--border-hairline) solid var(--color-border);
+  background: var(--color-surface); box-shadow: var(--shadow-raised);
+}
+.protobar__row {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--space-8); padding-block: var(--space-6);
+}
+.protobar__text {
+  display: flex; align-items: flex-start; gap: var(--space-5); margin: 0;
+  font-size: var(--text-base); color: var(--color-text-secondary);
+}
+.protobar__text .icon { flex: 0 0 auto; margin-top: 2px; color: var(--color-text-muted); }
+.protobar__lead { color: var(--color-text-strong); font-weight: var(--font-semibold); }
+.protobar .btn { flex: 0 0 auto; }
+
+/* The shell holds the space the bar covers, measured per render. */
+.app { padding-bottom: var(--notice-h, 0); }
+
+@media (max-width: 700px) {
+  .protobar__row { flex-direction: column; align-items: stretch; gap: var(--space-5); }
+  .protobar .btn { align-self: flex-start; }
+}
+
+/* --------------------------------------------------------------------------
+ * Column alignment, for both grids
+ *
+ * Alignment belongs to the column, not to the grid drawing it: declared once in
+ * the registry and read by both. The Ampel sat centred in the table and left in
+ * the bar plan; the Kredit heading right in one and left in the other. Declared
+ * here, after both grids, so it is not overruled by a rule of the same weight.
+ * -------------------------------------------------------------------------- */
+.align-end, .align-end .sorthead { justify-content: flex-end; text-align: right; }
+.align-center, .align-center .sorthead { justify-content: center; text-align: center; }
+/* Centred means centred in the cell, so it cannot carry padding on one side. */
+.align-center { padding-inline: 0; }
+
 /* ==========================================================================
    15 · Print layout
    ========================================================================== */
@@ -1985,7 +2031,7 @@ h1, h2, h3,
 .sheet__gantt .gantt__axislabel { font-size: var(--sheet-text); padding-inline: 6px; }
 .sheet__gantt .gantt__rowlabel { padding: 0 6px; }
 .sheet__gantt .gantt__col--id { font-size: var(--sheet-text); }
-.sheet__gantt .gantt__rowtitle { font-size: var(--sheet-text); font-weight: var(--font-semibold); }
+.sheet__gantt .gantt__rowtitle { font-size: var(--sheet-text); }
 .sheet__gantt .gantt__barlabel { font-size: var(--sheet-text); }
 .sheet__gantt .gantt__track { align-items: center; }
 
@@ -2042,6 +2088,15 @@ h1, h2, h3,
   min-height: var(--target-min); border-bottom: 1px solid var(--color-border-rule);
   font-size: var(--sheet-text); font-weight: var(--font-semibold); color: var(--color-text-muted);
 }
+/*
+ * The row centres its children, so a heading cell was only as tall as its own
+ * line — 15px of a 24px row — and the year rule beside it stopped nine pixels
+ * short of the cells below. The bar plan's axis already stretched; this makes
+ * the table's head agree with it.
+ */
+.sheet__row--head > * { align-self: stretch; display: flex; align-items: center; }
+.sheet__row--head > .sheet__num { justify-content: flex-end; }
+.sheet__row--head > .sheet__period { justify-content: center; }
 .sheet__id { padding-left: 8px; color: var(--color-text-muted); font-variant-numeric: tabular-nums; }
 /*
  * 162 of 222 titles were clipped with no tooltip and no way back — on paper an
@@ -2052,7 +2107,7 @@ h1, h2, h3,
 .sheet__mark { display: flex; align-items: center; justify-content: center; overflow: visible; }
 
 .sheet__project {
-  font-weight: var(--font-semibold); padding-right: var(--space-3);
+  padding-right: var(--space-3);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .sheet__muted {
@@ -2062,8 +2117,17 @@ h1, h2, h3,
 .sheet__num { text-align: right; padding-right: 6px; font-variant-numeric: tabular-nums; }
 /* Same rule as on screen: the time axis is centred, the master data is not. */
 .sheet__period { text-align: center; padding-right: 0; }
-.sheet__cell.is-yearstart, .sheet__num.is-yearstart {
-  border-left: var(--border-hairline) solid var(--color-text-secondary);
+/*
+ * A year boundary is the strongest line on the sheet, and the same line in both
+ * reports — the table drew it in grey 75,85,99 and the bar plan in 206,211,221,
+ * so the two disagreed about how much a year matters.
+ */
+.sheet__cell.is-yearstart,
+.sheet__num.is-yearstart,
+.sheet__gantt .gantt__quarters .is-yearstart,
+.sheet__gantt .gantt__gridline.is-yearstart,
+.sheet__gantt .capband__cell.is-yearstart {
+  border-left: var(--border-hairline) solid var(--color-text-strong);
 }
 .sheet__cell {
   height: 26px; display: flex; align-items: center; justify-content: center;
@@ -2116,8 +2180,9 @@ h1, h2, h3,
 }
 .sheet__prose dt { font-weight: var(--font-semibold); color: var(--color-text-strong); }
 .sheet__prose dd { margin: 0; color: var(--color-text-secondary); }
+/* On every sheet now, so it needs its own air above the footer rule. */
 .sheet__disclaimer {
-  margin: 0; padding-top: 10px;
+  margin: 0 0 10px; padding-top: 10px;
   font-size: var(--sheet-text); font-style: italic; color: var(--color-text-muted);
 }
 

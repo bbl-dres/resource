@@ -11,6 +11,9 @@
      label    German source string; every consumer runs it through t()
      flag     the switch that turns it on, or null for a column that is always
               there. Only `id` is always there: a row has to be identifiable.
+     align    'end' for a figure, 'center' for a mark; text reads from the left
+              and needs no entry. Both grids read it, so a column cannot sit one
+              way in the table and another in the bar plan.
      sort     the SORT_KEYS entry a header click selects, if it sorts at all
      width    the design token holding its width in the grid
      sheet    { w: [portrait, landscape], cls } for the printed sheet
@@ -56,6 +59,7 @@ export const COLUMNS = [
   {
     // The signal reports on the project lead, so it sits beside that column.
     key: 'ampel', label: 'Ampel', flag: 'ampel', sort: null, width: '--grid-col-ampel',
+    align: 'center',
     cls: 'pcell--ampel', sheet: { w: [34, 38], cls: 'sheet__mark' }, xls: { type: 'text', width: 14 },
     // A coloured dot carries nothing in a spreadsheet, so it exports as its word.
     text: p => t(ampel(p.leadId).word)
@@ -80,13 +84,13 @@ export const COLUMNS = [
   },
   {
     key: 'credit', label: 'Kredit CHF', flag: 'credit', sort: 'credit',
-    width: '--grid-col-credit', cls: 'pcell--credit', numeric: true,
+    width: '--grid-col-credit', cls: 'pcell--credit', numeric: true, align: 'end',
     sheet: { w: [62, 76], cls: 'sheet__num sheet__muted' }, xls: { type: 'num', width: 14 },
     text: p => t(p.creditLabel)
   },
   {
     key: 'target', label: 'Soll-Pensum', flag: 'target', sort: 'target',
-    width: '--grid-col-target', cls: 'pcell--target', numeric: true,
+    width: '--grid-col-target', cls: 'pcell--target', numeric: true, align: 'end',
     sheet: { w: [44, 52], cls: 'sheet__num' }, xls: { type: 'pct', width: 10 }
     // `text` is omitted: the value is a pensum and every consumer formats it
     // in the unit the toolbar has selected.
@@ -152,7 +156,7 @@ export function leadLayout(set, fit) {
   let offset = 0;
 
   for (const col of shown) {
-    const w = fit.widthOf(col);
+    const w = col.grow && fit.titleW ? fit.titleW : fit.widthOf(col);
     sticky[col.key] = offset;
     offset += w;
     parts.push(grow && col.grow ? `minmax(${w}px, 1fr)` : `${w}px`);
@@ -162,6 +166,31 @@ export function leadLayout(set, fit) {
   sticky.shown = shown;
   return { parts, sticky, shown, hidden, width: offset };
 }
+
+/*
+ * The columns the project name is reckoned against: the pensum grid's own
+ * defaults. Not what is switched on right now, so toggling an attribute never
+ * moves the name either.
+ */
+const TITLE_REFERENCE = ['id', 'phase', 'lead', 'ampel', 'credit'];
+
+/**
+ * How wide the project name is — the same answer for both grids.
+ *
+ * It cannot be whatever each grid happens to have room for. The bar plan
+ * carries two lead columns and the table six, so at 1280px the same project
+ * name was 285px wide in one tab and 460px in the other, and it jumped 175px
+ * on every switch. Both ask this instead.
+ */
+export function titleWidth({ room, quarters, px }) {
+  const fixed = TITLE_REFERENCE.reduce((a, key) => a + px(column(key).width), 0);
+  const spare = room - fixed - quarters * px('--grid-quarter');
+  return Math.round(Math.max(px('--grid-col-title'),
+    Math.min(px('--grid-col-title-max'), spare)));
+}
+
+/** The class that carries a column's alignment into either grid. */
+export const alignCls = (col) => (col.align ? `align-${col.align}` : '');
 
 /** Is this column switched on? A column with no flag is always on. */
 export const columnOn = (set, col) => !col.flag || !!set[col.flag];

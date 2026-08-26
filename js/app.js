@@ -14,7 +14,7 @@ import {
   cellValue, toggleIn, removeFilter, resetFilters, defaultDir, t, columnSetKey
 } from './store.js';
 import { loadIcons } from './icons.js';
-import { html, appHeader, appFooter, toast } from './ui.js';
+import { html, appHeader, appFooter, prototypeBar, toast } from './ui.js';
 import { renderLanding, renderOverview, editPopover } from './views-overview.js';
 import { renderModal } from './views-modals.js';
 import { renderSchedule } from './views-schedule.js';
@@ -56,6 +56,7 @@ function render() {
     ${appHeader()}
     <main id="main">${view()}</main>
     ${appFooter()}
+    ${prototypeBar()}
     ${state.editing ? editPopover() : ''}
     ${renderModal()}
     ${toast()}
@@ -67,6 +68,7 @@ function render() {
   positionMenu();
   syncPageSize();
   syncZoom();
+  syncNoticeHeight();
   restoreFocus(focus);
   syncModalFocus();
   if (Math.abs(window.scrollY - scrollY) > 1) window.scrollTo({ top: scrollY });
@@ -120,6 +122,17 @@ function syncZoom() {
   const room = mount.clientWidth;
   // Never magnify to fill: a sheet smaller than the pane stays its own size.
   mount.style.setProperty('--sheet-zoom', paper > room ? room / paper : 1);
+}
+
+/*
+ * The notice floats over the page, so the shell has to make room for it. Its
+ * height is measured rather than assumed: it wraps to two lines on a phone and
+ * to three in French.
+ */
+function syncNoticeHeight() {
+  const bar = root.querySelector('.protobar');
+  document.documentElement.style.setProperty('--notice-h',
+    bar ? `${Math.ceil(bar.getBoundingClientRect().height)}px` : '0px');
 }
 
 /** Programmatic scroll restoration must not read as a user scroll. */
@@ -508,6 +521,13 @@ const actions = {
   sheet: (val) => setState({ sheet: val }),
   paper: (val) => setState({ paper: val, menu: null }),
   zoom: (val) => setState({ zoom: val, menu: null }),
+
+  'notice-ok': () => {
+    // Private browsing refuses the write; the notice then returns next render,
+    // which is the safe direction to fail in.
+    try { sessionStorage.setItem('bbl-notice', '1'); } catch { /* no storage */ }
+    setState({ noticeSeen: true });
+  },
   report: (val) => setState({ report: val }),
   page: (val) => setState(s => ({ page: Math.max(1, s.page + Number(val)) })),
   'page-size': (val) => setState({ pageSize: val, page: 1, menu: null }),

@@ -508,15 +508,19 @@ function printSheet(sheet, report, { rows, all, block, page, total, last }) {
   /*
    * Every column has a ceiling, and the table is only as wide as its columns
    * need. Left to stretch, the project name took every spare pixel: on an A0
-   * poster it ran past 3000px while the figures beside it stayed at 50. A sheet
-   * wider than the table keeps the difference as margin — readability first,
-   * and the surplus is filled by more quarters, not by fatter ones.
+   * poster it ran past 3000px while the figures beside it stayed at 50.
+   *
+   * The name is the one column that grows, and only to the width at which the
+   * longest one sets in full. Letting the quarters grow too put them first —
+   * eight tracks against one take eight ninths of any surplus — and a sheet
+   * ended up with wide columns of two-digit numbers beside truncated names.
+   * A sheet wider than the table keeps the difference as margin.
    */
   const quarter = sheet.orientation === 'portrait' ? 54 : 50;
   const cols = schedule
     ? `var(--grid-col-id) minmax(0, 1fr)`
     : lead.map(c => (c.flex ? `minmax(${c.w}px, ${SHEET_TITLE_MAX}px)` : `minmax(0, ${c.w}px)`))
-      .join(' ') + ` repeat(${block.length}, minmax(${quarter}px, ${quarter * 2}px))`;
+      .join(' ') + ` repeat(${block.length}, ${quarter}px)`;
 
   const span = lead.length;
   const numbers = (values, cls = '') => block.map((q, i) =>
@@ -594,6 +598,8 @@ function printSheet(sheet, report, { rows, all, block, page, total, last }) {
     </div>
 
     ${schedule ? ganttLegend('legend--sheet') : demandLegend(cfg)}
+
+    <p class="sheet__disclaimer">${t(data.meta.prototypeNotice)}</p>
 
     <footer class="sheet__foot">
       <span>${t('Erstellt am')} ${cfg.createdAt} ${t('durch')} ${cfg.createdBy} · ${t('Datenstand ePPM')}: ${cfg.syncedAt}</span>

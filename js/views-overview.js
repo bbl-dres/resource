@@ -17,7 +17,7 @@ import {
   tokenPx, yearRule, pinCls, pinLeft, sortableHead, changeProject
 } from './ui.js';
 
-import { leadLayout, column } from './columns.js';
+import { leadLayout, column, titleWidth, alignCls } from './columns.js';
 
 /* -----------------------------------------------------------------------------
    Shared helpers
@@ -289,14 +289,14 @@ const MIN_PERIODS = 3;
 
 function gridLayout() {
   const quarterW = tokenPx('--grid-quarter');
+  const cols = periods().length;
+  const room = cardWidth();
   const { parts, sticky, shown, hidden, width: offset } = leadLayout(columnSet(), {
-    room: cardWidth(),
+    room,
     axis: MIN_PERIODS * quarterW,
     widthOf: c => tokenPx(c.width),
-    grow: true          // the project title absorbs what the axis leaves over
+    titleW: titleWidth({ room, quarters: cols, px: tokenPx })
   });
-
-  const cols = periods().length;
   /*
    * A ceiling, not a free share. With eight flexible quarter tracks against one
    * flexible title track the quarters took 8/9 of every extra pixel: at 2400px
@@ -489,7 +489,7 @@ function columnHeader(tpl, sticky, cols) {
   return html`
     <div class="prow prow--head" style="grid-template-columns:${raw(tpl)}">
       ${sticky.shown.map(col => {
-        const extra = col.numeric ? 'pcell--num' : '';
+        const extra = `${col.numeric ? 'pcell--num' : ''} ${alignCls(col)}`.trim();
         // Without a sort key the header is a label, not a control.
         if (!col.sort) {
           return html`<span class="pcell--text ${col.key === 'ampel' ? 'pcell--ampelhead' : ''} ${pinCls(sticky, col.key, extra)}"
@@ -540,7 +540,7 @@ function projectRow(p, tpl, sticky, cols, rowIdx) {
   return html`<div class="prow" style="grid-template-columns:${raw(tpl)}"
       data-row="${rowIdx}">
     ${sticky.shown.map(col => html`<span
-        class="pcell ${col.cls} ${cellState(col, p, lead)} ${pinCls(sticky, col.key)}"
+        class="pcell ${col.cls} ${alignCls(col)} ${cellState(col, p, lead)} ${pinCls(sticky, col.key)}"
         style="${pinLeft(sticky, col.key)}">${cellBody(col, p, lead)}</span>`)}
 
     ${cols.map(period => {
