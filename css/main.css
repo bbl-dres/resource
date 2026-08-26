@@ -1078,9 +1078,33 @@ h1, h2, h3,
  * only cue left in the cell — the Ampel column (shape) and the Auslastung row
  * (words) carry the same fact without relying on hue.
  */
-.pcell--val.is-warn { color: var(--color-danger-fg-strong); font-weight: var(--font-bold); }
+/*
+ * The mark is the triangle, not the colour. Red on 37 % of 888 cells was a wash
+ * rather than a signal, and it fought the blue ramp underneath it, which is
+ * what this table is actually saying. The same rule the Ampel states: the shape
+ * carries the meaning, so it survives a photocopy and a colour deficiency — and
+ * the printed sheet, which has always marked this with ▲, now agrees with the
+ * screen instead of describing it differently.
+ */
+/*
+ * The mark annotates the value; it must not move it. Set inline it pushed the
+ * number 7px right of centre, so a column of figures lost the alignment the
+ * heading is drawn to — marked and unmarked cells no longer lined up.
+ *
+ * It hangs off the value rather than off the cell, so the gap between the two
+ * stays a single space whatever the number is wide — anchored to the cell it
+ * sat at the far left and the pair read as two separate things.
+ */
+.cellv { position: relative; }
+.warnmark {
+  position: absolute; right: 100%; margin-right: 3px; top: 50%; transform: translateY(-50%);
+  font-size: var(--text-sm); line-height: 1; color: var(--color-text-strong);
+  pointer-events: none;
+}
+.sheet__cell .warnmark { margin-right: 2px; font-size: var(--sheet-text); }
+.markglyph { font-size: var(--text-sm); color: var(--color-text-strong); }
 /* On the darkest heat fill the strong red falls to 4.3:1; the darker one holds. */
-.pcell--val.is-warn.heat-4 { color: var(--color-danger-fg); }
+
 .pcell--val.is-editing { box-shadow: var(--ring-cell-edit); position: relative; z-index: var(--z-raised); }
 .pcell--val.is-edited { box-shadow: inset 0 -3px 0 var(--color-accent); }
 

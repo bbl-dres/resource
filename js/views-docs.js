@@ -561,7 +561,7 @@ function printSheet(sheet, report, { rows, all, block, page, total, last }) {
             >${sheetCell(c, p, { from: block[0], to: block.at(-1) })}</span>`)}
           ${block.map((q, i) => {
             const over = who && personUtilisation(p.leadId, q) > 100;
-            return html`<span class="sheet__cell heat-${heatStep(cells[q])} ${yearBreak(quarters, i)}">${over && cells[q] > 0 ? '▲ ' : ''}${cells[q] ? num(cells[q]) : '–'}</span>`;
+            return html`<span class="sheet__cell heat-${heatStep(cells[q])} ${yearBreak(quarters, i)}"><span class="cellv">${over && cells[q] > 0 ? html`<span class="warnmark" aria-hidden="true">▲</span>` : ''}${cells[q] ? num(cells[q]) : '–'}</span></span>`;
           })}
         </div>`;
       })}

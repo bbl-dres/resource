@@ -430,7 +430,7 @@ export function heatLegend() {
     { label: 'Ampel', items: columnSet().ampel ? ampelLegend() : null },
     {
       label: 'Markierung',
-      items: html`${legendItem(icons.warn(13), 'Projektleitung über 100 % im Quartal')}
+      items: html`${legendItem(html`<span class="markglyph">▲</span>`, 'Projektleitung über 100 % im Quartal')}
         ${legendItem(html`<span class="legend__swatch is-nolead"></span>`, l.noLead)}`
     },
     { label: 'Auslastung', items: html`${t(l.thresholds).replace(/^Auslastung:\s*/, '')}` }
@@ -559,7 +559,7 @@ function projectRow(p, tpl, sticky, cols, rowIdx) {
         class="pcell pcell--val heat-${heatStep(v)} ${over ? 'is-warn' : ''} ${editing ? 'is-editing' : ''} ${isEdited(p, q) ? 'is-edited' : ''} ${yearRule(period)}"
         data-act="cell" data-val="${p.id}" data-q="${q}" data-fk="cell:${p.id}:${q}"
         aria-label="${description}" title="${description}" ${attr(!state.edit || locked, 'data-locked="1"')}>
-        ${label}
+        <span class="cellv">${over && v > 0 ? html`<span class="warnmark" aria-hidden="true">▲</span>` : ''}${label}</span>
       </button>`;
     })}
 

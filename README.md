@@ -6,6 +6,13 @@
   </a>
 </p>
 
+<table align="center" width="100%">
+  <tr>
+    <td width="50%"><img src="assets/preview1.jpg" width="100%" alt="Monthly project schedule with phase bars and milestone markers"/></td>
+    <td width="50%"><img src="assets/preview2.jpg" width="100%" alt="Monthly resource-planning overview with project demand and utilisation"/></td>
+  </tr>
+</table>
+
 [![Demo on GitHub Pages](https://img.shields.io/badge/demo-GitHub%20Pages-2ea44f?logo=github&logoColor=white)](https://bbl-dres.github.io/resource/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 ![Status: prototype](https://img.shields.io/badge/status-prototype-orange.svg)
