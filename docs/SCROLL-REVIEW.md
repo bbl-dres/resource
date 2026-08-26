@@ -194,12 +194,66 @@ Auslastungsband läuft dann mit dem Balkenplan mit, was es heute nicht tut.
 
 ## Umsetzung
 
-Gemacht wie beschrieben. Geprüft:
+Gemacht wie beschrieben, gemessen bei 1500 px:
 
-- Kartenkante links und rechts bleibt beim Scrollen stehen, Abstand 28 px auf
-  beiden Seiten, über alle geprüften Fensterbreiten.
-- Alle Scroller einer Ansicht zeigen nach jedem Scrollen dieselbe Position —
-  in beiden Tabs, inklusive Auslastungsband.
-- `--port-w` und `--scroll-x` sind aus Code und Stylesheet verschwunden.
-- Der Schatten der eingefrorenen Spalte kommt aus einer Regel für beide Tabs.
-- `flow.js`, `audit.js`, `resp.js`, `robust.js` grün.
+| | vorher | nachher |
+|---|---|---|
+| `.pblock` rechte Kante | 1703 (233 px über den Inhaltsbereich) | **1442** = `.toolbar`, `.grid-card` |
+| Kartenrahmen beim Scrollen | wandert nach links hinaus | steht |
+| Scrollerpositionen nach dem Scrollen | `[130, 0, 0, 0, 0]` | **alle gleich** |
+| `--port-w`, `--scroll-x` | aus JS veröffentlicht | entfallen |
+| Schattenregel | zwei | **eine** |
+
+### Was dabei noch mitkam
+
+**Der Verlauf ist jetzt ein Verlauf, keine Maske.** Die rechte Kante löste bisher
+den *Inhalt* auf (`mask-image`), damit war die letzte Spalte unlesbar. Beide
+Kanten tragen jetzt dieselbe Rampe, gespiegelt: links wo die eingefrorene Spalte
+endet, rechts an der Kartenkante. Ein `box-shadow` taugte dafür nicht — mit der
+negativen Streuung im Token endet er 8 px vor der Box, die er umgibt. Der
+Verlauf sitzt bündig. Deckung 0,055, gemessen 12–13 Helligkeitsstufen, also so
+zurückhaltend wie die frühere Fassung.
+
+**Die Heute-Marke lag hinter den Balken.** Ursache war das `clip-path` am
+Overlay: es erzeugt einen Stapelkontext, wodurch die Kinder darin die Balken
+nicht mehr überragen konnten. Jetzt trägt das Overlay selbst die Ordnung.
+
+**Die beiden Raster lesen sich gleich.** ID und Projekt stehen in Termine an
+denselben Stellen wie in der Übersicht (58/62 und 120/285, nachgemessen), die
+Kopfzeilen sind beide 39 px hoch auf weissem Grund, die Spaltentrenner laufen
+durch Kopf, Daten und Summenzeilen, und die Kopfzeilen der Leitspalten
+sortieren jetzt auch im Balkenplan.
+
+**Das Jahresband im Balkenplan ist weg.** Es sagte, was jede Spalte jetzt selbst
+sagt: `Jul 26`, `Q3 26`, `2026` — ein Format für alle drei Skalen und beide Tabs.
+
+**Die Sperre bei schmalen Fenstern ist ersetzt.** Statt zu verweigern blendet das
+Raster Spalten aus, in einer festgelegten Reihenfolge, und sagt welche:
+
+| Fenster | ausgeblendet |
+|---|---|
+| 1400, 1100 | keine |
+| 900 | Kredit CHF, SIA-Phase |
+| 768 | + Ampel |
+| 600 | + Projektleitung, ID |
+
+Kein horizontaler Seitenüberlauf bei irgendeiner dieser Breiten. `state.narrow`
+und `tooNarrow()` sind entfallen; ein entprelltes `resize` zeichnet neu.
+
+### Zum Panning im Balkenplan
+
+Nachgemessen mit einem horizontalen Radereignis:
+
+| | Scrollraum | nach dem Wisch |
+|---|---|---|
+| Übersicht 1500 / 1280 / 1150 | 261 / 421 / 551 | gescrollt |
+| Termine 1500 / 1280 | 0 / 0 | nichts zu schieben |
+| Termine 1150 | 117 | gescrollt |
+
+Das Schieben funktioniert, es greift nur, wenn es etwas zu schieben gibt. Beide
+Tabs folgen derselben Regel — die Übersicht überläuft nur früher, weil ihre
+Leitspalten 781 px breit sind und die des Balkenplans 347 px. Will man den
+gleichen Umschaltpunkt, müsste der Balkenplan dieselben Stammdatenspalten
+zeigen; das wäre eine Erweiterung, keine Korrektur.
+
+Alle Prüfläufe grün: `flow.js`, `audit.js`, `resp.js`, `robust.js`.

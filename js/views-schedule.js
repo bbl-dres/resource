@@ -40,18 +40,26 @@ export function renderSchedule() {
  * the window has been stepped past it. The columns flex, so the marker is
  * placed proportionally rather than in pixels.
  */
+/**
+ * Where today falls on the visible axis, as a share of its whole width.
+ *
+ * Today is first placed on the quarter axis as a fractional index — quarter 0
+ * plus how far into it the date sits — and then looked up against the slice
+ * each column covers. Matching on `quarters` instead put the marker in the
+ * first of the three month columns that share a quarter, so at month scale the
+ * line stood in July while the heading marked August.
+ */
 function todayFraction(cols) {
   const today = new Date(data.meta.today + 'T00:00:00');
   const qStart = new Date(today.getFullYear(), Math.floor(today.getMonth() / 3) * 3, 1);
   const qEnd = new Date(qStart.getFullYear(), qStart.getMonth() + 3, 1);
-  const withinQuarter = (today - qStart) / (qEnd - qStart);
   const q = data.quarterIndex[data.meta.todayQuarter] ?? 0;
+  const at = q + (today - qStart) / (qEnd - qStart);
 
-  const at = cols.findIndex(c => c.quarters.includes(q));
-  if (at < 0) return null;                       // the window has moved past today
-  const col = cols[at];
-  const within = (q + withinQuarter - col.quarters[0]) / col.quarters.length;
-  return (at + within) / cols.length;
+  const i = cols.findIndex(c => at >= c.from && at < c.to);
+  if (i < 0) return null;                        // the window has moved past today
+  const col = cols[i];
+  return (i + (at - col.from) / (col.to - col.from)) / cols.length;
 }
 
 function ganttView() {

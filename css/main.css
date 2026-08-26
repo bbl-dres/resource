@@ -873,16 +873,19 @@ h1, h2, h3,
 }
 .prow > .pcell:first-child,
 .prow--head > :first-child { padding-left: var(--space-6); }
-.prow--head .pcell--num {
-  text-align: right; padding-right: var(--space-5);
-  border-left: var(--border-hairline) solid var(--color-border-subtle);
-  border-right: var(--border-hairline) solid var(--color-border-subtle);
-}
-/* The current period is marked the same way in both grids. */
+/*
+ * No rule around the master-data headings either. A line that stops after one
+ * row claims a structure the table does not have.
+ */
+.prow--head .pcell--num { text-align: right; padding-right: var(--space-5); }
+/*
+ * The current period, marked the same way in both grids and in the same colour
+ * as the today line in the bar plan: now is a position, not a problem.
+ */
 .prow--head .pcell--num.is-today,
 .gantt__quarters .is-today {
   background: var(--color-surface-sunken); color: var(--color-text-strong);
-  font-weight: var(--font-bold); box-shadow: inset 0 2px 0 var(--color-danger-solid);
+  font-weight: var(--font-bold); box-shadow: inset 0 2px 0 var(--color-brand);
 }
 
 /*
@@ -953,13 +956,26 @@ h1, h2, h3,
 .pcell--ampelhead { text-align: center; padding: 0; }
 .pcell--ampelhead .sorthead { justify-content: center; }
 
+/*
+ * No rule between quarters. Every value sits in its own column, right-aligned
+ * under its own heading, so there is nothing for a line to help the eye find —
+ * and twelve hairlines lay a grid over the heat fill, which is what this table
+ * is actually saying. Equal values now read as one band, which is the point.
+ *
+ * The bar plan is the other case: a bar spans columns, so reading where it ends
+ * means projecting down from the heading. There the rules stay.
+ */
 .pcell--val {
   justify-content: flex-end; gap: 3px;
   height: var(--row-height); padding: 0 var(--space-5) 0 0;
-  border: 0; border-left: var(--border-hairline) solid var(--color-border-subtle);
-  border-right: var(--border-hairline) solid var(--color-border-subtle);
+  border: 0;
   font-weight: var(--font-regular); cursor: default;
 }
+/*
+ * The one vertical line worth drawing here. One border, not two: cells sit edge
+ * to edge, so a left and a right rule at the same boundary render as 2px — and
+ * with different colours, as a 1px dark line beside a 1px light one.
+ */
 .pcell--val.is-yearstart, .pcell--sum.is-yearstart, .pcell--foot.is-yearstart,
 .pcell--load.is-yearstart, .prow--head .is-yearstart {
   border-left: var(--border-hairline) solid var(--color-border);
@@ -1038,6 +1054,8 @@ h1, h2, h3,
   display: flex; align-items: center; gap: var(--space-5); padding-left: var(--space-6);
 }
 .prow__sumlabel .linkbtn { font-size: var(--text-sm); }
+/* Full row height, or the year rule reads as a tick with air above and below. */
+.pcell--sum, .pcell--foot, .pcell--load { align-self: stretch; }
 .pcell--sum, .pcell--foot { justify-content: flex-end; padding-right: var(--space-5); }
 
 /*
@@ -1396,6 +1414,7 @@ h1, h2, h3,
   font-size: var(--text-sm); font-weight: var(--font-semibold);
   color: var(--color-text-secondary);
 }
+/* The heading rules line up with the gridlines beneath them, one per boundary. */
 .gantt__quarters > * {
   align-self: stretch; display: flex; align-items: center; justify-content: center;
   border-left: var(--border-hairline) solid var(--color-border-subtle);

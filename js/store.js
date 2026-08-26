@@ -404,6 +404,11 @@ const MONTHS_DE = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep
  * A pensum is a *rate*, not a total: 80 % in Q3 means 80 % of that person's
  * time throughout Q3. So a month inside a quarter carries the same number, and
  * a year is the average of its quarters — never their sum.
+ *
+ * Every column also carries `from` and `to`: the slice of the quarter axis it
+ * covers, as a fractional quarter index. At month scale three columns share one
+ * quarter and each covers a third of it, which `quarters` alone cannot say —
+ * and without it the today marker cannot be placed.
  */
 export function periods() {
   return markYears(buildPeriods());
@@ -432,7 +437,11 @@ function buildPeriods() {
     const years = [...new Set(qs.map(q => q.year))];
     return years.map(year => {
       const idx = qs.map((q, i) => (q.year === year ? i : -1)).filter(i => i >= 0);
-      return { id: String(year), label: String(year), short: String(year), quarters: idx, isNow: idx.includes(0) };
+      return {
+        id: String(year), label: String(year), short: String(year),
+        quarters: idx, isNow: idx.includes(0),
+        from: idx[0], to: idx[idx.length - 1] + 1
+      };
     });
   }
 
@@ -445,12 +454,14 @@ function buildPeriods() {
       if (qi >= qs.length) break;
       const q = qs[qi];
       const month = (Number(q.short.slice(1)) - 1) * 3 + (n % 3);
+      const slice = n % 3;
       out.push({
         id: `${q.year}-${month + 1}`,
         label: `${MONTHS_DE[month]} ${q.year}`,
         short: `${MONTHS_DE[month]} ${String(q.year).slice(2)}`,
         quarters: [qi],
-        isNow: qi === 0 && month === new Date(data.meta.today + 'T00:00:00').getMonth()
+        isNow: qi === 0 && month === new Date(data.meta.today + 'T00:00:00').getMonth(),
+        from: qi + slice / 3, to: qi + (slice + 1) / 3
       });
     }
     return out;
@@ -460,7 +471,8 @@ function buildPeriods() {
   return qs.slice(start).map((q, n) => ({
     id: q.id, label: q.label,
     short: `${q.short} ${String(q.year).slice(2)}`,
-    quarters: [start + n], isNow: start + n === 0
+    quarters: [start + n], isNow: start + n === 0,
+    from: start + n, to: start + n + 1
   }));
 }
 
