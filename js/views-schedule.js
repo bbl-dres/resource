@@ -9,11 +9,11 @@ import {
 
 import {
   html, raw, icons, pageHeader, pageActions, toolbar, activeFilterRow,
-  timeControls, tooNarrow, noResults, legendBlock, legendItem,
+  timeControls, tooNarrow, noResults, legendBlock, legendItem, yearRule
 } from './ui.js';
 
 
-export function renderTermine() {
+export function renderSchedule() {
   const body = state.narrow ? tooNarrow('Der Balkenplan')
     : groupProjects().some(g => g.projects.length) ? ganttView()
       : noResults('Bauprojekte');
@@ -62,7 +62,7 @@ function ganttView() {
   const cols = periods();
   // A column only has to hold its own label: "2026" and "Q3/26" need room,
   // "Jul" does not. A single minimum made twelve months overflow the card.
-  const minCol = { jahr: 96, quartal: 88, monat: 50 }[state.scale] ?? 88;
+  const minCol = { year: 96, quarter: 88, month: 50 }[state.scale] ?? 88;
   const f = todayFraction(cols);
   const todayLeft = f === null ? null
     : `calc(var(--gantt-lead) + (100% - var(--gantt-lead)) * ${f.toFixed(4)})`;
@@ -104,7 +104,7 @@ function ganttView() {
             const pct = periodValue(tot.utilisation, col);
             const q = col.quarters[0];
             const st = loadStatus(pct);
-            return html`<div class="capband__cell is-${st.key} ${col.yearStart ? 'is-yearstart' : ''}"
+            return html`<div class="capband__cell is-${st.key} ${yearRule(col)}"
                 title="${col.label}: ${pct} % — ${t(st.label)} · ${tot.booked[q]} % ${t('gebucht auf')} ${tot.net[q]} % ${t('netto')}">
               <span class="capband__value">${pct} %</span>
             </div>`;
@@ -144,7 +144,7 @@ function ganttLegend() {
 function ganttAxis(cols) {
   // At year scale the columns already are the years, so a band would repeat them.
   const bands = [];
-  if (state.scale !== 'jahr') {
+  if (state.scale !== 'year') {
     cols.forEach((col, i) => {
       if (col.yearStart) bands.push({ label: col.year, span: 1 });
       else bands[bands.length - 1].span++;
@@ -157,7 +157,7 @@ function ganttAxis(cols) {
         ${bands.map(b => html`<div class="gantt__year" style="grid-column:span ${b.span}">${b.label}</div>`)}
       </div>` : ''}
       <div class="gantt__quarters">
-        ${cols.map(col => html`<div class="${col.isNow ? 'is-today' : ''} ${col.yearStart ? 'is-yearstart' : ''}"
+        ${cols.map(col => html`<div class="${col.isNow ? 'is-today' : ''} ${yearRule(col)}"
           title="${col.label}">${col.short}</div>`)}
       </div>
     </div>
@@ -176,7 +176,7 @@ function ganttRow(p, cols) {
               title="${p.title}">${p.title}</button>
     </div>
     <div class="gantt__track">
-      ${cols.map((col, n) => html`<span class="gantt__gridline ${col.yearStart ? 'is-yearstart' : ''}"
+      ${cols.map((col, n) => html`<span class="gantt__gridline ${yearRule(col)}"
         style="grid-column:${n + 1}"></span>`)}
       ${bars.map((b, i) => ganttBar(b, i, bars, cols, p))}
       ${bars.some(b => b.openEnd) && openEndRail(bars.find(b => b.openEnd), cols)}
@@ -220,7 +220,7 @@ function ganttBar(b, i, bars, cols, p) {
  * the 189 shows up, and each can be opened.
  */
 function gates(p, cols) {
-  const list = data.milestones.items.filter(m => m.projectId === p.id);
+  const list = data.milestonesByProject[p.id] ?? [];
   if (!list.length) return '';
 
   /*
@@ -245,7 +245,7 @@ function gates(p, cols) {
     const rank = seen[at] = (seen[at] ?? 0) + 1;
     // Earliest of a stack sits leftmost, so the sequence still reads forwards.
     const shift = (perColumn[at] - rank) * 13;
-    const cat = data.milestones.catalog.find(c => c.code === m.code);
+    const cat = data.milestoneCatalog[m.code];
     const state = m.forecast === null ? 'is-open' : m.status === 'late' ? 'is-late' : '';
     const label = `${m.code} ${cat ? t(cat.name) : ''} · ${data.quarters[data.quarterIndex[m.forecast ?? m.plan]].label}`;
     return html`<button type="button" class="gantt__gate ${at === cols.length - 1 ? 'is-last' : ''}"

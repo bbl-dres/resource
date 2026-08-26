@@ -1564,20 +1564,20 @@ h1, h2, h3,
 .colchart__bar { border-radius: var(--radius-sm) var(--radius-sm) 0 0; border: 1px solid; }
 .colchart__axis { display: grid; grid-auto-columns: minmax(0, 1fr); grid-auto-flow: column; gap: var(--space-4); font-size: var(--text-xs); color: var(--color-text-secondary); text-align: center; }
 
-.colchart__col.is-ueberlast .colchart__val { color: var(--color-danger-fg); }
+.colchart__col.is-overload .colchart__val { color: var(--color-danger-fg); }
 /*
  * Height is the measurement. In greyscale four of the five fills collapsed into
  * 7.7 luma, so only the state that needs an alarm keeps a colour.
  */
-.colchart__col.is-ueberlast .colchart__bar { background: var(--color-danger-border); border-color: var(--color-danger-solid); }
-.colchart__col.is-defizit .colchart__val { color: var(--color-danger-fg); }
-.colchart__col.is-defizit .colchart__bar { background: var(--color-danger-bg); border-color: var(--color-danger-solid); }
-.colchart__col.is-knapp .colchart__val { color: var(--color-warn-fg); }
-.colchart__col.is-knapp .colchart__bar { background: var(--color-bar-bg); border-color: var(--color-bar-border); }
+.colchart__col.is-overload .colchart__bar { background: var(--color-danger-border); border-color: var(--color-danger-solid); }
+.colchart__col.is-deficit .colchart__val { color: var(--color-danger-fg); }
+.colchart__col.is-deficit .colchart__bar { background: var(--color-danger-bg); border-color: var(--color-danger-solid); }
+.colchart__col.is-tight .colchart__val { color: var(--color-warn-fg); }
+.colchart__col.is-tight .colchart__bar { background: var(--color-bar-bg); border-color: var(--color-bar-border); }
 .colchart__col.is-ok .colchart__val { color: var(--color-ok-fg); }
 .colchart__col.is-ok .colchart__bar { background: var(--color-bar-bg); border-color: var(--color-bar-border); }
-.colchart__col.is-frei .colchart__val { color: var(--color-text-secondary); }
-.colchart__col.is-frei .colchart__bar { background: var(--color-bar-bg); border-color: var(--color-bar-border); }
+.colchart__col.is-free .colchart__val { color: var(--color-text-secondary); }
+.colchart__col.is-free .colchart__bar { background: var(--color-bar-bg); border-color: var(--color-bar-border); }
 
 .barlist { display: flex; flex-direction: column; }
 .barlist__row { display: flex; flex-direction: column; gap: var(--space-2); }

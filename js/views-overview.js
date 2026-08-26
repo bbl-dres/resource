@@ -6,15 +6,17 @@ import {
   data, state, t, num, fmt, unitSuffix, fmtMio,
   cellValue, projectDemand, isEdited, personLoad, personUtilisation,
   totals, loadStatus, heatStep, ampel, filteredProjects, groupProjects,
-  activeFilters, milestones, milestoneStats, kpis, periods, periodValue
+  activeFilters, milestones, milestoneStats, kpis, periods, periodValue, phaseOf
 } from './store.js';
 
 import {
   html, raw, icons, pageHeader, pageActions, toolbar, activeFilterRow,
-  timeControls, columnChart, tooNarrow, noResults, phaseOf, ampelLegend,
-  legendBlock, legendItem,
-  attr
+  timeControls, columnChart, tooNarrow, noResults, ampelLegend,
+  legendBlock, legendItem, attr,
+  tokenPx, tone, yearRule, pinCls, pinLeft, sortableHead
 } from './ui.js';
+
+import { visibleColumns, column } from './columns.js';
 
 /* -----------------------------------------------------------------------------
    Shared helpers
@@ -24,14 +26,6 @@ const shortName = p => {
   const rest = p.location.split(',').slice(1).join(',').trim();
   return rest || p.location;
 };
-
-/** Tone for a utilisation percentage — same four words in every view. */
-function tone(pct) {
-  if (pct >= 100) return 'ueberlast';
-  if (pct >= 95) return 'knapp';
-  if (pct >= 85) return 'ok';
-  return 'frei';
-}
 
 function utilisationChartRows() {
   const tot = totals();
@@ -62,7 +56,7 @@ export function renderLanding() {
     {
       title: 'Auslastung', sub: firstThree,
       metric: tot.utilisation.filter(v => v > 100).length, metricLabel: 'Quartale in Überlast',
-      tone: 'danger', tab: 'uebersicht'
+      tone: 'danger', tab: 'overview'
     },
     {
       title: 'Personen', count: data.people.length,
@@ -74,13 +68,13 @@ export function renderLanding() {
       title: 'Meilensteine', count: ms.total,
       sub: `${ms.onTime} im Termin · ${ms.open} ohne Termin`,
       metric: ms.late, metricLabel: 'überfällig',
-      tone: 'danger', tab: 'termine'
+      tone: 'danger', tab: 'schedule'
     },
     {
       title: 'Projekte', count: data.projects.length,
       sub: `${tot.demand[0]} % Bedarf · ${tot.preCredit[0]} % vor Baukredit-Freigabe`,
       metric: unassigned.length, metricLabel: 'ohne Projektleitung',
-      tone: 'warn', tab: 'uebersicht'
+      tone: 'warn', tab: 'overview'
     }
   ];
 
@@ -90,7 +84,7 @@ export function renderLanding() {
       title: 'Ressourcenplanung',
       chrome: false,
       actions: pageActions({ extra: html`<button type="button" class="btn btn--primary"
-        data-act="tab" data-val="uebersicht">${t('Zur Planung')}</button>` })
+        data-act="tab" data-val="overview">${t('Zur Planung')}</button>` })
     })}
 
     <div class="wrap"><div class="content content--landing">
@@ -131,7 +125,7 @@ function nextMilestonesCard() {
     </header>
     <ul class="mslist">
       ${list.map(m => html`<li class="mslist__row is-${m.status}">
-        <button type="button" class="mslist__btn" data-act="open-termine" data-val="${m.projectId}">
+        <button type="button" class="mslist__btn" data-act="open-schedule" data-val="${m.projectId}">
           <span class="mslist__q">${data.quarters[m.planIdx].label}</span>
           <span>
             <span class="mslist__title">${m.code} ${m.short} · ${m.project.location}</span>
@@ -160,7 +154,7 @@ function attentionCard(overPeople, unassigned) {
     .map(p => ({
       severity: 'danger',
       name: p.name,
-      context: data.projects.filter(x => x.leadId === p.id).map(shortName).join(' · '),
+      context: (data.projectsByLead[p.id] ?? []).map(shortName).join(' · '),
       value: `${personLoad(p.id, 0)} %`,
       act: 'filter-lead', val: p.id
     }));
@@ -219,7 +213,7 @@ function utilisationCard() {
       <h2 class="card__title">${t('Auslastung nach Quartal')}</h2>
       <p class="card__sub">${t('Bedarf gegen Kapazität netto')} · ${t('öffnet die Übersicht')}</p>
     </header>
-    <button type="button" class="chartlink" data-act="tab" data-val="uebersicht"
+    <button type="button" class="chartlink" data-act="tab" data-val="overview"
             aria-label="${t('Auslastung nach Quartal')} — ${t('öffnet die Übersicht')}">
       ${columnChart(utilisationChartRows(), { height: 150, refAt: 100, refLabel: '100 %' })}
     </button>
@@ -246,7 +240,7 @@ function recentChangesBlock() {
         <span class="chg__date">${c.dateLabel}</span>
       </div>`)}
     </div>
-    <button type="button" class="more-link" data-act="tab" data-val="verlauf">
+    <button type="button" class="more-link" data-act="tab" data-val="history">
       ${t('Alle Änderungen anzeigen')}
     </button>
   </section>`;
@@ -256,7 +250,7 @@ function recentChangesBlock() {
    Tab «Übersicht» — the pensum grid
    ========================================================================== */
 
-export function renderUebersicht() {
+export function renderOverview() {
   return html`
     ${pageHeader({
       crumbs: ['Bauprojekte', 'Übersicht'],
@@ -279,69 +273,42 @@ export function renderUebersicht() {
  * 35px of content while 99 of 111 titles were clipped — and it is always the
  * Massnahme at the end that goes.
  */
-/*
- * The grid template and the frozen-column offsets have to agree to the pixel,
- * so they may not be two lists of numbers. Both come from the tokens: read
- * once at first use, because a stylesheet does not change under us.
- */
-const COL_KEYS = ['ampel', 'id', 'title', 'phase', 'lead', 'portfolio',
-  'priority', 'nextMs', 'credit', 'target', 'quarter', 'trend'];
-let widths = null;
-function colWidths() {
-  if (widths) return widths;
-  const css = getComputedStyle(document.documentElement);
-  const read = name => parseInt(css.getPropertyValue(name), 10);
-  widths = Object.fromEntries(COL_KEYS.map(k =>
-    [k, read(k === 'quarter' ? '--grid-quarter' : `--grid-col-${k.toLowerCase()}`)]));
-  return widths;
-}
-
 /**
  * One description of the column layout for the whole grid.
  *
- * `minWidth` matters: every row is its own grid, so they only line up when they
- * are all exactly as wide as the scroll track. Letting each row size itself to
- * its own content is what pulled the header out of step with the cells.
+ * The template and the frozen-column offsets have to agree to the pixel, so
+ * they may not be two lists of numbers: both come from the width token each
+ * column names. `minWidth` matters too — every row is its own grid, and they
+ * only line up when all of them are exactly as wide as the scroll track.
+ *
+ * The master data of a project stays put while the time axis moves, so every
+ * lead column is frozen and each needs the running offset of the ones before.
  */
 function gridLayout() {
-  const c = state.cols;
-  const COL_W = colWidths();
+  const shown = visibleColumns(state);
   const parts = [];
-  let minWidth = 0;
-  const add = (track, px) => { parts.push(track); minWidth += px; };
-
-  /*
-   * The master data of a project stays put; only the time axis moves. So every
-   * lead column is frozen, and each needs the running offset of the ones
-   * before it.
-   */
   const sticky = {};
   let offset = 0;
-  const pin = (key, on, track, px) => {
-    if (!on) return;
-    sticky[key] = offset;
-    offset += px;
-    add(track, px);
-  };
 
-  pin('id', c.id, `${COL_W.id}px`, COL_W.id);
-  pin('title', true, `minmax(${COL_W.title}px, 1fr)`, COL_W.title);
-  pin('phase', c.phase, `${COL_W.phase}px`, COL_W.phase);
-  pin('lead', c.lead, `${COL_W.lead}px`, COL_W.lead);
-  // The signal reports on the project lead, so it sits beside that column.
-  pin('ampel', state.ampel, `${COL_W.ampel}px`, COL_W.ampel);
-  pin('portfolio', c.portfolio, `${COL_W.portfolio}px`, COL_W.portfolio);
-  pin('priority', c.priority, `${COL_W.priority}px`, COL_W.priority);
-  pin('nextMs', c.nextMs, `${COL_W.nextMs}px`, COL_W.nextMs);
-  pin('credit', c.credit, `${COL_W.credit}px`, COL_W.credit);
-  pin('target', state.target, `${COL_W.target}px`, COL_W.target);
+  for (const col of shown) {
+    const w = tokenPx(col.width);
+    sticky[col.key] = offset;
+    offset += w;
+    parts.push(col.grow ? `minmax(${w}px, 1fr)` : `${w}px`);
+  }
   sticky.width = offset;
-  sticky.last = Object.keys(sticky).filter(k => k !== 'width').pop();
+  sticky.last = shown.at(-1)?.key ?? null;
 
+  const quarterW = tokenPx('--grid-quarter');
   const cols = periods().length;
-  add(`repeat(${cols}, minmax(${COL_W.quarter}px, 1fr))`, COL_W.quarter * cols);
-  if (state.trend) add(`${COL_W.trend}px`, COL_W.trend);
+  parts.push(`repeat(${cols}, minmax(${quarterW}px, 1fr))`);
+  let minWidth = offset + quarterW * cols;
 
+  if (state.trend) {
+    const w = tokenPx(column('trend').width);
+    parts.push(`${w}px`);
+    minWidth += w;
+  }
   return { tpl: parts.join(' '), minWidth, sticky };
 }
 
@@ -460,53 +427,71 @@ export function heatLegend() {
   ]);
 }
 
-/** The rule that separates one year from the next, drawn on its first column. */
-const yearRule = period => (period.yearStart ? 'is-yearstart' : '');
-
-/**
- * A column header that sorts. Clicking the active column flips the direction,
- * and the toolbar dropdown reads the same two pieces of state.
- */
-function sortHead(key, label, { cls = '', style = '', title = '' } = {}) {
-  const active = state.sort === key;
-  return html`<span class="pcell--text ${cls} ${active ? 'is-sorted' : ''}" style="${style}">
-    <button type="button" class="sorthead" data-act="sort-col" data-val="${key}"
-            title="${title || `${t('Sortieren nach')} ${typeof label === 'string' ? label : key}`}"
-            aria-label="${t('Sortieren nach')} ${typeof label === 'string' ? label : key}">
-      <span class="sorthead__label">${label}</span>
-      <span class="sorthead__dir" aria-hidden="true">${active ? (state.sortDir === 'asc' ? '↑' : '↓') : ''}</span>
-    </button>
-  </span>`;
-}
+/** Clicking the active column flips it; the toolbar reads the same state. */
+const sortHead = (key, label, opts = {}) => sortableHead({
+  ...opts, key, label, act: 'sort-col',
+  active: state.sort === key, ascending: state.sortDir === 'asc'
+});
 
 /*
- * Only the time axis scrolls; the master data of a project stays where it is.
- * A pinned column therefore needs the running offset of the ones before it,
- * which gridLayout() has already worked out.
+ * Most cells print the registry's plain text. These four draw something the
+ * reader can act on or read as a shape, so they are named here rather than
+ * hidden behind a flag on the column.
  */
-const pinCls = (s, k, extra = '') =>
-  `${extra} ${s[k] === undefined ? '' : `is-frozen ${k === s.last ? 'is-frozen-last' : ''}`}`.trim();
-const pinLeft = (s, k) => (s[k] === undefined ? '' : `left:${s[k]}px`);
+const CELL_BODY = {
+  title: p => html`<button type="button" class="prow__title"
+      data-act="open-project" data-val="${p.id}" title="${p.title}">${p.title}</button>`,
+
+  lead: (p, lead) => {
+    const name = lead ? lead.name : html`<span class="lead-open">${t('nicht zugewiesen')}</span>`;
+    return state.edit
+      ? html`<button type="button" class="leadbtn" data-act="assign" data-val="${p.id}"
+          title="${t('Projektleitung zuweisen')}">${name}</button>`
+      : name;
+  },
+
+  ampel: (p) => {
+    const a = ampel(p.leadId, 0);
+    return html`<span class="ampel ampel--${a.key}" role="img" aria-label="${a.title}" title="${a.title}"></span>`;
+  },
+
+  target: p => html`${num(p.target)}${unitSuffix()}`
+};
+
+const cellBody = (col, p, lead) =>
+  (CELL_BODY[col.key] ? CELL_BODY[col.key](p, lead) : (col.text(p) || '—'));
+
+/** The two cells that also carry a state class. */
+function cellState(col, p, lead) {
+  if (col.key === 'lead') return lead ? '' : 'is-none';
+  if (col.key === 'target' && cellValue(p, 0) > p.target) return 'is-over';
+  return '';
+}
 
 /** The class and offset a pinned column needs, as sortHead's options. */
 const pin = (s, k, extra = '') => ({ cls: pinCls(s, k, extra), style: pinLeft(s, k) });
 
-/** The year band and the column names, repeated at the top of every group card. */
+/** What a column is called in the grid header, where two names are shorter. */
+function headLabel(col) {
+  if (col.key === 'target') return `${t('Soll')} ${data.quarters[0].short}`;
+  return t(col.label);
+}
+
+/** The column names, repeated at the top of every group card. */
 function columnHeader(tpl, sticky, cols) {
-  const q0 = data.quarters[0];
   return html`
     <div class="prow prow--head" style="grid-template-columns:${raw(tpl)}">
-      ${state.cols.id && sortHead('id', 'ID', pin(sticky, 'id'))}
-      ${sortHead('projekt', t('Projekt'), pin(sticky, 'title'))}
-      ${state.cols.phase && sortHead('phase', t('SIA-Phase'), pin(sticky, 'phase'))}
-      ${state.cols.lead && sortHead('lead', t('Projektleitung'), pin(sticky, 'lead'))}
-      ${state.ampel && html`<span class="pcell--text pcell--ampelhead ${pinCls(sticky, 'ampel')}" style="${pinLeft(sticky, 'ampel')}"
-        title="${t('Auslastung der Projektleitung im laufenden Quartal')}">${t('Ampel')}</span>`}
-      ${state.cols.portfolio && sortHead('portfolio', t('Teilportfolio'), pin(sticky, 'portfolio'))}
-      ${state.cols.priority && sortHead('priority', t('Priorität'), pin(sticky, 'priority'))}
-      ${state.cols.nextMs && html`<span class="pcell--text ${pinCls(sticky, 'nextMs')}" style="${pinLeft(sticky, 'nextMs')}">${t('Nächster Meilenstein')}</span>`}
-      ${state.cols.credit && sortHead('credit', t('Kredit CHF'), pin(sticky, 'credit', 'pcell--num'))}
-      ${state.target && sortHead('target', `${t('Soll')} ${data.quarters[0].short}`, pin(sticky, 'target', 'pcell--num'))}
+      ${visibleColumns(state).map(col => {
+        const extra = col.numeric ? 'pcell--num' : '';
+        // Without a sort key the header is a label, not a control.
+        if (!col.sort) {
+          return html`<span class="pcell--text ${col.key === 'ampel' ? 'pcell--ampelhead' : ''} ${pinCls(sticky, col.key, extra)}"
+              style="${pinLeft(sticky, col.key)}"
+              title="${col.key === 'ampel' ? t('Auslastung der Projektleitung im laufenden Quartal') : ''}"
+            >${headLabel(col)}</span>`;
+        }
+        return sortHead(col.sort, headLabel(col), pin(sticky, col.key, extra));
+      })}
       ${cols.map(period => sortHead(`q${period.quarters[0]}`, period.short, {
         cls: `pcell--num ${period.isNow ? 'is-today' : ''} ${yearRule(period)}`,
         title: period.isNow
@@ -544,32 +529,12 @@ function footRow(label, values, tpl, span, cols) {
 function projectRow(p, tpl, sticky, cols, rowIdx) {
   const lead = p.leadId ? data.peopleById[p.leadId] : null;
   const cells = projectDemand(p);
-  const a = ampel(p.leadId, 0);
-  const phase = phaseOf(p.phase);
-  const nextMs = data.milestones.items.find(m => m.projectId === p.id);
-  const targetOver = state.target && cells[0] > p.target;
 
   return html`<div class="prow" style="grid-template-columns:${raw(tpl)}"
       data-row="${rowIdx}">
-    ${state.cols.id && html`<span class="pcell pcell--id ${pinCls(sticky, 'id')}" style="${pinLeft(sticky, 'id')}">${p.number}</span>`}
-    <span class="pcell pcell--title ${pinCls(sticky, 'title')}" style="${pinLeft(sticky, 'title')}">
-      <button type="button" class="prow__title" data-act="open-project" data-val="${p.id}" title="${p.title}">${p.title}</button>
-    </span>
-    ${state.cols.phase && html`<span class="pcell pcell--phase ${pinCls(sticky, 'phase')}" style="${pinLeft(sticky, 'phase')}">
-      ${t(phase.label)}
-    </span>`}
-    ${state.cols.lead && html`<span class="pcell pcell--lead ${pinCls(sticky, 'lead')} ${!lead ? 'is-none' : ''}" style="${pinLeft(sticky, 'lead')}">${state.edit
-      ? html`<button type="button" class="leadbtn" data-act="assign" data-val="${p.id}"
-          title="${t('Projektleitung zuweisen')}">${lead ? lead.name : html`<span class="lead-open">${t('nicht zugewiesen')}</span>`}</button>`
-      : (lead ? lead.name : html`<span class="lead-open">${t('nicht zugewiesen')}</span>`)}</span>`}
-    ${state.ampel && html`<span class="pcell pcell--ampel ${pinCls(sticky, 'ampel')}" style="${pinLeft(sticky, 'ampel')}">
-      <span class="ampel ampel--${a.key}" role="img" aria-label="${a.title}" title="${a.title}"></span>
-    </span>`}
-    ${state.cols.portfolio && html`<span class="pcell pcell--text ${pinCls(sticky, 'portfolio')}" style="${pinLeft(sticky, 'portfolio')}">${t(data.portfoliosById[p.portfolio].label)}</span>`}
-    ${state.cols.priority && html`<span class="pcell pcell--text ${pinCls(sticky, 'priority')}" style="${pinLeft(sticky, 'priority')}">${t(p.priority)}</span>`}
-    ${state.cols.nextMs && html`<span class="pcell pcell--text ${pinCls(sticky, 'nextMs')}" style="${pinLeft(sticky, 'nextMs')}">${nextMs ? `${nextMs.code} · ${data.quarters[data.quarterIndex[nextMs.plan]].label}` : '—'}</span>`}
-    ${state.cols.credit && html`<span class="pcell pcell--credit ${pinCls(sticky, 'credit')}" style="${pinLeft(sticky, 'credit')}">${t(p.creditLabel)}</span>`}
-    ${state.target && html`<span class="pcell pcell--target ${pinCls(sticky, 'target')} ${targetOver ? 'is-over' : ''}" style="${pinLeft(sticky, 'target')}">${num(p.target)}${unitSuffix()}</span>`}
+    ${visibleColumns(state).map(col => html`<span
+        class="pcell ${col.cls} ${cellState(col, p, lead)} ${pinCls(sticky, col.key)}"
+        style="${pinLeft(sticky, col.key)}">${cellBody(col, p, lead)}</span>`)}
 
     ${cols.map(period => {
       const q = period.quarters[0];
@@ -592,8 +557,11 @@ function projectRow(p, tpl, sticky, cols, rowIdx) {
     })}
 
     ${state.trend && html`<span class="pcell pcell--trend">
-      ${cols.map(period => { const v = periodValue(cells, period); return html`<span class="spark" style="height:${v ? Math.max(8, Math.round(v / 120 * 100)) : 0}%"
-        class="${v ? '' : 'is-empty'}"></span>`; })}
+      ${cols.map(period => {
+        const v = periodValue(cells, period);
+        return html`<span class="spark ${v ? '' : 'is-empty'}"
+          style="height:${v ? Math.max(8, Math.round(v / 120 * 100)) : 0}%"></span>`;
+      })}
     </span>`}
   </div>`;
 }

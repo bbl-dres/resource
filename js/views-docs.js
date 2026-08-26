@@ -7,15 +7,16 @@
    ============================================================================= */
 
 import {
-  data, state, t, num, unitSuffix, cellValue, projectDemand, ampel,
+  data, state, t, num, unitSuffix, cellValue, projectDemand, ampel, phaseOf,
   personUtilisation, totals, loadStatus, heatStep, filteredProjects, activeFilters,
   groupProjects
 } from './store.js';
 
 import {
   html, raw, icons, pageHeader, exportMenu, toolbar, activeFilterRow, noResults,
-  phaseOf, scopeLine, AMPEL_STATES, legendBlock, legendItem
+  scopeLine, AMPEL_STATES, legendBlock, legendItem
 } from './ui.js';
+import { visibleColumns } from './columns.js';
 
 /* =============================================================================
    API documentation
@@ -91,15 +92,14 @@ function loadSwagger() {
    ========================================================================== */
 
 /*
- * `rows` is how many the paper actually holds, not a guess. A4 hoch is 1131 px
- * tall at this scale less 56 px of padding, and the fixed furniture — letter
- * head 74, column header 24, legend 64, footer 24, plus 22 of table margin —
- * leaves about 840 px. At a 27 px row that is 31. A4 quer: 778 − 60 − 167 = 551, so 19.
- * A group heading costs 1.6 rows, because it carries a gap above it.
+ * `rows` is a budget in row-heights, not a row count: a group heading costs
+ * more than a project (see ROW_COST). The numbers are measured, not guessed —
+ * with the sheet rendered, the space left under the table is 65 px at the
+ * tightest, so neither format can spill onto the paper's margin.
  */
 const SHEETS = [
-  { id: 'hoch', label: 'A4 hoch', caption: 'Übersicht als PDF, A4 hoch', quarters: 4, rows: 34 },
-  { id: 'quer', label: 'A4 quer', caption: 'Acht Quartale auf einem Blatt', quarters: 8, rows: 21 }
+  { id: 'portrait', label: 'A4 hoch', caption: 'Übersicht als PDF, A4 hoch', quarters: 4, rows: 34 },
+  { id: 'landscape', label: 'A4 quer', caption: 'Acht Quartale auf einem Blatt', quarters: 8, rows: 21 }
 ];
 
 export function renderExport() {
@@ -109,7 +109,7 @@ export function renderExport() {
       crumbs: ['Bauprojekte', 'Export'],
       title: 'PDF-Export — Drucklayout',
       chrome: false,
-      actions: html`<button type="button" class="btn" data-act="tab" data-val="uebersicht">${t('Abbrechen')}</button>
+      actions: html`<button type="button" class="btn" data-act="tab" data-val="overview">${t('Abbrechen')}</button>
         <button type="button" class="btn btn--primary" data-act="print">${icons.download(15)}${t('Drucken')}</button>`
     })}
     <div class="wrap"><div class="content">
@@ -285,46 +285,32 @@ function methodSheet(sheet, { page, total }) {
  * attributes are on at once, so the sheet never grows past the page.
  */
 function sheetColumns(sheet) {
-  const c = state.cols;
-  const wide = sheet.id === 'quer';
-  const w = (a, b) => (wide ? b : a);
-  const cols = [];
-
-  if (c.id) cols.push({ key: 'id', label: 'ID', w: w(52, 62), cls: 'sheet__id' });
-  cols.push({ key: 'title', label: t('Projekt'), flex: true, w: w(150, 190) });
-  if (c.phase) cols.push({ key: 'phase', label: t('SIA-Teilphase'), w: w(88, 112), cls: 'sheet__muted' });
-  if (c.lead) cols.push({ key: 'lead', label: t('Projektleitung'), w: w(86, 108), cls: 'sheet__muted' });
-  if (state.ampel) cols.push({ key: 'ampel', label: t('Ampel'), w: w(34, 38), cls: 'sheet__mark' });
-  if (c.portfolio) cols.push({ key: 'portfolio', label: t('Teilportfolio'), w: w(76, 96), cls: 'sheet__muted' });
-  if (c.priority) cols.push({ key: 'priority', label: t('Priorität'), w: w(50, 62), cls: 'sheet__muted' });
-  if (c.nextMs) cols.push({ key: 'nextMs', label: t('Nächster Meilenstein'), w: w(92, 116), cls: 'sheet__muted' });
-  if (c.credit) cols.push({ key: 'credit', label: t('Kredit CHF'), w: w(62, 76), cls: 'sheet__num sheet__muted' });
-  if (state.target) {
-    cols.push({ key: 'target', label: `${t('Soll')} ${data.quarters[0].short}`, w: w(44, 52), cls: 'sheet__num' });
-  }
-  return cols;
+  const wide = sheet.id === 'landscape';
+  return visibleColumns(state).map(c => ({
+    key: c.key,
+    // The sheet has room for the longer name where the grid header does not.
+    label: c.key === 'target'
+      ? `${t('Soll')} ${data.quarters[0].short}`
+      : t(c.sheet.label ?? c.label),
+    w: c.sheet.w[wide ? 1 : 0],
+    cls: c.sheet.cls,
+    flex: c.sheet.flex,
+    text: c.text ?? (() => '')
+  }));
 }
 
-/** One project's value for a lead column, already formatted for paper. */
-function sheetCell(col, p, lead) {
+/**
+ * One project's value for a lead column, already formatted for paper. Most
+ * columns are the registry's plain text; only these three draw something.
+ */
+function sheetCell(col, p) {
   switch (col.key) {
-    case 'id': return p.number;
-    case 'title': return p.title;
-    case 'phase': return t(phaseOf(p.phase).label);
-    case 'lead': return lead ? lead.name : t('nicht zugewiesen');
     case 'ampel': {
       const a = ampel(p.leadId, 0);
       return html`<span class="ampel ampel--${a.key}" title="${a.title}"></span>`;
     }
-    case 'portfolio': return t(data.portfoliosById[p.portfolio].label);
-    case 'priority': return t(p.priority);
-    case 'nextMs': {
-      const ms = data.milestones.items.find(m => m.projectId === p.id);
-      return ms ? `${ms.code} · ${data.quarters[data.quarterIndex[ms.plan]].label}` : '—';
-    }
-    case 'credit': return t(p.creditLabel);
     case 'target': return `${num(p.target)}${unitSuffix()}`;
-    default: return '';
+    default: return col.text(p) || '—';
   }
 }
 
@@ -345,7 +331,7 @@ function printSheet(sheet, { rows, all, block, page, total, last }) {
 
   const cols = lead
     .map(c => (c.flex ? `minmax(${c.w}px, 1fr)` : `minmax(0, ${c.w}px)`))
-    .join(' ') + ` repeat(${block.length}, ${sheet.id === 'hoch' ? 54 : 50}px)`;
+    .join(' ') + ` repeat(${block.length}, ${sheet.id === 'portrait' ? 54 : 50}px)`;
 
   const span = lead.length;
   const numbers = (values, cls = '') => block.map(q =>
@@ -392,10 +378,10 @@ function printSheet(sheet, { rows, all, block, page, total, last }) {
 
         const p = row.p;
         const cells = projectDemand(p);
-        const who = p.leadId ? data.peopleById[p.leadId] : null;
+        const who = p.leadId ? data.peopleById[p.leadId] : null;   // only for the overload marker
         return html`<div class="sheet__row ${p.leadId ? '' : 'is-unassigned'}">
           ${lead.map(c => html`<span class="${c.key === 'title' ? 'sheet__project' : `sheet__lead ${c.cls ?? ''}`}"
-            >${sheetCell(c, p, who)}</span>`)}
+            >${sheetCell(c, p)}</span>`)}
           ${block.map(q => {
             const over = who && personUtilisation(p.leadId, q) > 100;
             return html`<span class="sheet__cell heat-${heatStep(cells[q])}">${over && cells[q] > 0 ? '▲ ' : ''}${cells[q] ? num(cells[q]) : '–'}</span>`;

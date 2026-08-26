@@ -7,10 +7,10 @@
    ============================================================================= */
 
 import {
-  data, state, t, num, fmt, unitSuffix, cellValue, projectDemand, heatStep, personUtilisation
+  data, state, t, num, fmt, unitSuffix, cellValue, projectDemand, heatStep, personUtilisation, phaseOf
 } from './store.js';
 
-import { html, icons, phaseOf, attr } from './ui.js';
+import { html, icons, attr } from './ui.js';
 
 /**
  * One dialog head for all four: the same close button was written out four
@@ -28,14 +28,21 @@ function modalHead(kicker, title, meta = '') {
   </header>`;
 }
 
+/* One entry per dialog; app.js sets state.modal.type to one of these keys. */
+const MODALS = {
+  phase: phaseModal,
+  milestone: milestoneModal,
+  project: projectModal,
+  share: shareModal,
+  assign: assignModal,
+  rebook: rebookModal
+};
+
 export function renderModal() {
   if (!state.modal) return '';
-  const body = state.modal.type === 'phase' ? phaseModal(state.modal)
-    : state.modal.type === 'milestone' ? milestoneModal(state.modal)
-    : state.modal.type === 'project' ? projectModal(state.modal)
-    : state.modal.type === 'share' ? shareModal(state.modal)
-      : state.modal.type === 'assign' ? assignModal(state.modal)
-        : rebookModal(state.modal);
+  const build = MODALS[state.modal.type];
+  if (!build) return '';
+  const body = build(state.modal);
   return html`<div class="scrim" data-act="close-modal">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" data-stop>${body}</div>
   </div>`;
@@ -106,7 +113,7 @@ function milestoneModal({ milestoneId }) {
   const m = data.milestones.items.find(x => x.id === milestoneId);
   if (!m) return '';
   const p = data.projectsById[m.projectId];
-  const cat = data.milestones.catalog.find(c => c.code === m.code);
+  const cat = data.milestoneCatalog[m.code];
   const lead = p.leadId ? data.peopleById[p.leadId] : null;
   const planQ = data.quarters[data.quarterIndex[m.plan]];
   const foreQ = m.forecast ? data.quarters[data.quarterIndex[m.forecast]] : null;
@@ -204,7 +211,7 @@ function projectModal({ projectId }) {
   const nextMs = data.milestones.items
     .filter(m => m.projectId === p.id)
     .sort((a, b) => a.planDate.localeCompare(b.planDate))[0];
-  const nextName = nextMs && data.milestones.catalog.find(c => c.code === nextMs.code)?.name;
+  const nextName = nextMs && data.milestoneCatalog[nextMs.code]?.name;
   const log = data.changes.filter(c => c.projectId === p.id);
   const util = lead ? personUtilisation(lead.id, 0) : null;
 
@@ -268,7 +275,7 @@ function projectModal({ projectId }) {
     </section>` : ''}
 
     <footer class="modal__foot">
-      <button type="button" class="btn" data-act="open-termine" data-val="${p.id}">${t('In Termine öffnen')}</button>
+      <button type="button" class="btn" data-act="open-schedule" data-val="${p.id}">${t('In Termine öffnen')}</button>
       <button type="button" class="btn btn--primary" data-act="noop">${t('Im ePPM öffnen')}</button>
     </footer>`;
 }

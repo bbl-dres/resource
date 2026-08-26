@@ -8,11 +8,12 @@
    ============================================================================= */
 
 import {
-  data, state, t, projectDemand, ampel, groupProjects, filteredProjects,
+  data, state, t, projectDemand, ampel, groupProjects, filteredProjects, phaseOf,
   totals, periods, periodValue, loadStatus, activeFilters
 } from './store.js';
 
-import { phaseOf, scopeLine } from './ui.js';
+import { scopeLine } from './ui.js';
+import { visibleColumns } from './columns.js';
 
 /* -----------------------------------------------------------------------------
    The table
@@ -20,39 +21,28 @@ import { phaseOf, scopeLine } from './ui.js';
 
 /** 'text' left-aligns, 'num' is a real number, 'pct' a number in percent points. */
 function columns(cols) {
-  const c = state.cols;
-  const list = [];
-  if (c.id) list.push({ key: 'id', label: 'ID', type: 'text', width: 12 });
-  list.push({ key: 'title', label: t('Projekt'), type: 'text', width: 38 });
-  if (c.phase) list.push({ key: 'phase', label: t('SIA-Phase'), type: 'text', width: 20 });
-  if (c.lead) list.push({ key: 'lead', label: t('Projektleitung'), type: 'text', width: 20 });
-  // A coloured dot carries nothing in a spreadsheet, so the Ampel exports as its word.
-  if (state.ampel) list.push({ key: 'ampel', label: t('Ampel'), type: 'text', width: 14 });
-  if (c.portfolio) list.push({ key: 'portfolio', label: t('Teilportfolio'), type: 'text', width: 18 });
-  if (c.priority) list.push({ key: 'priority', label: t('Priorität'), type: 'text', width: 12 });
-  if (c.nextMs) list.push({ key: 'nextMs', label: t('Nächster Meilenstein'), type: 'text', width: 24 });
-  if (c.credit) list.push({ key: 'credit', label: `${t('Kredit')} ${t('Mio. CHF')}`, type: 'num', width: 14 });
-  if (state.target) list.push({ key: 'target', label: `${t('Soll')} ${data.quarters[0].short}`, type: 'pct', width: 10 });
+  const list = visibleColumns(state).map(c => ({
+    key: c.key,
+    // Two columns say something different on a spreadsheet than on screen:
+    // the credit is a bare number in millions, and the target names its quarter.
+    label: c.key === 'credit' ? `${t('Kredit')} ${t('Mio. CHF')}`
+      : c.key === 'target' ? `${t('Soll')} ${data.quarters[0].short}`
+        : t(c.label),
+    type: c.xls.type,
+    width: c.xls.width
+  }));
   cols.forEach(period => list.push({ key: period.id, label: period.label, type: 'pct', width: 10 }));
   return list;
 }
 
 function projectCells(p, cols) {
-  const lead = p.leadId ? data.peopleById[p.leadId] : null;
   const demand = projectDemand(p);
-  const nextMs = data.milestones.items.find(m => m.projectId === p.id);
-  const row = {
-    id: p.number.replace('…', ''),
-    title: p.title,
-    phase: t(phaseOf(p.phase).label),
-    lead: lead ? lead.name : t('nicht zugewiesen'),
-    ampel: t(ampel(p.leadId, 0).word),
-    portfolio: t(data.portfoliosById[p.portfolio].label),
-    priority: t(p.priority),
-    nextMs: nextMs ? `${nextMs.code} · ${data.quarters[data.quarterIndex[nextMs.plan]].label}` : '',
-    credit: p.credit ?? null,
-    target: p.target
-  };
+  const row = {};
+  for (const c of visibleColumns(state)) row[c.key] = c.text ? c.text(p) : null;
+  // Numbers must reach the workbook as numbers, not as the words the grid shows.
+  row.id = p.number.replace('…', '');
+  row.credit = p.credit ?? null;
+  row.target = p.target;
   cols.forEach(period => { row[period.id] = periodValue(demand, period); });
   return row;
 }
@@ -93,7 +83,7 @@ export function buildTable() {
 /** A file name that sorts by date and says which slice it holds. */
 function fileName(ext) {
   const stamp = data.meta.today.replace(/-/g, '');
-  const scope = state.scale === 'quartal' ? 'quartal' : state.scale;
+  const scope = state.scale;
   return `ressourcenplanung_${scope}_${stamp}.${ext}`;
 }
 

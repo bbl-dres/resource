@@ -8,6 +8,7 @@
 import {
   data, state, t, activeFilters, kpis, filteredProjects, sortKey, canStep
 } from './store.js';
+import { toggleableColumns } from './columns.js';
 import { icon } from './icons.js';
 
 /* -----------------------------------------------------------------------------
@@ -94,6 +95,68 @@ export const icons = {
   externalLink: (s = 13) => ico('external-link', s)
 };
 
+/**
+ * Only http(s) and mailto leave the app. Escaping keeps markup out of an href
+ * but says nothing about the scheme, and `javascript:` in a data file would
+ * still run — this is the one place a JSON value becomes a navigation.
+ */
+export function safeHref(href) {
+  return /^(https?:|mailto:)/i.test(String(href ?? '')) ? href : '#';
+}
+
+/* -----------------------------------------------------------------------------
+   Shared measurements and mappings
+   -------------------------------------------------------------------------- */
+
+/**
+ * A design token read as a number. Tokens are the single source for the column
+ * widths, and the grid template and the frozen offsets must agree to the pixel.
+ * A stylesheet does not change under us, so one read per token is enough.
+ */
+const pxCache = new Map();
+export function tokenPx(name) {
+  if (!pxCache.has(name)) {
+    pxCache.set(name, parseInt(getComputedStyle(document.documentElement).getPropertyValue(name), 10));
+  }
+  return pxCache.get(name);
+}
+
+/** Tone for a utilisation percentage — the same four words in every view. */
+export function tone(pct) {
+  if (pct >= 100) return 'overload';
+  if (pct >= 95) return 'tight';
+  if (pct >= 85) return 'ok';
+  return 'free';
+}
+
+/** The rule that separates one year from the next, drawn on its first column. */
+export const yearRule = period => (period.yearStart ? 'is-yearstart' : '');
+
+/*
+ * Only the time axis scrolls; the master data stays where it is. A pinned
+ * column therefore needs the running offset of the ones before it, which the
+ * view's layout function has already worked out.
+ */
+export const pinCls = (s, k, extra = '') =>
+  `${extra} ${s[k] === undefined ? '' : `is-frozen ${k === s.last ? 'is-frozen-last' : ''}`}`.trim();
+export const pinLeft = (s, k) => (s[k] === undefined ? '' : `left:${s[k]}px`);
+
+/**
+ * A sortable column header. Both grids use it; they differ only in which pair
+ * of state fields they sort by and which action they dispatch.
+ */
+export function sortableHead({ key, label, act, active, ascending, cls = '', style = '', title = '' }) {
+  const name = typeof label === 'string' ? label : key;
+  return html`<span class="pcell--text ${cls} ${active ? 'is-sorted' : ''}" style="${style}">
+    <button type="button" class="sorthead" data-act="${act}" data-val="${key}"
+            title="${title || `${t('Sortieren nach')} ${name}`}"
+            aria-label="${t('Sortieren nach')} ${name}">
+      <span class="sorthead__label">${label}</span>
+      <span class="sorthead__dir" aria-hidden="true">${active ? (ascending ? '↑' : '↓') : ''}</span>
+    </button>
+  </span>`;
+}
+
 /* -----------------------------------------------------------------------------
    Small shared controls
    -------------------------------------------------------------------------- */
@@ -177,10 +240,10 @@ export function divider() { return html`<div class="dd__divider"></div>`; }
    -------------------------------------------------------------------------- */
 
 const TABS = [
-  { id: 'uebersicht', label: 'Übersicht' },
-  { id: 'termine', label: 'Termine' },
+  { id: 'overview', label: 'Übersicht' },
+  { id: 'schedule', label: 'Termine' },
   { id: 'dashboard', label: 'Dashboard' },
-  { id: 'verlauf', label: 'Verlauf' }
+  { id: 'history', label: 'Verlauf' }
 ];
 
 export function appHeader() {
@@ -337,7 +400,7 @@ export function kpiStrip() {
    Toolbar — search, sort, group, filters, attributes
    -------------------------------------------------------------------------- */
 
-const SORTS = ['projekt', 'id', 'phase', 'lead', 'credit', 'q0'];
+const SORTS = ['project', 'id', 'phase', 'lead', 'credit', 'q0'];
 const GROUPS = [
   { id: 'none', label: 'Keine' },
   { id: 'lead', label: 'Projektleitung' },
@@ -345,28 +408,15 @@ const GROUPS = [
   { id: 'portfolio', label: 'Teilportfolio' }
 ];
 /*
- * Listed in the order the grid lays them out, so the menu can be read against
- * the table. Some are columns and some are flags of their own; that is an
- * implementation detail and the menu does not expose it.
+ * Some entries are columns and some are flags of their own; that is an
+ * implementation detail the menu does not expose. Order comes from the
+ * registry, so the menu always reads against the table.
  */
-const COLUMNS = [
-  { id: 'id', label: 'ID', act: 'toggle-col' },
-  { id: 'phase', label: 'SIA-Phase', act: 'toggle-col' },
-  { id: 'lead', label: 'Projektleitung', act: 'toggle-col' },
-  { id: 'ampel', label: 'Ampel', act: 'toggle-flag' },
-  { id: 'portfolio', label: 'Teilportfolio', act: 'toggle-col' },
-  { id: 'priority', label: 'Priorität', act: 'toggle-col' },
-  { id: 'nextMs', label: 'Nächster Meilenstein', act: 'toggle-col' },
-  { id: 'credit', label: 'Kredit', act: 'toggle-col' },
-  { id: 'target', label: 'Soll-Pensum', act: 'toggle-flag' },
-  { id: 'trend', label: 'Verlauf', act: 'toggle-flag' }
-];
-
-const columnOn = c => (c.act === 'toggle-col' ? state.cols[c.id] : state[c.id]);
+const menuColumnOn = c => (c.act === 'toggle-col' ? state.cols[c.id] : state[c.id]);
 
 export function toolbar({ attributes = true, exclude = [] } = {}) {
   const active = sortKey();
-  const groupLabel = GROUPS.find(g => g.id === state.group).label;
+  const groupLabel = GROUPS.find(g => g.id === state.group)?.label ?? GROUPS[0].label;
   const mine = data.meta.user.personId;
   const minesOnly = state.leads.length === 1 && state.leads[0] === mine;
 
@@ -441,8 +491,8 @@ export function toolbar({ attributes = true, exclude = [] } = {}) {
         </div>
         ${divider()}
         ${menuGroupLabel(t('Spalten'))}
-        ${COLUMNS.filter(c => !exclude.includes(c.id))
-          .map(c => menuCheckbox(t(c.label), columnOn(c), c.act, c.id))}
+        ${toggleableColumns().filter(c => !exclude.includes(c.id))
+          .map(c => menuCheckbox(t(c.label), menuColumnOn(c), c.act, c.id))}
         ${divider()}
         ${menuCheckbox(t('Nullwerte ausblenden'), state.hideZeros, 'toggle-flag', 'hideZeros')}`
     })}
@@ -518,9 +568,9 @@ export function timeControls() {
   return html`<div class="timebar">
     <div class="timebar__group">
       ${segmented([
-        { value: 'jahr', label: 'Jahr' },
-        { value: 'quartal', label: 'Quartal' },
-        { value: 'monat', label: 'Monat' }
+        { value: 'year', label: 'Jahr' },
+        { value: 'quarter', label: 'Quartal' },
+        { value: 'month', label: 'Monat' }
       ], state.scale, 'scale')}
     </div>
     <div class="timebar__group timebar__nav">
@@ -546,7 +596,7 @@ export function appFooter() {
     <span class="shell-footer__links">
       ${m.footerLinks.map(l => l.tab
         ? html`<a href="#?tab=${l.tab}" data-act="tab" data-val="${l.tab}">${t(l.label)}</a>`
-        : html`<a href="${l.href}" target="_blank" rel="noopener noreferrer">${t(l.label)}</a>`)}
+        : html`<a href="${safeHref(l.href)}" target="_blank" rel="noopener noreferrer">${t(l.label)}</a>`)}
     </span>
   </div></footer>`;
 }
@@ -597,10 +647,6 @@ export function barList(rows, { max, gap = 12 } = {}) {
    Misc helpers used by more than one view
    -------------------------------------------------------------------------- */
 
-
-export function phaseOf(subCode) {
-  return data.phases.sub[subCode];
-}
 
 
 
@@ -661,7 +707,7 @@ export function tooNarrow(what) {
     <div class="narrow-note__actions">
       <button type="button" class="btn btn--primary" data-act="tab" data-val="start">${t('Zur Einstiegsseite')}</button>
       <button type="button" class="btn" data-act="tab" data-val="dashboard">${t('Dashboard ansehen')}</button>
-      <button type="button" class="btn" data-act="tab" data-val="verlauf">${t('Verlauf ansehen')}</button>
+      <button type="button" class="btn" data-act="tab" data-val="history">${t('Verlauf ansehen')}</button>
     </div>
   </div>`;
 }

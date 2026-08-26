@@ -19,14 +19,30 @@ export const data = {};
    State
    -------------------------------------------------------------------------- */
 
+/*
+ * The closed sets the URL and the state share. readUrl() accepts nothing else,
+ * so a hand-edited hash cannot put the app into a state a view has no branch
+ * for — `#?group=colour` used to reach the toolbar and throw.
+ */
+export const VOCAB = {
+  tab:     ['start', 'overview', 'schedule', 'dashboard', 'history', 'api', 'export'],
+  sheet:   ['portrait', 'landscape'],
+  lang:    ['de', 'en', 'fr', 'it'],
+  scale:   ['year', 'quarter', 'month'],
+  unit:    ['pct', 'fte'],
+  sortDir: ['asc', 'desc'],
+  group:   ['portfolio', 'lead', 'phase', 'none'],
+  bi:      ['general', 'people']
+};
+
 const DEFAULT_STATE = {
-  tab: 'start',            // start | uebersicht | termine | dashboard | verlauf | api | export
-  sheet: 'hoch',           // print layout: hoch | quer
-  lang: 'de',              // de | en
-  scale: 'quartal',        // jahr | quartal | monat
+  tab: 'start',
+  sheet: 'portrait',
+  lang: 'de',
+  scale: 'quarter',
   periodOffset: 0,         // how far the visible window has been stepped
   unit: 'pct',             // pct | fte
-  sort: 'projekt',         // any key in SORT_KEYS, or q0…q7 for one quarter
+  sort: 'project',         // any key in SORT_KEYS, or q0…q7 for one quarter
   sortDir: 'asc',          // asc | desc
   group: 'portfolio',      // portfolio | lead | phase | none
   search: '',
@@ -51,7 +67,7 @@ const DEFAULT_STATE = {
   menuSearch: '',          // filter inside the open dropdown
   modal: null,             // { type: 'project'|'rebook', ... }
   footDetails: false,
-  bi: 'allgemein',         // dashboard section: allgemein | personen
+  bi: 'general',           // dashboard section, see VOCAB.bi
   pSort: 'peak',           // person table: name | role | employment | projects | peak | q0…q7
   pDir: 'desc',
   showAll: { attention: false, milestones: false },   // landing cards, expanded
@@ -100,26 +116,28 @@ export function closeOverlays() {
    -------------------------------------------------------------------------- */
 
 
+/** A sort key is a column name or a quarter, addressed as q0…q7. */
+const isSortKey = v => v in SORT_KEYS || /^q\d+$/.test(v);
+
 export function readUrl() {
   const raw = location.hash.replace(/^#\/?\??/, '');
   const p = new URLSearchParams(raw);
   const list = k => (p.get(k) || '').split(',').filter(Boolean);
   const patch = {};
-  if (p.get('tab')) patch.tab = p.get('tab');
-  if (p.get('sheet')) patch.sheet = p.get('sheet');
-  if (p.get('lang')) patch.lang = p.get('lang');
-  if (p.get('unit')) patch.unit = p.get('unit');
-  if (p.get('scale')) patch.scale = p.get('scale');
-  if (p.get('von')) patch.periodOffset = Number(p.get('von')) || 0;
-  if (p.get('sort')) patch.sort = p.get('sort');
-  if (p.get('dir')) patch.sortDir = p.get('dir');
-  if (p.get('group')) patch.group = p.get('group');
-  if (p.get('bi')) patch.bi = p.get('bi');
+
+  // An unknown value is dropped rather than passed on: the default it falls
+  // back to is always renderable.
+  for (const [key, allowed] of Object.entries(VOCAB)) {
+    const v = p.get(key === 'sortDir' ? 'dir' : key);
+    if (v && allowed.includes(v)) patch[key] = v;
+  }
+  if (isSortKey(p.get('sort'))) patch.sort = p.get('sort');
+  if (p.get('from')) patch.periodOffset = Math.max(0, Number(p.get('from')) || 0);
   if (p.has('q')) patch.search = p.get('q');
   if (p.has('phase')) patch.phases = list('phase');
   if (p.has('lead')) patch.leads = list('lead');
-  if (p.has('teilportfolio')) patch.portfolios = list('teilportfolio');
-  if (p.get('ueberlast') === '1') patch.overloadOnly = true;
+  if (p.has('portfolio')) patch.portfolios = list('portfolio');
+  if (p.get('overload') === '1') patch.overloadOnly = true;
   if (p.get('edit') === '1') patch.edit = true;
   return patch;
 }
@@ -133,17 +151,17 @@ export function writeUrl() {
   if (state.tab === 'export') p.set('sheet', state.sheet);
   if (state.lang !== 'de') p.set('lang', state.lang);
   if (state.unit !== 'pct') p.set('unit', state.unit);
-  if (state.scale !== 'quartal') p.set('scale', state.scale);
-  if (state.periodOffset) p.set('von', String(state.periodOffset));
-  if (state.sort !== 'projekt') p.set('sort', state.sort);
+  if (state.scale !== 'quarter') p.set('scale', state.scale);
+  if (state.periodOffset) p.set('from', String(state.periodOffset));
+  if (state.sort !== 'project') p.set('sort', state.sort);
   if (state.sortDir !== 'asc') p.set('dir', state.sortDir);
   if (state.group !== 'portfolio') p.set('group', state.group);
-  if (state.tab === 'dashboard' && state.bi !== 'allgemein') p.set('bi', state.bi);
+  if (state.tab === 'dashboard' && state.bi !== 'general') p.set('bi', state.bi);
   if (state.search) p.set('q', state.search);
   if (state.phases.length) p.set('phase', state.phases.join(','));
   if (state.leads.length) p.set('lead', state.leads.join(','));
-  if (state.portfolios.length) p.set('teilportfolio', state.portfolios.join(','));
-  if (state.overloadOnly) p.set('ueberlast', '1');
+  if (state.portfolios.length) p.set('portfolio', state.portfolios.join(','));
+  if (state.overloadOnly) p.set('overload', '1');
   if (state.edit) p.set('edit', '1');
   const next = '#?' + p.toString();
   if (next !== location.hash) history.replaceState(null, '', next);
@@ -176,7 +194,19 @@ export async function load() {
   data.portfoliosById = Object.fromEntries(data.meta.portfolios.map(p => [p.id, p]));
   data.quarters = data.meta.quarters;
   data.quarterIndex = Object.fromEntries(data.quarters.map((q, i) => [q.id, i]));
+
+  // Grouped once here rather than scanned per row in four different views.
+  data.milestonesByProject = groupBy(data.milestones.items, m => m.projectId);
+  data.projectsByLead = groupBy(data.projects, p => p.leadId ?? 'none');
+  data.milestoneCatalog = Object.fromEntries(data.milestones.catalog.map(c => [c.code, c]));
   return data;
+}
+
+/** Bucket a list by a key, preserving the order within each bucket. */
+function groupBy(list, keyOf) {
+  const out = {};
+  for (const item of list) (out[keyOf(item)] ??= []).push(item);
+  return out;
 }
 
 /* -----------------------------------------------------------------------------
@@ -237,8 +267,7 @@ export function loadDelta(personId, q) {
   const person = data.peopleById[personId];
   if (!person) return 0;
   let delta = 0;
-  for (const p of data.projects) {
-    if (p.leadId !== personId) continue;
+  for (const p of data.projectsByLead[personId] ?? []) {
     const o = state.overrides[`${p.id}:${q}`];
     if (o !== undefined) delta += (o - p.demand[q]) / person.employment * 100;
   }
@@ -320,15 +349,23 @@ export function heatStep(v) {
 
 /** Traffic light for the row's project lead, based on the current quarter. */
 export function ampel(personId, q = 0) {
-  if (!personId) {
+  const person = data.peopleById[personId];
+  if (!person) {
     return { key: 'none', word: 'ohne Projektleitung', title: 'Keine Projektleitung zugewiesen — keine Ampel' };
   }
-  const person = data.peopleById[personId];
   const pct = personUtilisation(personId, q);
   const key = pct > 100 ? 'over' : pct >= 95 ? 'tight' : 'ok';
   const word = key === 'over' ? 'Überlast' : key === 'tight' ? 'knapp' : 'im Rahmen';
   const label = data.quarters[q].label;
   return { key, pct, word, title: `${person.name}: ${pct} % der Anstellung in ${label} — ${word}` };
+}
+
+/**
+ * A SIA sub-phase by its code. An unknown code returns a stand-in rather than
+ * undefined, so one bad record cannot take a whole view down.
+ */
+export function phaseOf(subCode) {
+  return data.phases.sub[subCode] ?? { label: String(subCode ?? '—'), main: null };
 }
 
 /* -----------------------------------------------------------------------------
@@ -392,7 +429,7 @@ function buildPeriods() {
   const qs = data.quarters;
   const off = state.periodOffset;
 
-  if (state.scale === 'jahr') {
+  if (state.scale === 'year') {
     const years = [...new Set(qs.map(q => q.year))];
     return years.map(year => {
       const idx = qs.map((q, i) => (q.year === year ? i : -1)).filter(i => i >= 0);
@@ -400,7 +437,7 @@ function buildPeriods() {
     });
   }
 
-  if (state.scale === 'monat') {
+  if (state.scale === 'month') {
     const out = [];
     // Twelve months, stepped a quarter at a time.
     const start = Math.max(0, Math.min(off, qs.length - 4));
@@ -437,7 +474,7 @@ export function periodValue(values, period) {
 
 /** How many quarters the window can still be stepped. */
 export function canStep(dir) {
-  const max = data.quarters.length - (state.scale === 'jahr' ? data.quarters.length : 1);
+  const max = data.quarters.length - (state.scale === 'year' ? data.quarters.length : 1);
   return dir < 0 ? state.periodOffset > 0 : state.periodOffset < max;
 }
 
@@ -447,7 +484,7 @@ export function canStep(dir) {
  */
 export const SORT_KEYS = {
   id:        { label: 'ID', numeric: false, value: p => p.number },
-  projekt:   { label: 'Projekt', numeric: false, value: p => p.title },
+  project:   { label: 'Projekt', numeric: false, value: p => p.title },
   phase:     { label: 'SIA-Phase', numeric: false, value: p => p.phase },
   lead:      { label: 'Projektleitung', numeric: false, value: p => (p.leadId ? data.peopleById[p.leadId].name : '\uffff') },
   portfolio: { label: 'Teilportfolio', numeric: false, value: p => data.portfoliosById[p.portfolio].label },
@@ -463,11 +500,14 @@ export function sortKey(key = state.sort) {
     const i = Number(q[1]);
     return { label: data.quarters[i]?.label ?? key, numeric: true, value: p => cellValue(p, i) };
   }
-  return SORT_KEYS[key] ?? SORT_KEYS.projekt;
+  return SORT_KEYS[key] ?? SORT_KEYS.project;
 }
 
 /** Numbers read high-to-low by default, names A–Z. */
 export const defaultDir = key => (sortKey(key).numeric ? 'desc' : 'asc');
+
+/** One collator for the whole app: localeCompare builds a fresh one per call. */
+const collator = new Intl.Collator('de');
 
 export function sortProjects(list) {
   const { numeric, value } = sortKey();
@@ -475,7 +515,7 @@ export function sortProjects(list) {
   return [...list].sort((a, b) => {
     const x = value(a);
     const y = value(b);
-    const cmp = numeric ? x - y : String(x).localeCompare(String(y), 'de');
+    const cmp = numeric ? x - y : collator.compare(String(x), String(y));
     return cmp * sign;
   });
 }
@@ -491,7 +531,7 @@ export function groupProjects(list = filteredProjects()) {
   };
   const labelOf = key => {
     if (state.group === 'lead') {
-      return key === 'none' ? `(${t('nicht zugewiesen')})` : data.peopleById[key].name;
+      return key === 'none' ? `(${t('nicht zugewiesen')})` : (data.peopleById[key]?.name ?? key);
     }
     if (state.group === 'phase') {
       return t(data.phases.main.find(m => m.id === key)?.label ?? key);
@@ -565,7 +605,7 @@ export function milestones() {
     .filter(m => projectIds.has(m.projectId))
     .map(m => {
       const project = data.projectsById[m.projectId];
-      const cat = data.milestones.catalog.find(c => c.code === m.code);
+      const cat = data.milestoneCatalog[m.code];
       return {
         ...m,
         project,
@@ -603,7 +643,7 @@ export function personRows() {
   return data.people.map(person => {
     const values = cols.map(col =>
       Math.round(periodValue(person.baseLoad, col) / person.employment * 100));
-    const leads = data.projects.filter(p => p.leadId === person.id).length;
+    const leads = data.projectsByLead[person.id]?.length ?? 0;
     return {
       person, values, leads,
       peak: leads ? Math.max(...values) : null,
@@ -627,7 +667,7 @@ export function sortPersonRows(rows) {
   const dir = state.pDir === 'asc' ? 1 : -1;
   return [...rows].sort((a, b) => {
     const x = value(a), y = value(b);
-    return (typeof x === 'string' ? x.localeCompare(y) : x - y) * dir;
+    return (typeof x === 'string' ? collator.compare(x, y) : x - y) * dir;
   });
 }
 
@@ -669,7 +709,7 @@ export function kpis() {
         ? '▲ ' + over.slice(0, 3).map(p => `${p.shortName} ${personLoad(p.id, 0)}`).join(' · ')
         : 'alle innerhalb der Anstellung',
       more: over.length > 3
-        ? { label: `${over.length - 3} weitere`, act: 'scroll-to', val: 'card-personen' }
+        ? { label: `${over.length - 3} weitere`, act: 'scroll-to', val: 'card-people' }
         : null,
       alert: over.length > 0
     },

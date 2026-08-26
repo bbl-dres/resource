@@ -12,6 +12,7 @@ import {
 import {
   html, raw, icons, pageHeader, pageActions, toolbar, activeFilterRow,
   columnChart, barList, kpiStrip, segmented,
+  tokenPx, tone, yearRule, pinCls, pinLeft, sortableHead
 } from './ui.js';
 
 /* =============================================================================
@@ -20,12 +21,12 @@ import {
 
 /* The KPI strip and the filters hold for both sections, so they stay above them. */
 const BI_SECTIONS = [
-  { value: 'allgemein', label: 'Allgemein' },
-  { value: 'personen', label: 'Personen' }
+  { value: 'general', label: 'Allgemein' },
+  { value: 'people', label: 'Personen' }
 ];
 
 export function renderDashboard() {
-  const section = BI_SECTIONS.some(s => s.value === state.bi) ? state.bi : 'allgemein';
+  const section = BI_SECTIONS.some(s => s.value === state.bi) ? state.bi : 'general';
 
   return html`
     ${pageHeader({
@@ -38,7 +39,7 @@ export function renderDashboard() {
       ${activeFilterRow()}
       ${kpiStrip()}
       <div class="bibar">${segmented(BI_SECTIONS, section, 'bi')}</div>
-      ${section === 'personen' ? personSection() : html`<div class="bi-grid">
+      ${section === 'people' ? personSection() : html`<div class="bi-grid">
         ${utilisationCard()}
         ${phaseCountCard()}
         ${portfolioCard()}
@@ -59,44 +60,39 @@ export function renderDashboard() {
  */
 const personHeat = v => (v === 0 ? 0 : v <= 80 ? 1 : v <= 100 ? 2 : v <= 150 ? 3 : 4);
 
-/** Fixed widths in px, so every row can be told exactly how wide the track is. */
-const P_COL = { name: 150, role: 130, employment: 70, projects: 60, peak: 76, quarter: 72 };
+/** The frozen columns of the person table, in order, with their width token. */
+const PERSON_COLS = [
+  { key: 'name', token: '--person-col-name', grow: true },
+  { key: 'role', token: '--person-col-role' },
+  { key: 'employment', token: '--person-col-employment' },
+  { key: 'projects', token: '--person-col-projects' },
+  { key: 'peak', token: '--person-col-peak' }
+];
 
 function personLayout(cols) {
-  const lead = [
-    ['name', `minmax(${P_COL.name}px, 1fr)`], ['role', `${P_COL.role}px`],
-    ['employment', `${P_COL.employment}px`], ['projects', `${P_COL.projects}px`],
-    ['peak', `${P_COL.peak}px`]
-  ];
+  const parts = [];
   const sticky = {};
   let offset = 0;
-  for (const [key] of lead) { sticky[key] = offset; offset += P_COL[key]; }
+  for (const c of PERSON_COLS) {
+    const w = tokenPx(c.token);
+    sticky[c.key] = offset;
+    offset += w;
+    parts.push(c.grow ? `minmax(${w}px, 1fr)` : `${w}px`);
+  }
   sticky.width = offset;
-  sticky.last = 'peak';
+  sticky.last = PERSON_COLS.at(-1).key;
 
-  return {
-    tpl: `${lead.map(([, track]) => track).join(' ')} repeat(${cols.length}, minmax(var(--grid-quarter), 1fr))`,
-    minWidth: offset + P_COL.quarter * cols.length,
-    sticky
-  };
+  const quarterW = tokenPx('--grid-quarter');
+  parts.push(`repeat(${cols.length}, minmax(${quarterW}px, 1fr))`);
+  return { tpl: parts.join(' '), minWidth: offset + quarterW * cols.length, sticky };
 }
-
-const pinCls = (s, k, extra = '') =>
-  `${extra} is-frozen ${k === s.last ? 'is-frozen-last' : ''}`.trim();
 
 /** A sortable header cell for the person table. */
-function personHead(key, label, sticky, cls = '') {
-  const active = state.pSort === key;
-  const frozen = sticky[key] !== undefined;
-  return html`<span class="pcell--text ${cls} ${frozen ? pinCls(sticky, key) : ''} ${active ? 'is-sorted' : ''}"
-      style="${frozen ? `left:${sticky[key]}px` : ''}">
-    <button type="button" class="sorthead" data-act="sort-person" data-val="${key}"
-            aria-label="${t('Sortieren nach')} ${label}">
-      <span class="sorthead__label">${label}</span>
-      <span class="sorthead__dir" aria-hidden="true">${active ? (state.pDir === 'asc' ? '↑' : '↓') : ''}</span>
-    </button>
-  </span>`;
-}
+const personHead = (key, label, sticky, cls = '') => sortableHead({
+  key, label, act: 'sort-person', cls: pinCls(sticky, key, cls),
+  style: pinLeft(sticky, key),
+  active: state.pSort === key, ascending: state.pDir === 'asc'
+});
 
 function personSection() {
   const cols = periods();
@@ -106,7 +102,9 @@ function personSection() {
   // own contract, quarter by quarter.
   const overPerCol = cols.map((_, i) => rows.filter(r => r.leads && r.values[i] > 100).length);
 
-  const pin = key => raw(`${pinCls(sticky, key)}" style="left:${sticky[key]}px`);
+  /* The frozen lead cells differ only in their class and their content. */
+  const leadCell = (key, cls, body) => html`<span class="pcell ${cls} ${pinCls(sticky, key)}"
+      style="${pinLeft(sticky, key)}">${body}</span>`;
 
   return html`<section class="grid-card">
     <div class="scrollbox">
@@ -120,24 +118,23 @@ function personSection() {
             ${personHead('projects', t('Proj.'), sticky, 'pcell--num')}
             ${personHead('peak', t('Spitze'), sticky, 'pcell--num')}
             ${cols.map((col, i) => personHead(`q${i}`, col.short,
-              sticky, `pcell--num ${col.isNow ? 'is-today' : ''} ${col.yearStart ? 'is-yearstart' : ''}`))}
+              sticky, `pcell--num ${col.isNow ? 'is-today' : ''} ${yearRule(col)}`))}
           </div>
 
           ${rows.map(r => html`<div class="prow" style="grid-template-columns:${raw(tpl)}">
-            <span class="pcell pcell--title ${pin('name')}">
-              <button type="button" class="prow__title" data-act="filter-lead" data-val="${r.person.id}"
-                      title="${t('Übersicht auf diese Person filtern')}">${r.person.name}</button>
-            </span>
-            <span class="pcell pcell--phase ${pin('role')}">${t(r.person.role)}</span>
-            <span class="pcell pcell--target ${pin('employment')}">${r.person.employment} %</span>
-            <span class="pcell pcell--target ${pin('projects')}">${r.leads || '—'}</span>
-            <span class="pcell pcell--target ${r.peak > 100 ? 'is-over' : ''} ${pin('peak')}">${
-              r.peak === null ? '—' : `${r.peak} %`}</span>
+            ${leadCell('name', 'pcell--title', html`<button type="button" class="prow__title"
+                data-act="filter-lead" data-val="${r.person.id}"
+                title="${t('Übersicht auf diese Person filtern')}">${r.person.name}</button>`)}
+            ${leadCell('role', 'pcell--phase', t(r.person.role))}
+            ${leadCell('employment', 'pcell--target', `${r.person.employment} %`)}
+            ${leadCell('projects', 'pcell--target', r.leads || '—')}
+            ${leadCell('peak', `pcell--target ${r.peak > 100 ? 'is-over' : ''}`,
+              r.peak === null ? '—' : `${r.peak} %`)}
             ${cols.map((col, i) => {
               const v = r.values[i];
               const label = r.leads ? `${v} %` : '—';
               return html`<span class="pcell pcell--val ${r.leads ? `heat-${personHeat(v)}` : ''}
-                  ${r.leads && v > 100 ? 'is-warn' : ''} ${col.yearStart ? 'is-yearstart' : ''}"
+                  ${r.leads && v > 100 ? 'is-warn' : ''} ${yearRule(col)}"
                   title="${r.person.name}, ${col.label}: ${label} ${t('der Anstellung')}">${label}</span>`;
             })}
           </div>`)}
@@ -151,7 +148,7 @@ function personSection() {
                 data.people.reduce((a, p) => a + p.employment, 0)} % ${t('Anstellung')}</span>
             </div>
             ${overPerCol.map((v, i) => html`<span class="pcell pcell--load is-${v > 0 ? 'danger' : 'neutral'}
-                ${cols[i].yearStart ? 'is-yearstart' : ''}">
+                ${yearRule(cols[i])}">
               <span class="pcell__pct">${v}</span>
             </span>`)}
           </div>
@@ -186,20 +183,13 @@ function biCard(id, title, subtitle, body, { full = false, wide = false } = {}) 
   </section>`;
 }
 
-function toneFor(pct) {
-  if (pct >= 100) return 'ueberlast';
-  if (pct >= 95) return 'knapp';
-  if (pct >= 85) return 'ok';
-  return 'frei';
-}
-
 function utilisationCard() {
   const tot = totals();
   const util = data.quarters.map((q, i) => ({
     value: tot.utilisation[i],
     label: `${tot.utilisation[i]} %`,
     axis: `${q.short}/${String(q.year).slice(2)}`,
-    tone: toneFor(tot.utilisation[i]),
+    tone: tone(tot.utilisation[i]),
     title: `${q.label} — ${t(loadStatus(tot.utilisation[i]).label)}`
   }));
 
@@ -257,7 +247,7 @@ function personCard() {
       noteTone: over ? 'danger' : null
     };
   });
-  return biCard('personen', 'Auslastung nach Person',
+  return biCard('people', 'Auslastung nach Person',
     `${q0.label} · ${t('Balken gegen die eigene Anstellung')}`,
     barList(rows, { max: Math.max(...rows.map(r => r.value)) * 1.1 }));
 }
@@ -271,7 +261,7 @@ function portfolioCard() {
     })
     .filter(r => r.value > 0)
     .sort((a, b) => b.value - a.value);
-  return biCard('teilportfolio', 'Bedarf nach Teilportfolio',
+  return biCard('portfolio', 'Bedarf nach Teilportfolio',
     `${data.quarters[0].label} · ${t('Pensum in %')}`,
     barList(rows, { gap: 10 }), { wide: true });
 }
@@ -302,7 +292,7 @@ function creditPhaseCard() {
    Verlauf — the change log
    ========================================================================== */
 
-export function renderVerlauf() {
+export function renderHistory() {
   const rows = visibleChanges();
 
   return html`
