@@ -1,245 +1,179 @@
-# Ressourcenplanung — Prototyp
+# BBL Resource Planning (Ressourcenplanung)
 
-A working prototype of the resource-planning application sketched in
-[docs/wireframes/260825_Portfolio Resource Management](docs/wireframes/260825_Portfolio%20Resource%20Management).
+<p align="center">
+  <a href="https://bbl-dres.github.io/resource/">
+    <img src="assets/resource-planning-hero.jpg" width="100%" alt="Concept illustration of a building portfolio connected to a quarterly resource plan, project milestones and team capacity"/>
+  </a>
+</p>
 
-No build step, no dependencies: vanilla ES modules, two stylesheets, static JSON.
-It is designed to be served straight from GitHub Pages.
+[![Demo on GitHub Pages](https://img.shields.io/badge/demo-GitHub%20Pages-2ea44f?logo=github&logoColor=white)](https://bbl-dres.github.io/resource/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+![Status: prototype](https://img.shields.io/badge/status-prototype-orange.svg)
+![Build: none](https://img.shields.io/badge/build-none-brightgreen.svg)
 
-> All content is fictional and for demonstration only.
+> [!CAUTION]
+> **This is an unofficial prototype for demonstration purposes only.**
+> All people, projects and operational data are fictional. Changes exist only in the current browser session, the API screen documents a target contract rather than a live service, and the application is not intended for production use.
 
----
+A German-first resource-planning prototype for the [Federal Office for Buildings and Logistics (BBL)](https://www.bbl.admin.ch). It connects construction-project demand, schedules, milestones, project leads and team capacity in one portfolio view.
 
-## Running it
+## Demo
 
-The app reads its data with `fetch`, which browsers block on `file://`.
-Serve the folder over HTTP:
+**Live app:** https://bbl-dres.github.io/resource/
+
+No installation is required for the hosted demo. The repository itself is a static site and can be served by any basic HTTP server.
+
+## Scope
+
+### Screens
+
+| Screen | Route | Purpose |
+|---|---|---|
+| Start | `#?tab=start` | Due items, upcoming milestones, overloads, utilisation and recent changes |
+| Overview | `#?tab=overview` | Project demand across eight quarters, with capacity and utilisation totals |
+| Schedule | `#?tab=schedule` | Phase bars, milestone diamonds, a today marker and the shared capacity band |
+| Dashboard | `#?tab=dashboard` | Portfolio KPIs, utilisation, free capacity, phase and credit analysis, and a person-by-period view |
+| History | `#?tab=history` | Paginated change history for prototype-owned fields |
+| API | `#?tab=api` | Read-only Swagger UI for the OpenAPI 3.1 target contract |
+| Print layout | `#?tab=export` | Preview, direct PDF download and browser printing for the Overview and Schedule reports |
+
+### Core interactions
+
+- Edit future-quarter demand in place; the current quarter is locked, and a reason is required when a change creates overload.
+- Assign a project lead or use the rebooking flow with a searchable, keyboard-accessible person picker.
+- Filter by SIA phase, project lead, sub-portfolio, overload status or text; group and sort the remaining projects.
+- Switch between year, quarter and month scales and between percent and FTE units. Rates are averaged across years and repeated across months rather than summed.
+- Recalculate portfolio demand, capacity, utilisation, overload signals and dependent dashboard views from the active state.
+- Export the visible scope to semicolon-separated CSV or a native `.xlsx` workbook, and download the rendered reports as PDF.
+- Share hash-based views and switch the interface between German, French, Italian and English.
+
+### Print and data export
+
+The print layout produces two reports from the same filtered portfolio:
+
+- **Overview** — project demand by quarter, group totals, capacity and utilisation.
+- **Schedule** — project phases and milestones over the same quarter axis.
+
+Both reports support A4, A3, A2, A1 and A0 in portrait or landscape orientation. The screen preview offers Fit, 50%, 100%, 200% and 400% zoom. A small local writer translates the rendered sheets into a directly downloadable PDF at their physical page sizes; browser printing remains available with a matching runtime `@page` rule.
+
+## Technical overview
+
+- Static single-page application built with vanilla JavaScript ES modules, HTML and layered CSS.
+- No package installation, runtime framework or build step; Swagger UI and Lucide assets are vendored locally.
+- Ten JSON fixtures load at startup. The OpenAPI document and Swagger UI load only when the API screen is opened.
+- `js/store.js` owns application state, URL serialization and derived portfolio figures.
+- Views are pure rendering functions. The `html\`\`` tagged template escapes interpolated values, while delegated `data-act` handlers in `js/app.js` own interaction.
+- Rendering replaces `#app` as a whole and restores focus, caret and scroll state afterwards.
+- Layout tokens, semantic color roles and print geometry are centralized in `css/tokens.css` and `css/main.css`.
+- Planning grids progressively drop optional frozen columns and expose a horizontally scrollable time axis on narrower screens.
+
+## Run locally
+
+The app loads JSON with `fetch()`, so opening `index.html` through `file://` will not work. From the repository root, run one of:
 
 ```bash
+# Python
 python -m http.server 8000
-# or
+
+# Node.js
 npx serve .
+
+# PHP
+php -S localhost:8000
 ```
 
-Then open <http://localhost:8000>.
+Then open <http://localhost:8000/>.
 
-On GitHub Pages, enable Pages for the repository root — `index.html`, `css/`, `js/`,
-`data/` and `assets/` are all that is needed. A `.nojekyll` file keeps Pages from
-running the content through Jekyll.
+## Project structure
 
----
-
-## What is here
-
-| Screen | Route | What it does |
-|---|---|---|
-| Einstieg (landing) | `#?tab=start` | What is due today: KPI entries, next milestones, who is overbooked, utilisation by quarter, recent changes. Every card leads into a tab. |
-| Übersicht | `#?tab=overview` | The pensum grid: projects × eight quarters, with a capacity footer. Switch on **Bearbeiten** to edit a cell. |
-| Termine | `#?tab=schedule` | The bar plan: phase bars, milestone diamonds and a today line, with the same capacity band the Übersicht carries in its footer. Same time scale and period stepper as the Übersicht. |
-| Dashboard | `#?tab=dashboard&bi=…` | The KPI strip, then two sections: **Allgemein** (utilisation and free capacity over time, project count by phase, demand by portfolio, committed credit by year and by phase) and **Personen** (utilisation per person and quarter as a grid, sortable, with a peak column and a per-quarter count of people over their contract). |
-| Verlauf | `#?tab=history` | The immutable change log for app-owned fields. |
-| API | `#?tab=api` | Swagger UI over `data/openapi.json` — a real OpenAPI 3.1 document: 42 operations in nine groups covering full CRUD, with `ETag`/`If-Match` concurrency, `Idempotency-Key` on creates and RFC 9457 problem details. Reached from the **API** link in the footer. |
-| Drucklayout | `#?tab=export` | The PDF export, every page of it: A4 portrait carries four quarters and 24 rows per sheet, landscape all eight quarters and 14 rows. 111 projects come out as 10 portrait sheets or 8 landscape ones, each with letterhead, legend, document ID and «Blatt x von y»; the totals close each quarter block. The **Attribute** menu applies here too: any of the ten grid columns can be added to the sheet, and the pagination re-measures itself so a title that wraps to two lines never pushes a sheet past the page. Reached from **Exportieren → Als PDF exportieren**. |
-
-### Interactions that actually work
-
-- **Editing.** Turn on *Bearbeiten*, click a pensum cell, adjust with the stepper or type a value.
-  The popover shows what the change does to the lead's utilisation, and a **reason is required**
-  when the change pushes someone over their contracted percentage. The current quarter is locked.
-- **Live recalculation.** Applying an edit moves the demand total, the utilisation row, the
-  capacity band, the KPI strip and every dashboard aggregate — nothing is hard-coded.
-- **Umbuchen.** From the edit popover: von / Pensum / Dauer, a person picker that filters as you
-  type and answers to the arrow keys, and a reason that is mandatory for every rebooking.
-  One entry lands in the change log carrying both sides.
-- **Filtering.** Phase, project lead, location, free-text search and *Nur Überlast*, with removable
-  chips. Filters survive a tab switch and are written to the URL.
-- **Grouping and sorting**, column and unit toggles (`%` ↔ FTE), *Soll-Pensum* and *Verlauf* columns.
-- **Expandable search** in the header and in the toolbar: click the icon, the field grows in place.
-  The two open independently and share the query.
-- **Menus that behave like menus.** The project-lead menu filters as you type, floats selected
-  entries to the top and scrolls at 214px. Arrow keys roam, `Escape` closes and hands focus back
-  to the trigger, and panels stay inside the window. *Mir zugewiesen* sits in the toolbar itself.
-- **A person's utilisation over time.** The Dashboard's *Personen* section reuses the pensum grid
-  with people as the rows: contract, project count, peak, and one column per period. A peak column
-  because a single quarter misleads — 21 people are over 100 % today, 35 at some point in the window.
-- **Frozen master data.** Every lead column — ID, project, phase, lead, Ampel, budget — holds its
-  place while only the time axis scrolls under it. There is no scrollbar: the arrows beside
-  *Heute* step the window, and the rows fade out at the right edge where the axis continues.
-- **Time scale.** Jahr / Quartal / Monat with a period stepper. A pensum is a rate, so a year is
-  the average of its quarters and a month carries its quarter's figure — never a sum.
-- **Assigning a lead.** In edit mode the Projektleitung cell opens a searchable picker; every
-  assignment lands in the change log.
-- **Sortable columns.** Clicking a header sorts by it; clicking the active one flips the
-  direction. The sort dropdown and the headers read the same state.
-- **Teilen** opens a dialog with the shareable URL for the current view.
-- **CSV and Excel export.** Both write the grid exactly as it stands on screen — same columns,
-  filters, grouping, sorting and time scale. The CSV is semicolon-separated with a UTF-8 BOM so
-  Excel opens it natively in a de-CH locale; the `.xlsx` is a real workbook with number formats,
-  column widths and the same frozen pane, written without a library.
-- **CSV and Excel export.** Both write the grid exactly as it stands on screen — same columns,
-  filters, grouping, sorting and time scale. The CSV is semicolon-separated with a UTF-8 BOM so
-  Excel opens it natively in a de-CH locale; the `.xlsx` is a real workbook with number formats,
-  column widths and the same frozen pane, written without a library.
-- **Four languages.** The language menu translates the interface live into English, French and
-  Italian. The dictionary is keyed by the German source string, so one entry carries all three
-  translations side by side and a translation team reads it without touching the code.
-- **URL state.** Tab, view, filters, grouping, sorting, unit and search live in the hash, so any
-  view is shareable and the back button behaves.
-
----
-
-## Layout of the repository
-
-```
-index.html            the shell — links the stylesheets and boots js/app.js
+```text
+index.html                 Application shell; boots js/app.js
 css/
-  tokens.css          design tokens: colours, type, spacing, radii, layout metrics
-  main.css            all component styles, referencing the semantic tokens only
+  tokens.css               Primitive and semantic design tokens
+  main.css                 Components, responsive layout and print styles
 js/
-  app.js              bootstrap, hash routing, delegated event dispatch, rendering
-  store.js            data loading, application state, URL sync, all derived figures
-  ui.js               html`` templating, icons, and the shared shell components
-  columns.js          the project columns, declared once for all six consumers
-  icons.js            loads the Lucide SVGs into one in-document sprite
-  views-overview.js   landing page, pensum grid, edit popover
-  views-modals.js     the dialogs: project, phase, milestone, assign, rebook, share
-  views-schedule.js   Termine: the bar plan and its capacity band
-  views-analysis.js   Dashboard and Verlauf
-  views-docs.js       Swagger UI mount and the PDF print layout
-  export.js           the CSV and XLSX writers
-data/                 static mock data, see below
-tools/
-  generate-portfolio.js   regenerates data/ at portfolio scale (node tools/generate-portfolio.js)
-assets/
-  swiss-logo-flag.svg
-  icons/              Lucide icons (ISC) + icons.json manifest
+  app.js                   Bootstrap, rendering and delegated interaction
+  store.js                 Data loading, state, URL sync and derived figures
+  ui.js                    Escaped HTML template and shared UI components
+  columns.js               Shared project-column definitions
+  icons.js                 In-document Lucide SVG sprite
+  views-overview.js        Landing page, demand grid and edit popover
+  views-schedule.js        Gantt-style schedule and capacity band
+  views-analysis.js        Dashboard and history
+  views-modals.js          Project, milestone, assignment and rebooking dialogs
+  views-docs.js            Swagger UI and printable reports
+  export.js                CSV and XLSX writers
+  pdf.js                   Client-side PDF writer for rendered sheets
+data/                      Static fictional fixtures and OpenAPI document
+assets/                    Hero, brand mark, icons and vendored Swagger UI
+docs/                      Dated design, domain and code-review records
+tools/generate-portfolio.js  Portfolio-scale fixture generator
 ```
 
-### How rendering works
+## Data snapshot
 
-Views are pure functions that return HTML through a tagged template literal.
-`html\`\`` escapes every interpolation unless it is already markup, so data can never
-break out into the page. Interaction happens through `data-act` attributes that
-`app.js` dispatches, which keeps the views free of event wiring.
-
-State changes re-render `#app` wholesale. With eleven rows that is far below a frame,
-and focus, caret position and scroll offset are restored afterwards, so typing and
-tabbing survive a re-render.
-
-Two rules follow from how the escaping works:
-
-- A boolean renders to the empty string, so that `` cond && html`…` `` renders nothing. The one
-  exception is an ARIA slot, where `html` spells the boolean out — `aria-expanded=""` is not
-  "collapsed", it is invalid.
-- `attr(cond, 'disabled')` emits a raw attribute fragment; interpolating that string
-  directly would escape it and the attribute would silently never apply.
-
-### Adding an icon
-
-Drop the Lucide SVG into `assets/icons/` and add its name to `assets/icons/icons.json`.
-`js/icons.js` fetches the manifest at boot and folds every file into one `<symbol>` sprite.
-
----
-
-## The data
-
-Everything lives in `data/` as plain JSON.
-
-| File | Contents |
+| File | Checked-in contents |
 |---|---|
-| `meta.json` | Organisation, current user, today's date, the eight quarters, the portfolios |
-| `people.json` | 46 people: contracted percentage and booked load per quarter |
-| `capacity.json` | Gross capacity, absences and externally contracted work per quarter |
-| `projects.json` | 111 projects: phase, lead, budget, demand per quarter, target, Gantt bars |
-| `milestones.json` | 189 gates with planned and forecast dates and status |
-| `changes.json` | The change log — 9 hand-written entries plus 240 generated over the ten weeks before today |
-| `phases.json` | SIA 112 main phases and sub-phases |
-| `dashboard.json` | The one dashboard series that is not derivable (budget by year) |
-| `i18n.json` | 297 German source strings, each with its EN, FR and IT translation |
-| `print.json` | The print letterhead, legend and document metadata |
-| `openapi.json` | The OpenAPI 3.1 document Swagger UI renders — 20 paths, 42 operations |
+| `meta.json` | Organisation, fictional user, eight-quarter axis and seven sub-portfolios |
+| `projects.json` | 111 projects with demand, target, credit, lead and schedule bars |
+| `people.json` | 46 people with contracted percentage and eight-quarter base load |
+| `capacity.json` | Gross capacity, absences and externally contracted work |
+| `milestones.json` | 189 project gates: 130 on schedule, 51 late and 8 without a forecast |
+| `changes.json` | 249 fictional history entries |
+| `phases.json` | SIA 112 main phases and sub-phases used by the prototype |
+| `dashboard.json` | The budget-by-year series that is not derived from projects |
+| `i18n.json` | 307 German source terms with DE, FR, IT and EN variants |
+| `print.json` | Print letterhead, legend and document metadata |
+| `openapi.json` | OpenAPI 3.1 target contract with 20 paths and 42 operations |
 
-**Nothing that can be computed is stored.** Demand totals, net capacity, utilisation,
-free capacity, per-person load, budget roll-ups, milestone counts and every KPI are
-derived in `store.js` from the files above. That is what makes an edit propagate.
+Most portfolio totals, net capacity, utilisation, free capacity, milestone counts and filter results are derived at runtime in `store.js`. The checked-in demo represents 111 projects, 46 people, 4,130% contracted capacity, CHF 971.77 million committed credit and three projects without a lead.
 
-### Portfolio scale
+## Verification
 
-The wireframe's eleven projects are all still here, unchanged, and a hundred more
-are generated around them so the views can be judged at the size a real portfolio
-would have. What depends on the projects is derived rather than invented:
+There is currently no committed test runner, browser harness or CI workflow. The dated review documents mention internal `flow.js`, `audit.js`, `resp.js` and `robust.js` probes, but those scripts are not part of this repository and their results are not reproducible from the checkout.
 
-- a person's booked load is the sum of the projects they lead, so an edit moves it;
-- the team is sized so that the portfolio runs at 112 % at its busiest quarter;
-- gross capacity is flat apart from one planned hire, because a team does not grow
-  to meet a falling demand curve — the utilisation curve falls out of that.
+A minimal syntax pass requires only Node.js:
 
-```
-demand       4122  4405  4830  4690  4155  3565  3145  2730  %
-net capacity 3670  3905  4065  4025  3800  4025  4065  4025  %
-utilisation   106   106   111   109   102    82    72    63  %
+```powershell
+Get-ChildItem js -Filter *.js | ForEach-Object { node --check $_.FullName }
 ```
 
-111 projects · 46 people · 4 130 % contracted · 972 Mio. CHF committed ·
-189 gates (130 on schedule, 51 late, 8 without a date) · 3 projects without a lead.
+After changes, serve the app and exercise all seven routes, responsive widths, exports and the browser print preview manually.
 
-Because these are derived, the wireframe's own headline figures (572 % demand,
-112 % utilisation, 130,9 Mio.) now describe only the eleven original projects, not
-the portfolio. Filter to them and they come back.
+## Documentation
 
----
+The files in [`docs/`](docs/) are dated review and decision records. They explain why the prototype looks and behaves as it does, but older findings can lag the current implementation.
 
-Three review documents sit alongside this one:
+- [Gap analysis](docs/GAP-ANALYSIS.md)
+- [Latest code review](docs/CODE-REVIEW-2.md)
+- [Latest design review](docs/DESIGN-REVIEW-3.md)
+- [Responsive review](docs/RESPONSIVE-REVIEW.md)
+- [Print reports](docs/PRINT-REPORTS.md)
+- [Edit mode](docs/EDIT-MODE.md)
+- [Column model](docs/COLUMNS.md)
+- [Notification model](docs/NOTIFICATIONS.md)
 
-- [docs/GAP-ANALYSIS.md](docs/GAP-ANALYSIS.md) — a full comparison against the mockup: what was
-  missing, what deviates and what was fixed.
-- [docs/DESIGN-REVIEW.md](docs/DESIGN-REVIEW.md) — a measured design and accessibility audit:
-  contrast, greyscale legibility, density on a small laptop, target sizes, ARIA.
-- [docs/CODE-REVIEW.md](docs/CODE-REVIEW.md) — correctness, structure, duplication and dead
-  code, with the fixes applied.
-- [docs/DESIGN-REVIEW-2.md](docs/DESIGN-REVIEW-2.md) — a second, measured design pass across
-  spacing, typography, colour, interaction and responsive behaviour, with the fixes applied.
-- [docs/DASHBOARD-STUDY.md](docs/DASHBOARD-STUDY.md) — what the dashboard should become, and why.
+## Deployment
 
-## Deliberate deviations from the wireframe
+The repository is ready for static hosting. GitHub Pages can publish the root of `main`; `index.html`, `css/`, `js/`, `data/` and `assets/` are the runtime files, and `.nojekyll` prevents Jekyll processing. No build artifact is produced.
 
-Worth reviewing — each is a one-line change if you disagree:
+## Known limitations
 
-1. **Grouping is applied, not decorative.** The wireframe's toolbar reads
-   "Gruppieren nach: Projektleitung" while the grid renders flat. Here grouping really
-   groups, and the default is **Teilportfolio** on every tab.
-2. **Teilportfolio taxonomy.** The wireframe has five areas, of which *Inland* holds
-   more than half — which is a default, not a grouping. The prototype uses the BBL's
-   own building categories instead: Verwaltung, Zoll, Justiz und Polizei, Bildung und
-   Forschung, Bauten im Ausland, Kultur und Denkmäler, Sport. Seven areas, the largest
-   holding a quarter of the portfolio. The dashboard card is derived from the data
-   rather than asserted, so its figures follow.
-3. **Change-log pagination.** The wireframe shows "1 – 25 von 214 Einträgen". The
-   prototype has nine real entries and says so.
-4. **Design annotations removed.** The wireframe's "Wofür / Stärke / Grenze" notes are
-   review commentary and are not part of the application.
+- **No persistence or live backend.** Edits, assignments and history additions are in memory and disappear on reload. Swagger submit methods are disabled because `openapi.json` is documentation only.
+- **One lead per project.** The fixture model assigns the entire project demand to one `leadId`. Rebooking changes that lead; it does not split allocations between several people or periods as the target API model would.
+- **Fixed planning horizon.** The fixtures cover eight quarters. Year and month views are projections of that horizon, not independently stored plans.
+- **Responsive density.** Narrow layouts hide lower-priority frozen columns and scroll the time axis. The full portfolio is designed primarily for laptop and desktop planning.
+- **Large-format output.** A2–A0 previews use measured row budgets and standards-based page sizes. Direct PDFs preserve those sizes, but physical output still depends on the receiving PDF viewer and printer-driver support.
+- **No reproducible regression suite.** Accessibility, browser behavior, URL robustness and print pagination currently require manual verification.
+- **Fixture generator is not incremental.** Do not rerun `tools/generate-portfolio.js` against the already expanded checked-in data; it appends another generated portfolio and duplicate generated change IDs. Use it only from a known seed dataset until it is made idempotent.
 
-## Known limits
+## Standards and attribution
 
-- **Fewer quarters first.** The wireframe's degradation order is *fewer quarters → hide
-  attributes → freeze the left half*. The prototype freezes the left half and scrolls, but does
-  not yet drop to six quarters on a narrow laptop.
-- **Below 900 px** the planning views show a reading path instead, as the wireframe
-  prescribes. The landing page, the milestone list and the change log stay usable.
-- **`Personen über 100 %`** counts a raw load above 100. The traffic light next to each
-  row measures load against the person's *contracted* percentage instead, so somebody at
-  90 % of an 80 % contract also lights up. The wireframe is inconsistent here; both
-  readings are reproduced faithfully and the question is open.
-- **One lead is far above the rest.** Sonja Beispiel carries the wireframe's three
-  largest projects, which at portfolio scale puts her at 225 % against a median of 90 %.
-  That is what the data says rather than a generation artefact, and it is exactly the
-  case the view exists to surface.
-- **Rebooking** moves the whole project lead rather than splitting the allocation into
-  two person-level rows. The data model does not carry per-person allocations yet — the API
-  reference shows the `allocations` shape a real implementation would use.
-- **The Gantt's own list and calendar views are gone.** They showed the same milestones
-  without adding a reading the bar plan does not already give.
+- Project phase labels follow the SIA 112 taxonomy represented in `data/phases.json`.
+- The target API is described with OpenAPI 3.1 and RFC 9457 problem details, including `ETag`/`If-Match` concurrency and idempotency keys for creates.
+- Interface icons come from `lucide-static` 1.34.0 under the ISC licence.
+- Swagger UI is vendored under `assets/vendor/swagger-ui/`; retain its upstream notices when redistributing those files.
 
-## Licence
+## License
 
-MIT, see [LICENSE](LICENSE). Lucide icons are ISC-licensed.
+Original project code is licensed under the [MIT License](LICENSE). Third-party assets remain subject to their own upstream terms.

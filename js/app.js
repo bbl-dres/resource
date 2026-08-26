@@ -65,10 +65,61 @@ function render() {
   if (state.tab === 'api') mountSwagger();
   root.querySelectorAll('[data-scroll]').forEach(syncScrollFades);
   positionMenu();
+  syncPageSize();
+  syncZoom();
   restoreFocus(focus);
   syncModalFocus();
   if (Math.abs(window.scrollY - scrollY) > 1) window.scrollTo({ top: scrollY });
   lastRenderAt = performance.now();
+}
+
+/*
+ * The page box the browser prints onto, kept the same size as the sheet.
+ *
+ * `@page` is a document-level rule, so it cannot be a class on the sheet — but
+ * the millimetres belong in the stylesheet with the rest of the paper, so they
+ * are read back off a rendered sheet rather than written down a second time.
+ *
+ * Without this the print stylesheet let an A4 sheet reflow to whatever width
+ * the print container had (measured: 1440 x 962px), and the row budget worked
+ * out for 210 x 297mm no longer described the page it landed on.
+ */
+const pageStyle = document.head.appendChild(document.createElement('style'));
+
+function syncPageSize() {
+  const sheet = root.querySelector('.sheet');
+  if (!sheet) { pageStyle.textContent = ''; return; }
+  const cs = getComputedStyle(sheet);
+  const short = cs.getPropertyValue('--paper-short').trim();
+  const long = cs.getPropertyValue('--paper-long').trim();
+  if (!short || !long) return;
+  const size = sheet.classList.contains('sheet--landscape') ? `${long} ${short}` : `${short} ${long}`;
+  pageStyle.textContent = `@page { size: ${size}; margin: 0; }`;
+}
+
+/*
+ * The preview scale. `zoom` rather than a transform, because the mount has to
+ * know how much room the sheet takes: a transform leaves the layout box at the
+ * unscaled size, so a magnified A0 would have nothing to scroll.
+ *
+ * «Anpassen» is measured, not declared — it is the pane's width over the
+ * sheet's own, so it has to be read after the sheet is in the document.
+ */
+function syncZoom() {
+  const mount = root.querySelector('.mount');
+  if (!mount) return;
+  const sheet = mount.querySelector('.sheet');
+  if (!sheet) return;
+
+  if (state.zoom !== 'fit') {
+    mount.style.setProperty('--sheet-zoom', Number(state.zoom) / 100);
+    return;
+  }
+  mount.style.setProperty('--sheet-zoom', 1);
+  const paper = sheet.getBoundingClientRect().width;
+  const room = mount.clientWidth;
+  // Never magnify to fill: a sheet smaller than the pane stays its own size.
+  mount.style.setProperty('--sheet-zoom', paper > room ? room / paper : 1);
 }
 
 /** Programmatic scroll restoration must not read as a user scroll. */
@@ -456,10 +507,33 @@ const actions = {
 
   sheet: (val) => setState({ sheet: val }),
   paper: (val) => setState({ paper: val, menu: null }),
+  zoom: (val) => setState({ zoom: val, menu: null }),
   report: (val) => setState({ report: val }),
   page: (val) => setState(s => ({ page: Math.max(1, s.page + Number(val)) })),
   'page-size': (val) => setState({ pageSize: val, page: 1, menu: null }),
-  print: () => window.print()
+  print: () => window.print(),
+
+  /*
+   * The file, not the dialog. A printer driver imposes its own paper and its
+   * own unprintable margin, so an A3 sheet arrives scaled onto A4 and A0 is not
+   * on offer at all. The writer is loaded on demand, like the API widget.
+   */
+  'export-pdf': async (val, el) => {
+    const sheets = [...root.querySelectorAll('.sheet')];
+    if (!sheets.length) return;
+    el.disabled = true;
+    try {
+      const { sheetsToPdf } = await import('./pdf.js');
+      const url = URL.createObjectURL(new Blob([sheetsToPdf(sheets)], { type: 'application/pdf' }));
+      const link = Object.assign(document.createElement('a'), { href: url, download: val });
+      link.click();
+      // Revoked on the next turn of the loop; Safari needs the URL to still be
+      // there when the click is handled.
+      setTimeout(() => URL.revokeObjectURL(url), 0);
+    } finally {
+      el.disabled = false;
+    }
+  }
 };
 
 /* -----------------------------------------------------------------------------

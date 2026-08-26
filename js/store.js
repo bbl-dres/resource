@@ -33,7 +33,8 @@ export const VOCAB = {
   group:   ['portfolio', 'lead', 'phase', 'none'],
   bi:      ['general', 'people'],
   report:  ['demand', 'schedule'],
-  paper:   ['a4', 'a3'],
+  paper:   ['a4', 'a3', 'a2', 'a1', 'a0'],
+  zoom:    ['fit', '50', '100', '200', '400'],
   sheet:   ['portrait', 'landscape'],
   pageSize: ['25', '50', '100']
 };
@@ -70,6 +71,7 @@ const DEFAULT_STATE = {
   modal: null,             // { type: 'project'|'rebook', ... }
   footDetails: false,
   bi: 'general',           // dashboard section, see VOCAB.bi
+  zoom: 'fit',             // print preview, see VOCAB.zoom
   page: 1,                 // change log, 1-based
   pageSize: '25',          // see VOCAB.pageSize
   pSort: 'peak',           // person table: name | role | employment | projects | peak | q0…q7

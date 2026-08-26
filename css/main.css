@@ -1911,10 +1911,30 @@ h1, h2, h3,
   display: flex; flex-direction: column; align-items: safe center; gap: var(--space-12);
   overflow-x: auto;
 }
-.sheet--portrait { width: 800px; min-height: 1131px; padding: 28px 32px; }
-/* A3 is A4 turned once: the long side becomes the short side of the next size. */
-.sheet--a3.sheet--portrait { width: 1131px; min-height: 1600px; }
-.sheet--a3.sheet--landscape { width: 1600px; min-height: 1131px; }
+/*
+ * The preview scale, set per render. On paper it must not apply — the sheet is
+ * its format there, and the page box is drawn to match.
+ */
+@media screen {
+  .mount .sheet { zoom: var(--sheet-zoom, 1); }
+}
+/*
+ * The paper, in the units paper is sold in. Stated in millimetres the sheet is
+ * exactly its format — a browser converts mm at 96dpi, so @page and the sheet
+ * agree to the pixel and a printed A0 measures 841 × 1189 mm on the wall.
+ *
+ * Each size is the one before it turned once: the long side becomes the short
+ * side of the next.
+ */
+.sheet--a4 { --paper-short: 210mm; --paper-long:  297mm; }
+.sheet--a3 { --paper-short: 297mm; --paper-long:  420mm; }
+.sheet--a2 { --paper-short: 420mm; --paper-long:  594mm; }
+.sheet--a1 { --paper-short: 594mm; --paper-long:  841mm; }
+.sheet--a0 { --paper-short: 841mm; --paper-long: 1189mm; }
+
+.sheet--portrait  { width: var(--paper-short); min-height: var(--paper-long); }
+.sheet--landscape { width: var(--paper-long);  min-height: var(--paper-short); }
+.sheet { padding: 7.4mm 8.5mm; }
 
 /*
  * The bar plan on paper. Same markup as the screen, at paper density: a row is
@@ -1968,7 +1988,6 @@ h1, h2, h3,
   font-size: var(--sheet-lead); font-weight: var(--font-semibold);
 }
 .sheet__gantt .sheet__grouphead:first-child { margin-top: 0; }
-.sheet--landscape { width: 1100px; min-height: 778px; padding: 28px 32px; }
 
 .sheet__head {
   display: flex; align-items: flex-start; justify-content: space-between; gap: 20px;
@@ -2207,11 +2226,16 @@ h1, h2, h3,
   .page-header__row { margin-top: var(--space-3); }
 }
 
-@page { size: A4 portrait; margin: 12mm; }
+/* Overridden per format at runtime; this is only the fallback before the
+   export tab has rendered a sheet to read the format from. */
+@page { size: A4 portrait; margin: 0; }
 
 @media print {
+  /* .crumbbar, not .crumbs: hiding the nav left its container's 1px bottom rule
+     standing, which pushed the stack down by a pixel and spilled an empty
+     twelfth page out of an eleven-sheet report. */
   .shell-header, .tabs, .toolbar, .filterbar, .timebar, .toast, .shell-footer,
-  .page-header__actions, .sheetbar, .crumbs { display: none !important; }
+  .page-header__actions, .sheetbar, .crumbbar { display: none !important; }
   body { background: var(--color-paper); }
   .grid-card, .table-card, .card, .bi-card, .gantt__card, .capband { break-inside: avoid; }
 
@@ -2219,10 +2243,14 @@ h1, h2, h3,
   .mount { display: block; padding: 0; border: 0; background: none; overflow: visible; }
   .content, .wrap { padding: 0; gap: 0; }
   .page-header { display: none; }
-  .sheet {
-    width: auto !important; min-height: 0; padding: 0;
-    box-shadow: none; break-inside: avoid;
-  }
+  /*
+   * The sheet keeps its size. It is already exactly its paper format, and the
+   * page box is set to match (see syncPageSize), so one sheet is one page at
+   * its true dimensions. Letting it reflow to the print container was the whole
+   * problem: an A4 sheet arrived on paper 1440px wide and 962px tall, and the
+   * row budget measured at 210mm no longer described the page.
+   */
+  .sheet { box-shadow: none; break-inside: avoid; }
   /*
    * The pensum ramp is a background fill, and browsers drop background fills by
    * default. Without this the sheet prints 687 white rectangles under a legend

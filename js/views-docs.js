@@ -104,22 +104,52 @@ function loadSwagger() {
  * budgets follow the height, and the number of quarters follows the width —
  * that is the whole difference between a format and its neighbour.
  */
-const PAPERS = [
-  { id: 'a4', label: 'A4' },
-  { id: 'a3', label: 'A3' }
-];
+/* Up to A0: the large sheets are for a workshop wall, not for a desk. */
+const PAPERS = ['a4', 'a3', 'a2', 'a1', 'a0'].map(id => ({ id, label: id.toUpperCase() }));
 
 const ORIENTATIONS = [
   { id: 'portrait', label: 'Hoch' },
   { id: 'landscape', label: 'Quer' }
 ];
 
-/* quarters per sheet, and the row budget per report, measured against the page */
+/*
+ * The preview scale. «Anpassen» is the default because an A0 sheet is 3179px
+ * wide and no screen shows one at its own size; the fixed steps are for reading
+ * the small print, and the preview pans once a sheet is wider than the pane.
+ */
+const ZOOMS = [
+  { id: 'fit', label: 'Anpassen' },
+  { id: '50', label: '50 %' },
+  { id: '100', label: '100 %' },
+  { id: '200', label: '200 %' },
+  { id: '400', label: '400 %' }
+];
+const zoomLabel = () => (ZOOMS.find(z => z.id === state.zoom) ?? ZOOMS[0]).label;
+
+/** What the downloaded file is called: the report, the paper, the way round. */
+const fileName = (report, sheet) => (
+  `Ressourcenplanung-${t(report.label)}-${sheet.paper.toUpperCase()}`
+  + `-${t(sheet.orientation === 'landscape' ? 'Quer' : 'Hoch')}`
+).replace(/[^\p{L}\p{N}.-]+/gu, '-') + '.pdf';   // \w drops the Umlaut
+
+/*
+ * Quarters per sheet, and the row budget per report, measured against the page.
+ *
+ * The budgets are not derived from the paper ladder. The ladder is √2, but the
+ * letterhead, the legend and the footer are the same size on every format, so
+ * the usable height grows faster than the sheet does.
+ */
 const FORMATS = {
-  'a4-portrait':  { quarters: 4, rows: { demand: 31, schedule: 28 } },
-  'a4-landscape': { quarters: 8, rows: { demand: 18, schedule: 16 } },
-  'a3-portrait':  { quarters: 8, rows: { demand: 46, schedule: 42 } },
-  'a3-landscape': { quarters: 12, rows: { demand: 31, schedule: 28 } }
+  'a4-portrait':  { quarters: 4,  rows: { demand: 31, schedule: 28 } },
+  'a4-landscape': { quarters: 8,  rows: { demand: 18, schedule: 16 } },
+  'a3-portrait':  { quarters: 8,  rows: { demand: 46, schedule: 42 } },
+  'a3-landscape': { quarters: 12, rows: { demand: 31, schedule: 28 } },
+  'a2-portrait':  { quarters: 12, rows: { demand: 67,  schedule: 61 } },
+  'a2-landscape': { quarters: 16, rows: { demand: 46,  schedule: 42 } },
+  'a1-portrait':  { quarters: 16, rows: { demand: 96,  schedule: 88 } },
+  'a1-landscape': { quarters: 20, rows: { demand: 67,  schedule: 61 } },
+  'a0-portrait':  { quarters: 20, rows: { demand: 138, schedule: 126 } },
+  'a0-landscape': { quarters: 24, rows: { demand: 96,  schedule: 88 } }
 };
 
 /*
@@ -141,7 +171,9 @@ export function renderExport() {
       title: 'PDF-Export — Drucklayout',
       chrome: false,
       actions: html`<button type="button" class="btn" data-act="tab" data-val="overview">${t('Abbrechen')}</button>
-        <button type="button" class="btn btn--primary" data-act="print">${icons.download(15)}${t('Drucken')}</button>`
+        <button type="button" class="btn" data-act="print">${t('Drucken')}</button>
+        <button type="button" class="btn btn--primary" data-act="export-pdf"
+          data-val="${fileName(report, sheet)}">${icons.download(15)}${t('PDF herunterladen')}</button>`
     })}
     <div class="wrap"><div class="content">
       ${toolbar({ exclude: ['trend'] })}
@@ -152,6 +184,10 @@ export function renderExport() {
             aria-pressed="${r.id === report.id}" data-act="report" data-val="${r.id}">${t(r.label)}</button>`)}
         </div>
         <div class="sheetbar__paper">
+          ${dropdown({
+            id: 'zoom', label: `${t('Ansicht')}: ${zoomLabel()}`, width: 180,
+            body: html`${ZOOMS.map(z => menuRadio(t(z.label), state.zoom === z.id, 'zoom', z.id))}`
+          })}
           ${dropdown({
             id: 'paper', label: `${t('Format')}: ${state.paper.toUpperCase()}`, width: 180,
             body: html`${PAPERS.map(p => menuRadio(p.label, state.paper === p.id, 'paper', p.id))}`
@@ -195,11 +231,16 @@ function sheetRows() {
  * runs over one carries its heading to the top of the next.
  */
 /*
- * What a row costs in the page budget. A group heading carries a gap and a
- * repeated column head; on the bar plan that head is shorter, so it costs less.
+ * What a row costs in the page budget, in multiples of a project row.
+ *
+ * Measured against the rendered sheet, not estimated. A group heading brings a
+ * repeated column head with it, so it is charged for both: on the pensum sheet
+ * 1.41 + 0.89, on the bar plan 1.02 + 0.92. The bar plan's figure was right all
+ * along; the pensum sheet was charging 2.9 for something costing 2.3, which is
+ * why an A0 poster broke into two pages with 111 projects that fit on one.
  */
-const ROW_COST = { group: 2.9, sum: 1, project: 1 };
-const SCHEDULE_COST = { ...ROW_COST, group: 1.9, sum: 0 };
+const ROW_COST = { group: 2.3, sum: 0.85, project: 1 };
+const SCHEDULE_COST = { ...ROW_COST, group: 1.95, sum: 0 };
 const rowCost = (row, cost = ROW_COST) => row.cost ?? cost[row.kind];
 const costOf = (page, cost) => page.reduce((a, r) => a + rowCost(r, cost), 0);
 
