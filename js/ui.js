@@ -260,9 +260,6 @@ export function appHeader() {
       <p class="proto-pill">${t(m.prototypeNotice)}</p>
 
       <div class="shell-header__actions">
-        ${expandableSearch({ variant: 'header', placeholder: 'Projekt, ID oder Person suchen',
-                             title: 'Globale Suche über alle Portfolios' })}
-
         <div class="dd">
           <button type="button" class="hdr-btn" data-act="menu" data-val="lang"
                   aria-expanded="${open}" aria-haspopup="menu" aria-label="${t('Sprache wählen')}">
@@ -295,20 +292,18 @@ export function appHeader() {
  * Icon that expands into a search field in place. The header and the toolbar
  * each render one; both drive the same query.
  */
-export function expandableSearch({ variant, placeholder, title }) {
-  const open = state.searchOpen[variant];
-  if (!open) {
-    return html`<button type="button" class="xsearch xsearch--${variant}" data-act="search-toggle"
-        data-val="${variant}" aria-expanded="false"
-        title="${t(title ?? placeholder)}" aria-label="${t('Suchfeld öffnen')}">
+export function expandableSearch({ placeholder }) {
+  if (!state.searchOpen) {
+    return html`<button type="button" class="xsearch" data-act="search-toggle"
+        aria-expanded="false" title="${t(placeholder)}" aria-label="${t('Suchfeld öffnen')}">
       ${icons.search()}${state.search && html`<span class="xsearch__dot" aria-hidden="true"></span>`}
     </button>`;
   }
-  return html`<div class="xsearch xsearch--${variant} is-open" role="search">
+  return html`<div class="xsearch is-open" role="search">
     <span class="xsearch__icon" aria-hidden="true">${icons.search()}</span>
-    <input type="search" data-act="search" data-fk="search-${variant}" value="${state.search}"
+    <input type="search" data-act="search" data-fk="search" value="${state.search}"
            placeholder="${t(placeholder)}" autocomplete="off" aria-label="${t(placeholder)}">
-    <button type="button" class="xsearch__close" data-act="search-close" data-val="${variant}"
+    <button type="button" class="xsearch__close" data-act="search-close"
             aria-label="${t('Suche schliessen')}">${icons.close(13)}</button>
   </div>`;
 }
@@ -356,18 +351,25 @@ export function editToggle() {
   </button>`;
 }
 
+/** One row of the export menu: what it produces, and in what shape. */
+const exportItem = (val, label, meta) => html`<button type="button" class="dd__item"
+    role="menuitem" data-act="export" data-val="${val}">
+  <span>${label}</span><span class="dd__meta">${meta}</span>
+</button>`;
+
 export function exportMenu() {
   const open = state.menu === 'export';
   return html`<div class="dd">
     <button type="button" class="btn ${open ? 'is-open' : ''}" data-act="menu" data-val="export"
             aria-expanded="${open}" aria-haspopup="menu">${t('Exportieren')}${icons.chevronDown()}</button>
-    ${open && html`<div class="dd__panel dd__panel--right" role="menu" style="width:270px">
-      <button type="button" class="dd__item" role="menuitem" data-act="export" data-val="csv">${t('Als CSV exportieren')}</button>
-      <button type="button" class="dd__item" role="menuitem" data-act="export" data-val="xlsx">${t('Als Excel exportieren')}</button>
+    ${open && html`<div class="dd__panel dd__panel--right" role="menu" style="width:236px">
+      ${menuGroupLabel(t('Daten'))}
+      ${exportItem('csv', 'CSV', 'Semikolon, UTF-8')}
+      ${exportItem('xlsx', 'Excel', '.xlsx')}
       ${divider()}
-      <button type="button" class="dd__item" role="menuitem" data-act="export" data-val="pdf">
-        <span>${t('Als PDF exportieren')}</span><span class="dd__meta">${t('Drucklayout')}</span>
-      </button>
+      ${menuGroupLabel(t('Drucklayout'))}
+      ${exportItem('pdf-demand', t('Übersicht'), t('Pensum je Quartal'))}
+      ${exportItem('pdf-schedule', t('Termine'), t('Balkenplan'))}
     </div>`}
   </div>`;
 }
@@ -421,7 +423,7 @@ export function toolbar({ attributes = true, exclude = [] } = {}) {
   const minesOnly = state.leads.length === 1 && state.leads[0] === mine;
 
   return html`<div class="toolbar">
-    ${expandableSearch({ variant: 'toolbar', placeholder: 'Projekt, ID oder Person' })}
+    ${expandableSearch({ placeholder: 'Projekt, ID oder Person' })}
 
     ${dropdown({
       id: 'sort',

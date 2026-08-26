@@ -133,12 +133,24 @@ andere Information.
 
 **→ Alle Spaltengrenzen, Jahresgrenze stärker.**
 
-### Ist das inkonsistent?
+### Nachtrag — der Einwand hat sich in der Ansicht erledigt
 
-Nein — es ist dieselbe Regel auf zwei verschiedene Datenformen angewandt. Was
-konsistent sein muss, ist das **Vokabular**: Stärke, Farbe, Rang. Nicht die
-Dichte. Zwei Raster mit gleicher Linienstärke und unterschiedlicher Dichte lesen
-sich als ein System; zwei Raster mit 2 px und 1 px lesen sich als ein Versehen.
+Oben stand: die Dichte darf unterschiedlich sein, solange das Vokabular gleich
+ist. Am fertigen Bild hat sich das nicht gehalten, und zwar aus zwei Gründen.
+
+**Die Kopfzeile ist in beiden Rastern dasselbe:** eine Reihe Beschriftungen.
+Mein Projektions-Argument gilt für die Fläche, nicht für den Kopf. Zwei
+Kopfzeilen, die nebeneinander im selben Programm verschieden aussehen, sind eine
+Abweichung ohne Grund. → beide nur Jahresgrenzen.
+
+**Und in der Fläche hat sich mein Einwand als überschätzt erwiesen.** Ich hatte
+argumentiert, ohne Gitterlinien sei nicht ablesbar, wo ein Balken endet. Am
+gerenderten Plan stimmt das nicht: **ein Balken trägt seine eigene Kante**, und
+diese Kante *ist* die Phasengrenze — genau die Information, die man sucht. Das
+Gitter hat sie nicht getragen, sondern überlagert.
+
+Also: beide Raster, Kopf wie Fläche, nur Jahresgrenzen. Was bleibt, sind die
+Kanten der Balken selbst — die gehören zum Objekt, nicht zum Raster.
 
 ---
 
@@ -149,9 +161,13 @@ sich als ein System; zwei Raster mit 2 px und 1 px lesen sich als ein Versehen.
 | Rang | Stärke | Farbe | Übersicht | Termine |
 |---|---|---|---|---|
 | Zeilentrenner | 1 px | `--line-subtle` | ja | ja |
-| Spaltengrenze | 1 px | `--line-subtle` | **nein** | ja |
+| Spaltengrenze | — | — | **nein** | **nein** |
 | Jahresgrenze | 1 px | `--line` | ja | ja |
 | Unterkante Kopfzeile | 1 px | `--line-strong` | ja | ja |
+| Kante eines Balkens | 1 px | `--color-bar-border` | — | ja |
+
+Die letzte Zeile ist keine Rasterlinie: sie gehört zum Balken, nicht zum Raster.
+Genau deshalb kann das Gitter darunter entfallen.
 
 Dazu vier Korrekturen, die keine Geschmacksfrage sind:
 

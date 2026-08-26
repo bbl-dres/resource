@@ -217,17 +217,9 @@ button, input, select, textarea { font: inherit; color: inherit; }
 }
 
 /* On the navy bar the field borrows the header control treatment. */
-.xsearch--header {
   border-color: var(--color-brand-control-border);
   background: var(--color-brand-control-bg); color: var(--color-brand-fg-muted);
 }
-.xsearch--header:not(.is-open):hover { background: var(--color-brand-control-bg-strong); color: var(--color-brand-fg); }
-.xsearch--header.is-open { border-color: var(--color-brand-control-border-strong); }
-.xsearch--header .xsearch__icon { color: var(--color-brand-fg-muted); }
-.xsearch--header input { color: var(--color-brand-fg); }
-.xsearch--header input::placeholder { color: var(--color-brand-fg-muted); opacity: .8; }
-.xsearch--header .xsearch__close { color: var(--color-brand-fg-muted); }
-.xsearch--header .xsearch__close:hover { background: var(--color-brand-control-bg-strong); color: var(--color-brand-fg); }
 
 /* body and #app both stretch so the footer can sit at the bottom of a short page. */
 .app { display: flex; flex-direction: column; flex: 1 0 auto; }
@@ -880,7 +872,9 @@ h1, h2, h3,
 .prow--head .pcell--num { text-align: right; padding-right: var(--space-5); }
 /*
  * The current period, marked the same way in both grids and in the same colour
- * as the today line in the bar plan: now is a position, not a problem.
+ * as the today line in the bar plan: now is a position, not a problem. Not on
+ * paper — a printed sheet carries its date in the letterhead, and a
+ * highlighted column there reads as emphasis on the data.
  */
 .prow--head .pcell--num.is-today,
 .gantt__quarters .is-today {
@@ -1414,12 +1408,24 @@ h1, h2, h3,
   font-size: var(--text-sm); font-weight: var(--font-semibold);
   color: var(--color-text-secondary);
 }
-/* The heading rules line up with the gridlines beneath them, one per boundary. */
+/*
+ * A heading is a row of labels in both grids, so both are ruled the same way:
+ * years only. The bodies differ because their content does — a bar spans
+ * columns and needs the reference, a value sits inside its own.
+ */
 .gantt__quarters > * {
   align-self: stretch; display: flex; align-items: center; justify-content: center;
-  border-left: var(--border-hairline) solid var(--color-border-subtle);
 }
 .gantt__quarters .is-yearstart { border-left: var(--border-hairline) solid var(--color-border); }
+
+/*
+ * Paper has no "today": the sheet carries its date in the letterhead, and a
+ * highlighted column there reads as emphasis on the data instead.
+ */
+.sheet .prow--head .pcell--num.is-today,
+.sheet .gantt__quarters .is-today {
+  background: none; font-weight: inherit; box-shadow: none;
+}
 
 .gantt__body { position: relative; }
 /*
@@ -1494,8 +1500,12 @@ h1, h2, h3,
   display: grid; grid-template-columns: repeat(var(--gantt-cols, 8), minmax(0, 1fr));
   grid-template-rows: calc(var(--row-height) - 2px); align-items: center;
 }
-.gantt__gridline { grid-row: 1; border-left: var(--border-hairline) solid var(--color-border-subtle); height: 100%; }
-.gantt__gridline.is-yearstart { border-left-color: var(--color-border); }
+/*
+ * Years only, as in the pensum grid — heading and cells alike, in both tabs.
+ * The gridline element stays: it is what the year rule hangs on.
+ */
+.gantt__gridline { grid-row: 1; height: 100%; }
+.gantt__gridline.is-yearstart { border-left: var(--border-hairline) solid var(--color-border); }
 
 .gantt__bar {
   grid-row: 1; align-self: center; z-index: var(--z-raised);
@@ -1788,8 +1798,61 @@ h1, h2, h3,
 .mount {
   display: flex; flex-direction: column; align-items: safe center; gap: var(--space-12);
 }
-.sheet--hoch { width: 800px; min-height: 1131px; padding: 28px 32px; }
-.sheet--quer { width: 1100px; min-height: 778px; padding: 30px 34px; }
+.sheet--portrait { width: 800px; min-height: 1131px; padding: 28px 32px; }
+
+/*
+ * The bar plan on paper. Same markup as the screen, at paper density: a row is
+ * as tall as a row on the pensum sheet, and the lead columns give the time axis
+ * as much width as the page can spare.
+ */
+.sheet__gantt {
+  /* The screen container spaces its group cards apart; on paper the rows are
+     one continuous table. */
+  gap: 0;
+  /* A bar leaves air above and below it, in the same proportion as on screen. */
+  --bar-height: 18px;
+  --grid-col-id: 46px;
+  --grid-col-title: 190px;
+  --gantt-lead: calc(var(--grid-col-id) + var(--grid-col-title));
+  margin-top: 6px;
+}
+.sheet--landscape .sheet__gantt { --grid-col-title: 240px; }
+
+.sheet__gantt .gantt__row { min-height: 26px; }
+.sheet__gantt .gantt__track { grid-template-rows: 24px; }
+.sheet__gantt .gantt__axis { min-height: 24px; }
+.sheet__gantt .gantt__quarters { font-size: var(--sheet-text); }
+.sheet__gantt .gantt__axislabel { font-size: var(--sheet-text); padding-inline: 6px; }
+.sheet__gantt .gantt__rowlabel { padding: 0 6px; }
+.sheet__gantt .gantt__rowid { font-size: var(--sheet-text); }
+.sheet__gantt .gantt__rowtitle { font-size: var(--sheet-text); font-weight: var(--font-semibold); }
+.sheet__gantt .gantt__barlabel { font-size: var(--sheet-text); }
+.sheet__gantt .gantt__track { align-items: center; }
+
+/* The plan closes on the same figure the screen shows beneath it. */
+.sheet__gantt .gantt__row--load { border-top: 1px solid var(--color-border-strong); margin-top: 4px; }
+.sheet__gantt .gantt__track--load {
+  display: grid; grid-template-columns: repeat(var(--gantt-cols, 8), minmax(0, 1fr));
+}
+.sheet__gantt .capband__cell {
+  display: flex; align-items: center; justify-content: center;
+  font-size: var(--sheet-text); font-weight: var(--font-semibold);
+}
+/*
+ * Not grid rows here: on the bar plan the heading and the continuation note
+ * span the whole sheet rather than sitting in the first column.
+ */
+.sheet__gantt .sheet__row--more { display: block; padding: 4px 6px 0; }
+
+/* Not a grid row here: the bar plan's heading spans the whole sheet. */
+.sheet__gantt .sheet__grouphead {
+  display: flex; align-items: baseline; gap: 8px;
+  padding: 5px 6px; margin-top: var(--space-8);
+  background: var(--color-surface-frame);
+  font-size: var(--sheet-lead); font-weight: var(--font-semibold);
+}
+.sheet__gantt .sheet__grouphead:first-child { margin-top: 0; }
+.sheet--landscape { width: 1100px; min-height: 778px; padding: 30px 34px; }
 
 .sheet__head {
   display: flex; align-items: flex-start; justify-content: space-between; gap: 20px;
@@ -1878,7 +1941,7 @@ h1, h2, h3,
 
 /* The closing sheet is prose, so it gets a measure rather than a grid. */
 .sheet__prose { flex: 1; display: grid; gap: 20px; align-content: start; padding-top: 14px; }
-.sheet--quer .sheet__prose { grid-template-columns: 1fr 1fr; column-gap: 32px; }
+.sheet--landscape .sheet__prose { grid-template-columns: 1fr 1fr; column-gap: 32px; }
 .sheet__prose h3 {
   margin: 0 0 6px; font-size: var(--text-xs); font-weight: var(--font-bold);
   color: var(--color-text-strong);

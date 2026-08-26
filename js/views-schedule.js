@@ -129,7 +129,7 @@ function ganttView() {
  * name those — plus the utilisation bands, which lost their words when the
  * capacity band was reduced to figures.
  */
-function ganttLegend() {
+export function ganttLegend(cls = '') {
   const l = data.print.legend;
   return legendBlock([
     {
@@ -144,7 +144,7 @@ function ganttLegend() {
         ${legendItem(html`<span class="diamond is-open"></span>`, 'Termin offen')}`
     },
     { label: 'Auslastung', items: html`${t(l.thresholds).replace(/^Auslastung:\s*/, '')}` }
-  ]);
+  ], cls);
 }
 
 /**
@@ -169,7 +169,7 @@ function ganttAxis(cols) {
   </header>`;
 }
 
-function ganttRow(p, cols) {
+export function ganttRow(p, cols) {
   const bars = p.bars ?? [];
   const delayed = bars.some(b => b.delay);
   const rail = p.unassigned ? 'is-unassigned' : delayed ? 'is-delayed' : '';

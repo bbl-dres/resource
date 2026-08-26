@@ -32,12 +32,14 @@ export const VOCAB = {
   unit:    ['pct', 'fte'],
   sortDir: ['asc', 'desc'],
   group:   ['portfolio', 'lead', 'phase', 'none'],
-  bi:      ['general', 'people']
+  bi:      ['general', 'people'],
+  report:  ['demand', 'schedule']
 };
 
 const DEFAULT_STATE = {
   tab: 'start',
   sheet: 'portrait',
+  report: 'demand',        // which printed report, see VOCAB.report
   lang: 'de',
   scale: 'quarter',
   periodOffset: 0,         // how far the visible window has been stepped
@@ -71,7 +73,7 @@ const DEFAULT_STATE = {
   pSort: 'peak',           // person table: name | role | employment | projects | peak | q0…q7
   pDir: 'desc',
   showAll: { attention: false, milestones: false },   // landing cards, expanded
-  searchOpen: { header: false, toolbar: false },   // the two fields open independently
+  searchOpen: false,
   collapsedGroups: {},
   toast: null
 };
@@ -79,7 +81,6 @@ const DEFAULT_STATE = {
 export const state = {
   ...DEFAULT_STATE,
   cols: { ...DEFAULT_STATE.cols },
-  searchOpen: { ...DEFAULT_STATE.searchOpen },
   showAll: { ...DEFAULT_STATE.showAll }
 };
 
@@ -148,6 +149,7 @@ export function writeUrl() {
   const p = new URLSearchParams();
   p.set('tab', state.tab);
   if (state.tab === 'export') p.set('sheet', state.sheet);
+  if (state.tab === 'export' && state.report !== 'demand') p.set('report', state.report);
   if (state.lang !== 'de') p.set('lang', state.lang);
   if (state.unit !== 'pct') p.set('unit', state.unit);
   if (state.scale !== 'quarter') p.set('scale', state.scale);
@@ -474,6 +476,21 @@ function buildPeriods() {
     quarters: [start + n], isNow: start + n === 0,
     from: start + n, to: start + n + 1
   }));
+}
+
+/**
+ * Period objects for an arbitrary run of quarters. The printed sheets work in
+ * quarter blocks rather than in the window the toolbar has scrolled to, and
+ * everything that draws a time axis expects periods, not indices.
+ */
+export function quarterPeriods(from, count) {
+  const cols = data.quarters.slice(from, from + count).map((q, n) => ({
+    id: q.id, label: q.label,
+    short: `${q.short} ${String(q.year).slice(2)}`,
+    quarters: [from + n], isNow: from + n === 0,
+    from: from + n, to: from + n + 1
+  }));
+  return markYears(cols);
 }
 
 /** A rate over several quarters is their average, rounded. */

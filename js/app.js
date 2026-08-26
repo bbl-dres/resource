@@ -173,9 +173,9 @@ function syncModalFocus() {
 }
 
 /** Move the caret into the field the moment it expands. */
-function focusSearch(variant) {
+function focusSearch() {
   requestAnimationFrame(() => {
-    const el = root.querySelector(`[data-fk="search-${variant}"]`);
+    const el = root.querySelector('[data-fk="search"]');
     if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); }
   });
 }
@@ -217,7 +217,7 @@ const actions = {
   home: () => setState({
     tab: 'start', menu: null, editing: null, modal: null,
     phases: [], leads: [], portfolios: [], overloadOnly: false, search: '',
-    searchOpen: { header: false, toolbar: false }
+    searchOpen: false
   }),
   lang: (val) => setState({ lang: val, menu: null }),
 
@@ -239,15 +239,11 @@ const actions = {
     }
   },
 
-  'search-toggle': (variant) => {
-    setState(s => ({ searchOpen: { ...s.searchOpen, [variant]: true }, menu: null }));
-    focusSearch(variant);
+  'search-toggle': () => {
+    setState({ searchOpen: true, menu: null });
+    focusSearch();
   },
-  'search-close': (variant) => setState(s => {
-    const searchOpen = { ...s.searchOpen, [variant]: false };
-    // The query is shared, so it only clears when no field is left showing it.
-    return searchOpen.header || searchOpen.toolbar ? { searchOpen } : { searchOpen, search: '' };
-  }),
+  'search-close': () => setState({ searchOpen: false, search: '' }),
 
   sort: (val) => setState({ sort: val, sortDir: defaultDir(val), menu: null }),
   'sort-dir': (val) => setState({ sortDir: val, menu: null }),
@@ -409,7 +405,9 @@ const actions = {
 
   'close-modal': () => setState({ modal: null }),
   export: (val) => {
-    if (val === 'pdf') return setState({ tab: 'export', menu: null });
+    if (val.startsWith('pdf')) {
+      return setState({ tab: 'export', report: val.slice(4) || 'demand', menu: null });
+    }
     setState({ menu: null });
     try {
       const name = val === 'csv' ? exportCsv() : exportXlsx();
@@ -433,6 +431,7 @@ const actions = {
   }),
 
   sheet: (val) => setState({ sheet: val }),
+  report: (val) => setState({ report: val }),
   print: () => window.print()
 };
 

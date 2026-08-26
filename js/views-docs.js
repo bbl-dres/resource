@@ -7,16 +7,17 @@
    ============================================================================= */
 
 import {
-  data, state, t, num, unitSuffix, cellValue, projectDemand, ampel, phaseOf,
+  data, state, t, num, unitSuffix, cellValue, projectDemand, ampel, phaseOf, quarterPeriods,
   personUtilisation, totals, loadStatus, heatStep, filteredProjects, activeFilters,
   groupProjects
 } from './store.js';
 
 import {
-  html, raw, icons, pageHeader, exportMenu, toolbar, activeFilterRow, noResults,
-  scopeLine, AMPEL_STATES, legendBlock, legendItem
+  html, raw, attr, icons, pageHeader, exportMenu, toolbar, activeFilterRow, noResults,
+  scopeLine, AMPEL_STATES, legendBlock, legendItem, yearRule
 } from './ui.js';
 import { visibleColumns } from './columns.js';
+import { ganttRow, ganttLegend } from './views-schedule.js';
 
 /* =============================================================================
    API documentation
@@ -98,12 +99,27 @@ function loadSwagger() {
  * tightest, so neither format can spill onto the paper's margin.
  */
 const SHEETS = [
-  { id: 'portrait', label: 'A4 hoch', caption: 'Übersicht als PDF, A4 hoch', quarters: 4, rows: 34 },
-  { id: 'landscape', label: 'A4 quer', caption: 'Acht Quartale auf einem Blatt', quarters: 8, rows: 21 }
+  { id: 'portrait', label: 'A4 hoch', caption: 'Übersicht als PDF, A4 hoch', quarters: 4 },
+  { id: 'landscape', label: 'A4 quer', caption: 'Acht Quartale auf einem Blatt', quarters: 8 }
+];
+
+/*
+ * Two reports off the same press. They share the letterhead, the scope line,
+ * the pagination and the closing method sheet; they differ in what a row is —
+ * a run of numbers, or a bar over the same quarters.
+ */
+const REPORTS = [
+  // `rows` is a budget in row-heights per format — the bar plan's rows are
+  // taller than the number table's, so it holds fewer of them.
+  { id: 'demand', label: 'Übersicht', sub: 'Pensum je Projekt und Quartal',
+    rows: { portrait: 31, landscape: 18 } },
+  { id: 'schedule', label: 'Termine', sub: 'Phasen und Meilensteine je Projekt',
+    rows: { portrait: 28, landscape: 16 } }
 ];
 
 export function renderExport() {
   const sheet = SHEETS.find(s => s.id === state.sheet) ?? SHEETS[0];
+  const report = REPORTS.find(r => r.id === state.report) ?? REPORTS[0];
   return html`
     ${pageHeader({
       crumbs: ['Bauprojekte', 'Export'],
@@ -117,12 +133,16 @@ export function renderExport() {
       ${activeFilterRow()}
       <div class="sheetbar">
         <div class="segmented">
+          ${REPORTS.map(r => html`<button type="button" class="${r.id === report.id ? 'is-on' : ''}"
+            aria-pressed="${r.id === report.id}" data-act="report" data-val="${r.id}">${t(r.label)}</button>`)}
+        </div>
+        <div class="segmented">
           ${SHEETS.map(s => html`<button type="button" class="${s.id === sheet.id ? 'is-on' : ''}"
             aria-pressed="${s.id === sheet.id}" data-act="sheet" data-val="${s.id}">${t(s.label)}</button>`)}
         </div>
       </div>
       ${filteredProjects().length
-        ? html`<div class="mount">${printSheets(sheet)}</div>`
+        ? html`<div class="mount">${printSheets(sheet, report)}</div>`
         : noResults('Bauprojekte')}
     </div></div>`;
 }
@@ -188,9 +208,9 @@ function paginate(rows, perPage) {
   return pages.length ? pages : [[]];
 }
 
-function printSheets(sheet) {
+function printSheets(sheet, report) {
   const all = filteredProjects();
-  const perSheet = sheet.rows;
+  const perSheet = report.rows[sheet.id];
   const blocks = [];
   for (let from = 0; from < data.quarters.length; from += sheet.quarters) {
     blocks.push(data.quarters.slice(from, from + sheet.quarters).map((_, i) => from + i));
@@ -203,7 +223,7 @@ function printSheets(sheet) {
   let page = 0;
   const sheets = blocks.flatMap(block => pages.map((rows, i) => {
     page++;
-    return printSheet(sheet, { rows, all, block, page, total, last: i === pages.length - 1 });
+    return printSheet(sheet, report, { rows, all, block, page, total, last: i === pages.length - 1 });
   }));
   sheets.push(methodSheet(sheet, { page: total, total }));
   return sheets;
@@ -314,6 +334,77 @@ function sheetCell(col, p) {
   }
 }
 
+/** Said at the foot of every sheet whose table carries on. */
+const continuation = (span) => html`<div class="sheet__row sheet__row--more">
+  <span ${attr(span > 0, `style="grid-column:span ${span}"`)}>${t('Fortsetzung auf dem nächsten Blatt')}</span>
+</div>`;
+
+/**
+ * The bar plan on paper. Rows come from the schedule view unchanged, so the
+ * printed plan and the screen plan cannot drift apart; only the width of the
+ * lead columns differs, and that is a stylesheet matter.
+ */
+function scheduleTable(rows, block, tot, last) {
+  const cols = quarterPeriods(block[0], block.length);
+  return html`<div class="sheet__gantt gantt" style="--gantt-cols:${cols.length}">
+    ${rows.some(r => r.kind === 'group') ? '' : ganttAxisHead(cols)}
+    ${rows.map(row => {
+      if (row.kind === 'sum') return '';          // a bar plan has nothing to add up
+      if (row.kind === 'group') {
+        return html`<div class="sheet__grouphead">
+          <span>${t(row.label)}</span>
+          <span class="sheet__groupcount">${row.count} ${t('Projekte')}${
+            row.continued ? ` · ${t('Fortsetzung')}` : ''}</span>
+        </div>${ganttAxisHead(cols)}`;
+      }
+      return ganttRow(row.p, cols);
+    })}
+    ${last ? capacityRow(cols, tot) : continuation(0)}
+  </div>`;
+}
+
+/** The axis, repeated above every group exactly as the column head is. */
+const ganttAxisHead = (cols) => html`<header class="gantt__axis">
+  <div class="gantt__axislabel">ID</div>
+  <div class="gantt__axislabel">${t('Projekt')}</div>
+  <div class="gantt__quarters">
+    ${cols.map(col => html`<div class="${col.isNow ? 'is-today' : ''} ${yearRule(col)}">${col.short}</div>`)}
+  </div>
+</header>`;
+
+/** The plan closes on the same figure the screen shows beneath it. */
+const capacityRow = (cols, tot) => html`<div class="gantt__row gantt__row--load">
+  <div class="gantt__rowlabel" style="grid-column: span 2">${t('Auslastung')}</div>
+  <div class="gantt__track gantt__track--load">
+    ${cols.map((col, n) => {
+      const pct = tot.utilisation[col.quarters[0]];
+      return html`<span class="capband__cell is-${loadStatus(pct).key} ${yearRule(col)}"
+        style="grid-column:${n + 1}">${pct} %</span>`;
+    })}
+  </div>
+</div>`;
+
+/** What the numbers on the pensum sheet mean. */
+const demandLegend = (cfg) => legendBlock([
+  {
+    label: 'Pensum',
+    items: cfg.legend.steps.map(s => legendItem(html`<span class="legend__swatch heat-${s.step}"></span>`, s.label))
+  },
+  {
+    label: 'Ampel',
+    items: state.ampel
+      ? AMPEL_STATES.filter(a => a.key !== 'none')
+        .map(a => legendItem(html`<span class="ampel ampel--${a.key}"></span>`, a.label))
+      : null
+  },
+  {
+    label: 'Markierung',
+    items: html`<span class="legend__item">${t(cfg.legend.marker)}</span>
+      ${legendItem(html`<span class="legend__swatch is-nolead"></span>`, cfg.legend.noLead)}`
+  },
+  { label: 'Auslastung', items: html`${t(cfg.legend.thresholds).replace(/^Auslastung:\s*/, '')}` }
+], 'legend--sheet');
+
 /** The column header, repeated wherever the reader needs it again. */
 function columnHead(lead, quarters) {
   return html`<div class="sheet__row sheet__row--head">
@@ -322,16 +413,20 @@ function columnHead(lead, quarters) {
   </div>`;
 }
 
-function printSheet(sheet, { rows, all, block, page, total, last }) {
+function printSheet(sheet, report, { rows, all, block, page, total, last }) {
   const cfg = data.print;
   const quarters = block.map(q => data.quarters[q]);
   const tot = totals(all);
   const chips = activeFilters();
+  const schedule = report.id === 'schedule';
   const lead = sheetColumns(sheet);
 
-  const cols = lead
-    .map(c => (c.flex ? `minmax(${c.w}px, 1fr)` : `minmax(0, ${c.w}px)`))
-    .join(' ') + ` repeat(${block.length}, ${sheet.id === 'portrait' ? 54 : 50}px)`;
+  // The bar plan needs only the two identifying columns; the rest of the width
+  // is the time axis, which it draws itself.
+  const cols = schedule
+    ? `var(--grid-col-id) minmax(0, 1fr)`
+    : lead.map(c => (c.flex ? `minmax(${c.w}px, 1fr)` : `minmax(0, ${c.w}px)`))
+      .join(' ') + ` repeat(${block.length}, ${sheet.id === 'portrait' ? 54 : 50}px)`;
 
   const span = lead.length;
   const numbers = (values, cls = '') => block.map(q =>
@@ -344,8 +439,8 @@ function printSheet(sheet, { rows, all, block, page, total, last }) {
         <div>${cfg.sender.map((line, i) => html`<span class="${i === 2 ? 'is-muted' : ''}">${t(line)}</span>`)}</div>
       </div>
       <div class="sheet__titles">
-        <div class="sheet__title">${t(cfg.title)}</div>
-        <div class="sheet__sub">${t('Pensum je Projekt und Quartal')} · ${state.unit === 'fte' ? t('Pensum in FTE') : t('Pensum in %')}
+        <div class="sheet__title">${t('Ressourcenplanung')} — ${t(report.label)}</div>
+        <div class="sheet__sub">${t(report.sub)}${schedule ? '' : ` · ${state.unit === 'fte' ? t('Pensum in FTE') : t('Pensum in %')}`}
           · ${quarters[0].label} – ${quarters[quarters.length - 1].label}</div>
       </div>
       <div class="sheet__meta">
@@ -357,7 +452,8 @@ function printSheet(sheet, { rows, all, block, page, total, last }) {
     </header>
 
     <div class="sheet__table">
-      ${rows.some(r => r.kind === 'group') ? '' : columnHead(lead, quarters)}
+      ${schedule ? scheduleTable(rows, block, tot, last)
+        : html`${rows.some(r => r.kind === 'group') ? '' : columnHead(lead, quarters)}
 
       ${rows.map(row => {
         if (row.kind === 'group') {
@@ -404,30 +500,10 @@ function printSheet(sheet, { rows, all, block, page, total, last }) {
       <div class="sheet__row sheet__row--load">
         <span style="grid-column:span ${span}">${t('Auslastung')}</span>
         ${block.map(q => html`<span class="sheet__num is-${loadStatus(tot.utilisation[q]).key}">${tot.utilisation[q]} %</span>`)}
-      </div>` : html`<div class="sheet__row sheet__row--more">
-        <span style="grid-column:span ${block.length + 5}">${t('Fortsetzung auf dem nächsten Blatt')}</span>
-      </div>`}
+      </div>` : continuation(block.length + 5)}`}
     </div>
 
-    ${legendBlock([
-      {
-        label: 'Pensum',
-        items: cfg.legend.steps.map(s => legendItem(html`<span class="legend__swatch heat-${s.step}"></span>`, s.label))
-      },
-      {
-        label: 'Ampel',
-        items: state.ampel
-          ? AMPEL_STATES.filter(a => a.key !== 'none')
-            .map(a => legendItem(html`<span class="ampel ampel--${a.key}"></span>`, a.label))
-          : null
-      },
-      {
-        label: 'Markierung',
-        items: html`<span class="legend__item">${t(cfg.legend.marker)}</span>
-          ${legendItem(html`<span class="legend__swatch is-nolead"></span>`, cfg.legend.noLead)}`
-      },
-      { label: 'Auslastung', items: html`${t(cfg.legend.thresholds).replace(/^Auslastung:\s*/, '')}` }
-    ], 'legend--sheet')}
+    ${schedule ? ganttLegend('legend--sheet') : demandLegend(cfg)}
 
     <footer class="sheet__foot">
       <span>${t('Erstellt am')} ${cfg.createdAt} ${t('durch')} ${cfg.createdBy} · ${t('Datenstand ePPM')}: ${cfg.syncedAt}</span>
