@@ -4,14 +4,14 @@
    ============================================================================= */
 
 import {
-  data, state, t, num, unitSuffix, totals, loadStatus, groupProjects, periods,
+  data, state, t, num, unitSuffix, totals, loadStatus, groupProjects, periods, phaseOf,
   periodValue, windowEdges, columnSet
 } from './store.js';
 
 import {
   html, raw, icons, pageHeader, pageActions, toolbar, activeFilterRow,
   timeControls, noResults, legendBlock, legendItem, yearRule, sortableHead, attr,
-  tokenPx, pinCls, pinLeft, ampelDot, droppedNote
+  tokenPx, pinCls, pinLeft, ampelDot, droppedNote, textWidth
 } from './ui.js';
 
 import { leadLayout, titleWidth, alignCls } from './columns.js';
@@ -24,21 +24,40 @@ const MIN_PERIODS = 3;
 
 /** The frozen block in front of the bars, from the same registry as the table. */
 function ganttLayout() {
-  const quarterW = tokenPx('--grid-quarter');
+  const quarterW = tokenPx('--grid-period');
   const room = Math.min(tokenPx('--layout-width'), document.documentElement.clientWidth)
     - 2 * tokenPx('--shell-pad-x');
   const cols = periods().length;
   const lay = leadLayout(columnSet(), {
     room, axis: MIN_PERIODS * quarterW, widthOf: c => tokenPx(c.width),
-    titleW: titleWidth({ room, quarters: cols, px: tokenPx })
+    titleW: titleWidth({ room, px: tokenPx })
   });
 
   /*
-   * Fixed widths throughout, and the bar track takes the rest. With two
-   * flexible tracks in one row they split the slack, and the frozen block would
-   * no longer be the width the capacity band below it is drawn to.
+   * The bar track stops at the same ceiling the pensum grid's cells stop at, so
+   * a quarter is the same width in both tabs and neither stretches to fill the
+   * card. Left to take the whole remainder, a five-column year view drew bars
+   * across 180px quarters while the table beside it held them at 96.
+   *
+   * Fixed widths otherwise: with two flexible tracks in one row they split the
+   * slack, and the frozen block would no longer be the width the capacity band
+   * below it is drawn to.
    */
-  return { ...lay, tpl: [...lay.parts, 'minmax(0, 1fr)'].join(' ') };
+  /*
+   * A floor as well as a ceiling, exactly as the pensum grid's columns have. The
+   * track was `minmax(0, …)`, which let it shrink to whatever was left over — so
+   * it always fitted, nothing ever overflowed, and the timeline could not be
+   * panned at all. The pensum grid never lost that because its columns have
+   * always had a minimum width.
+   */
+  const floor = cols * quarterW;
+  const ceiling = cols * tokenPx('--grid-period-max');
+  const track = Math.min(ceiling, Math.max(floor, room - lay.width));
+  return {
+    ...lay,
+    colWidth: cols ? track / cols : 0,
+    tpl: [...lay.parts, `minmax(${floor}px, ${ceiling}px)`].join(' ')
+  };
 }
 
 
@@ -234,26 +253,133 @@ export function ganttRow(p, cols, lay) {
     <div class="gantt__track">
       ${cols.map((col, n) => html`<span class="gantt__gridline ${yearRule(col)}"
         style="grid-column:${n + 1}"></span>`)}
-      ${bars.map((b, i) => ganttBar(b, i, bars, cols, p))}
+      ${(() => {
+        const marks = gatePlaces(p, cols);
+        const placed = placeBars(bars, cols);
+        return html`${placed.map((at) => ganttBar(at, placed, cols, p, lay, marks))}
+          ${gates(marks, cols, p)}`;
+      })()}
       ${bars.some(b => b.openEnd) && openEndRail(bars.find(b => b.openEnd), cols)}
-      ${gates(p, cols)}
     </div>
   </div>`;
 }
 
-/** Map a quarter range onto the visible columns; null when it falls outside. */
-function span(cols, from, to) {
-  const hits = cols
-    .map((c, i) => (c.quarters.some(q => q >= from && q < to) ? i : -1))
-    .filter(i => i >= 0);
-  return hits.length ? { from: hits[0] + 1, to: hits[hits.length - 1] + 2 } : null;
+/**
+ * Where a quarter falls on the track, measured in columns — 2.5 being halfway
+ * through the third column.
+ */
+function unitAt(cols, q) {
+  for (let i = 0; i < cols.length; i++) {
+    const qs = cols[i].quarters;
+    if (q < qs[0]) return i;
+    if (q <= qs.at(-1)) return i + (q - qs[0]) / qs.length;
+  }
+  return cols.length;
 }
 
-function ganttBar(b, i, bars, cols, p) {
-  const at = span(cols, b.from, b.to);
-  if (!at) return '';
-  const startsChain = !bars.some((o, j) => j !== i && o.to === b.from);
-  const endsChain = !bars.some((o, j) => j !== i && o.from === b.to);
+/*
+ * Every bar of a row, placed on the track and clipped to it.
+ *
+ * Bars used to be laid out by whole columns. That is exact while a column is a
+ * quarter, but at year scale a phase boundary usually falls inside a column,
+ * and both phases claimed it: 212 of 392 bars were drawn one on top of the
+ * other, a full column wide. What showed was whichever happened to be painted
+ * last, which is why the divider between two phases seemed to come and go.
+ */
+function placeBars(bars, cols) {
+  return bars
+    .map((b) => ({
+      b,
+      from: Math.max(0, unitAt(cols, b.from)),
+      to: Math.min(cols.length, unitAt(cols, b.to))
+    }))
+    .filter((at) => at.to > at.from);
+}
+
+const EPSILON = 1e-6;
+const abuts = (a, b) => Math.abs(a - b) < EPSILON;
+
+/*
+ * What a bar says. The full name where it fits, the sub-phase number where it
+ * does not, and nothing at all where even that would be cut.
+ *
+ * Decided here rather than in the data. Written into the file against a quarter
+ * count, the same 394 of 496 bars carried a name at every scale and every
+ * window width — at year scale 119 of those were cut off mid-word and 105 ran
+ * underneath a milestone diamond.
+ */
+const BAR_PADDING = 16;      // --space-4 on each side
+const GATE_CLEAR = 17;       // half a diamond, and air enough to read past it
+const CHEVRON = 19;          // the mark on a bar that runs off the window: a
+                             // 13px icon and the --space-3 gap before it
+const EDGE = 1e-3;           // a gate on a boundary belongs to neither bar
+
+/*
+ * Where a gate is actually drawn, in pixels along the track — its date, less
+ * whatever the fan-out moved it by.
+ */
+const gateX = (g, w) => g.at * w - (g.shift ?? 0);
+
+/*
+ * The clear run a label has inside its bar, as a start and an end in pixels.
+ *
+ * A gate standing inside the bar cuts the run short. A gate on the bar's own
+ * boundary — the ordinary case, one marking the end of the phase it closes —
+ * does not, but it is a diamond centred on that boundary, so half of it lies in
+ * this bar and the label has to begin after it. That last case was almost all
+ * of what still collided: not names running too long, but names starting too
+ * early, four pixels under the diamond that opened them.
+ */
+function barRun(b, at, lay, gates) {
+  const w = lay.colWidth || 0;
+  const x0 = at.from * w;
+  const x1 = at.to * w - (b.continues ? CHEVRON : 0);
+  const half = BAR_PADDING / 2;
+
+  let from = x0 + half;
+  let to = x1 - half;
+  for (const g of gates) {
+    const x = gateX(g, w);
+    if (x <= x0 - GATE_CLEAR || x >= x1 + GATE_CLEAR) continue;
+    if (x <= x0 + EDGE) from = Math.max(from, x + GATE_CLEAR);
+    else if (x < x1) { to = Math.min(to, x - GATE_CLEAR); break; }
+    else to = Math.min(to, x - GATE_CLEAR);
+  }
+
+  /*
+   * Round the start the same way the padding is written, and keep a pixel back.
+   * Measuring against a fractional width the element cannot have left two bars
+   * a shade too narrow for the name they had already been given, and the browser
+   * finished the sentence with an ellipsis.
+   */
+  from = Math.round(from);
+  return { from, to, room: to - from - 1 };
+}
+
+/*
+ * What a bar says, in three steps down: the phase and its name, the number
+ * alone, or nothing at all. Decided against the run the bar actually has on
+ * screen, so it answers the same way at every scale and every window width, and
+ * a bar never carries a word cut in half or a name running under a milestone.
+ *
+ * The full name stays in the tooltip and in the accessible name either way.
+ */
+function barText(b, run) {
+  const name = t(phaseOf(b.phase).label);
+  if (textWidth(name) <= run.room) return name;
+  return textWidth(b.phase) <= run.room ? b.phase : '';
+}
+
+function ganttBar(at, placed, cols, p, lay, gates) {
+  const b = at.b;
+  /*
+   * A bar draws its own left edge unless the phase before it ends exactly
+   * there, in which case that phase's right edge already is the divider.
+   * Judged on what is drawn, not on the data: where the previous phase lies
+   * outside the window there is nothing to lean on, and the bar needs its own.
+   */
+  const startsChain = !placed.some((o) => o !== at && abuts(o.to, at.from));
+  const endsChain = !placed.some((o) => o !== at && abuts(o.from, at.to));
   const cls = [
     'gantt__bar',
     b.delay ? 'is-delay' : b.unassigned ? 'is-unassigned' : 'is-phase',
@@ -262,10 +388,16 @@ function ganttBar(b, i, bars, cols, p) {
     b.continues ? 'is-open' : ''
   ].join(' ');
 
-  return html`<button type="button" class="${cls}" style="grid-column:${at.from} / ${at.to}"
+  const left = (at.from / cols.length) * 100;
+  const width = ((at.to - at.from) / cols.length) * 100;
+  const run = barRun(b, at, lay, gates);
+  const inset = Math.max(0, run.from - at.from * (lay.colWidth || 0));
+  const full = t(phaseOf(b.phase).label);
+  return html`<button type="button" class="${cls}"
+      style="left:${left}%;width:${width}%;padding-left:${inset}px"
       data-act="open-phase" data-val="${p.id}:${b.from}"
-      title="${t(b.milestone ?? b.label)}" aria-label="${p.title}: ${t(b.label)}">
-    <span class="gantt__barlabel">${t(b.label)}</span>
+      title="${t(b.milestone) || full}" aria-label="${p.title}: ${full}">
+    <span class="gantt__barlabel">${barText(b, run)}</span>
     ${b.continues && html`<span class="gantt__more" aria-hidden="true">${icons.chevronRight(13)}</span>`}
   </button>`;
 }
@@ -275,37 +407,63 @@ function ganttBar(b, i, bars, cols, p) {
  * milestone data rather than from a label baked into a bar means every one of
  * the 189 shows up, and each can be opened.
  */
-function gates(p, cols) {
-  const list = data.milestonesByProject[p.id] ?? [];
-  if (!list.length) return '';
+/** How far through its quarter a date falls, from 0 at the first day to 1. */
+function quarterFraction(iso, qi) {
+  const q = data.quarters[qi];
+  if (!q || !iso) return 1;
+  const first = Date.UTC(q.year, (Number(q.short.slice(1)) - 1) * 3, 1);
+  const next = Date.UTC(q.year, Number(q.short.slice(1)) * 3, 1);
+  const [y, m, d] = iso.split('-').map(Number);
+  const on = Date.UTC(y, m - 1, d);
+  return Math.min(1, Math.max(0, (on - first) / (next - first)));
+}
 
-  /*
-   * Two gates due in the same period land on the same pixel, and the second one
-   * is then invisible and unclickable. They fan out to the left instead, so a
-   * quarter with MS5 and MS6 in it reads as two marks in sequence.
-   */
-  const placed = [];
-  for (const m of list) {
+/*
+ * Every gate of a row, placed on the track in the units the bars use — and to
+ * its date, not to the end of the quarter it happens to fall in. A gate is a
+ * day: a Baukredit is released on one, and the plan should show where.
+ *
+ * It used to be placed by column, at that column's right edge. A quarter is a
+ * column at quarter scale, so nothing showed; at year scale a gate due in Q2
+ * slid three quarters forward, to the end of the year, and came down in the
+ * middle of a bar's name — which was most of what the labels collided with.
+ */
+function gatePlaces(p, cols) {
+  const out = [];
+  for (const m of data.milestonesByProject[p.id] ?? []) {
     const qi = data.quarterIndex[m.forecast ?? m.plan];
     if (qi === undefined) continue;
-    const at = cols.findIndex(c => c.quarters.includes(qi));
-    if (at < 0) continue;
-    placed.push({ m, at });
+    const at = unitAt(cols, qi + quarterFraction(m.forecastDate ?? m.planDate, qi));
+    if (at <= 0 || at > cols.length) continue;
+    out.push({ m, at });
   }
-  placed.sort((a, b) => a.at - b.at || a.m.code.localeCompare(b.m.code));
+  out.sort((a, b) => a.at - b.at || a.m.code.localeCompare(b.m.code));
 
-  const perColumn = placed.reduce((a, g) => ((a[g.at] = (a[g.at] ?? 0) + 1), a), {});
+  /*
+   * Two gates due at the same moment land on the same pixel, and the second is
+   * then invisible and unclickable. They fan out to the left, so a pair reads
+   * as two marks in sequence — and the label rule reads the same offsets, or it
+   * would clear the diamond it can see and run under the one beside it.
+   */
+  const perPlace = out.reduce((a, g) => ((a[g.at] = (a[g.at] ?? 0) + 1), a), {});
   const seen = {};
-
-  return html`${placed.map(({ m, at }) => {
-    const rank = seen[at] = (seen[at] ?? 0) + 1;
+  for (const g of out) {
+    const rank = (seen[g.at] = (seen[g.at] ?? 0) + 1);
     // Earliest of a stack sits leftmost, so the sequence still reads forwards.
-    const shift = (perColumn[at] - rank) * 13;
+    g.shift = (perPlace[g.at] - rank) * 13;
+  }
+  return out;
+}
+
+function gates(placed, cols, p) {
+  if (!placed.length) return '';
+
+  return html`${placed.map(({ m, at, shift }) => {
     const cat = data.milestoneCatalog[m.code];
     const state = m.forecast === null ? 'is-open' : m.status === 'late' ? 'is-late' : '';
     const label = `${m.code} ${cat ? t(cat.name) : ''} · ${data.quarters[data.quarterIndex[m.forecast ?? m.plan]].label}`;
-    return html`<button type="button" class="gantt__gate ${at === cols.length - 1 ? 'is-last' : ''}"
-        style="grid-column:${at + 1}; --gate-shift:${shift}px"
+    return html`<button type="button" class="gantt__gate"
+        style="left:${(at / cols.length) * 100}%; --gate-shift:${shift}px"
         data-act="open-milestone" data-val="${m.id}"
         title="${label} — ${t(m.statusLabel)}"
         aria-label="${p.title}: ${label} — ${t(m.statusLabel)}">
@@ -315,11 +473,12 @@ function gates(p, cols) {
 }
 
 function openEndRail(b, cols) {
-  const at = span(cols, b.to, data.quarters.length);
-  if (!at) return '';
-  const from = at.from;
-  const to = cols.length + 1;
-  return html`<span class="gantt__rail" style="grid-column:${from} / ${to}" aria-hidden="true"></span>
-    <span class="gantt__railcaption" style="grid-column:${from} / ${to}"><span>${b.openEnd}</span></span>`;
+  const from = Math.max(0, unitAt(cols, b.to));
+  if (from >= cols.length) return '';
+  const left = (from / cols.length) * 100;
+  const width = 100 - left;
+  const at = `left:${left}%;width:${width}%`;
+  return html`<span class="gantt__rail" style="${at}" aria-hidden="true"></span>
+    <span class="gantt__railcaption" style="${at}"><span>${b.openEnd}</span></span>`;
 }
 

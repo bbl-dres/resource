@@ -174,6 +174,14 @@ export function leadLayout(set, fit) {
  */
 const TITLE_REFERENCE = ['id', 'phase', 'lead', 'ampel', 'credit'];
 
+/*
+ * And against a fixed number of quarter columns, not however many the current
+ * time scale happens to show. Reckoned against the visible count, the year view
+ * — five columns instead of eighteen — left so much over that the project name
+ * grew from 285 to 460px, and it changed width on every scale change.
+ */
+const REFERENCE_COLUMNS = 8;
+
 /**
  * How wide the project name is — the same answer for both grids.
  *
@@ -182,9 +190,9 @@ const TITLE_REFERENCE = ['id', 'phase', 'lead', 'ampel', 'credit'];
  * name was 285px wide in one tab and 460px in the other, and it jumped 175px
  * on every switch. Both ask this instead.
  */
-export function titleWidth({ room, quarters, px }) {
+export function titleWidth({ room, px }) {
   const fixed = TITLE_REFERENCE.reduce((a, key) => a + px(column(key).width), 0);
-  const spare = room - fixed - quarters * px('--grid-quarter');
+  const spare = room - fixed - REFERENCE_COLUMNS * px('--grid-quarter');
   return Math.round(Math.max(px('--grid-col-title'),
     Math.min(px('--grid-col-title-max'), spare)));
 }

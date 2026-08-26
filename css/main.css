@@ -1483,7 +1483,7 @@ h1, h2, h3,
  * whichever way you are looking at it — and the bar plan scrolls in the same
  * situations the pensum grid does.
  */
-.gantt__scroll > * { min-width: calc(var(--gantt-lead) + var(--gantt-cols, 8) * var(--grid-quarter)); }
+.gantt__scroll > * { min-width: calc(var(--gantt-lead) + var(--gantt-cols, 8) * var(--grid-period)); }
 
 /*
  * The same two lead columns the pensum grid uses, at the same widths, so a
@@ -1626,6 +1626,8 @@ h1, h2, h3,
 .gantt__track {
   display: grid; grid-template-columns: repeat(var(--gantt-cols, 8), minmax(0, 1fr));
   grid-template-rows: calc(var(--row-height) - 2px); align-items: center;
+  /* The bars are placed on the track itself, not in its columns. */
+  position: relative;
 }
 /*
  * Years only, as in the pensum grid — heading and cells alike, in both tabs.
@@ -1635,13 +1637,19 @@ h1, h2, h3,
 .gantt__gridline.is-yearstart { border-left: var(--border-hairline) solid var(--color-border); }
 
 .gantt__bar {
-  grid-row: 1; align-self: center; z-index: var(--z-raised);
+  /*
+   * Positioned to the quarter rather than snapped to a column, so a phase that
+   * ends mid-year ends mid-column and the next one starts where it left off.
+   */
+  position: absolute; top: 50%; transform: translateY(-50%); z-index: var(--z-raised);
   display: flex; align-items: center; justify-content: space-between; gap: var(--space-3);
   height: var(--bar-height); padding: 0 var(--space-4);
   border: var(--border-hairline) solid var(--color-bar-border);
   background: var(--color-bar-bg);
   color: var(--color-text-body);
-  font-size: var(--text-xs); font-weight: var(--font-semibold);
+  /* Regular weight: a hundred bold labels across the plan read as clutter,
+     and the bar itself already carries the phase. */
+  font-size: var(--text-xs);
   border-left: 0; min-width: 0;
 }
 .gantt__bar { cursor: pointer; text-align: left; transition: filter var(--dur-fast) var(--ease); }
@@ -1667,27 +1675,30 @@ h1, h2, h3,
  * the mark — an 8px diamond is not a target.
  */
 .gantt__gate {
-  /* Same row as the bars and the gridlines, or the grid puts it on its own. */
-  grid-row: 1; justify-self: end; align-self: center;
+  /*
+   * Centred on the moment it is due, like the bars are drawn to theirs. Placed
+   * by column it snapped to that column's right edge, which at year scale threw
+   * a gate up to three quarters away from its date.
+   */
+  position: absolute; top: 50%; z-index: var(--z-label);
+  transform: translate(calc(-50% - var(--gate-shift, 0px)), -50%);
   display: inline-flex; align-items: center; justify-content: center;
-  width: 24px; height: 24px; margin-right: calc(-6px + var(--gate-shift, 0px));
+  width: 24px; height: 24px;
   border: 0; padding: 0; background: none; cursor: pointer;
-  z-index: var(--z-label);
 }
 .gantt__gate .diamond { transition: transform var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease); }
 .gantt__gate:hover .diamond { transform: rotate(45deg) scale(1.25); }
 .gantt__gate:active .diamond { transform: rotate(45deg) scale(1.1); }
-.gantt__gate.is-last { margin-right: var(--gate-shift, 0px); }
 .gantt__gate:focus-visible { outline-offset: -3px; }
 
 .gantt__more { display: inline-flex; color: var(--color-text-muted); }
 
 .gantt__rail {
-  grid-row: 1; align-self: center; z-index: var(--z-base);
+  position: absolute; top: 50%; z-index: var(--z-base);
   height: 1px; border-top: 2px dashed var(--color-border-rule);
 }
 .gantt__railcaption {
-  grid-row: 1; align-self: center; z-index: var(--z-raised);
+  position: absolute; top: 50%; transform: translateY(-50%); z-index: var(--z-raised);
   display: flex; align-items: center; justify-content: center;
 }
 .gantt__railcaption span {
@@ -1709,7 +1720,7 @@ h1, h2, h3,
 .capband__row {
   display: grid; grid-template-columns: var(--gantt-lead) minmax(0, 1fr);
   min-height: 42px; align-items: stretch;
-  min-width: calc(var(--gantt-lead) + var(--gantt-cols, 8) * var(--grid-quarter));
+  min-width: calc(var(--gantt-lead) + var(--gantt-cols, 8) * var(--grid-period));
   background: var(--color-surface-frame);
 }
 .capband__label { display: flex; align-items: center; padding-left: var(--space-6); }

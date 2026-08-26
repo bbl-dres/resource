@@ -117,8 +117,39 @@ export function tokenPx(name) {
   return pxCache.get(name);
 }
 
+/*
+ * Some of these tokens depend on the time scale, so the cache cannot outlive a
+ * change of it. It nearly did: after switching from Jahr to Quartal the grids
+ * went on laying out quarters at a year's width, three thousand pixels of track
+ * for sixteen columns, and only a reload put it right.
+ */
+export function forgetTokens() {
+  pxCache.clear();
+}
+
 /** The rule that separates one year from the next, drawn on its first column. */
 export const yearRule = period => (period.yearStart ? 'is-yearstart' : '');
+
+/*
+ * How wide a string sets, in the app's own font at a given size token. Measured
+ * once per string and cached: the bar plan asks about the same dozen phase
+ * names for every one of five hundred bars.
+ */
+const textCache = new Map();
+let measure = null;
+
+export function textWidth(text, sizeToken = '--text-xs') {
+  const key = `${sizeToken}|${text}`;
+  const hit = textCache.get(key);
+  if (hit !== undefined) return hit;
+
+  if (!measure) measure = document.createElement('canvas').getContext('2d');
+  const cs = getComputedStyle(document.documentElement);
+  measure.font = `${cs.getPropertyValue(sizeToken).trim()} ${cs.getPropertyValue('--font-sans').trim()}`;
+  const width = measure.measureText(text).width;
+  textCache.set(key, width);
+  return width;
+}
 
 /**
  * The row's traffic light. Three views draw it — the table, the bar plan and

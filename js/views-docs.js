@@ -7,7 +7,8 @@
    ============================================================================= */
 
 import {
-  data, state, t, num, unitSuffix, cellValue, projectDemand, ampel, phaseOf, quarterPeriods, columnSet,
+  data, state, t, num, unitSuffix, cellValue, projectDemand, ampel, phaseOf, printPeriods, columnSet,
+  periodValue,
   personUtilisation, totals, loadStatus, heatStep, filteredProjects, activeFilters,
   groupProjects
 } from './store.js';
@@ -117,6 +118,17 @@ const ORIENTATIONS = [
  * wide and no screen shows one at its own size; the fixed steps are for reading
  * the small print, and the preview pans once a sheet is wider than the pane.
  */
+/*
+ * The report prints the plan at the same three grains the screen offers. Four
+ * and a half years by month is 54 columns, which is what the large papers are
+ * for.
+ */
+const SCALES = [
+  { id: 'year', label: 'Jahr' },
+  { id: 'quarter', label: 'Quartal' },
+  { id: 'month', label: 'Monat' }
+];
+
 const ZOOMS = [
   { id: 'fit', label: 'Anpassen' },
   { id: '50', label: '50 %' },
@@ -184,6 +196,10 @@ export function renderExport() {
             aria-pressed="${r.id === report.id}" data-act="report" data-val="${r.id}">${t(r.label)}</button>`)}
         </div>
         <div class="sheetbar__paper">
+          <div class="segmented">
+            ${SCALES.map(s => html`<button type="button" class="${s.id === state.scale ? 'is-on' : ''}"
+              aria-pressed="${s.id === state.scale}" data-act="scale" data-val="${s.id}">${t(s.label)}</button>`)}
+          </div>
           ${dropdown({
             id: 'zoom', label: `${t('Ansicht')}: ${zoomLabel()}`, width: 180,
             body: html`${ZOOMS.map(z => menuRadio(t(z.label), state.zoom === z.id, 'zoom', z.id))}`
@@ -288,8 +304,9 @@ function printSheets(sheet, report) {
   const all = filteredProjects();
   const perSheet = sheet.rows[report.id];
   const blocks = [];
-  for (let from = 0; from < data.quarters.length; from += sheet.quarters) {
-    blocks.push(data.quarters.slice(from, from + sheet.quarters).map((_, i) => from + i));
+  const columns = printPeriods();
+  for (let from = 0; from < columns.length; from += sheet.quarters) {
+    blocks.push(columns.slice(from, from + sheet.quarters));
   }
   // Every row is now one line high, so the page budget is a plain row count and
   // switching attributes on can no longer push a sheet past the paper.
@@ -419,7 +436,7 @@ const continuation = (span) => html`<div class="sheet__row sheet__row--more">
  * lead columns differs, and that is a stylesheet matter.
  */
 function scheduleTable(rows, block, tot, last, sheet) {
-  const cols = quarterPeriods(block[0], block.length);
+  const cols = block;
   // Paper widths, not screen ones — the same numbers the printed table uses.
   const wide = sheet.orientation === 'landscape';
   const lay = leadLayout(columnSet(), {
@@ -490,16 +507,15 @@ const demandLegend = (cfg) => legendBlock([
 /** True where a quarter opens a year, the way markYears() does it on screen. */
 const yearBreak = (quarters, i) => (i === 0 || quarters[i].year !== quarters[i - 1].year ? 'is-yearstart' : '');
 
-function columnHead(lead, quarters) {
+function columnHead(lead, columns) {
   return html`<div class="sheet__row sheet__row--head">
     ${lead.map(c => html`<span class="${c.cls ?? ''}">${c.label}</span>`)}
-    ${quarters.map((q, i) => html`<span class="sheet__num sheet__period ${yearBreak(quarters, i)}">${q.short}/${String(q.year).slice(2)}</span>`)}
+    ${columns.map(col => html`<span class="sheet__num sheet__period ${yearRule(col)}">${col.short}</span>`)}
   </div>`;
 }
 
 function printSheet(sheet, report, { rows, all, block, page, total, last }) {
   const cfg = data.print;
-  const quarters = block.map(q => data.quarters[q]);
   const tot = totals(all);
   const chips = activeFilters();
   const schedule = report.id === 'schedule';
@@ -523,8 +539,8 @@ function printSheet(sheet, report, { rows, all, block, page, total, last }) {
       .join(' ') + ` repeat(${block.length}, ${quarter}px)`;
 
   const span = lead.length;
-  const numbers = (values, cls = '') => block.map((q, i) =>
-    html`<span class="sheet__num sheet__period ${cls} ${yearBreak(quarters, i)}">${num(values[q])}</span>`);
+  const numbers = (values, cls = '') => block.map(col =>
+    html`<span class="sheet__num sheet__period ${cls} ${yearRule(col)}">${num(periodValue(values, col))}</span>`);
 
   return html`<article class="sheet sheet--${sheet.paper} sheet--${sheet.orientation}" style="--sheet-cols:${raw(cols)}">
     <header class="sheet__head">
@@ -535,7 +551,7 @@ function printSheet(sheet, report, { rows, all, block, page, total, last }) {
       <div class="sheet__titles">
         <div class="sheet__title">${t('Ressourcenplanung')} — ${t(report.label)}</div>
         <div class="sheet__sub">${t(report.sub)}${schedule ? '' : ` · ${state.unit === 'fte' ? t('Pensum in FTE') : t('Pensum in %')}`}
-          · ${quarters[0].label} – ${quarters[quarters.length - 1].label}</div>
+          · ${block[0].label} – ${block[block.length - 1].label}</div>
       </div>
       <div class="sheet__meta">
         <span>${t('Umfang')}: ${scopeLine(all.length)}</span>
@@ -547,7 +563,7 @@ function printSheet(sheet, report, { rows, all, block, page, total, last }) {
 
     <div class="sheet__table">
       ${schedule ? scheduleTable(rows, block, tot, last, sheet)
-        : html`${rows.some(r => r.kind === 'group') ? '' : columnHead(lead, quarters)}
+        : html`${rows.some(r => r.kind === 'group') ? '' : columnHead(lead, block)}
 
       ${rows.map(row => {
         if (row.kind === 'group') {
@@ -556,13 +572,14 @@ function printSheet(sheet, report, { rows, all, block, page, total, last }) {
             <span style="grid-column:span ${block.length + lead.length}">${t(row.label)}
               <span class="sheet__groupcount">${row.count} ${t('Projekte')}${
                 row.continued ? ` · ${t('Fortsetzung')}` : ''}</span></span>
-          </div>${columnHead(lead, quarters)}`;
+          </div>${columnHead(lead, block)}`;
         }
         if (row.kind === 'sum') {
-          const values = block.map(q => row.projects.reduce((a, p) => a + projectDemand(p)[q], 0));
+          const values = data.quarters.map((_, q) =>
+            row.projects.reduce((a, p) => a + projectDemand(p)[q], 0));
           return html`<div class="sheet__row sheet__row--groupsum">
             <span style="grid-column:span ${span}">${t('Summe')} ${t(row.label)}</span>
-            ${values.map((v, i) => html`<span class="sheet__num sheet__period ${yearBreak(quarters, i)}">${num(v)}</span>`)}
+            ${block.map(col => html`<span class="sheet__num sheet__period ${yearRule(col)}">${num(periodValue(values, col))}</span>`)}
           </div>`;
         }
 
@@ -571,10 +588,14 @@ function printSheet(sheet, report, { rows, all, block, page, total, last }) {
         const who = p.leadId ? data.peopleById[p.leadId] : null;   // only for the overload marker
         return html`<div class="sheet__row ${p.leadId ? '' : 'is-unassigned'}">
           ${lead.map(c => html`<span class="${c.key === 'title' ? 'sheet__project' : `sheet__lead ${c.cls ?? ''}`}"
-            >${sheetCell(c, p, { from: block[0], to: block.at(-1) })}</span>`)}
-          ${block.map((q, i) => {
+            >${sheetCell(c, p, {
+              from: block[0].quarters[0], to: block.at(-1).quarters.at(-1)
+            })}</span>`)}
+          ${block.map((col) => {
+            const q = col.quarters[0];
             const over = who && personUtilisation(p.leadId, q) > 100;
-            return html`<span class="sheet__cell heat-${heatStep(cells[q])} ${yearBreak(quarters, i)}"><span class="cellv">${over && cells[q] > 0 ? html`<span class="warnmark" aria-hidden="true">▲</span>` : ''}${cells[q] ? num(cells[q]) : '–'}</span></span>`;
+            const v = periodValue(cells, col);
+            return html`<span class="sheet__cell heat-${heatStep(v)} ${yearRule(col)}"><span class="cellv">${over && v > 0 ? html`<span class="warnmark" aria-hidden="true">▲</span>` : ''}${v ? num(v) : '–'}</span></span>`;
           })}
         </div>`;
       })}
@@ -593,7 +614,10 @@ function printSheet(sheet, report, { rows, all, block, page, total, last }) {
       </div>
       <div class="sheet__row sheet__row--load">
         <span style="grid-column:span ${span}">${t('Auslastung')}</span>
-        ${block.map((q, i) => html`<span class="sheet__num sheet__period is-${loadStatus(tot.utilisation[q]).key} ${yearBreak(quarters, i)}">${tot.utilisation[q]} %</span>`)}
+        ${block.map(col => {
+          const pct = periodValue(tot.utilisation, col);
+          return html`<span class="sheet__num sheet__period is-${loadStatus(pct).key} ${yearRule(col)}">${pct} %</span>`;
+        })}
       </div>` : continuation(block.length + 5)}`}
     </div>
 

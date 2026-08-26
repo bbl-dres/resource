@@ -278,8 +278,18 @@ export function t(de) {
    comma as the decimal separator.
    -------------------------------------------------------------------------- */
 
+/*
+ * Swiss number grouping: an apostrophe every three digits, per the Bundeskanzlei
+ * Schreibweisungen. The typographic one, U+2019 — WinAnsi carries it at 0x92, so
+ * it survives the PDF writer as well as the screen.
+ */
+const GROUP = '’';
+const grouped = (s) => s.replace(/\B(?=(\d{3})+(?!\d))/g, GROUP);
+
 export function num(v) {
-  return state.unit === 'fte' ? (v / 100).toFixed(2).replace('.', ',') : String(Math.round(v));
+  return state.unit === 'fte'
+    ? grouped((v / 100).toFixed(2)).replace('.', ',')
+    : grouped(String(Math.round(v)));
 }
 
 export function unitSuffix() {
@@ -496,11 +506,27 @@ function markYears(cols) {
   });
 }
 
-function buildPeriods() {
-  const qs = data.quarters;
-  const off = state.periodOffset;
+/*
+ * How many time columns a grid builds, per scale — the same in either tab, so
+ * the frozen block does not move when the reader switches between them.
+ *
+ * Not the whole horizon: at ten years that is eleven columns, forty or a
+ * hundred and twenty in one grid, and nothing but the browser deciding what a
+ * column is worth. Each scale instead builds a few more than fit, at a width
+ * chosen for that scale — about four years, twelve quarters or eighteen months
+ * on a small laptop — and the rest is reached the two ways every other overflow
+ * in these grids is: the arrows step the window, and the grid pans.
+ *
+ * The whole plan at one glance is what the A0 report is for.
+ */
+const WINDOW_COLUMNS = { year: 12, quarter: 16, month: 24 };
+export const windowColumns = (scale = state.scale) => WINDOW_COLUMNS[scale] ?? 12;
 
-  if (state.scale === 'year') {
+/** Every column of the horizon at a scale, before the window is cut. */
+function allPeriods(scale = state.scale) {
+  const qs = data.quarters;
+
+  if (scale === 'year') {
     const years = [...new Set(qs.map(q => q.year))];
     return years.map(year => {
       const idx = qs.map((q, i) => (q.year === year ? i : -1)).filter(i => i >= 0);
@@ -512,13 +538,10 @@ function buildPeriods() {
     });
   }
 
-  if (state.scale === 'month') {
+  if (scale === 'month') {
     const out = [];
-    // Twelve months, stepped a quarter at a time.
-    const start = Math.max(0, Math.min(off, qs.length - 4));
-    for (let n = 0; n < 12; n++) {
-      const qi = start + Math.floor(n / 3);
-      if (qi >= qs.length) break;
+    for (let n = 0; n < qs.length * 3; n++) {
+      const qi = Math.floor(n / 3);
       const q = qs[qi];
       const month = (Number(q.short.slice(1)) - 1) * 3 + (n % 3);
       const slice = n % 3;
@@ -534,13 +557,36 @@ function buildPeriods() {
     return out;
   }
 
-  const start = Math.max(0, Math.min(off, qs.length - 1));
-  return qs.slice(start).map((q, n) => ({
+  return qs.map((q, n) => ({
     id: q.id, label: q.label,
     short: `${q.short} ${String(q.year).slice(2)}`,
-    quarters: [start + n], isNow: start + n === 0,
-    from: start + n, to: start + n + 1
+    quarters: [n], isNow: n === 0,
+    from: n, to: n + 1
   }));
+}
+
+/** How far the window may be stepped before it runs off the end. */
+export const maxOffset = (cols = allPeriods()) => Math.max(0, cols.length - windowColumns());
+
+/** The arrows move most of a window, keeping a little of it for orientation. */
+export const windowStep = () => Math.max(1, Math.round(windowColumns() * 0.75));
+
+/*
+ * Changing the scale keeps the reader where they were. Twelve columns mean one
+ * year of months or twelve years of years, so the offset cannot simply carry
+ * over; what carries over is the quarter the window opens on.
+ */
+export function offsetForScale(next) {
+  const at = windowQuarters().from;
+  const all = allPeriods(next);
+  const found = all.findIndex(c => c.quarters.includes(at));
+  return Math.max(0, Math.min(found < 0 ? 0 : found, Math.max(0, all.length - windowColumns(next))));
+}
+
+function buildPeriods(off = state.periodOffset) {
+  const all = allPeriods();
+  const start = Math.max(0, Math.min(off, maxOffset(all)));
+  return all.slice(start, start + windowColumns());
 }
 
 /**
@@ -573,6 +619,13 @@ export function periodValue(values, period) {
  * Returned as an attribute fragment so a card can carry it without the view
  * having to spell the two flags out.
  */
+/*
+ * Every column of the horizon at the current scale. A report prints the whole
+ * plan and tiles it across sheets, so it starts where the plan starts rather
+ * than where the reader has stepped the screen to.
+ */
+export const printPeriods = () => markYears(allPeriods());
+
 export function windowQuarters(cols = periods()) {
   return { from: cols[0]?.quarters[0] ?? 0, to: cols.at(-1)?.quarters.at(-1) ?? 0 };
 }
@@ -582,10 +635,9 @@ export function windowEdges(cols = periods()) {
   return { before: from > 0, after: to < data.quarters.length - 1 };
 }
 
-/** How many quarters the window can still be stepped. */
+/** Whether the window can still be stepped that way, in columns of this scale. */
 export function canStep(dir) {
-  const max = data.quarters.length - (state.scale === 'year' ? data.quarters.length : 1);
-  return dir < 0 ? state.periodOffset > 0 : state.periodOffset < max;
+  return dir < 0 ? state.periodOffset > 0 : state.periodOffset < maxOffset();
 }
 
 /**

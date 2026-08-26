@@ -61,6 +61,7 @@
   --steel-400: #c4d0e0;
   --steel-450: #c2d5ec;
   --steel-500: #9cb8de;
+  --steel-550: #76879f;
 
   /* ==========================================================================
      4 · PRIMITIVES — status hues
@@ -212,7 +213,13 @@
   --heat-neg-bg:  var(--red-100);    --heat-neg-fg:  var(--red-800);
 
   --color-bar-bg:     var(--steel-150);
-  --color-bar-border: var(--steel-400);
+  /*
+   * The edge of a phase bar, and the only thing separating one phase from the
+   * next where two abut. At steel-400 it measured 1.38:1 against the bar and
+   * read as missing on half the bars; this clears 3:1 on all four variants,
+   * which 1.4.11 asks of a boundary that carries meaning.
+   */
+  --color-bar-border: var(--steel-550);
 
   --spark-bar:       var(--steel-500);
   --spark-bar-empty: var(--grey-200);
@@ -331,7 +338,12 @@
    * right-hand one ended 8px inside the card. This lands exactly on the edge,
    * and the two sides are the same ramp mirrored.
    */
-  --scroll-edge: rgba(17, 24, 39, 0.055);
+  /*
+   * The ramp at a scrolling edge. At .055 it was there in the stylesheet and not
+   * on the screen — on a laptop panel in a lit meeting room it read as nothing
+   * at all, and the one thing it has to say is that the plan continues.
+   */
+  --scroll-edge: rgba(17, 24, 39, 0.09);
   --scroll-edge-w: 22px;
   --shadow-modal: 0 24px 48px rgba(0, 0, 0, 0.18);
 
@@ -359,6 +371,25 @@
   --grid-quarter-max:  96px;    /* and its ceiling: past this a wider window
                                    should lengthen the project name, not the
                                    space around a two-digit number */
+
+  /*
+   * One time column, whatever the scale is measuring. Both grids use these, so
+   * a column is the same width in Übersicht and in Termine and the frozen block
+   * does not move when the reader switches tab.
+   *
+   * A year is given room for four of them to fill a small laptop, because that
+   * is as much of a ten-year plan as can be read at once; the rest is reached
+   * by panning, the way every other overflow in these grids is. The whole plan
+   * at one glance is what the A0 report is for.
+   */
+  --grid-period:       var(--grid-quarter);
+  --grid-period-max:   var(--grid-quarter-max);
+  /*
+   * The same at every scale. Narrower months fitted more of them on screen but
+   * left the sum rows too tight for their own figures — "4415 %" broke onto a
+   * second line in a 52px column, and a total that wraps reads as two numbers.
+   * What the scale changes is what a column means and how many there are.
+   */
   --grid-col-ampel:     62px;
   --grid-col-id:        62px;
   --grid-col-title:     285px;   /* the floor; the column takes the slack */
@@ -384,7 +415,7 @@
   --row-height:         38px;
   --row-height-sum:     34px;
   --row-height-list:    48px;
-  --bar-height:         26px;
+  --bar-height:      24px;
 
   --control-height-sm: 26px;
   --control-height:    32px;
@@ -438,3 +469,4 @@
   --z-modal:   80;
   --z-toast:   90;
 }
+

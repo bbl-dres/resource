@@ -1,0 +1,178 @@
+{
+  "catalog": [
+    {
+      "code": "MS1",
+      "name": "Bedürfnis freigegeben",
+      "short": "Strategie"
+    },
+    {
+      "code": "MS2",
+      "name": "Machbarkeit bestätigt",
+      "short": "Machbarkeit"
+    },
+    {
+      "code": "MS3",
+      "name": "Vorprojekt genehmigt",
+      "short": "Vorprojekt"
+    },
+    {
+      "code": "MS4",
+      "name": "Baukredit bewilligt",
+      "short": "Baukredit"
+    },
+    {
+      "code": "MS5",
+      "name": "Vergabe erfolgt",
+      "short": "Vergabe"
+    },
+    {
+      "code": "MS6",
+      "name": "Abnahme, Inbetriebsetzung",
+      "short": "Abnahme"
+    },
+    {
+      "code": "MS7",
+      "name": "Übergabe Bewirtschaftung",
+      "short": "Übergabe"
+    }
+  ],
+  "items": [
+    {
+      "id": "ms-44-5",
+      "code": "MS5",
+      "projectId": "pr44",
+      "subPhase": "41",
+      "plan": "2026Q4",
+      "planDate": "2026-10-15",
+      "forecast": "2026Q4",
+      "forecastDate": "2026-10-15",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
+      "id": "ms-06-3",
+      "code": "MS3",
+      "projectId": "pr06",
+      "subPhase": "31",
+      "plan": "2026Q4",
+      "planDate": "2026-11-30",
+      "forecast": "2027Q1",
+      "forecastDate": "2027-02-15",
+      "status": "late",
+      "statusLabel": "▲ 1 Quartal verspätet",
+      "impact": "Verzug durch Statikprüfung"
+    },
+    {
+      "id": "ms-26-1",
+      "code": "MS1",
+      "projectId": "pr26",
+      "subPhase": "11",
+      "plan": "2026Q4",
+      "planDate": "2026-12-15",
+      "forecast": null,
+      "forecastDate": null,
+      "status": "pending",
+      "statusLabel": "▲ Auftrag noch hängig",
+      "impact": "Auftrag noch hängig"
+    },
+    {
+      "id": "ms-03-2",
+      "code": "MS2",
+      "projectId": "pr03",
+      "subPhase": "21",
+      "plan": "2027Q1",
+      "planDate": "2027-02-15",
+      "forecast": "2027Q1",
+      "forecastDate": "2027-02-15",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
+      "id": "ms-10-7",
+      "code": "MS7",
+      "projectId": "pr10",
+      "subPhase": "62",
+      "plan": "2027Q1",
+      "planDate": "2027-03-15",
+      "forecast": "2027Q1",
+      "forecastDate": "2027-03-15",
+      "status": "ok",
+      "statusLabel": "Termin gehalten",
+      "impact": "entlastet 10 %"
+    },
+    {
+      "id": "ms-57-4",
+      "code": "MS4",
+      "projectId": "pr57",
+      "subPhase": "33",
+      "plan": "2027Q1",
+      "planDate": "2027-03-31",
+      "forecast": "2027Q1",
+      "forecastDate": "2027-03-31",
+      "status": "ok",
+      "statusLabel": "Termin gehalten",
+      "impact": "löst 60 % Bauleitung aus"
+    },
+    {
+      "id": "ms-39-2",
+      "code": "MS2",
+      "projectId": "pr39",
+      "subPhase": "22",
+      "plan": "2027Q2",
+      "planDate": "2027-05-15",
+      "forecast": "2027Q2",
+      "forecastDate": "2027-05-15",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
+      "id": "ms-51-4",
+      "code": "MS4",
+      "projectId": "pr51",
+      "subPhase": "33",
+      "plan": "2027Q2",
+      "planDate": "2027-06-15",
+      "forecast": "2027Q2",
+      "forecastDate": "2027-06-15",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
+      "id": "ms-12-6",
+      "code": "MS6",
+      "projectId": "pr12",
+      "subPhase": "52",
+      "plan": "2027Q2",
+      "planDate": "2027-06-30",
+      "forecast": "2027Q4",
+      "forecastDate": "2027-12-15",
+      "status": "late",
+      "statusLabel": "▲ 2 Quartale verspätet",
+      "impact": "Abnahme verschoben, bindet Bauleitung 2 Quartale länger"
+    },
+    {
+      "id": "ms-39-3",
+      "code": "MS3",
+      "projectId": "pr39",
+      "subPhase": "31",
+      "plan": "2027Q3",
+      "planDate": "2027-08-31",
+      "forecast": "2027Q3",
+      "forecastDate": "2027-08-31",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    },
+    {
+      "id": "ms-51-5",
+      "code": "MS5",
+      "projectId": "pr51",
+      "subPhase": "41",
+      "plan": "2027Q4",
+      "planDate": "2027-11-30",
+      "forecast": "2027Q4",
+      "forecastDate": "2027-11-30",
+      "status": "ok",
+      "statusLabel": "Termin gehalten"
+    }
+  ]
+}

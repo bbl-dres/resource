@@ -1,0 +1,50 @@
+[
+  {
+    "id": "sonja",
+    "name": "Sonja Beispiel",
+    "initials": "SB",
+    "shortName": "Sonja B.",
+    "role": "Projektleitung",
+    "employment": 100
+  },
+  {
+    "id": "lars",
+    "name": "Lars Muster",
+    "initials": "LM",
+    "shortName": "Lars M.",
+    "role": "Projektleitung",
+    "employment": 100
+  },
+  {
+    "id": "alina",
+    "name": "Alina Beispiel",
+    "initials": "AB",
+    "shortName": "Alina B.",
+    "role": "Projektleitung",
+    "employment": 100
+  },
+  {
+    "id": "tobias",
+    "name": "Tobias Muster",
+    "initials": "TM",
+    "shortName": "Tobias M.",
+    "role": "Projektentwicklung",
+    "employment": 100
+  },
+  {
+    "id": "paula",
+    "name": "Paula Beispiel",
+    "initials": "PB",
+    "shortName": "Paula B.",
+    "role": "Projektentwicklung",
+    "employment": 80
+  },
+  {
+    "id": "nadia",
+    "name": "Nadia Muster",
+    "initials": "NM",
+    "shortName": "Nadia M.",
+    "role": "Bauleitung",
+    "employment": 60
+  }
+]

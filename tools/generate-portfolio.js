@@ -13,8 +13,18 @@
 const fs = require('fs');
 process.chdir(require('path').join(__dirname, '..'));
 
+/*
+ * The seed is the hand-written core the wireframe tells its story with; this
+ * fills the portfolio out around it. It is read from tools/seed, never from
+ * data/ — reading its own output made a second run append another hundred
+ * projects to the hundred already there, so the file was not reproducible.
+ */
+const core = n => JSON.parse(fs.readFileSync(`tools/seed/${n}.json`, 'utf8'));
 const read = n => JSON.parse(fs.readFileSync(`data/${n}.json`, 'utf8'));
-const write = (n, v) => fs.writeFileSync(`data/${n}.json`, JSON.stringify(v, null, 2) + '\n');
+/* CRLF, like every other file here — otherwise a run shows up as a rewrite of
+   every line in every data file it touched. */
+const write = (n, v) => fs.writeFileSync(`data/${n}.json`,
+  (JSON.stringify(v, null, 2) + '\n').replace(/\n/g, '\r\n'));
 
 /* mulberry32 — small, seeded, and good enough for mock data */
 let seed = 0x5bb1e1d;
@@ -70,15 +80,46 @@ const PORTFOLIOS = [
 const PRIORITIES = [['hoch', 26], ['mittel', 52], ['tief', 22]];
 
 /* The SIA 112 chain, and how much of a lead a phase typically takes. */
+/*
+ * A construction project ends with the handover. Phase 6 — Betrieb, Überwachung,
+ * Erhaltung — is what happens to the building afterwards, for as long as it
+ * stands; it is not part of the project and not this office's project work.
+ * The last gate, MS7 Übergabe Bewirtschaftung, is where the chain stops.
+ */
 const SEQ = ['11', '21', '22', '31', '32', '33', '41', '51', '52', '53'];
+/*
+ * What a phase asks of the office, in per cent of one person. Operation asks
+ * little and asks it for years, which is why it is on the list at all.
+ */
 const WEIGHT = {
   '11': 10, '21': 25, '22': 30, '31': 45, '32': 60, '33': 35,
   '41': 55, '51': 70, '52': 85, '53': 45
 };
+/*
+ * Quarters per sub-phase, before the project's own pace is applied.
+ *
+ *   22  an open design competition runs about twelve months, and the award
+ *       follows it.
+ *   33  a building permit averaged 140–160 days in 2023 and passes a year in
+ *       the cities; an objection stretches it much further.
+ *   52  the construction: a Teilsanierung inside two years, a Gesamtsanierung
+ *       of a building that stays in use, four or more.
+ *   53  commissioning, and with it the handover the project ends on.
+ */
 const DURATION = {
-  '11': [1, 2], '21': [1, 2], '22': [1, 2], '31': [1, 2], '32': [2, 3],
-  '33': [1, 2], '41': [1, 2], '51': [1, 2], '52': [2, 4], '53': [1, 1]
+  '11': [2, 4], '21': [3, 5], '22': [3, 5], '31': [2, 4], '32': [3, 6],
+  '33': [2, 6], '41': [2, 4], '51': [2, 4], '52': [6, 16], '53': [1, 2]
 };
+
+/*
+ * How fast this particular project moves. Money is the first half of it — a
+ * three-million Instandsetzung is decided and built while a thirty-million
+ * Gesamtsanierung is still in the permit procedure. The second half is
+ * everything money does not explain: a listed façade, a site that stays in
+ * operation through the work, an objection that goes to court.
+ */
+const COMPLEXITY = [[0.7, 24], [1, 42], [1.45, 24], [2.2, 10]];
+const paceOf = (size) => Math.max(0.55, size * weighted(COMPLEXITY));
 
 const SUB = read('phases').sub;
 
@@ -86,29 +127,74 @@ const SUB = read('phases').sub;
    Generating a project
    -------------------------------------------------------------------------- */
 
-const QUARTERS = 8;
+/*
+ * Q3/2026 to Q2/2036. A federal building project runs six to twelve years from
+ * the first Bedürfnisabklärung to the handover, so a plan that means to show a
+ * project whole has to be about that long. At eighteen quarters the far end was
+ * not a forecast at all: forty-two of a hundred and eleven projects simply ran
+ * off the edge, and the load curve fell away in 2030 because the paper stopped,
+ * not because the work did.
+ */
+const QUARTERS = 40;
+
+/*
+ * Q1/2027 — the last quarter a project may begin in. Anything later exists only
+ * on paper: it has no Auftrag, no lead and no pensum, so this tool has nothing
+ * to plan with.
+ */
+const LAST_START = 2;
+const FIRST_QUARTER = { year: 2026, q: 3 };
 
 /**
  * A project is a walk along the SIA chain. Where it stands today decides both
  * its phase label and its demand curve — the two can never drift apart.
  */
-function chain(startPhase, startQuarter) {
-  const bars = [];
-  let at = SEQ.indexOf(startPhase);
-  let q = startQuarter;
-  // The current phase is normally already under way, so it starts before today.
-  let firstOffset = startQuarter === 0 ? -between(0, 2) : 0;
-  q += firstOffset;
+/*
+ * Where a project stands today, as an index into SEQ. A project recorded in
+ * phase 6 has been handed over — the building is being run, which is not
+ * project work — so it is placed at the last phase the project itself has.
+ */
+const stageOf = (phase) => {
+  const at = SEQ.indexOf(phase);
+  return at >= 0 ? at : SEQ.length - 1;
+};
 
-  while (at < SEQ.length && q < QUARTERS) {
-    const phase = SEQ[at];
-    const [lo, hi] = DURATION[phase];
-    const span = between(lo, hi);
+/*
+ * A whole project: Strategische Planung through to the handover, every phase in
+ * between, at this project's own pace. Every project has all of them — what
+ * differs is how long each takes and when the first one began.
+ *
+ * `startQuarter` is where phase 11 starts, counted from today. Negative for a
+ * project already under way, positive for one still to begin. Phases before the
+ * window are dropped when the bars are written.
+ */
+function chain(startQuarter, pace) {
+  const bars = [];
+  let q = startQuarter;
+  for (const phase of SEQ) {
+    const span = Math.max(1, Math.round(between(...DURATION[phase]) * pace));
     bars.push({ phase, from: q, to: q + span });
     q += span;
-    at++;
   }
   return bars;
+}
+
+/** How long the whole chain runs, at this pace — the sum of its phases. */
+const chainLength = (bars) => bars.at(-1).to - bars[0].from;
+
+/*
+ * The same chain, moved along the axis. Drawing it a second time would draw new
+ * durations with it: a chain measured at thirty quarters and then rebuilt at
+ * twenty would be placed as though it were long, and could be shifted clear off
+ * the near edge — which left one project in the portfolio with no bars at all.
+ */
+const shifted = (bars, by) => bars.map(b => ({ ...b, from: b.from + by, to: b.to + by }));
+
+/** The phase a project is in today; the first one, if it has not begun. */
+function phaseAt(bars, q = 0) {
+  const now = bars.find(b => b.from <= q && q < b.to);
+  if (now) return now.phase;
+  return q < bars[0].from ? bars[0].phase : bars.at(-1).phase;
 }
 
 function demandFrom(bars, size) {
@@ -148,16 +234,24 @@ function makeProject(n, usedNumbers, usedAddresses) {
   usedNumbers.add(number);
 
   const kind = weighted(KINDS);
-  // Where the portfolio sits today: a pipeline, weighted towards the middle.
-  const phase = weighted([
-    ['11', 6], ['21', 9], ['22', 7], ['31', 11], ['32', 14], ['33', 8],
-    ['41', 10], ['51', 11], ['52', 17], ['53', 7]
-  ]);
   const size = weighted([[0.35, 18], [0.6, 30], [0.9, 30], [1.3, 16], [1.7, 6]]);
-  // A sixth of the portfolio has not started yet — the pipeline behind today.
-  const startQuarter = weighted([[0, 84], [1, 6], [2, 5], [3, 3], [4, 2]]);
 
-  const bars = chain(phase, startQuarter);
+  /*
+   * Where this project stands. The chain is built first, because how far back it
+   * may have started depends on how long it runs; then phase 11 is placed
+   * anywhere from a whole chain-length ago to LAST_START. That gives the
+   * portfolio every stage at once — one project's Ausführung, the next one's
+   * Machbarkeit, a third not yet begun.
+   *
+   * Nothing starts later than that: a project two years out is not in this tool
+   * yet, it is a line in a Botschaft. The plan thins towards its far end for
+   * that reason, and it should.
+   */
+  const pace = paceOf(size);
+  const shape = chain(0, pace);
+  const bars = shifted(shape, between(1 - chainLength(shape), LAST_START));
+
+  const phase = phaseAt(bars);
   const demand = demandFrom(bars, size);
   const credit = creditFor(phase, size);
   const peak = Math.max(...demand);
@@ -179,20 +273,25 @@ function makeProject(n, usedNumbers, usedAddresses) {
     demand,
     // The agreed pensum: usually what is planned, sometimes less than reality.
     target: Math.max(5, Math.round((peak * weighted([[1, 62], [0.85, 26], [0.7, 12]])) / 5) * 5),
-    bars: bars
-      .filter(b => b.to > 0)
-      .map((b, i, list) => {
-        const span = Math.min(QUARTERS, b.to) - Math.max(0, b.from);
-        const bar = {
-          phase: b.phase,
-          from: b.from,
-          to: b.to,
-          label: span >= 2 ? SUB[b.phase].label : b.phase
-        };
-        if (b.to > QUARTERS && i === list.length - 1) bar.continues = true;
-        return bar;
-      })
+    bars: barsFor(bars)
   };
+}
+
+/** The bars as the view reads them: inside the window, labelled where they fit. */
+function barsFor(bars) {
+  return bars
+    .filter(b => b.to > 0 && b.from < QUARTERS)
+    .map((b, i, list) => {
+      const span = Math.min(QUARTERS, b.to) - Math.max(0, b.from);
+      const bar = {
+        phase: b.phase,
+        from: b.from,
+        to: b.to,
+        label: span >= 2 ? SUB[b.phase].label : b.phase
+      };
+      if (b.to > QUARTERS && i === list.length - 1) bar.continues = true;
+      return bar;
+    });
 }
 
 /* -----------------------------------------------------------------------------
@@ -208,7 +307,14 @@ const FIRST = ['Anna', 'Beat', 'Chiara', 'Daniel', 'Elena', 'Fabio', 'Gina', 'Ha
 const LAST = ['Muster', 'Beispiel', 'Musterli', 'Beispieler', 'Mustermann', 'Beispielmann'];
 
 function makeTeam(rosterTarget) {
-  const people = read('people');
+  /*
+   * From the five named people the wireframe tells its story with, never from
+   * the roster of the last run. This loop only ever adds, so reading its own
+   * output meant a team that had once grown could not shrink again: a smaller
+   * portfolio kept the larger team and the peak quietly dropped below the
+   * number the story rests on.
+   */
+  const people = core('people');
   const taken = new Set(people.map(p => p.name));
   let total = people.reduce((a, p) => a + p.employment, 0);
 
@@ -244,11 +350,33 @@ function makeTeam(rosterTarget) {
    Milestones
    -------------------------------------------------------------------------- */
 
-const GATE = { '11': 'MS1', '21': 'MS2', '31': 'MS3', '33': 'MS4', '41': 'MS5', '53': 'MS6' };
+/* The gate at the end of each phase that has one. */
+const GATE = { '11': 'MS1', '21': 'MS2', '31': 'MS3', '33': 'MS4', '41': 'MS5',
+  '52': 'MS6', '53': 'MS7' };
 const META = read('meta');
-const QUARTER_IDS = META.quarters.map(q => q.id);
-const QUARTER_END = ['2026-09-30', '2026-12-31', '2027-03-31', '2027-06-30',
-  '2027-09-30', '2027-12-31', '2028-03-31', '2028-06-30'];
+
+/* The calendar follows QUARTERS, so the window has one definition. */
+const QUARTER_CAL = Array.from({ length: QUARTERS }, (_, i) => {
+  const n = (FIRST_QUARTER.q - 1) + i;
+  return { year: FIRST_QUARTER.year + Math.floor(n / 4), q: (n % 4) + 1 };
+});
+const QUARTER_IDS = QUARTER_CAL.map(c => `${c.year}Q${c.q}`);
+/*
+ * A gate falls on a day, not on a quarter. Board meetings, credit releases and
+ * handovers cluster in the closing weeks of a quarter but are not all on the
+ * thirty-first, and the plan draws them where they are — so a date is picked
+ * inside the quarter rather than pinned to its last page.
+ */
+function dayIn(qi) {
+  const c = QUARTER_CAL[qi];
+  const month = (c.q - 1) * 3 + weighted([[0, 15], [1, 30], [2, 55]]);
+  const days = [31, [28, 29][+(c.year % 4 === 0)], 31, 30, 31, 30,
+    31, 31, 30, 31, 30, 31][month];
+  return `${c.year}-${String(month + 1).padStart(2, '0')}-${String(between(1, days)).padStart(2, '0')}`;
+}
+
+const QUARTER_END = QUARTER_CAL.map(c =>
+  `${c.year}-${String(c.q * 3).padStart(2, '0')}-${[31, 30, 30, 31][c.q - 1]}`);
 
 const REASONS = [
   'Verzug durch Einsprache', 'Verzug durch Statikprüfung', 'Vergabe verschoben',
@@ -274,7 +402,15 @@ function makeMilestones(projects) {
       const near = planIdx <= 2;
       const late = weighted(near ? [[0, 62], [1, 24], [2, 14]] : [[0, 84], [1, 12], [2, 4]]);
       const forecastIdx = Math.min(QUARTERS - 1, planIdx + late);
-      const pending = late === 0 && rnd() < (near ? 0.08 : 0.04);
+      /*
+       * A gate with no forecast at all — not late, undated. This is what
+       * actually stalls a project for years: nobody has committed to a date, so
+       * everything behind it waits. It clusters where the decision is not the
+       * office's to make, on the Bedürfnis and on the Baukredit, and it is rare
+       * close to today, where a date has usually been pinned down.
+       */
+      const OPEN = { MS1: 0.30, MS2: 0.20, MS3: 0.12, MS4: 0.34, MS5: 0.10, MS6: 0.06, MS7: 0.06 };
+      const pending = rnd() < (OPEN[code] ?? 0.10) * (near ? 0.35 : 1);
 
       items.push({
         id: `ms-${p.id.slice(2)}-${code.slice(2)}`,
@@ -282,9 +418,9 @@ function makeMilestones(projects) {
         projectId: p.id,
         subPhase: bar.phase,
         plan: QUARTER_IDS[planIdx],
-        planDate: QUARTER_END[planIdx],
+        planDate: dayIn(planIdx),
         forecast: pending ? null : QUARTER_IDS[forecastIdx],
-        forecastDate: pending ? null : QUARTER_END[forecastIdx],
+        forecastDate: pending ? null : dayIn(forecastIdx),
         status: pending ? 'pending' : late ? 'late' : 'ok',
         statusLabel: pending ? '▲ Auftrag noch hängig'
           : late ? `▲ ${late} Quartal${late > 1 ? 'e' : ''} verspätet`
@@ -300,12 +436,46 @@ function makeMilestones(projects) {
    Assemble
    -------------------------------------------------------------------------- */
 
-const existing = read('projects');
+/*
+ * The hand-written core keeps its identity — name, address, lead, credit — but
+ * its timeline is generated like every other, or the eleven projects the story
+ * rests on would be the only ones still finishing inside a year.
+ */
+const existing = core('projects').map(p => {
+  /*
+   * The project's size, read back out of the hand-written demand curve. Against
+   * the peak weight any project reaches, not against its current phase: a
+   * project still in Strategische Planung is charged at 10, so dividing by that
+   * turned a modest curve into a size of thirty and gave it a Planung lasting
+   * thirty-eight quarters. Held inside the range generated projects draw from,
+   * so the eleven stay comparable with the rest.
+   */
+  const peak = Math.max(...p.demand) / Math.max(...Object.values(WEIGHT));
+  const size = Math.min(1.7, Math.max(0.35, peak));
+  const pace = paceOf(size);
+
+  /*
+   * These eleven keep the stage they were written in — the story on the landing
+   * page names them by it — so the chain is placed so that today falls inside
+   * the phase the file gives them, rather than anywhere along it.
+   */
+  const shape = chain(0, pace);
+  const stage = shape[Math.max(0, SEQ.indexOf(p.phase))];
+  const bars = shifted(shape, -between(stage.from, stage.to - 1));
+  return { ...p, bars: barsFor(bars), demand: demandFrom(bars, size), phase: phaseAt(bars) };
+});
 const usedNumbers = new Set(existing.map(p => p.number));
 const usedAddresses = new Set(existing.map(p => p.location));
 
+/*
+ * The portfolio an office of this size carries today. Since nothing new enters
+ * after Q1/2027, this is also the whole of the plan: they all finish somewhere
+ * in the ten years, and the far end of the window is thin because no more work
+ * has been decided on yet — not because the paper ran out.
+ */
+const GENERATED = 100;
 const generated = [];
-for (let i = 0; i < 100; i++) generated.push(makeProject(i, usedNumbers, usedAddresses));
+for (let i = 0; i < GENERATED; i++) generated.push(makeProject(i, usedNumbers, usedAddresses));
 
 const projects = [...existing, ...generated];
 
@@ -315,8 +485,18 @@ const projects = [...existing, ...generated];
  * the peak: at full stretch the portfolio runs at 112 %, which is the number
  * the wireframe tells its story with.
  */
-const ABSENCE_RATIO = [0.111, 0.055, 0.045, 0.054, 0.107, 0.054, 0.045, 0.054];
-const HIRE = [1, 1, 1.03, 1.03, 1.03, 1.03, 1.03, 1.03];
+/* Absence is seasonal: the summer quarter carries the holidays. */
+const ABSENCE_BY_QUARTER = { 1: 0.045, 2: 0.054, 3: 0.109, 4: 0.055 };
+const ABSENCE_RATIO = QUARTER_CAL.map(c => ABSENCE_BY_QUARTER[c.q]);
+/*
+ * The division grows about two per cent a year for as long as the posts are
+ * actually budgeted, and flat after that. Carrying the growth across the whole
+ * ten years added eighteen per cent of capacity nobody has approved, and the
+ * utilisation curve slid downhill for that reason alone.
+ */
+const FUNDED_YEARS = 3;
+const HIRE = QUARTER_CAL.map((_, q) =>
+  Math.round((1 + 0.02 * Math.min(FUNDED_YEARS, Math.floor(q / 4))) * 100) / 100);
 const PEAK_UTILISATION = 1.12;
 
 const demandTotal = Array.from({ length: QUARTERS }, (_, q) =>
@@ -366,9 +546,20 @@ for (const p of generated) {
  */
 for (const person of people) {
   const mine = projects.filter(p => p.leadId === person.id);
-  if (!mine.length) continue;
-  person.baseLoad = Array.from({ length: QUARTERS }, (_, q) =>
-    mine.reduce((a, p) => a + p.demand[q], 0));
+  if (mine.length) {
+    person.baseLoad = Array.from({ length: QUARTERS }, (_, q) =>
+      mine.reduce((a, p) => a + p.demand[q], 0));
+    continue;
+  }
+  /*
+   * Somebody who leads nothing is booked around their contract, drifting a
+   * little from quarter to quarter. Leaving them at zero would be the more
+   * obvious lie: the roster counts their capacity, so the division would look
+   * as though it had people spare that it does not.
+   */
+  const occupancy = 0.85 + rnd() * 0.25;
+  person.baseLoad = Array.from({ length: QUARTERS }, () =>
+    Math.round(person.employment * occupancy * (0.9 + rnd() * 0.2) / 5) * 5);
 }
 
 /* -----------------------------------------------------------------------------
@@ -390,7 +581,7 @@ capacity.absence = capacity.gross.map((g, q) => Math.round(g * ABSENCE_RATIO[q] 
    The things that quote the portfolio
    -------------------------------------------------------------------------- */
 
-const milestones = read('milestones');
+const milestones = core('milestones');
 const existingIds = new Set(milestones.items.map(m => m.projectId));
 milestones.items = [...milestones.items,
   ...makeMilestones(generated).filter(m => !existingIds.has(m.projectId))];
@@ -478,13 +669,16 @@ function changeLog() {
   return out.sort((a, b) => b.date.localeCompare(a.date));
 }
 
-const changes = read('changes');
+const changes = core('changes');
 write('changes', [...changes, ...changeLog()]);
 
 /* Committed credit by year of realisation, derived rather than asserted. */
 const dashboard = read('dashboard');
-const YEAR_OF = ['2026', '2026', '2027', '2027', '2027', '2027', '2028', '2028'];
-const buckets = { 2026: [0, 0], 2027: [0, 0], 2028: [0, 0], later: [0, 0] };
+/* Which year a quarter belongs to, derived so it cannot fall short of the window. */
+const YEAR_OF = QUARTER_CAL.map(c => String(c.year));
+const BUCKET_YEARS = [...new Set(YEAR_OF)].slice(0, 3);
+const buckets = { later: [0, 0] };
+for (const y of BUCKET_YEARS) buckets[y] = [0, 0];
 for (const p of projects) {
   if (p.credit === null) continue;
   const build = p.bars.find(b => b.phase === '52') ?? p.bars.find(b => b.phase === '51');
@@ -494,8 +688,8 @@ for (const p of projects) {
   bucket[1] += 1;
 }
 dashboard.creditByYear.rows = [
-  ['2026', buckets['2026']], ['2027', buckets['2027']], ['2028', buckets['2028']],
-  ['2029 und später', buckets.later]
+  ...BUCKET_YEARS.map(y => [y, buckets[y]]),
+  [`${Number(BUCKET_YEARS.at(-1)) + 1} und später`, buckets.later]
 ].map(([label, [sum, count]]) => ({
   label,
   value: Math.round(sum * 10) / 10,
@@ -503,6 +697,11 @@ dashboard.creditByYear.rows = [
   note: `${count} Projekte`
 }));
 
+/* The window has one definition; the app reads it from here. */
+META.quarters = QUARTER_CAL.map((c, i) => ({
+  id: QUARTER_IDS[i], label: `Q${c.q}/${c.year}`, short: `Q${c.q}`, year: c.year
+}));
+write('meta', META);
 write('projects', projects);
 write('people', people);
 write('capacity', capacity);

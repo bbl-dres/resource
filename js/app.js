@@ -11,10 +11,11 @@
 
 import {
   data, state, load, subscribe, setState, syncFromUrl, closeOverlays,
-  cellValue, toggleIn, removeFilter, resetFilters, defaultDir, t, columnSetKey
+  cellValue, toggleIn, removeFilter, resetFilters, defaultDir, t, columnSetKey,
+  offsetForScale, maxOffset, windowStep
 } from './store.js';
 import { loadIcons } from './icons.js';
-import { html, appHeader, appFooter, prototypeBar, toast } from './ui.js';
+import { html, appHeader, appFooter, prototypeBar, toast, forgetTokens } from './ui.js';
 import { renderLanding, renderOverview, editPopover } from './views-overview.js';
 import { renderModal } from './views-modals.js';
 import { renderSchedule } from './views-schedule.js';
@@ -51,6 +52,12 @@ function render() {
    * itself out against the previous tab's width.
    */
   document.documentElement.dataset.tab = state.tab;
+  /* Before the markup, not after: the grids measure their own columns as they
+     build, and a scale set afterwards was measured one render too late. */
+  if (document.documentElement.dataset.scale !== state.scale) {
+    document.documentElement.dataset.scale = state.scale;
+    forgetTokens();
+  }
 
   root.innerHTML = String(html`
     ${appHeader()}
@@ -339,9 +346,11 @@ const actions = {
   )),
   group: (val) => setState({ group: val, menu: null }),
   unit: (val) => setState({ unit: val }),
-  scale: (val) => setState({ scale: val, periodOffset: 0 }),
+  scale: (val) => setState({ scale: val, periodOffset: offsetForScale(val) }),
   period: (val) => setState(s => ({
-    periodOffset: val === 'today' ? 0 : Math.max(0, s.periodOffset + Number(val))
+    periodOffset: val === 'today'
+      ? 0
+      : Math.max(0, Math.min(maxOffset(), s.periodOffset + Number(val) * windowStep()))
   })),
 
   'my-projects': () => {

@@ -288,14 +288,14 @@ export function renderOverview() {
 const MIN_PERIODS = 3;
 
 function gridLayout() {
-  const quarterW = tokenPx('--grid-quarter');
+  const quarterW = tokenPx('--grid-period');
   const cols = periods().length;
   const room = cardWidth();
   const { parts, sticky, shown, hidden, width: offset } = leadLayout(columnSet(), {
     room,
     axis: MIN_PERIODS * quarterW,
     widthOf: c => tokenPx(c.width),
-    titleW: titleWidth({ room, quarters: cols, px: tokenPx })
+    titleW: titleWidth({ room, px: tokenPx })
   });
   /*
    * A ceiling, not a free share. With eight flexible quarter tracks against one
@@ -304,7 +304,7 @@ function gridLayout() {
    * still truncated at 285px. Capped, the surplus goes to the name instead and
    * none of them truncates.
    */
-  parts.push(`repeat(${cols}, minmax(${quarterW}px, ${tokenPx('--grid-quarter-max')}px))`);
+  parts.push(`repeat(${cols}, minmax(${quarterW}px, ${tokenPx('--grid-period-max')}px))`);
   let minWidth = offset + quarterW * cols;
 
   if (columnSet().trend) {
