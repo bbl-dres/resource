@@ -15,7 +15,7 @@
 > **This is an unofficial prototype for demonstration purposes only.**
 > All people, projects and operational data are fictional. Changes exist only in the current browser session, the API screen documents a target contract rather than a live service, and the application is not intended for production use.
 
-A German-first resource-planning prototype for the [Federal Office for Buildings and Logistics (BBL)](https://www.bbl.admin.ch). It connects construction-project demand, schedules, milestones, project leads and team capacity in one portfolio view.
+Resource-planning prototype for the [Federal Office for Buildings and Logistics (BBL)](https://www.bbl.admin.ch). It connects construction-project demand, schedules, milestones, project leads and team capacity in one portfolio view.
 
 ## Demo
 
