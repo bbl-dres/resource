@@ -346,7 +346,7 @@ export function pageHeader({ crumbs, title, actions = [], chrome = true }) {
   return html`
     <div class="crumbbar">
       <nav class="wrap crumbs" aria-label="Pfad">
-        ${crumbs.map((c, i) => {
+        <span class="crumbs__trail">${crumbs.map((c, i) => {
           const last = i === crumbs.length - 1;
           const sep = i > 0 ? html`<span aria-hidden="true">›</span>` : '';
           // Everything above the current level returns to the entry page, which
@@ -355,9 +355,10 @@ export function pageHeader({ crumbs, title, actions = [], chrome = true }) {
             ? html`<span class="crumbs__current" aria-current="page">${t(c)}</span>`
             : html`<a class="crumbs__link" href="." data-act="home"
                 title="${t('Zur Einstiegsseite, ohne Filter')}">${t(c)}</a>`}`;
-        })}
+        })}</span>
         ${state.edit && html`<span class="editbanner">${icons.pencil(13)}
-          ${t('Bearbeitungsmodus aktiv — Änderungen werden protokolliert')}</span>`}
+          ${t('Pensum und Projektleitung änderbar · laufendes Quartal gesperrt · Änderungen werden protokolliert')}</span>
+        <span class="crumbs__balance" aria-hidden="true"></span>`}
       </nav>
     </div>
     <div class="wrap page-header">

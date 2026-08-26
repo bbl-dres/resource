@@ -319,7 +319,21 @@ button, input, select, textarea { font: inherit; color: inherit; }
   display: flex; align-items: center; gap: var(--space-4); flex-wrap: wrap;
   font-size: var(--text-base); color: var(--color-text-muted);
 }
-.crumbs__current { color: var(--color-text); font-weight: var(--font-semibold); }
+/*
+ * Three slots — trail, banner, balance. Two equal flexible sides hold the banner
+ * on the centre of the bar whatever the path says, in any language; the trail
+ * truncates rather than running into it. Absolute centring could not yield: at
+ * 1024px the French wording ran 40px into the breadcrumb.
+ */
+.crumbs__trail {
+  display: flex; align-items: center; gap: var(--space-4);
+  flex: 1 1 0; min-width: 0;
+}
+.crumbs__balance { flex: 1 1 0; min-width: 0; }
+.crumbs__current {
+  color: var(--color-text); font-weight: var(--font-semibold);
+  min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
 .crumbs__link { display: inline-flex; align-items: center; min-height: var(--target-min); color: var(--color-text-secondary); text-decoration: none; }
 .crumbs__link:hover { color: var(--color-text-link); text-decoration: underline; text-underline-offset: 2px; }
 
@@ -974,7 +988,13 @@ h1, h2, h3,
   color: inherit; font: inherit; cursor: pointer;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.leadbtn:hover { color: var(--color-text-link); text-decoration: underline; text-underline-offset: 2px; }
+/*
+ * The name is a control only in edit mode, and a pointer says so one cell at a
+ * time. A dotted rule says it for the whole column at rest — the same job the
+ * hatch does for the locked quarter.
+ */
+.leadbtn { text-decoration: underline dotted var(--color-border-strong); text-underline-offset: 3px; }
+.leadbtn:hover { color: var(--color-text-link); text-decoration: underline solid; text-underline-offset: 3px; }
 .lead-open {
   display: inline-flex; align-items: center; gap: var(--space-3);
   font-style: italic;
@@ -1022,7 +1042,28 @@ h1, h2, h3,
  * once — default cursor, a hover response, and a live click — and the hover
  * itself was 1.06:1, below seeing.
  */
+/* The same resting mark the lead column carries: this number can be changed. */
+.pgrid--edit .pcell--val:not([data-locked]) {
+  text-decoration: underline dotted var(--color-border-strong);
+  text-underline-offset: 3px;
+}
 .pgrid--edit .pcell--val:not([data-locked]):hover { filter: brightness(.93); }
+
+/*
+ * In edit mode the current quarter is the one column that cannot be changed, so
+ * that is the column that gets marked — 111 cells instead of the 777 that stay
+ * open, and it reads as a band rather than as scatter.
+ *
+ * A hatch rather than a grey fill, for two measured reasons. Desaturating the
+ * heat step is nearly invisible where it matters most: 67 of the 111 cells are
+ * heat-0 or heat-1, and that blue is already almost neutral. And a grey of our
+ * own would collide with --heat-1-bg, which every grey in the palette sits
+ * within one channel of — the column would have read as «small pensum».
+ *
+ * The hatch layers over background-color and under the text, so the 50 cells
+ * that carry the overload warning keep it in red.
+ */
+.pgrid--edit .pcell--val[data-locked] { background-image: var(--hatch-locked); }
 /*
  * Over-capacity: bold and red, nothing more. In greyscale the weight is the
  * only cue left in the cell — the Ampel column (shape) and the Auslastung row
@@ -1371,7 +1412,7 @@ h1, h2, h3,
  */
 .crumbbar .crumbs { position: relative; }
 .editbanner {
-  position: absolute; left: 50%; transform: translateX(-50%);
+  flex: 0 0 auto;
   display: inline-flex; align-items: center; gap: var(--space-3);
   padding: 2px var(--space-5);
   border: var(--border-hairline) solid var(--color-warn-border);
@@ -1379,9 +1420,6 @@ h1, h2, h3,
   color: var(--color-warn-fg-alt);
   font-size: var(--text-sm); font-weight: var(--font-semibold);
   white-space: nowrap;
-}
-@media (max-width: 900px) {
-  .editbanner { position: static; transform: none; margin-left: auto; }
 }
 
 /* ==========================================================================

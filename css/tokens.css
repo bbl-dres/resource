@@ -257,6 +257,11 @@
   --tracking-h3: -0.01em;
   --tracking-caption: 0.02em;   /* 10px badges — tiny text set solid reads as a blur */
 
+  /* The «not available» texture. An overlay, so it works over every heat step
+     and leaves the value's own colour alone. */
+  --hatch-locked: repeating-linear-gradient(45deg,
+    transparent 0 4px, rgba(17, 24, 39, .055) 4px 8px);
+
   /* ==========================================================================
      14 · Spacing
      ========================================================================== */

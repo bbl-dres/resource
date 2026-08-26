@@ -259,6 +259,31 @@ auf Verdacht zu verbreitern.
 
 ---
 
+## 7b · Nachtrag: die Zeitachse wird zentriert
+
+Nach der Runde gemeldet: die Zeitachse der Übersicht war rechtsbündig, die des
+Balkenplans zentriert.
+
+Die Regel lautet jetzt in beiden Rastern und auf Papier gleich: **die Zeitachse
+ist zentriert, die Stammdaten sind es nicht.** Eine Quartalsspalte ist ein Fach,
+kein Zahlenblock — die Beschriftung benennt die ganze Spalte, und der Balkenplan
+daneben hat seine Achse immer schon zentriert. Kredit CHF und Soll-Pensum bleiben
+rechtsbündig, weil dort Ziffern gegeneinander stehen, die fluchten sollen.
+
+Dafür brauchte es eine eigene Klasse: `pcell--num` trug bisher beides. Neu ist
+`pcell--period` auf dem Bildschirm und `sheet__period` auf Papier, und nur die
+tragen die Zentrierung.
+
+Betroffen und nachgemessen (Abweichung des Textes von der Spaltenmitte, 0 oder
+0,5 px Rundung): Spaltenkopf, Wertzelle, Summenzeile «Bedarf total», Band
+«Auslastung total» — in der Übersicht, im Personenraster des Dashboards, im
+Balkenplan und im Druckbogen. Blattzahlen des Berichts unverändert (11/10/5/6).
+
+Der Befund aus Abschnitt 3 — der Kopf sass 4 px neben seinen Zahlen — bleibt
+gültig: er betrifft jetzt die rechtsbündigen Stammdatenspalten.
+
+---
+
 ## 8 · Was die Prüfung nicht überstanden hat
 
 Drei Agentenmeldungen habe ich nachgemessen und **verworfen**:

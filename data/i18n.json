@@ -376,11 +376,6 @@
       "fr": "Modifier",
       "it": "Modifica"
     },
-    "Bearbeitungsmodus aktiv — Änderungen werden protokolliert": {
-      "en": "Edit mode active — changes are logged",
-      "fr": "Mode édition actif — les modifications sont journalisées",
-      "it": "Modalità modifica attiva — le modifiche vengono registrate"
-    },
     "Bedarf": {
       "en": "Demand",
       "fr": "Besoin",
@@ -1560,6 +1555,11 @@
       "en": "Nothing open for you.",
       "fr": "Rien en attente pour vous.",
       "it": "Nulla in sospeso per voi."
+    },
+    "Pensum und Projektleitung änderbar · laufendes Quartal gesperrt · Änderungen werden protokolliert": {
+      "en": "Workload and project lead editable · current quarter locked · changes are logged",
+      "fr": "Charge et direction de projet modifiables · trimestre en cours verrouillé · modifications journalisées",
+      "it": "Carico e direzione di progetto modificabili · trimestre corrente bloccato · modifiche registrate"
     }
   }
 }
