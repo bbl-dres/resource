@@ -447,20 +447,34 @@ h1, h2, h3,
 .btn:hover { background: var(--color-surface); border-color: var(--color-border-emphasis); }
 .btn.is-open { border-color: var(--color-border-contrast); }
 
+/*
+ * One disabled register for the family, on the base class.
+ *
+ * Only .btn--primary had one, so a disabled timebar arrow rendered every channel
+ * identical to its live neighbour — and because :hover carries no :not(:disabled)
+ * guard, it lit up under the cursor and gave press feedback while doing nothing.
+ * The second rule is therefore not decoration; it is what stops an inert control
+ * answering the pointer.
+ */
+.btn:disabled {
+  background: var(--color-neutral-bg-alt); border-color: var(--color-neutral-bg-alt);
+  color: var(--color-text-secondary); cursor: not-allowed;
+}
+.btn:disabled:hover, .btn:disabled:active:active {
+  background: var(--color-neutral-bg-alt); border-color: var(--color-neutral-bg-alt);
+}
+
 .btn--primary {
   background: var(--color-accent); border-color: var(--color-accent);
   color: var(--color-accent-fg); font-weight: var(--font-semibold);
 }
 .btn--primary:hover { background: var(--color-accent-hover); border-color: var(--color-accent-hover); }
 /*
- * An explicit disabled pair rather than a fade: opacity .45 composited the
+ * The base rule above carries this now. Kept as a note, because it records why:
+ * an explicit disabled pair rather than a fade — opacity .45 composited the
  * white label onto the blue fill at 1.97:1, which is not de-emphasised, it is
- * unreadable — and it still read as a washed-out primary.
+ * unreadable, and it still read as a washed-out primary.
  */
-.btn--primary:disabled {
-  background: var(--grey-200); border-color: var(--grey-200);
-  color: var(--color-text-muted); cursor: not-allowed;
-}
 
 .btn--square { width: var(--control-height); height: var(--control-height); padding: 0; justify-content: center; }
 .toolbar .btn, .timebar .btn, .sheetbar .btn { height: var(--control-height-lg); }
@@ -475,8 +489,37 @@ h1, h2, h3,
  * silently stopped responding to a press.
  */
 :is(.btn, .iconbtn, .dd__item, .tabs__tab, .segmented button, .more-link,
-    .mslist__btn, .chartlink, .pgrouphead__toggle, .sheetbar button):active:active {
-  background: var(--color-surface-sunken);
+    .mslist__btn, .chartlink, .pgrouphead__toggle, .sheetbar button,
+    .pop__step, .toolbar__check, .modal__close):active:active {
+  background: var(--color-surface-pressed);
+}
+
+/*
+ * A press that replaces a fill sets its foreground in the same breath. The rule
+ * above only ever set `background`, so on the three filled controls the press
+ * swapped a blue or a near-black for a near-white and left the label white.
+ *
+ * Doubled class, because `:is()` takes the specificity of its strongest
+ * argument: `.sheetbar button` is a class *and* a type, so the rule above weighs
+ * (0,3,1) and quietly outranks a plain `.btn--primary:active:active` at (0,3,0).
+ * Measured while that was true: the border took blue-800 from here and the fill
+ * took grey-300 from there — half the rule applied, which is worse than none.
+ */
+.btn.btn--primary:active:active {
+  background: var(--color-accent-pressed); border-color: var(--color-accent-pressed);
+  color: var(--color-accent-fg);
+}
+:is(.btn--toggle.is-on, .segmented button.is-on, .sheetbar button.is-on):active:active {
+  background: var(--color-toggle-on-pressed); border-color: var(--color-toggle-on-pressed);
+  color: var(--color-toggle-on-fg);
+  /* The hover brightness applies while the pointer is down too, so it is turned
+     off here — otherwise the press is measured from a lightened hover and the
+     step collapses to 1.21. */
+  filter: none;
+}
+/* A light press is invisible on the navy header, so those two darken instead. */
+.hdr-btn:active:active, .avatar[data-act]:active:active {
+  background: var(--alpha-white-25);
 }
 .entry:active { box-shadow: none; }
 
@@ -488,12 +531,19 @@ h1, h2, h3,
   color: var(--color-toggle-on-fg);
 }
 .btn--danger-toggle { font-weight: var(--font-semibold); }
-/* The only action in the app with no way back looks like it. */
-.btn--danger { border-color: var(--color-danger-border); color: var(--color-danger-fg); }
-.btn--danger:hover { background: var(--color-danger-bg); border-color: var(--color-danger-solid); }
+/*
+ * The only action in the app with no way back looks like it — and its edge is
+ * visible. At --color-danger-border it measured 1.77:1 in the modal footer.
+ * The token itself is left alone: the overload chart bar uses it as a *fill*
+ * against a red-600 border, and repointing it would collapse that pair.
+ */
+.btn--danger { border-color: var(--color-danger-solid); color: var(--color-danger-fg); }
+.btn--danger:hover {
+  background: var(--color-danger-bg); border-color: var(--color-danger-fg-strong);
+}
 .modal__foot-left { margin-right: auto; }
 .btn--danger-toggle.is-on {
-  background: var(--color-danger-bg); border-color: var(--color-danger-border);
+  background: var(--color-danger-bg); border-color: var(--color-danger-solid);
   color: var(--color-danger-fg);
 }
 

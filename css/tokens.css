@@ -44,6 +44,7 @@
   --blue-300: #93c5fd;
   --blue-600: #2563eb;
   --blue-700: #1d4ed8;
+  --blue-800: #1e40af;
 
   /* ==========================================================================
      3 · PRIMITIVES — "steel", a second blue-shifted neutral family
@@ -117,7 +118,14 @@
   --color-border:          var(--line);          /* default card / row divider  */
   --color-border-rule:     var(--line-rule);     /* table head, totals, sheet   */
   --color-border-strong:   var(--line-strong);   /* inputs, buttons             */
-  --color-border-emphasis: var(--grey-400);   /* 1.5px marker rings          */
+  /*
+   * Every consumer of this is a boundary, and at grey-400 all four measured
+   * below 3:1 — .btn:hover 2.24 on the page ground, the menu tickbox 2.54 on
+   * white, the popover 1.70 over a heat-4 cell, the open diamond 2.24 on the bar
+   * it sits on. Worse, .btn:hover went *lighter* than its own 3.18 rest: the one
+   * state a reader is looking hardest at had the weakest edge.
+   */
+  --color-border-emphasis: var(--grey-550);   /* boundaries, 1.4.11: ≥ 3:1   */
   --color-border-contrast: var(--grey-900);   /* open / active menu button   */
   --color-border-accent:   var(--blue-600);   /* focused search field        */
 
@@ -129,6 +137,13 @@
   --color-surface-alt:      var(--grey-50);
   --color-surface-sunken:   var(--grey-100);
   --color-surface-hover:    var(--steel-100);
+  /*
+   * Pressed. One magnitude for the whole family, because the previous value was
+   * --color-surface-sunken — 1.003:1 from the hover it was supposed to follow,
+   * which is to say no press at all on ten controls.
+   */
+  --color-surface-pressed:  var(--grey-300);
+
   --color-surface-selected: var(--blue-50);
 
   /*
@@ -164,11 +179,21 @@
 
   --color-accent:        var(--blue-600);
   --color-accent-fg:     var(--white);
+  /* A filled control keeps a fill when pressed. Falling through to the neutral
+     press left a white label on near-white: measured 1.101:1. */
+  --color-accent-pressed: var(--blue-800);
   --color-accent-hover:  var(--blue-700);
 
   --color-toggle-on:      var(--grey-900);
   --color-toggle-on-fg:   var(--white);
-  --color-toggle-off:     var(--grey-300);
+  /* Same defect, worse: brightness(1.12) also applies while the pointer is down,
+     so the chosen segment rendered pure #ffffff under a white label — 1.000:1. */
+  /* grey-700, not grey-800: the on-state hover already brightens grey-900, so a
+     press one step down measured only 1.21 from it. */
+  --color-toggle-on-pressed: var(--grey-700);
+  /* The white knob measured 1.47:1 against its own track, so the off switch read
+     as a decorative pill rather than a control. */
+  --color-toggle-off:     var(--line-strong);
   --color-toggle-knob:    var(--white);
   --color-toggle-edit-on: var(--green-400);   /* the "Bearbeiten" switch only */
 
