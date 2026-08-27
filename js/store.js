@@ -66,6 +66,20 @@ const DEFAULT_STATE = {
   draft: 0,
   reason: '',
   overrides: {},           // 'projectId:q' -> value
+  /*
+   * The session. Access itself is eIAM's business — this only models what the
+   * application does on either side of it, which is the part a reader of the
+   * prototype cannot otherwise see.
+   */
+  signedIn: true,
+  /*
+   * What the account carries. Neither is in the URL: a shared link should open
+   * in the reader's own language with the reader's own notifications.
+   */
+  account: {
+    mail: { milestones: true, changes: true, digest: false },
+    lang: 'de'
+  },
   // transient ui
   menu: null,              // id of the open dropdown
   menuSearch: '',          // filter inside the open dropdown
@@ -73,14 +87,6 @@ const DEFAULT_STATE = {
   footDetails: false,
   bi: 'general',           // dashboard section, see VOCAB.bi
   zoom: 'fit',             // print preview, see VOCAB.zoom
-  /*
-   * The prototype notice, acknowledged for this browser session. Kept out of the
-   * URL: a shared link should not carry someone else's dismissal, and a reader
-   * who opens the app fresh is told once.
-   */
-  noticeSeen: (() => {
-    try { return sessionStorage.getItem('bbl-notice') === '1'; } catch { return false; }
-  })(),
   page: 1,                 // change log, 1-based
   pageSize: '25',          // see VOCAB.pageSize
   pSort: 'peak',           // person table: name | role | employment | projects | peak | q0…q7

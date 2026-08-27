@@ -236,11 +236,6 @@
       "fr": "Exporter en Excel",
       "it": "Esporta come Excel"
     },
-    "Als PDF exportieren": {
-      "en": "Export as PDF",
-      "fr": "Exporter en PDF",
-      "it": "Esporta come PDF"
-    },
     "Ampel": {
       "en": "Status light",
       "fr": "Feu",
@@ -311,11 +306,6 @@
       "fr": "Taux de charge",
       "it": "Grado di utilizzo"
     },
-    "Auslastung nach Person": {
-      "en": "Utilisation by person",
-      "fr": "Taux de charge par personne",
-      "it": "Grado di utilizzo per persona"
-    },
     "Auslastung nach Quartal": {
       "en": "Utilisation by quarter",
       "fr": "Taux de charge par trimestre",
@@ -335,11 +325,6 @@
       "en": "Bars",
       "fr": "Barres",
       "it": "Barre"
-    },
-    "Balken gegen die eigene Anstellung": {
-      "en": "Bars against each person's own contract",
-      "fr": "Barres rapportées au taux d'activité",
-      "it": "Barre rapportate al grado di occupazione"
     },
     "Baukredit bewilligt": {
       "en": "Construction credit granted",
@@ -460,11 +445,6 @@
       "en": "Dashboard",
       "fr": "Tableau de bord",
       "it": "Cruscotto"
-    },
-    "Dashboard ansehen": {
-      "en": "View dashboard",
-      "fr": "Voir le tableau de bord",
-      "it": "Vedi il cruscotto"
     },
     "Datenstand ePPM": {
       "en": "ePPM data as of",
@@ -720,11 +700,6 @@
       "en": "Open in Schedule",
       "fr": "Ouvrir dans Échéances",
       "it": "Apri in Scadenze"
-    },
-    "innerhalb der Anstellung.": {
-      "en": "within the contract.",
-      "fr": "dans les limites du taux d'activité.",
-      "it": "entro il grado di occupazione."
     },
     "Jahr": {
       "en": "Year",
@@ -1341,16 +1316,6 @@
       "fr": "faible",
       "it": "bassa"
     },
-    "über der Anstellung": {
-      "en": "above contract",
-      "fr": "au-dessus du taux d'activité",
-      "it": "oltre il grado di occupazione"
-    },
-    "über der Anstellung.": {
-      "en": "above contract.",
-      "fr": "au-dessus du taux d'activité.",
-      "it": "oltre il grado di occupazione."
-    },
     "über Soll": {
       "en": "above target",
       "fr": "au-dessus du prévu",
@@ -1410,11 +1375,6 @@
       "en": "History",
       "fr": "Historique",
       "it": "Cronologia"
-    },
-    "Verlauf ansehen": {
-      "en": "View history",
-      "fr": "Voir l'historique",
-      "it": "Vedi la cronologia"
     },
     "verschoben": {
       "en": "postponed",
@@ -1561,25 +1521,10 @@
       "fr": "Charge et direction de projet modifiables · trimestre en cours verrouillé · modifications journalisées",
       "it": "Carico e direzione di progetto modificabili · trimestre corrente bloccato · modifiche registrate"
     },
-    "Diese Anwendung ist ein Prototyp.": {
-      "en": "This application is a prototype.",
-      "fr": "Cette application est un prototype.",
-      "it": "Questa applicazione è un prototipo."
-    },
     "Darstellung, Funktionalität und Inhalte dienen ausschliesslich der Demonstration; die verwendeten Daten sind fiktiv oder öffentlich zugänglich.": {
       "en": "Presentation, functionality and content serve demonstration purposes only; the data used is fictitious or publicly available.",
       "fr": "La présentation, les fonctionnalités et les contenus servent uniquement à la démonstration; les données utilisées sont fictives ou publiquement accessibles.",
       "it": "Presentazione, funzionalità e contenuti servono unicamente a scopo dimostrativo; i dati utilizzati sono fittizi o pubblicamente accessibili."
-    },
-    "Verstanden": {
-      "en": "Understood",
-      "fr": "Compris",
-      "it": "Ho capito"
-    },
-    "Hinweis": {
-      "en": "Notice",
-      "fr": "Remarque",
-      "it": "Avviso"
     },
     "PDF wird erstellt …": {
       "en": "Creating PDF …",
@@ -1590,6 +1535,111 @@
       "en": "opens the dashboard",
       "fr": "ouvre le tableau de bord",
       "it": "apre la dashboard"
+    },
+    "Konto": {
+      "en": "Account",
+      "fr": "Compte",
+      "it": "Account"
+    },
+    "Einstellungen": {
+      "en": "Settings",
+      "fr": "Paramètres",
+      "it": "Impostazioni"
+    },
+    "Angemeldet über eIAM": {
+      "en": "Signed in via eIAM",
+      "fr": "Connecté via eIAM",
+      "it": "Accesso tramite eIAM"
+    },
+    "Sie sind abgemeldet": {
+      "en": "You are signed out",
+      "fr": "Vous êtes déconnecté",
+      "it": "Sei disconnesso"
+    },
+    "Die Ressourcenplanung zeigt Personendaten und Kredite; ohne Anmeldung wird nichts davon geladen.": {
+      "en": "Resource planning shows personal data and credits; none of it is loaded without a sign-in.",
+      "fr": "La planification des ressources affiche des données personnelles et des crédits ; rien n'est chargé sans connexion.",
+      "it": "La pianificazione delle risorse mostra dati personali e crediti; senza accesso nulla viene caricato."
+    },
+    "Der Zugang wird über eIAM gesteuert. Berechtigungen, Kennwort und Zwei-Faktor-Anmeldung werden dort verwaltet, nicht in dieser Anwendung.": {
+      "en": "Access is governed by eIAM. Permissions, password and two-factor sign-in are managed there, not in this application.",
+      "fr": "L'accès est géré par eIAM. Les autorisations, le mot de passe et l'authentification à deux facteurs y sont gérés, pas dans cette application.",
+      "it": "L'accesso è gestito da eIAM. Autorizzazioni, password e autenticazione a due fattori sono gestite lì, non in questa applicazione."
+    },
+    "Mit eIAM anmelden": {
+      "en": "Sign in with eIAM",
+      "fr": "Se connecter avec eIAM",
+      "it": "Accedi con eIAM"
+    },
+    "Prototyp: die Anmeldung ist simuliert und lädt denselben fiktiven Datensatz wieder.": {
+      "en": "Prototype: the sign-in is simulated and reloads the same fictional data set.",
+      "fr": "Prototype : la connexion est simulée et recharge le même jeu de données fictif.",
+      "it": "Prototipo: l'accesso è simulato e ricarica lo stesso set di dati fittizio."
+    },
+    "E-Mail-Benachrichtigungen": {
+      "en": "E-mail notifications",
+      "fr": "Notifications par e-mail",
+      "it": "Notifiche e-mail"
+    },
+    "Meilensteine meiner Projekte": {
+      "en": "Milestones on my projects",
+      "fr": "Jalons de mes projets",
+      "it": "Milestone dei miei progetti"
+    },
+    "Sobald ein Termin verschoben wird oder ein Auftrag hängig bleibt.": {
+      "en": "As soon as a date moves or an order stays pending.",
+      "fr": "Dès qu'une échéance est reportée ou qu'un mandat reste en suspens.",
+      "it": "Non appena una scadenza slitta o un incarico resta in sospeso."
+    },
+    "Änderungen durch andere": {
+      "en": "Changes by others",
+      "fr": "Modifications par des tiers",
+      "it": "Modifiche di altri"
+    },
+    "Umbuchungen und Pensumsänderungen an Projekten, die ich führe.": {
+      "en": "Rebookings and pensum changes on projects I lead.",
+      "fr": "Transferts et modifications de taux sur les projets que je dirige.",
+      "it": "Riassegnazioni e modifiche di impegno sui progetti che dirigo."
+    },
+    "Wöchentliche Zusammenfassung": {
+      "en": "Weekly digest",
+      "fr": "Résumé hebdomadaire",
+      "it": "Riepilogo settimanale"
+    },
+    "Montags: Auslastung, überfällige Meilensteine, offene Zuweisungen.": {
+      "en": "Mondays: utilisation, overdue milestones, open assignments.",
+      "fr": "Le lundi : charge, jalons en retard, attributions ouvertes.",
+      "it": "Il lunedì: carico, milestone scadute, assegnazioni aperte."
+    },
+    "Gilt für diese Anwendung und für E-Mails.": {
+      "en": "Applies to this application and to e-mails.",
+      "fr": "S'applique à cette application et aux e-mails.",
+      "it": "Vale per questa applicazione e per le e-mail."
+    },
+    "noch nicht übersetzt": {
+      "en": "not yet translated",
+      "fr": "pas encore traduit",
+      "it": "non ancora tradotto"
+    },
+    "Berechtigungen, Kennwort und Zwei-Faktor-Anmeldung werden über eIAM verwaltet.": {
+      "en": "Permissions, password and two-factor sign-in are managed via eIAM.",
+      "fr": "Les autorisations, le mot de passe et l'authentification à deux facteurs sont gérés via eIAM.",
+      "it": "Autorizzazioni, password e autenticazione a due fattori sono gestite tramite eIAM."
+    },
+    "Fertig": {
+      "en": "Done",
+      "fr": "Terminé",
+      "it": "Fatto"
+    },
+    "Version 0.4 · Prototyp, fiktive Inhalte — nur zur Demonstration": {
+      "en": "Version 0.4 · Prototype, fictional content — for demonstration only",
+      "fr": "Version 0.4 · Prototype, contenus fictifs — à des fins de démonstration uniquement",
+      "it": "Versione 0.4 · Prototipo, contenuti fittizi — solo a scopo dimostrativo"
+    },
+    "Pfad": {
+      "en": "Path",
+      "fr": "Chemin",
+      "it": "Percorso"
     }
   }
 }

@@ -308,7 +308,10 @@ export function appHeader() {
 
       <p class="proto-pill">${t(m.prototypeNotice)}</p>
 
-      <div class="shell-header__actions">
+      <!-- Signed out, the header carries the wordmark and nothing else: a
+           language switch and a bell would both be promising something the
+           page cannot deliver without a session. -->
+      ${state.signedIn ? html`<div class="shell-header__actions">
         <div class="dd">
           <button type="button" class="hdr-btn" data-act="menu" data-val="lang"
                   aria-expanded="${open}" aria-haspopup="menu" aria-label="${t('Sprache wählen')}">
@@ -327,10 +330,67 @@ export function appHeader() {
 
         ${notifyBell()}
 
-        <span class="avatar" title="${t('Angemeldet')}: ${m.user.name}">${m.user.initials}</span>
-      </div>
+        ${accountMenu()}
+      </div>` : ''}
     </div>
   </header>`;
+}
+
+/*
+ * The account. Who is signed in, the two things they can change about that, and
+ * the way out.
+ *
+ * Nothing here changes a permission: the federal login (eIAM) decides what this
+ * person may see, and the application only reports the name it was handed. Which
+ * is exactly why the menu says so — a settings dialog with no password field
+ * looks like an omission until it explains itself.
+ */
+function accountMenu() {
+  const m = data.meta;
+  const open = state.menu === 'user';
+  return html`<div class="dd">
+    <button type="button" class="avatar ${open ? 'is-open' : ''}" data-act="menu" data-val="user"
+            aria-expanded="${open}" aria-haspopup="menu"
+            aria-label="${t('Konto')}: ${m.user.name}">${m.user.initials}</button>
+    ${open && html`<div class="dd__panel dd__panel--right" role="menu"
+        aria-label="${t('Konto')}" style="--dd-w:260px">
+      <div class="account">
+        <span class="avatar avatar--lg" aria-hidden="true">${m.user.initials}</span>
+        <div>
+          <p class="account__name">${m.user.name}</p>
+          <p class="account__meta">${t(m.user.role)} · ${t(m.org.unit)}</p>
+        </div>
+      </div>
+      <p class="account__note">${t('Angemeldet über eIAM')}</p>
+      <div class="dd__sep" role="separator"></div>
+      <button type="button" class="dd__item" role="menuitem" data-act="settings">
+        <span>${t('Einstellungen')}</span>
+      </button>
+      <button type="button" class="dd__item" role="menuitem" data-act="signout">
+        <span>${t('Abmelden')}</span>
+      </button>
+    </div>`}
+  </div>`;
+}
+
+/*
+ * The signed-out screen. A prototype that is always signed in never has to say
+ * what it is: this page is the one place the application admits that it holds
+ * nothing of its own — no account, no password, no session it could restore by
+ * itself — and that everything behind it belongs to the federal login.
+ */
+export function signedOutView() {
+  return html`<div class="signout">
+    <div class="signout__card">
+      <h1 class="signout__title">${t('Sie sind abgemeldet')}</h1>
+      <p class="signout__lead">${t('Die Ressourcenplanung zeigt Personendaten und Kredite; ohne Anmeldung wird nichts davon geladen.')}</p>
+      <p class="signout__note">${t('Der Zugang wird über eIAM gesteuert. Berechtigungen, Kennwort und Zwei-Faktor-Anmeldung werden dort verwaltet, nicht in dieser Anwendung.')}</p>
+      <button type="button" class="btn btn--primary btn--lg" data-act="signin">
+        ${t('Mit eIAM anmelden')}
+      </button>
+      <p class="signout__demo">${t('Prototyp: die Anmeldung ist simuliert und lädt denselben fiktiven Datensatz wieder.')}</p>
+    </div>
+  </div>`;
 }
 
 /**
@@ -402,8 +462,8 @@ export function expandableSearch({ placeholder }) {
 export function pageHeader({ crumbs, title, actions = [], chrome = true }) {
   return html`
     <div class="crumbbar">
-      <nav class="wrap crumbs" aria-label="Pfad">
-        <span class="crumbs__trail">${crumbs.map((c, i) => {
+      <div class="wrap crumbs">
+        <nav class="crumbs__trail" aria-label="${t('Pfad')}">${crumbs.map((c, i) => {
           const last = i === crumbs.length - 1;
           const sep = i > 0 ? html`<span aria-hidden="true">›</span>` : '';
           // Everything above the current level returns to the entry page, which
@@ -412,11 +472,14 @@ export function pageHeader({ crumbs, title, actions = [], chrome = true }) {
             ? html`<span class="crumbs__current" aria-current="page">${t(c)}</span>`
             : html`<a class="crumbs__link" href="." data-act="home"
                 title="${t('Zur Einstiegsseite, ohne Filter')}">${t(c)}</a>`}`;
-        })}</span>
+        })}</nav>
         ${state.edit && html`<span class="editbanner">${icons.pencil(13)}
-          ${t('Pensum und Projektleitung änderbar · laufendes Quartal gesperrt · Änderungen werden protokolliert')}</span>
-        <span class="crumbs__balance" aria-hidden="true"></span>`}
-      </nav>
+          ${t('Pensum und Projektleitung änderbar · laufendes Quartal gesperrt · Änderungen werden protokolliert')}</span>`}
+        <!-- Also the counterweight that keeps the edit banner on the centre of
+             the bar: the slot was there either way, and standing empty it was
+             an element whose whole job was to be invisible. -->
+        <span class="crumbs__stand">${t('Datenstand ePPM')}: ${data.meta.asOf}</span>
+      </div>
     </div>
     <div class="wrap page-header">
       <div class="page-header__row">
@@ -687,25 +750,10 @@ export function timeControls() {
  * shell carries its measured height as bottom padding while it is there, so it
  * never covers the last row of a table.
  */
-export function prototypeBar() {
-  if (state.noticeSeen) return '';
-  return html`<aside class="protobar" role="region" aria-label="${t('Hinweis')}">
-    <div class="wrap protobar__row">
-      <p class="protobar__text">
-        ${icons.info()}
-        <span><span class="protobar__lead">${t('Diese Anwendung ist ein Prototyp.')}</span>
-        ${t('Darstellung, Funktionalität und Inhalte dienen ausschliesslich der Demonstration; die verwendeten Daten sind fiktiv oder öffentlich zugänglich.')}</span>
-      </p>
-      <button type="button" class="btn" data-act="notice-ok">${icons.check()}${t('Verstanden')}</button>
-    </div>
-  </aside>`;
-}
-
 export function appFooter() {
   const m = data.meta;
   return html`<footer class="shell-footer"><div class="wrap shell-footer__inner">
     <span>${m.version}</span>
-    <span class="shell-footer__stand">${m.asOf}</span>
     <span class="shell-footer__links">
       ${m.footerLinks.map(l => l.tab
         ? html`<a href="#?tab=${l.tab}" data-act="tab" data-val="${l.tab}">${t(l.label)}</a>`

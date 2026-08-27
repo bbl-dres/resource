@@ -16,6 +16,73 @@ import { html, icons, attr } from './ui.js';
  * One dialog head for all four: the same close button was written out four
  * times, so it could drift four ways.
  */
+/*
+ * What the application would send by e-mail. Three switches rather than one,
+ * because the three differ in how often they fire: a gate on your own project
+ * is rare and worth an interruption, somebody else's edit is not, and the
+ * digest is what somebody who wants neither still wants once a week.
+ */
+const MAIL_PREFS = [
+  { key: 'milestones', label: 'Meilensteine meiner Projekte',
+    note: 'Sobald ein Termin verschoben wird oder ein Auftrag hängig bleibt.' },
+  { key: 'changes', label: 'Änderungen durch andere',
+    note: 'Umbuchungen und Pensumsänderungen an Projekten, die ich führe.' },
+  { key: 'digest', label: 'Wöchentliche Zusammenfassung',
+    note: 'Montags: Auslastung, überfällige Meilensteine, offene Zuweisungen.' }
+];
+
+/*
+ * Account settings. Two things, and a sentence about the third.
+ *
+ * There is no password field and no permissions tab, because there is nothing
+ * here to change: access is federated through eIAM, and a dialog that offered
+ * to change a password would be lying about where the account lives. Saying so
+ * costs one line and stops the question being asked.
+ */
+function settingsModal() {
+  const m = data.meta;
+  const langs = data.i18n.languages;
+
+  return html`
+    ${modalHead(t('Konto'), m.user.name, `${t(m.user.role)} · ${t(m.org.unit)}`)}
+
+    <div class="settings">
+      <section class="settings__block">
+        <h3 class="settings__title">${t('E-Mail-Benachrichtigungen')}</h3>
+        ${MAIL_PREFS.map(pref => html`<label class="settings__row">
+          <input type="checkbox" data-act="mail-pref" data-val="${pref.key}"
+                 ${attr(state.account.mail[pref.key], 'checked')}>
+          <span>
+            <span class="settings__label">${t(pref.label)}</span>
+            <span class="settings__note">${t(pref.note)}</span>
+          </span>
+        </label>`)}
+      </section>
+
+      <section class="settings__block">
+        <h3 class="settings__title">${t('Sprache')}</h3>
+        <p class="settings__note settings__note--lead">${t('Gilt für diese Anwendung und für E-Mails.')}</p>
+        <div class="settings__langs" role="radiogroup" aria-label="${t('Sprache')}">
+          ${langs.map(l => html`<label class="settings__row settings__row--inline">
+            <input type="radio" name="account-lang" data-act="account-lang" data-val="${l.code}"
+                   ${attr(state.account.lang === l.code, 'checked')}
+                   ${attr(!l.available, 'disabled')}>
+            <span>
+              <span class="settings__label">${l.label}</span>
+              ${l.available ? '' : html`<span class="settings__note">${t('noch nicht übersetzt')}</span>`}
+            </span>
+          </label>`)}
+        </div>
+      </section>
+
+      <p class="settings__eiam">${t('Berechtigungen, Kennwort und Zwei-Faktor-Anmeldung werden über eIAM verwaltet.')}</p>
+    </div>
+
+    <footer class="modal__foot">
+      <button type="button" class="btn btn--primary" data-act="close-modal">${t('Fertig')}</button>
+    </footer>`;
+}
+
 function modalHead(kicker, title, meta = '') {
   return html`<header class="modal__head">
     <div>
@@ -30,6 +97,7 @@ function modalHead(kicker, title, meta = '') {
 
 /* One entry per dialog; app.js sets state.modal.type to one of these keys. */
 const MODALS = {
+  settings: settingsModal,
   phase: phaseModal,
   milestone: milestoneModal,
   project: projectModal,

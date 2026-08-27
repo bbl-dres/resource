@@ -60,7 +60,7 @@ export function buildTable() {
     name: t('Ressourcenplanung'),
     subtitle: [
       `${data.meta.org.name} · ${data.meta.org.unit}`,
-      data.meta.asOf,
+      `${t('Datenstand ePPM')}: ${data.meta.asOf}`,
       scopeLine(list.length),
       filters.length ? `${t('Filter')}: ${filters.map(f => f.label).join(', ')}` : t('ohne Filter')
     ].join(' · '),

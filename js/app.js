@@ -15,7 +15,7 @@ import {
   offsetForScale, maxOffset, windowStep, pageCount
 } from './store.js';
 import { loadIcons } from './icons.js';
-import { html, appHeader, appFooter, prototypeBar, toast, forgetTokens } from './ui.js';
+import { html, appHeader, appFooter, toast, forgetTokens, signedOutView } from './ui.js';
 import { renderLanding, renderOverview, editPopover } from './views-overview.js';
 import { renderModal } from './views-modals.js';
 import { renderSchedule } from './views-schedule.js';
@@ -96,11 +96,15 @@ function render() {
     forgetTokens();
   }
 
+  /*
+   * Signed out, the application draws nothing of its own: no tabs, no toolbar,
+   * no figures. The header keeps only the wordmark, so the page still says
+   * whose it is.
+   */
   root.innerHTML = String(html`
     ${appHeader()}
-    <main id="main">${view()}</main>
+    <main id="main">${state.signedIn ? view() : signedOutView()}</main>
     ${appFooter()}
-    ${prototypeBar()}
     ${state.editing ? editPopover() : ''}
     ${renderModal()}
     ${toast()}
@@ -114,7 +118,6 @@ function render() {
   positionMenu();
   syncPageSize();
   syncZoom();
-  syncNoticeHeight();
   restoreFocus(focus);
   syncModalFocus();
   if (Math.abs(window.scrollY - scrollY) > 1) window.scrollTo({ top: scrollY });
@@ -171,59 +174,60 @@ function syncZoom() {
   mount.style.setProperty('--sheet-zoom', paper > room ? room / paper : 1);
 }
 
-/*
- * The notice floats over the page, so the shell has to make room for it. Its
- * height is measured rather than assumed: it wraps to two lines on a phone and
- * to three in French.
- */
-function syncNoticeHeight() {
-  const bar = root.querySelector('.protobar');
-  document.documentElement.style.setProperty('--notice-h',
-    bar ? `${Math.ceil(bar.getBoundingClientRect().height)}px` : '0px');
-}
-
 /** Programmatic scroll restoration must not read as a user scroll. */
 let lastRenderAt = 0;
 
-/**
- * Keep the open menu inside the window: cap its height at the space below the
- * trigger, and pull it back from the right edge when it would run off-screen.
+/*
+ * Place the open menu against its trigger, in window coordinates.
+ *
+ * The panel is `position: fixed`, so this is the only thing that positions it —
+ * which is the point. Anchored by CSS to its own `.dd`, it inherited whatever
+ * clipping that box lived inside, and on a phone that is a 34px sideways
+ * scroller. Window coordinates have no such ancestor.
  */
 const MENU_EDGE = 12;     // how close a panel may come to the window edge
+const MENU_GAP = 6;       // clear of the trigger; mirrors --space-3
 
 function positionMenu() {
   const panel = root.querySelector('.dd__panel');
   if (!panel) return;
-  panel.style.removeProperty('--dd-max-h');
-  panel.style.removeProperty('left');
-  panel.style.removeProperty('right');
-  panel.style.removeProperty('margin-left');
+  const trigger = panel.closest('.dd')?.querySelector('button');
+  if (!trigger) return;
 
-  const box = panel.getBoundingClientRect();
-  panel.style.setProperty('--dd-max-h', `${Math.max(160, window.innerHeight - box.top - 16)}px`);
+  panel.style.removeProperty('--dd-max-h');
+  panel.classList.remove('dd__panel--up');
+  panel.style.left = '0px';
+  panel.style.top = '0px';
+
+  const at = trigger.getBoundingClientRect();
 
   /*
-   * Clamp in window coordinates, then state the result as a `left` against the
-   * panel's own containing block.
-   *
-   * The earlier version nudged with margin-left, which is only half a lever: on
-   * a right-anchored panel the margin enters the same equation `right` does, so
-   * a 376px correction moved the box 188px and the Attribute menu still hung
-   * 176px off the left edge of a phone.
+   * Above or below. A landscape phone has no room under a trigger that sits
+   * two thirds down the window, so the panel flips rather than being squeezed
+   * into 40 pixels.
    */
-  const room = window.innerWidth - 2 * MENU_EDGE;
-  const width = Math.min(box.width, room);
-  const want = Math.min(Math.max(box.left, MENU_EDGE), window.innerWidth - MENU_EDGE - width);
-  const origin = (panel.offsetParent ?? panel.parentElement).getBoundingClientRect().left;
-  panel.style.left = `${Math.round(want - origin)}px`;
-  panel.style.right = 'auto';
+  const below = window.innerHeight - at.bottom - MENU_GAP - MENU_EDGE;
+  const above = at.top - MENU_GAP - MENU_EDGE;
+  const up = below < 200 && above > below;
+  panel.classList.toggle('dd__panel--up', up);
+  panel.style.setProperty('--dd-max-h', `${Math.max(160, up ? above : below)}px`);
 
-  /* Landscape phones have no room below the trigger; open upwards instead. */
-  const below = window.innerHeight - box.top;
-  panel.classList.toggle('dd__panel--up', below < 200 && box.top > below);
-  if (panel.classList.contains('dd__panel--up')) {
-    panel.style.setProperty('--dd-max-h', `${Math.max(160, box.bottom - 16)}px`);
-  }
+  /* Measured after the height cap, or a long list reports its unclamped size. */
+  const box = panel.getBoundingClientRect();
+
+  /*
+   * Lined up with the edge the panel asks for, then clamped into the window.
+   * A right-anchored panel used to be nudged with margin-left, which is only
+   * half a lever — the margin enters the same equation `right` does, so a 376px
+   * correction moved the box 188px and the Attribute menu still hung 176px off
+   * the left edge of a phone.
+   */
+  const width = Math.min(box.width, window.innerWidth - 2 * MENU_EDGE);
+  const wanted = panel.classList.contains('dd__panel--right') ? at.right - width : at.left;
+  const left = Math.min(Math.max(wanted, MENU_EDGE), window.innerWidth - MENU_EDGE - width);
+
+  panel.style.left = `${Math.round(left)}px`;
+  panel.style.top = `${Math.round(up ? at.top - MENU_GAP - box.height : at.bottom + MENU_GAP)}px`;
 }
 
 /*
@@ -557,6 +561,29 @@ const actions = {
   },
 
   'close-modal': () => setState({ modal: null }),
+
+  settings: () => setState({ menu: null, modal: { type: 'settings' } }),
+
+  /* Derived from state, not read back off the checkbox — the same way
+     «Mir zugewiesen» does it, and independent of event ordering. */
+  'mail-pref': (val) => setState(s => ({
+    account: { ...s.account, mail: { ...s.account.mail, [val]: !s.account.mail[val] } }
+  })),
+
+  /* The account language is the language: a preference nobody can see applied
+     is a preference nobody believes was saved. */
+  'account-lang': (val) => setState(s => ({ account: { ...s.account, lang: val }, lang: val })),
+
+  /*
+   * Signing out. Unsaved pensum edits live only in memory, so they go with the
+   * session rather than waiting behind a login for somebody else — and the
+   * signed-out screen says that they did.
+   */
+  signout: () => setState({
+    signedIn: false, menu: null, modal: null, editing: null, reason: '', overrides: {}
+  }),
+
+  signin: () => setState({ signedIn: true }),
   export: (val) => {
     if (val.startsWith('pdf')) {
       return setState({ tab: 'export', report: val.slice(4) || 'demand', menu: null });
@@ -586,12 +613,6 @@ const actions = {
   paper: (val) => setState({ paper: val, menu: null }),
   zoom: (val) => setState({ zoom: val, menu: null }),
 
-  'notice-ok': () => {
-    // Private browsing refuses the write; the notice then returns next render,
-    // which is the safe direction to fail in.
-    try { sessionStorage.setItem('bbl-notice', '1'); } catch { /* no storage */ }
-    setState({ noticeSeen: true });
-  },
   report: (val) => setState({ report: val }),
   /*
    * Clamped where it is written. pageOf() clamps on read, so the display was
@@ -865,10 +886,17 @@ function alignScrollers(source) {
 }
 
 root.addEventListener('scroll', (event) => {
+  /* A fixed panel stays where it was put, so it is re-placed while its trigger
+     moves — the toolbar it hangs off is itself a scroller. */
+  if (state.menu !== null) positionMenu();
   if (!event.target.hasAttribute?.('data-scroll')) return;
   syncScrollFades(event.target);
   alignScrollers(event.target);
 }, true);
+
+window.addEventListener('scroll', () => {
+  if (state.menu !== null) positionMenu();
+}, { passive: true });
 
 /*
  * The grid drops master-data columns to fit the window, so a resize can change

@@ -314,7 +314,6 @@ button, input, select, textarea { font: inherit; color: inherit; }
   gap: var(--space-8); flex-wrap: wrap; padding-block: var(--space-4);
   min-height: 40px; font-size: var(--text-xs);
 }
-.shell-footer__stand { color: var(--color-text-secondary); }
 .shell-footer__links { display: flex; align-items: center; gap: var(--space-8); }
 .shell-footer__links a { display: inline-flex; align-items: center; min-height: var(--target-min); color: var(--color-text-secondary); }
 
@@ -338,7 +337,18 @@ button, input, select, textarea { font: inherit; color: inherit; }
   display: flex; align-items: center; gap: var(--space-4);
   flex: 1 1 0; min-width: 0;
 }
-.crumbs__balance { flex: 1 1 0; min-width: 0; }
+/*
+ * The right-hand slot: the counterweight for the centred edit banner, and the
+ * data timestamp. It sits here rather than in the footer because a reader who
+ * has scrolled six thousand pixels of plan has long since lost sight of how old
+ * the numbers are — and that is the one fact the plan is worthless without.
+ */
+.crumbs__stand {
+  flex: 1 1 0; min-width: 0;
+  text-align: right; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis;
+  font-size: var(--text-sm); color: var(--color-text-muted);
+}
 .crumbs__current {
   color: var(--color-text); font-weight: var(--font-semibold);
   min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
@@ -574,8 +584,22 @@ h1, h2, h3,
 /* Dropdowns ---------------------------------------------------------------- */
 
 .dd { position: relative; }
+/*
+ * Fixed, not absolute — and positioned entirely by positionMenu().
+ *
+ * On a phone the toolbar is a sideways scroller, and a scroll container clips
+ * its children on both axes: `overflow-x: auto` forces the other axis from
+ * visible to auto. The panel opened, was positioned correctly, and was cut off
+ * by a 34px-high box — seven of nine menus were invisible below 700px, which is
+ * every filter and the grouping. A fixed box is not clipped by an ancestor's
+ * overflow, and nothing in the tree establishes a containing block that would
+ * take that away.
+ *
+ * The alignment classes below no longer position anything; they say which edge
+ * the panel prefers to line up with, and positionMenu() reads them.
+ */
 .dd__panel {
-  position: absolute; top: calc(100% + var(--space-3)); z-index: var(--z-popover);
+  position: fixed; z-index: var(--z-popover);
   width: var(--dd-w, 244px);
   /* never wider or taller than the window leaves room for */
   max-width: calc(100vw - 2 * var(--space-8));
@@ -587,9 +611,7 @@ h1, h2, h3,
   display: flex; flex-direction: column; gap: 1px;
   overflow-y: auto;
 }
-.dd__panel--left { left: 0; }
-.dd__panel--right { right: 0; }
-.dd__panel--up { top: auto; bottom: calc(100% + var(--space-3)); }
+
 
 .dd__item {
   display: flex; align-items: center; gap: var(--space-5);
@@ -1937,31 +1959,6 @@ h1, h2, h3,
  * hairline, the raised shadow, the info mark the dropped-columns note uses, and
  * a plain button. It is not the page's main action, so it is not primary.
  * -------------------------------------------------------------------------- */
-.protobar {
-  position: fixed; inset-inline: 0; bottom: 0; z-index: var(--z-popover);
-  border-top: var(--border-hairline) solid var(--color-notice-border);
-  background: var(--color-notice-bg); box-shadow: var(--shadow-raised);
-}
-.protobar__row {
-  display: flex; align-items: center; justify-content: space-between;
-  gap: var(--space-8); padding-block: var(--space-6);
-}
-.protobar__text {
-  display: flex; align-items: flex-start; gap: var(--space-5); margin: 0;
-  font-size: var(--text-base); color: var(--color-text-secondary);
-}
-.protobar__text .icon { flex: 0 0 auto; margin-top: 2px; color: var(--color-text-muted); }
-.protobar__lead { color: var(--color-text-strong); font-weight: var(--font-semibold); }
-.protobar .btn { flex: 0 0 auto; }
-
-/* The shell holds the space the bar covers, measured per render. */
-.app { padding-bottom: var(--notice-h, 0); }
-
-@media (max-width: 700px) {
-  .protobar__row { flex-direction: column; align-items: stretch; gap: var(--space-5); }
-  .protobar .btn { align-self: flex-start; }
-}
-
 /* --------------------------------------------------------------------------
  * Column alignment, for both grids
  *
@@ -2378,4 +2375,93 @@ h1, h2, h3,
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+
+/* =============================================================================
+   Account — the menu behind the initials, and the page without a session
+   ========================================================================== */
+
+/* The initials are a control now, so they answer to hover and focus like one. */
+.avatar[data-act] { border: 0; cursor: pointer; }
+.avatar[data-act]:hover, .avatar[data-act].is-open { background: var(--color-accent-hover); }
+.avatar--lg { width: 40px; height: 40px; font-size: var(--text-base); }
+
+.account {
+  display: flex; align-items: center; gap: var(--space-5);
+  padding: var(--space-4) var(--space-5) var(--space-3);
+}
+.account__name { margin: 0; font-weight: var(--font-semibold); color: var(--color-text-strong); }
+.account__meta, .account__note {
+  margin: 0; font-size: var(--text-sm); color: var(--color-text-muted);
+}
+.account__note { padding: 0 var(--space-5) var(--space-4); }
+.dd__sep { height: 1px; margin: var(--space-2) 0; background: var(--color-border); }
+
+/* ---- the settings dialog ------------------------------------------------ */
+
+/*
+ * The same gutter every other modal body uses — .modal__lead, .modal__section
+ * and .rebook all sit on --space-11, and the head and foot bring their own 24px.
+ * Without it this block started at the raw edge of the dialog: the section
+ * headings stood 24px to the left of the title above them.
+ */
+.settings { display: flex; flex-direction: column; gap: var(--space-8); padding: var(--space-8) var(--space-11); }
+.settings__block { display: flex; flex-direction: column; gap: var(--space-4); }
+.settings__title {
+  margin: 0; font-size: var(--text-sm); font-weight: var(--font-semibold);
+  letter-spacing: var(--tracking-caption); text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+/*
+ * The whole row is the target, not the 16px box: a checkbox on its own is half
+ * the minimum touch target, and the note beside it is what the reader is
+ * actually deciding on.
+ */
+/*
+ * Outdented by its own padding, so the control lines up with the headings while
+ * the hover fill still reaches into the gutter. Indented instead, every checkbox
+ * sat 8px right of everything above it.
+ */
+.settings__row {
+  display: flex; align-items: flex-start; gap: var(--space-5);
+  min-height: var(--target-min); padding: var(--space-3) var(--space-4);
+  margin-inline: calc(-1 * var(--space-4));
+  border-radius: var(--radius); cursor: pointer;
+}
+.settings__row:hover { background: var(--color-surface-hover); }
+/* The inline margins are the browser's own — 4px on a checkbox, 5px on a radio —
+   and they push the control off the gutter the rest of the block sits on. */
+.settings__row input { margin: 3px 0 0; width: 16px; height: 16px; flex: 0 0 auto; accent-color: var(--color-accent); }
+.settings__row > span { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.settings__label { color: var(--color-text-strong); }
+.settings__note { font-size: var(--text-sm); color: var(--color-text-muted); }
+.settings__note--lead { margin: 0 0 var(--space-2); }
+.settings__row--inline > span { flex-direction: row; align-items: baseline; gap: var(--space-4); }
+.settings__langs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px; }
+
+.settings__eiam {
+  margin: 0; padding: var(--space-5);
+  border-radius: var(--radius); background: var(--color-surface-sunken);
+  font-size: var(--text-sm); color: var(--color-text-secondary);
+}
+
+/* ---- signed out --------------------------------------------------------- */
+
+.signout { display: flex; justify-content: center; padding: var(--space-12) var(--space-8); }
+.signout__card {
+  display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-6);
+  max-width: 52ch; padding: var(--space-10);
+  border: var(--border-hairline) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface); box-shadow: var(--shadow-raised);
+}
+.signout__title { margin: 0; font-size: var(--text-2xl); color: var(--color-text-strong); }
+.signout__lead { margin: 0; color: var(--color-text-body); }
+.signout__note, .signout__demo { margin: 0; font-size: var(--text-sm); color: var(--color-text-muted); }
+.signout__demo { font-style: italic; }
+
+@media (max-width: 700px) {
+  .settings__langs { grid-template-columns: minmax(0, 1fr); }
+  .signout { padding: var(--space-8) var(--space-6); }
+  .signout__card { padding: var(--space-8); }
 }
