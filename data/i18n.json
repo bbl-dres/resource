@@ -1580,6 +1580,16 @@
       "en": "Notice",
       "fr": "Remarque",
       "it": "Avviso"
+    },
+    "PDF wird erstellt …": {
+      "en": "Creating PDF …",
+      "fr": "Création du PDF …",
+      "it": "Creazione del PDF …"
+    },
+    "öffnet das Dashboard": {
+      "en": "opens the dashboard",
+      "fr": "ouvre le tableau de bord",
+      "it": "apre la dashboard"
     }
   }
 }

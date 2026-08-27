@@ -56,6 +56,7 @@ const DEFAULT_STATE = {
   leads: [],               // selected person ids
   portfolios: [],          // selected portfolio ids
   overloadOnly: false,
+  exporting: false,        // a PDF is being written; transient, never in the URL
   // column / attribute toggles, one set per grid — see columnSet()
   cols: null,              // filled from COLUMN_DEFAULTS below
   hideZeros: false,
@@ -117,9 +118,7 @@ export const state = {
  * set, which is also what the spreadsheet export takes its columns from.
  */
 export function columnSet() {
-  const key = state.tab === 'schedule' || (state.tab === 'export' && state.report === 'schedule')
-    ? 'schedule' : 'overview';
-  return state.cols[key];
+  return state.cols[columnSetKey()];
 }
 
 /** The name of the set columnSet() returns, for the action that writes to it. */
@@ -279,9 +278,17 @@ export function t(de) {
    -------------------------------------------------------------------------- */
 
 /*
- * Swiss number grouping: an apostrophe every three digits, per the Bundeskanzlei
- * Schreibweisungen. The typographic one, U+2019 — WinAnsi carries it at 0x92, so
- * it survives the PDF writer as well as the screen.
+ * Swiss number grouping: an apostrophe every three digits, U+2019.
+ *
+ * This is cantonal practice, chosen deliberately and not the federal rule. The
+ * Bundeskanzlei Schreibweisungen say the opposite — Rn 512 groups with a fixed
+ * space and calls the apostrophe obsolete, and Rn 513 leaves four-digit numbers
+ * ungrouped unless the same table carries five-digit ones. Revisit if this ever
+ * has to satisfy a federal style review.
+ *
+ * U+2019 rather than a fixed space for a second reason: WinAnsi carries it at
+ * 0x92, so it survives the PDF writer. U+202F and U+2009 do not — they would be
+ * written as '?' on paper.
  */
 const GROUP = '’';
 const grouped = (s) => s.replace(/\B(?=(\d{3})+(?!\d))/g, GROUP);
@@ -321,26 +328,37 @@ export function isEdited(project, q) {
   return state.overrides[`${project.id}:${q}`] !== undefined;
 }
 
-/** Total pensum delta a person carries from unsaved edits, in load points. */
+/*
+ * How loaded a person is, in three steps, and the unit changes exactly once.
+ *
+ * A pensum point is a point of one project's demand. person.baseLoad is the sum
+ * of those over the projects they lead, so loadDelta must be in the same unit —
+ * it converted to utilisation points first, and personUtilisation then divided
+ * by the contract a second time. For the nine part-time leads every edited
+ * figure came out wrong: an 80 % lead taking on 20 more points read 138 %
+ * instead of 131 %, which armed the over-capacity gate on a cell that was not
+ * over capacity.
+ */
+
+/** A person's unsaved edits, summed. In pensum points, like baseLoad. */
 export function loadDelta(personId, q) {
-  const person = data.peopleById[personId];
-  if (!person) return 0;
+  if (!data.peopleById[personId]) return 0;
   let delta = 0;
   for (const p of data.projectsByLead[personId] ?? []) {
     const o = state.overrides[`${p.id}:${q}`];
-    if (o !== undefined) delta += (o - p.demand[q]) / person.employment * 100;
+    if (o !== undefined) delta += o - p.demand[q];
   }
   return delta;
 }
 
-/** A person's booked pensum in a quarter, including unsaved edits. */
+/** A person's booked pensum in a quarter, including unsaved edits. Pensum points. */
 export function personLoad(personId, q) {
   const person = data.peopleById[personId];
   if (!person) return null;
   return Math.round(person.baseLoad[q] + loadDelta(personId, q));
 }
 
-/** A person's utilisation against their own contracted percentage. */
+/** The same load against their own contract. The one place the unit changes. */
 export function personUtilisation(personId, q) {
   const person = data.peopleById[personId];
   if (!person) return null;
@@ -589,21 +607,6 @@ function buildPeriods(off = state.periodOffset) {
   return all.slice(start, start + windowColumns());
 }
 
-/**
- * Period objects for an arbitrary run of quarters. The printed sheets work in
- * quarter blocks rather than in the window the toolbar has scrolled to, and
- * everything that draws a time axis expects periods, not indices.
- */
-export function quarterPeriods(from, count) {
-  const cols = data.quarters.slice(from, from + count).map((q, n) => ({
-    id: q.id, label: q.label,
-    short: `${q.short} ${String(q.year).slice(2)}`,
-    quarters: [from + n], isNow: from + n === 0,
-    from: from + n, to: from + n + 1
-  }));
-  return markYears(cols);
-}
-
 /** A rate over several quarters is their average, rounded. */
 export function periodValue(values, period) {
   const picked = period.quarters.map(i => values[i]).filter(v => v != null);
@@ -849,6 +852,27 @@ export function milestones() {
  * The page is clamped rather than reset: a filter that shortens the list would
  * otherwise leave the reader on an empty page with nothing to say why.
  */
+/*
+ * The change log under the filters and the search box. It lives here rather
+ * than in the view because it is the same question the project list answers,
+ * asked of another collection — and because the pager has to know how long it
+ * is before the view is built.
+ */
+export function visibleChanges() {
+  const ids = new Set(filteredProjects().map(p => p.id));
+  const q = state.search.trim().toLowerCase();
+  return data.changes.filter(c => {
+    if (c.projectId && !ids.has(c.projectId)) return false;
+    if (!q) return true;
+    const hay = `${c.projectLabel} ${c.actor} ${c.field} ${c.change} ${c.value}`.toLowerCase();
+    return hay.includes(q);
+  });
+}
+
+/** How many pages that log has, at the chosen page size. */
+export const pageCount = () =>
+  Math.max(1, Math.ceil(visibleChanges().length / Number(state.pageSize)));
+
 export function pageOf(rows) {
   const size = Number(state.pageSize);
   const pages = Math.max(1, Math.ceil(rows.length / size));
@@ -879,8 +903,12 @@ export function milestoneStats() {
 export function personRows() {
   const cols = periods();
   return data.people.map(person => {
+    /* Through the accessor, so an unsaved edit shows here too. Read straight
+       from baseLoad, this table answered 170 % while the grid beside it said
+       220 % for the same person in the same session. */
+    const load = data.quarters.map((_, q) => personLoad(person.id, q));
     const values = cols.map(col =>
-      Math.round(periodValue(person.baseLoad, col) / person.employment * 100));
+      Math.round(periodValue(load, col) / person.employment * 100));
     const leads = data.projectsByLead[person.id]?.length ?? 0;
     return {
       person, values, leads,
@@ -927,7 +955,7 @@ export function kpis() {
   return {
     credit: {
       label: 'Gebundene Kredite CHF',
-      value: fmtMio(credit).replace(' Mio.', ' Mio.'),
+      value: fmtMio(credit),
       note: `Spitzenjahr ${peak.label}: ${peak.valueLabel} — trifft die Überlastquartale`,
       alert: false
     },
@@ -946,9 +974,11 @@ export function kpis() {
       note: over.length
         ? '▲ ' + over.slice(0, 3).map(p => `${p.shortName} ${personLoad(p.id, 0)}`).join(' · ')
         : 'alle innerhalb der Anstellung',
-      more: over.length > 3
-        ? { label: `${over.length - 3} weitere`, act: 'scroll-to', val: 'card-people' }
-        : null,
+      /* A number, not an instruction. This used to name a DOM id and an
+         action — #card-people, which nothing has rendered since the person
+         card was replaced, so the button was a silent no-op. The store is
+         layer 0 and has no business knowing what a control does. */
+      overflow: Math.max(0, over.length - 3),
       alert: over.length > 0
     },
     unassigned: {

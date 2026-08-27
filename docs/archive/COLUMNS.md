@@ -1,3 +1,10 @@
+> **Superseded — kept for the record.**
+> Written against an eight-quarter data set and a layout that no longer
+> exists. Standing rules from this document were harvested into
+> [`DECISIONS.md`](../DECISIONS.md); the mechanism it describes, where still
+> true, is in [`ARCHITECTURE.md`](../ARCHITECTURE.md). Do not cite this file
+> as current.
+
 # Spalten — ein Menü, zwei Sätze, ein Raster-Mechanismus
 
 **Datum:** 26.08.2026 · **Umfang:** `js/columns.js`, `js/store.js`, `js/views-schedule.js`,

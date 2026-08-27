@@ -1,3 +1,10 @@
+> **Superseded — kept for the record.**
+> Written against an eight-quarter data set and a layout that no longer
+> exists. Standing rules from this document were harvested into
+> [`DECISIONS.md`](../DECISIONS.md); the mechanism it describes, where still
+> true, is in [`ARCHITECTURE.md`](../ARCHITECTURE.md). Do not cite this file
+> as current.
+
 # Code-Review — Wartbarkeit, Robustheit, Leistung, Sicherheit
 
 **Rolle:** Senior Developer · **Datum:** 26.08.2026
@@ -32,7 +39,7 @@ Stellen:
 von Hand synchron halten.** Vergisst man eine, verschiebt sich die Tabelle gegen
 ihren eigenen Kopf oder der Export fehlt eine Spalte — beides ohne Fehlermeldung.
 
-Neu ist [`js/columns.js`](../js/columns.js): jede Spalte einmal, mit allem, was
+Neu ist [`js/columns.js`](../../js/columns.js): jede Spalte einmal, mit allem, was
 die sechs Verbraucher brauchen.
 
 ```js

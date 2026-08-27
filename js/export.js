@@ -8,7 +8,7 @@
    ============================================================================= */
 
 import {
-  data, state, t, projectDemand, ampel, groupProjects, filteredProjects, phaseOf, columnSet,
+  data, state, t, projectDemand, groupProjects, filteredProjects, columnSet,
   totals, periods, periodValue, loadStatus, activeFilters
 } from './store.js';
 
@@ -110,10 +110,18 @@ function download(blob, name) {
  */
 const SEP = ';';
 
+/*
+ * A cell a spreadsheet will not run. Quoting does not defuse a formula —
+ * Excel and Calc both evaluate a quoted cell that opens with = + - or @ — so
+ * such a text cell is prefixed with a tab, which they strip on display.
+ * Numbers take the other branch untouched, so a negative value stays negative.
+ */
+const RISKY = /^[=+\-@\t\r]/;
 const csvCell = (value, type) => {
   if (value === null || value === undefined) return '';
-  const text = type === 'text' ? String(value) : String(value).replace('.', ',');
-  return /[";\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+  let text = type === 'text' ? String(value) : String(value).replace('.', ',');
+  if (type === 'text' && RISKY.test(text)) text = '\t' + text;
+  return /[";\r\n\t]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
 };
 
 export function exportCsv() {
@@ -244,6 +252,14 @@ function zip(files, iso) {
 const xmlText = s => String(s)
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
+/* Element escaping leaves the quote alone, which is fine until the value is
+   used in an attribute — as the worksheet name is. */
+const xmlAttr = s => xmlText(s).replace(/"/g, '&quot;');
+
+/* Excel's own rule for a worksheet name: 31 characters, and none of : \\ / ? * [ ] */
+const sheetName = s =>
+  String(s).replace(/[:\\/?*\[\]]/g, ' ').trim().slice(0, 31) || 'Export';
+
 const colName = (n) => {
   let name = '';
   for (let i = n; i > 0; i = Math.floor((i - 1) / 26)) {
@@ -259,7 +275,12 @@ function cell(col, rowNum, value, style, kind) {
   const ref = `${colName(col)}${rowNum}`;
   const s = style ? ` s="${style}"` : '';
   if (value === null || value === undefined || value === '') return `<c r="${ref}"${s}/>`;
-  if (kind === 'n') return `<c r="${ref}"${s}><v>${value}</v></c>`;
+  /* A numeric cell must hold a number. A credit arriving as "1'250'000"
+     would otherwise go straight into <v>, and Excel refuses the workbook;
+     anything that is not finite falls through to the escaped text branch. */
+  if (kind === 'n' && Number.isFinite(Number(value))) {
+    return `<c r="${ref}"${s}><v>${Number(value)}</v></c>`;
+  }
   return `<c r="${ref}"${s} t="inlineStr"><is><t xml:space="preserve">${xmlText(value)}</t></is></c>`;
 }
 
@@ -389,7 +410,7 @@ export function exportXlsx() {
       body: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"
  xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
-<sheets><sheet name="${xmlText(sheet)}" sheetId="1" r:id="rId1"/></sheets>
+<sheets><sheet name="${xmlAttr(sheetName(sheet))}" sheetId="1" r:id="rId1"/></sheets>
 </workbook>`
     },
     {

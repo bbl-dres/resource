@@ -1,3 +1,10 @@
+> **Superseded — kept for the record.**
+> Written against an eight-quarter data set and a layout that no longer
+> exists. Standing rules from this document were harvested into
+> [`DECISIONS.md`](../DECISIONS.md); the mechanism it describes, where still
+> true, is in [`ARCHITECTURE.md`](../ARCHITECTURE.md). Do not cite this file
+> as current.
+
 # Token-Audit — hartcodierte Werte und die Radius-Skala
 
 **Rolle:** Senior Design Engineer · **Datum:** 26.08.2026

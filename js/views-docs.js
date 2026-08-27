@@ -7,14 +7,14 @@
    ============================================================================= */
 
 import {
-  data, state, t, num, unitSuffix, cellValue, projectDemand, ampel, phaseOf, printPeriods, columnSet,
+  data, state, t, num, unitSuffix, cellValue, projectDemand, ampel, printPeriods, columnSet,
   periodValue,
   personUtilisation, totals, loadStatus, heatStep, filteredProjects, activeFilters,
   groupProjects
 } from './store.js';
 
 import {
-  html, raw, attr, icons, pageHeader, exportMenu, toolbar, activeFilterRow, noResults,
+  html, raw, attr, icons, pageHeader, toolbar, activeFilterRow, noResults,
   dropdown, menuRadio,
   scopeLine, AMPEL_STATES, legendBlock, legendItem, yearRule, ampelDot
 } from './ui.js';
@@ -177,6 +177,9 @@ const REPORTS = [
 export function renderExport() {
   const report = REPORTS.find(r => r.id === state.report) ?? REPORTS[0];
   const sheet = format();
+  /* Nothing in scope means nothing to write: the button used to stay enabled
+     over an empty report, where the click was a silent no-op. */
+  const empty = !filteredProjects().length;
   return html`
     ${pageHeader({
       crumbs: ['Bauprojekte', 'Export'],
@@ -185,7 +188,9 @@ export function renderExport() {
       actions: html`<button type="button" class="btn" data-act="tab" data-val="overview">${t('Abbrechen')}</button>
         <button type="button" class="btn" data-act="print">${t('Drucken')}</button>
         <button type="button" class="btn btn--primary" data-act="export-pdf"
-          data-val="${fileName(report, sheet)}">${icons.download(15)}${t('PDF herunterladen')}</button>`
+          ${attr(state.exporting || empty, 'disabled')}
+          data-val="${fileName(report, sheet)}">${icons.download(15)}${t(
+            state.exporting ? 'PDF wird erstellt …' : 'PDF herunterladen')}</button>`
     })}
     <div class="wrap"><div class="content">
       ${toolbar({ exclude: ['trend'] })}
@@ -214,9 +219,9 @@ export function renderExport() {
           </div>
         </div>
       </div>
-      ${filteredProjects().length
-        ? html`<div class="mount">${printSheets(sheet, report)}</div>`
-        : noResults('Bauprojekte')}
+      ${empty
+        ? noResults('Bauprojekte')
+        : html`<div class="mount">${printSheets(sheet, report)}</div>`}
     </div></div>`;
 }
 
@@ -314,10 +319,21 @@ function printSheets(sheet, report) {
     report.id === 'schedule' ? SCHEDULE_COST : ROW_COST);
   const total = blocks.length * pages.length + 1;   // + the method sheet
 
+  /*
+   * The same for every sheet in the run, so they are worked out once rather
+   * than per sheet. At month scale grouped by lead that was 270 calls where 30
+   * were needed, and totals() walks the whole filtered portfolio each time.
+   */
+  const tot = totals(all);
+  const chips = activeFilters();
+  const lead = sheetColumns(sheet);
+
   let page = 0;
   const sheets = blocks.flatMap(block => pages.map((rows, i) => {
     page++;
-    return printSheet(sheet, report, { rows, all, block, page, total, last: i === pages.length - 1 });
+    return printSheet(sheet, report, {
+      rows, all, block, page, total, last: i === pages.length - 1, tot, chips, lead
+    });
   }));
   sheets.push(methodSheet(sheet, { page: total, total }));
   return sheets;
@@ -505,7 +521,6 @@ const demandLegend = (cfg) => legendBlock([
 
 /** The column header, repeated wherever the reader needs it again. */
 /** True where a quarter opens a year, the way markYears() does it on screen. */
-const yearBreak = (quarters, i) => (i === 0 || quarters[i].year !== quarters[i - 1].year ? 'is-yearstart' : '');
 
 function columnHead(lead, columns) {
   return html`<div class="sheet__row sheet__row--head">
@@ -514,12 +529,9 @@ function columnHead(lead, columns) {
   </div>`;
 }
 
-function printSheet(sheet, report, { rows, all, block, page, total, last }) {
+function printSheet(sheet, report, { rows, all, block, page, total, last, tot, chips, lead }) {
   const cfg = data.print;
-  const tot = totals(all);
-  const chips = activeFilters();
   const schedule = report.id === 'schedule';
-  const lead = sheetColumns(sheet);
 
   /*
    * Every column has a ceiling, and the table is only as wide as its columns
@@ -575,8 +587,12 @@ function printSheet(sheet, report, { rows, all, block, page, total, last }) {
           </div>${columnHead(lead, block)}`;
         }
         if (row.kind === 'sum') {
+          /* cellValue, not projectDemand: the two agree, but projectDemand
+             rebuilds the project's whole forty-quarter array on each of the
+             forty iterations. The identical row on screen is already written
+             this way (views-overview.js). */
           const values = data.quarters.map((_, q) =>
-            row.projects.reduce((a, p) => a + projectDemand(p)[q], 0));
+            row.projects.reduce((a, p) => a + cellValue(p, q), 0));
           return html`<div class="sheet__row sheet__row--groupsum">
             <span style="grid-column:span ${span}">${t('Summe')} ${t(row.label)}</span>
             ${block.map(col => html`<span class="sheet__num sheet__period ${yearRule(col)}">${num(periodValue(values, col))}</span>`)}

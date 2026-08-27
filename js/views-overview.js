@@ -3,10 +3,9 @@
    ============================================================================= */
 
 import {
-  data, state, t, num, fmt, unitSuffix, fmtMio,
-  cellValue, projectDemand, isEdited, personLoad, personUtilisation,
+  data, state, t, num, fmt, unitSuffix, cellValue, projectDemand, isEdited, personLoad, personUtilisation,
   totals, loadStatus, heatStep, ampel, filteredProjects, groupProjects,
-  activeFilters, milestones, milestoneStats, kpis, periods, periodValue, phaseOf, windowEdges, columnSet,
+  milestones, milestoneStats, periods, periodValue, windowEdges, columnSet,
   chartTone
 } from './store.js';
 
@@ -28,9 +27,21 @@ const shortName = p => {
   return rest || p.location;
 };
 
+/*
+ * Two years, not the whole ten. This card is a glance on the way past — it sits
+ * inside a button that opens the dashboard, and a chart that has to be dragged
+ * inside a link is a chart nobody reads. Forty quarters gave it a scrollbar.
+ *
+ * Eight is also what lets the axis stay quarterly. Once the landing grid goes to
+ * three columns the card is 396px wide whatever the window does; sixteen
+ * quarters fit as bars there but not as labels, and a two-year chart labelled by
+ * year would be three ticks under eight bars.
+ */
+const LANDING_QUARTERS = 8;
+
 function utilisationChartRows() {
   const tot = totals();
-  return data.quarters.map((q, i) => ({
+  return data.quarters.slice(0, LANDING_QUARTERS).map((q, i) => ({
     value: tot.utilisation[i],
     label: String(tot.utilisation[i]),
     axis: `${q.short}/${String(q.year).slice(2)}`,
@@ -207,15 +218,21 @@ function attentionCard(overPeople, unassigned) {
   </section>`;
 }
 
+/** The span the card actually draws, read back off it rather than written twice. */
+function landingRange() {
+  const shown = data.quarters.slice(0, LANDING_QUARTERS);
+  return `${shown[0].label} – ${shown.at(-1).label}`;
+}
+
 function utilisationCard() {
   return html`<section class="card card--span4">
     <header class="card__head">
       <h2 class="card__title">${t('Auslastung nach Quartal')}</h2>
-      <p class="card__sub">${t('Bedarf gegen Kapazität netto')} · ${t('öffnet die Übersicht')}</p>
+      <p class="card__sub">${t('Bedarf gegen Kapazität netto')}, ${landingRange()} · ${t('öffnet das Dashboard')}</p>
     </header>
-    <button type="button" class="chartlink" data-act="tab" data-val="overview"
-            aria-label="${t('Auslastung nach Quartal')} — ${t('öffnet die Übersicht')}">
-      ${columnChart(utilisationChartRows(), { height: 150, refAt: 100, refLabel: '100 %' })}
+    <button type="button" class="chartlink" data-act="open-utilisation"
+            aria-label="${t('Auslastung nach Quartal')} — ${t('öffnet das Dashboard')}">
+      ${columnChart(utilisationChartRows(), { height: 150, refAt: 100, refLabel: '100 %', col: 34 })}
     </button>
   </section>`;
 }
@@ -588,7 +605,7 @@ export function editPopover() {
   const lead = p.leadId ? data.peopleById[p.leadId] : null;
   const base = cellValue(p, q);
   const delta = state.draft - base;
-  const newLoad = lead ? Math.round(personLoad(p.leadId, q) + delta / lead.employment * 100) : null;
+  const newLoad = lead ? Math.round(personLoad(p.leadId, q) + delta) : null;
   const newUtil = lead ? Math.round(newLoad / lead.employment * 100) : null;
   const over = newUtil != null && newUtil > 100;
 

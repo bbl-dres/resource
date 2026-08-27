@@ -2,17 +2,17 @@
    app.js — bootstrap, routing and event dispatch.
 
    Rendering is a full re-render of #app into innerHTML. It keeps the views
-   pure functions of state, at a measured ~46 ms for the 111-row grid — of
-   which ~11 ms is building and parsing the markup and the rest is the browser
-   rebuilding 5 400 nodes. That is why search is debounced rather than rendered
-   per keystroke. Focus, caret position and scroll offset are restored
-   afterwards so typing and tabbing survive.
+   pure functions of state, at a measured ~65 ms for the 111-row grid, most of
+   which is the browser rebuilding some 6 300 nodes. That is why search is
+   debounced rather than rendered per keystroke. What survives a render — focus,
+   caret, and both scroll offsets — is listed in docs/ARCHITECTURE.md; that list
+   is the contract, and it is longer than it looks.
    ============================================================================= */
 
 import {
   data, state, load, subscribe, setState, syncFromUrl, closeOverlays,
   cellValue, toggleIn, removeFilter, resetFilters, defaultDir, t, columnSetKey,
-  offsetForScale, maxOffset, windowStep
+  offsetForScale, maxOffset, windowStep, pageCount
 } from './store.js';
 import { loadIcons } from './icons.js';
 import { html, appHeader, appFooter, prototypeBar, toast, forgetTokens } from './ui.js';
@@ -39,8 +39,45 @@ const VIEWS = {
   export: renderExport
 };
 
+/*
+ * Where the reader had scrolled the plan to, sideways.
+ *
+ * Vertical scroll was already carried across a render; horizontal was not, so
+ * every sort, filter, toast or resize threw the reader back to the first
+ * quarter — on a ten-year plan, most of the way back to the start of the
+ * decade. One value covers every card, because alignScrollers keeps them all on
+ * the same part of the axis by design.
+ *
+ * Tied to the axis it was taken from: change the scale or step the window and
+ * the same pixel offset means a different date, so it is dropped instead. The
+ * comparison is against the axis the DOM is currently showing, not against
+ * state — setState has already written the new scale by the time render runs,
+ * so reading it here would compare the new value with itself.
+ */
+const axisKey = () => `${state.scale}:${state.periodOffset}`;
+let renderedAxis = null;
+
+function captureScroll() {
+  const plan = root.querySelector('[data-scroll]');
+  const toolbar = root.querySelector('.toolbar');
+  return {
+    axis: renderedAxis,
+    plan: plan ? plan.scrollLeft : 0,
+    toolbar: toolbar ? toolbar.scrollLeft : 0
+  };
+}
+
+function restoreScroll(saved) {
+  if (saved.plan && saved.axis === axisKey()) {
+    for (const el of root.querySelectorAll('[data-scroll]')) el.scrollLeft = saved.plan;
+  }
+  const toolbar = root.querySelector('.toolbar');
+  if (toolbar && saved.toolbar) toolbar.scrollLeft = saved.toolbar;
+}
+
 function render() {
   const focus = captureFocus();
+  const scroll = captureScroll();
   const scrollY = window.scrollY;
 
   const view = VIEWS[state.tab] ?? renderLanding;
@@ -71,6 +108,8 @@ function render() {
 
   document.documentElement.lang = state.lang;
   if (state.tab === 'api') mountSwagger();
+  /* Before the fades are read: they are computed from scrollLeft. */
+  restoreScroll(scroll);
   root.querySelectorAll('[data-scroll]').forEach(syncScrollFades);
   positionMenu();
   syncPageSize();
@@ -79,6 +118,7 @@ function render() {
   restoreFocus(focus);
   syncModalFocus();
   if (Math.abs(window.scrollY - scrollY) > 1) window.scrollTo({ top: scrollY });
+  renderedAxis = axisKey();
   lastRenderAt = performance.now();
 }
 
@@ -412,11 +452,27 @@ const actions = {
     const { projectId, q } = state.editing;
     const key = `${projectId}:${q}`;
     const project = data.projectsById[projectId];
+    /* Read before setState clears them. */
+    const value = state.draft;
+    const reason = state.reason.trim();
+    const before = cellValue(project, q);
+
     const overrides = { ...state.overrides };
-    if (state.draft === project.demand[q]) delete overrides[key];
-    else overrides[key] = state.draft;
+    if (value === project.demand[q]) delete overrides[key];
+    else overrides[key] = value;
+
+    /*
+     * Logged, like every other edit. The popover demands a justification and
+     * the banner above the grid promises that changes are recorded — and then
+     * this threw the reason away and wrote nothing. Same shape as a rebooking:
+     * one entry carrying both sides and the reason.
+     */
+    logChange(project, 'Pensum',
+      `${data.quarters[q].label}: ${before} % → ${value} %${reason ? ` · ${reason}` : ''}`,
+      `${value} %`);
+
     setState({ overrides, editing: null, reason: '' });
-    flash(`${t('Pensum übernommen')} — ${project.location}, ${data.quarters[q].label}: ${state.draft} %`);
+    flash(`${t('Pensum übernommen')} — ${project.location}, ${data.quarters[q].label}: ${value} %`);
   },
 
   rebook: () => {
@@ -522,10 +578,9 @@ const actions = {
     ? { pDir: s.pDir === 'asc' ? 'desc' : 'asc' }
     : { pSort: val, pDir: val === 'name' || val === 'role' ? 'asc' : 'desc' })),
 
-  'scroll-to': (val) => root.querySelector(`#${CSS.escape(val)}`)?.scrollIntoView({
-    behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
-    block: 'start'
-  }),
+  /* The landing chart is a glance at the dashboard's own utilisation card;
+     it opens that, at the scale that shows the whole plan. */
+  'open-utilisation': () => setState({ tab: 'dashboard', bi: 'general', scale: 'year' }),
 
   sheet: (val) => setState({ sheet: val }),
   paper: (val) => setState({ paper: val, menu: null }),
@@ -538,7 +593,22 @@ const actions = {
     setState({ noticeSeen: true });
   },
   report: (val) => setState({ report: val }),
-  page: (val) => setState(s => ({ page: Math.max(1, s.page + Number(val)) })),
+  /*
+   * Clamped where it is written. pageOf() clamps on read, so the display was
+   * always right while state.page ran on past the end: nine clicks on a
+   * four-page log left it at 10, and the next six «Vorherige Seite» clicks did
+   * nothing at all because they were counting back down through pages that do
+   * not exist.
+   */
+  page: (val) => setState(s => {
+    /* Step from where the reader actually is. pageOf() clamps for display but
+       leaves state.page where it ran to, so stepping back from a stale 10 over
+       a four-page log spent the first click getting back to 4 — the page the
+       screen had been showing all along. */
+    const pages = pageCount();
+    const at = Math.min(Math.max(1, s.page), pages);
+    return { page: Math.max(1, Math.min(pages, at + Number(val))) };
+  }),
   'page-size': (val) => setState({ pageSize: val, page: 1, menu: null }),
   print: () => window.print(),
 
@@ -547,12 +617,23 @@ const actions = {
    * own unprintable margin, so an A3 sheet arrives scaled onto A4 and A0 is not
    * on offer at all. The writer is loaded on demand, like the API widget.
    */
-  'export-pdf': async (val, el) => {
-    const sheets = [...root.querySelectorAll('.sheet')];
-    if (!sheets.length) return;
-    el.disabled = true;
+  'export-pdf': async (val) => {
+    if (state.exporting) return;
+    /*
+     * The lock lives in state, not on the button: set as el.disabled it sat on
+     * a node the next render replaces, so it protected nothing.
+     */
+    setState({ exporting: true });
     try {
       const { sheetsToPdf } = await import('./pdf.js');
+      /*
+       * Collected after the await. A render during the dynamic import — a
+       * resize, a toast — detaches everything gathered before it, and the
+       * writer then measured nodes with no layout: a 12 KB file with no text
+       * at all and a zero-sized page box.
+       */
+      const sheets = [...root.querySelectorAll('.sheet')].filter(s => s.isConnected);
+      if (!sheets.length) return;
       const url = URL.createObjectURL(new Blob([sheetsToPdf(sheets)], { type: 'application/pdf' }));
       const link = Object.assign(document.createElement('a'), { href: url, download: val });
       link.click();
@@ -560,7 +641,7 @@ const actions = {
       // there when the click is handled.
       setTimeout(() => URL.revokeObjectURL(url), 0);
     } finally {
-      el.disabled = false;
+      setState({ exporting: false });
     }
   }
 };
@@ -736,8 +817,18 @@ document.addEventListener('keydown', (event) => {
   }
 });
 
-/** A click anywhere outside an open dropdown closes it. */
-document.addEventListener('pointerdown', (event) => {
+/*
+ * A click anywhere outside an open dropdown closes it — on click, not on
+ * pointerdown.
+ *
+ * Closing on pointerdown re-rendered the page between the press and the
+ * release, which detached the element under the finger. The browser then
+ * produced no click event at all, so the delegated dispatch never ran: with a
+ * menu open, the first click on a tab, a checkbox or a filter did nothing but
+ * close the menu, and everything had to be clicked twice. Nine triggers shared
+ * this. On click the dispatch has already run by the time we re-render.
+ */
+document.addEventListener('click', (event) => {
   if (state.menu === null) return;
   if (event.target.closest('.dd')) return;
   setState({ menu: null });

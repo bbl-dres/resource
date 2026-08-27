@@ -5,8 +5,8 @@
 
 import {
   data, state, t, fmtMio, totals, loadStatus, cellValue,
-  personLoad, personUtilisation, filteredProjects,
-  periods, heatStep, personRows, sortPersonRows, windowEdges, pageOf, chartTone
+  filteredProjects, visibleChanges,
+  periods, personRows, sortPersonRows, windowEdges, pageOf, chartTone
 } from './store.js';
 
 import {
@@ -231,28 +231,6 @@ function phaseCountCard() {
     barList(rows, { max: Math.max(1, ...rows.map(r => r.value)) }));
 }
 
-/* Replaced by the «Personen» section — kept for reference during the rebuild. */
-// eslint-disable-next-line no-unused-vars
-function personCard() {
-  const q0 = data.quarters[0];
-  const rows = data.people.map(p => {
-    const load = personLoad(p.id, 0);
-    const util = personUtilisation(p.id, 0);
-    const over = util > 100;
-    return {
-      label: p.name,
-      value: load,
-      valueLabel: `${load} % ${t('von')} ${p.employment} %`,
-      tone: over ? 'danger' : 'accent',
-      note: over ? t('über der Anstellung') : `${p.employment - load} % ${t('frei')}`,
-      noteTone: over ? 'danger' : null
-    };
-  });
-  return biCard('people', 'Auslastung nach Person',
-    `${q0.label} · ${t('Balken gegen die eigene Anstellung')}`,
-    barList(rows, { max: Math.max(...rows.map(r => r.value)) * 1.1 }));
-}
-
 function portfolioCard() {
   const list = filteredProjects();
   const rows = data.meta.portfolios
@@ -350,15 +328,3 @@ function logFoot({ page, pages, from, rows, total }) {
  * The log follows the same filters as every other tab. Entries that are not
  * tied to a project (absences, for example) always stay visible.
  */
-function visibleChanges() {
-  const ids = new Set(filteredProjects().map(p => p.id));
-  const q = state.search.trim().toLowerCase();
-  return data.changes.filter(c => {
-    if (c.projectId && !ids.has(c.projectId)) return false;
-    if (q) {
-      const hay = `${c.projectLabel} ${c.actor} ${c.field} ${c.change} ${c.value}`.toLowerCase();
-      if (!hay.includes(q)) return false;
-    }
-    return true;
-  });
-}

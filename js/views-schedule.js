@@ -266,13 +266,21 @@ export function ganttRow(p, cols, lay) {
 
 /**
  * Where a quarter falls on the track, measured in columns — 2.5 being halfway
- * through the third column.
+ * through the third column. Fractional quarters are the point: a gate falls on
+ * a day, not at the end of the quarter it happens to sit in.
+ *
+ * Read from the period's own `from`/`to`, the way todayFraction already does.
+ * Matching on its `quarters` list instead looks equivalent and is not: a month
+ * column carries `quarters: [5]` but spans a third of quarter 5, so the test
+ * `q <= 5` rejected every fractional q and pushed it into the next column. Every
+ * one of 390 gates was drawn late — by up to 2.97 columns at month scale, which
+ * is a gate skipping all three months of its own quarter.
  */
 function unitAt(cols, q) {
   for (let i = 0; i < cols.length; i++) {
-    const qs = cols[i].quarters;
-    if (q < qs[0]) return i;
-    if (q <= qs.at(-1)) return i + (q - qs[0]) / qs.length;
+    const c = cols[i];
+    if (q < c.from) return i;
+    if (q < c.to) return i + (q - c.from) / (c.to - c.from);
   }
   return cols.length;
 }
@@ -391,7 +399,15 @@ function ganttBar(at, placed, cols, p, lay, gates) {
   const left = (at.from / cols.length) * 100;
   const width = ((at.to - at.from) / cols.length) * 100;
   const run = barRun(b, at, lay, gates);
-  const inset = Math.max(0, run.from - at.from * (lay.colWidth || 0));
+  /*
+   * Only where a label will actually be drawn. On a bar too narrow to carry
+   * even its number, the clearance is 16.5px of padding on a 23.5px box —
+   * more than the box holds, so it grew instead and overlapped the phase
+   * beside it, which is the one thing these bars must never do.
+   */
+  const inset = run.room > 0
+    ? Math.max(0, run.from - at.from * (lay.colWidth || 0))
+    : 0;
   const full = t(phaseOf(b.phase).label);
   return html`<button type="button" class="${cls}"
       style="left:${left}%;width:${width}%;padding-left:${inset}px"
@@ -402,11 +418,6 @@ function ganttBar(at, placed, cols, p, lay, gates) {
   </button>`;
 }
 
-/**
- * A gate sits at the end of the quarter it falls due in. Reading them from the
- * milestone data rather than from a label baked into a bar means every one of
- * the 189 shows up, and each can be opened.
- */
 /** How far through its quarter a date falls, from 0 at the first day to 1. */
 function quarterFraction(iso, qi) {
   const q = data.quarters[qi];
@@ -427,6 +438,12 @@ function quarterFraction(iso, qi) {
  * column at quarter scale, so nothing showed; at year scale a gate due in Q2
  * slid three quarters forward, to the end of the year, and came down in the
  * middle of a bar's name — which was most of what the labels collided with.
+ *
+ * Anything outside the window is dropped rather than pinned to its edge. The
+ * window is a slice of a ten-year plan, so most of a project's gates lie beyond
+ * it; drawn at the last column they stacked up there as diamonds claiming dates
+ * they do not have — 136 of them at quarter scale, 252 at month, visible as soon
+ * as the track was scrolled to its end.
  */
 function gatePlaces(p, cols) {
   const out = [];
@@ -434,7 +451,7 @@ function gatePlaces(p, cols) {
     const qi = data.quarterIndex[m.forecast ?? m.plan];
     if (qi === undefined) continue;
     const at = unitAt(cols, qi + quarterFraction(m.forecastDate ?? m.planDate, qi));
-    if (at <= 0 || at > cols.length) continue;
+    if (at <= 0 || at >= cols.length) continue;
     out.push({ m, at });
   }
   out.sort((a, b) => a.at - b.at || a.m.code.localeCompare(b.m.code));

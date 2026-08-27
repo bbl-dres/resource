@@ -152,11 +152,6 @@ export function textWidth(text, sizeToken = '--text-xs') {
 }
 
 /**
- * The row's traffic light. Three views draw it — the table, the bar plan and
- * the printed sheet — and a dot with no accessible name is a dot with no
- * meaning, so the name is part of the mark, not of the caller.
- */
-/**
  * Say what had to give. A window too narrow for every column is a reason to
  * show fewer, not a reason to refuse to draw — but the reader has to know that
  * what they are looking at is not the whole table.
@@ -170,6 +165,11 @@ export function droppedNote(hidden) {
   </p>`;
 }
 
+/**
+ * The row's traffic light. Three views draw it — the table, the bar plan and
+ * the printed sheet — and a dot with no accessible name is a dot with no
+ * meaning, so the name is part of the mark, not of the caller.
+ */
 export function ampelDot(p, range) {
   const a = ampel(p.leadId, range);
   return html`<span class="ampel ampel--${a.key}" role="img"
@@ -318,7 +318,7 @@ export function appHeader() {
             ${langs.map(l => html`<button type="button" class="dd__item ${state.lang === l.code ? 'is-checked' : ''}"
                 role="menuitemradio" aria-checked="${state.lang === l.code}"
                 ${attr(!l.available, 'aria-disabled="true" disabled')}
-                ${attr(l.available, `data-act="lang" data-val="${l.code}"`)}>
+                data-act="lang" data-val="${l.code}">
               <span>${l.label} <span class="dd__meta">${l.tag}</span></span>
               ${state.lang === l.code ? html`<span class="dd__check">${icons.check()}</span>` : l.note ? html`<span class="dd__meta">${l.note}</span>` : ''}
             </button>`)}
@@ -481,9 +481,9 @@ export function kpiStrip() {
     ${cards.map(c => html`<div class="kpi ${c.alert ? 'is-alert' : ''}">
       <div class="kpi__label">${t(c.label)}</div>
       <div class="kpi__value">${c.value}</div>
-      <div class="kpi__note">${c.note}${c.more ? html`<span aria-hidden="true"> · </span><button
-      type="button" class="kpi__more" data-act="${c.more.act}" data-val="${c.more.val}"
-      >${t(c.more.label)}</button>` : ''}</div>
+      <div class="kpi__note">${c.note}${c.overflow ? html`<span aria-hidden="true"> · </span><button
+      type="button" class="kpi__more" data-act="bi" data-val="people"
+      >${c.overflow} ${t('weitere')}</button>` : ''}</div>
     </div>`)}
   </div>`;
 }
@@ -720,10 +720,16 @@ export function appFooter() {
    -------------------------------------------------------------------------- */
 
 /** Vertical bar chart with a 100 % reference line. */
-export function columnChart(rows, { max, height = 150, refAt = 100, refLabel = '100 %', axis = true }) {
+export function columnChart(rows, { max, height = 150, refAt = 100, refLabel = '100 %', axis = true, col }) {
   const top = max ?? Math.max(refAt * 1.2, ...rows.map(r => r.value || 0));
   const refPct = (refAt / top) * 100;
-  return html`<div class="colchart" style="--chart-h:${height}px">
+  /*
+    * The plot and the axis scroll as one. They are two separate grids over the
+    * same columns, so a scroller around only one of them would slide the bars
+    * out from under their own labels.
+    */
+  return html`<div class="colchart" style="--chart-h:${height}px;--chart-cols:${rows.length}${col ? `;--chart-col:${col}px` : ''}">
+    <div class="colchart__scroll">
     <div class="colchart__plot">
       ${refAt ? html`<div class="colchart__ref" style="bottom:${refPct.toFixed(1)}%"></div>
                      <div class="colchart__reflabel" style="bottom:${(refPct + 1.2).toFixed(1)}%">${refLabel}</div>` : ''}
@@ -736,6 +742,7 @@ export function columnChart(rows, { max, height = 150, refAt = 100, refLabel = '
       </div>
     </div>
     ${axis ? html`<div class="colchart__axis">${rows.map(r => html`<span>${r.axis}</span>`)}</div>` : ''}
+    </div>
   </div>`;
 }
 

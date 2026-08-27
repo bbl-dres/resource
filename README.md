@@ -38,9 +38,17 @@ Resource-planning prototype for the [Federal Office for Buildings and Logistics 
 
 - Static single-page application using vanilla JavaScript ES modules, HTML and layered CSS.
 - No framework, package installation or build step; Swagger UI and Lucide assets are vendored locally.
-- Fictional JSON fixtures for 111 projects, 46 people, eight quarters, 189 milestones and 249 history entries.
+- Fictional JSON fixtures for 111 projects, 44 people, 40 quarters (Q3/2026 – Q2/2036), 390 milestones and 249 history entries. Seven of the eleven files in `data/` are generated — see [`tools/README.md`](tools/README.md).
 - Hash-based view state, escaped HTML templates and derived portfolio figures in `js/store.js`.
 - OpenAPI 3.1 target contract with 20 paths and 42 operations; no live API is connected.
+
+## How it works
+
+A short map of the codebase — module layers, the escaping layer, what must
+survive a re-render, the column registry, the time window, and why the PDF
+writer exists — is in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md). Read that
+first; it is four pages and it is the orientation this repository lacked for a
+long time.
 
 ## Run locally
 
@@ -54,16 +62,42 @@ npx serve .
 
 Then open <http://localhost:8000/>.
 
+### Regenerate the data
+
+`data/` is not hand-maintained. Seven of its eleven files come out of one
+deterministic generator:
+
+```bash
+node tools/generate-portfolio.js
+```
+
+It prints what it made — projects, roster, the demand and capacity curves,
+utilisation per quarter, milestone counts — so a run can be judged without
+opening the app. See [`tools/README.md`](tools/README.md) for what it models and
+what is deliberately wrong in the fixtures.
+
 ## Prototype limits
 
 - Changes are stored only in browser memory and disappear on reload.
 - The fixture model assigns each project to one lead; it does not yet support split person-level allocations.
-- The planning horizon is fixed to eight quarters and the dense portfolio grids are designed primarily for laptop and desktop use.
-- No automated test runner or CI workflow is committed; the review documents record manual and historical checks.
+- The planning horizon runs ten years, but a grid never shows all of it: a fixed number of columns per scale — 12 years, 16 quarters or 24 months — with the arrows stepping the window and the grid panning for the rest. The dense portfolio grids are designed primarily for laptop and desktop use.
+- **No test suite is committed.** The Playwright checks cited throughout `docs/` — behaviour, contrast, responsive, malformed input, print overflow — run from an external harness that is not part of this repository, so the figures quoted in those documents cannot currently be reproduced by a reader.
 
 ## Documentation
 
-Design decisions and implementation reviews are collected in [`docs/`](docs/), including the latest [code review](docs/CODE-REVIEW-2.md), [design review](docs/DESIGN-REVIEW-3.md), [responsive review](docs/RESPONSIVE-REVIEW.md) and [print report](docs/PRINT-REPORTS.md).
+Four documents, and that is deliberate:
+
+| | |
+|---|---|
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | How it is put together. Start here. |
+| [`docs/DECISIONS.md`](docs/DECISIONS.md) | The standing rules, one paragraph each, with the reason. |
+| [`docs/CODE-REVIEW-3.md`](docs/CODE-REVIEW-3.md) | The most recent whole-repository review, and what is still open. |
+| [`docs/DASHBOARD-STUDY.md`](docs/DASHBOARD-STUDY.md) | The one proposal still under discussion. |
+
+Fourteen earlier retrospectives are in [`docs/archive/`](docs/archive/). They were
+written against an eight-quarter data set and a layout that no longer exists, two
+of them contradicted each other, and none should be cited as current — their
+standing rules were harvested into `DECISIONS.md`.
 
 ## License
 

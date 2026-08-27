@@ -1,0 +1,190 @@
+# Architecture
+
+What a new developer needs before touching anything. Rules and their reasons are
+in `DECISIONS.md`; this file is the map.
+
+## Shape
+
+No bundler, no framework, no dependencies. `index.html` at the repository root
+loads ES modules directly, which is what makes GitHub Pages enough to host it.
+Data is static JSON under `data/`, fetched once at boot; nothing writes to disk.
+
+The app must be served over HTTP — `fetch` refuses `file://`. Any static server
+will do.
+
+```
+index.html
+css/tokens.css      design tokens, two layers
+css/main.css        everything else
+js/                 twelve modules, see below
+data/               eleven JSON files, seven of them generated
+tools/              the portfolio generator; see tools/README.md
+```
+
+## Module layers
+
+The graph is acyclic and each module imports only from lower layers. Keeping it
+that way is the point.
+
+| Layer | Module | Job |
+|---|---|---|
+| 0 | `store.js` | State, the URL, and every derived figure. **Imports nothing.** |
+| 0 | `icons.js` | Lucide sprites |
+| 0 | `pdf.js` | Writes a PDF by walking rendered sheets |
+| 1 | `columns.js` | The column registry |
+| 2 | `ui.js` | The `html` template layer, and every shared control |
+| 3 | `views-overview.js`, `views-schedule.js`, `views-analysis.js`, `views-modals.js`, `export.js` | One view each |
+| 4 | `views-docs.js` | The printed sheets; reuses the Gantt row |
+| 5 | `app.js` | Boot, render loop, event dispatch |
+
+`store.js` importing nothing is a constraint, not an accident. It is why a
+derived figure cannot quietly acquire a German label or a DOM identifier — see
+the first finding in `CODE-REVIEW-3.md` for what happens when it does.
+
+## Rendering
+
+### The template layer
+
+`ui.js` exports a tagged template literal:
+
+```js
+html`<span class="${cls}">${project.title}</span>`
+```
+
+- **Everything interpolated is escaped.** This is the default and it has no
+  exceptions worth memorising.
+- `raw(s)` opts out. Eighteen call sites; every one passes a literal or the
+  output of another `html` call. **Never pass data through `raw()`** — and never
+  into an attribute, which is the one hole a review found and closed.
+- `attr(cond, 'disabled')` emits a bare attribute fragment, because a boolean in
+  a `${}` slot renders the empty string and `disabled=""` is still disabled.
+
+### The re-render
+
+Every state change rebuilds the whole of `#app` into `innerHTML`. This is a
+deliberate simplification — no diffing, no keys, no component lifecycle — and it
+has consequences that are not bugs:
+
+- **CSS `animation` replays on every render.** Measured: a 700 ms entrance
+  animation restarts each time. Do not use animation to carry meaning.
+- **CSS `transition` never fires on a state change**, because the element is new.
+  Only `:hover` and `:focus` transitions work.
+
+### What must survive a render
+
+This list is the contract. Adding to it is cheap; discovering it one feature at a
+time is what happened instead, four times.
+
+1. **Focus**, keyed by `data-fk` — `captureFocus` / `restoreFocus` in `app.js`.
+2. **The caret position** inside the focused field.
+3. **Vertical scroll** — `window.scrollY`.
+4. **Horizontal scroll** of every `[data-scroll]` container and the mobile
+   toolbar — `captureScroll` / `restoreScroll`. Deliberately *dropped* when
+   `scale` or `periodOffset` changes, because the same pixel offset then means a
+   different date.
+
+Anything that must outlive a render belongs in `state`, never on a DOM node.
+A lock written as `el.disabled = true` protects nothing.
+
+Anything that collects DOM nodes and then `await`s must collect **after** the
+await and filter by `isConnected`.
+
+## Events
+
+One delegated listener. Controls carry `data-act` (and usually `data-val`), and
+`app.js` holds the dispatch table that maps the name to a function.
+
+Dropdowns close on **`click`**, not `pointerdown`: closing on pointerdown
+re-renders between press and release, the browser then produces no click event at
+all, and every control needs clicking twice.
+
+## State and the URL
+
+`state` is one object in `store.js`, mirrored into the URL hash so a view can be
+shared and reloaded. Every value read back from the hash is validated against
+`VOCAB`, a closed vocabulary — an unknown value falls back to the default rather
+than reaching a view.
+
+Known gap: `writeUrl` enumerates its keys by hand and omits several, and the
+history layer double-pushes. See “Still open” in `CODE-REVIEW-3.md`.
+
+## Grids
+
+Both planning grids are CSS Grid, one grid per row, all rows sharing a single
+inline `grid-template-columns` string. Frozen columns are `position: sticky` with
+an inline `left`.
+
+**`columns.js` is the registry.** One declaration per column — width, alignment,
+which tab shows it, how a cell renders, how it sorts, what the header says —
+feeding six consumers. Add a column there and nowhere else.
+
+`YIELD_ORDER` decides what is dropped as the window narrows. `id` is not in it:
+it is the floor and never disappears.
+
+## Time
+
+`store.js` builds *period columns* for the current scale: `year`, `quarter` or
+`month`. A period knows the quarters it covers and its `from`/`to` in fractional
+quarter units.
+
+- The horizon is 40 quarters, Q3/2026 – Q2/2036.
+- A grid never shows all of it. `WINDOW_COLUMNS` fixes the count per scale —
+  12 years, 16 quarters, 24 months — and the rest is reached by the arrows or by
+  panning. All three use the same column width, so the frozen block does not move
+  when the reader changes scale.
+- **Positions inside the track are fractional.** A bar or a milestone is placed
+  at its true position via `unitAt(cols, q)`, which reads a period's `from`/`to`.
+  Rounding to whole columns is what put 212 bars on top of one another and every
+  milestone on the wrong date.
+
+## Print and PDF
+
+`views-docs.js` lays out sheets in real millimetres, so what is on screen is what
+prints. Five paper sizes, two orientations, both reports, three scales; the row
+budget per combination is measured, not derived.
+
+`js/pdf.js` walks those rendered sheets and writes a vector PDF by hand:
+WinAnsi encoding, Helvetica width tables, horizontal scaling to the measured DOM
+width. It exists because the browser print dialog cannot be steered — driver
+paper size and unprintable margins override `@page`.
+
+Two things to know before touching it:
+
+- `getBoundingClientRect()` returns zoomed values and `getComputedStyle()` does
+  not. The writer lifts `--sheet-zoom` to 1 for the duration of the walk. This
+  trap has been hit twice.
+- Only WinAnsi characters survive. `’` (U+2019) does; U+202F and U+2009 become
+  `?`.
+
+## i18n
+
+`data/i18n.json` holds 312 terms in four languages, looked up through `t()` with
+the German string as the key and as the fallback. A user-visible string that is
+not passed through `t()` will be German in every language.
+
+## Tokens
+
+Two layers in `css/tokens.css`: primitives (`--blue-200`, `--steel-550`) feed
+semantic roles (`--color-notice-bg`, `--color-bar-border`), and components use
+the semantic layer. A component reaching a primitive directly is a smell; a new
+meaning gets a new role.
+
+Contrast is measured, not eyeballed: 4.5:1 for text, 3:1 for any boundary that
+carries meaning (WCAG 1.4.11), 24 px minimum target height.
+
+## Data
+
+Seven of the eleven files in `data/` are generated — see `tools/README.md`.
+`i18n.json`, `phases.json`, `print.json` and `openapi.json` are hand-written.
+
+Current fixtures: 111 projects, 44 people (4,160 % contracted), 40 quarters,
+390 milestones (47 undated, 81 late), 249 history entries, 7 sub-portfolios,
+5 projects without a lead.
+
+## Checks
+
+The Playwright suites cited throughout `docs/` run from a harness that is **not
+in this repository**. Figures quoted in the documents were measured with it; a
+reader cannot currently reproduce them. Either commit the harness or stop citing
+it — this is the weakest thing in the documentation and it is recorded here so it
+is not forgotten.

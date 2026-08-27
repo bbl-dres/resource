@@ -48,10 +48,15 @@ quarters forty-two of a hundred and eleven projects simply ran off the edge, and
 the load curve fell away in 2030 because the paper stopped, not because the work
 did — which is the one thing a plan must never look like.
 
-The app does not show all forty at once. It shows a fixed **twelve columns** at
-whatever scale is set — twelve years, three years or one — and the arrows step
-that window while the grid pans. Seeing the whole plan at once is what the A0
-report is for.
+The app does not show all forty at once. `WINDOW_COLUMNS` in `js/store.js` fixes
+how many columns a grid builds per scale — **12 years, 16 quarters, 24 months** —
+at one shared column width, so the frozen block does not move when the reader
+switches scale. What lies outside is reached by the arrows or by panning.
+
+One consequence nothing else documents: the horizon is eleven calendar years, so
+at year scale all of it already fits inside the twelve-column window. `maxOffset()`
+is therefore 0 there and the arrows are inert — only the grid pans. Seeing the
+whole plan at once is what the A0 report is for.
 
 ### The shape of a project
 

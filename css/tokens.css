@@ -130,6 +130,24 @@
   --color-surface-sunken:   var(--grey-100);
   --color-surface-hover:    var(--steel-100);
   --color-surface-selected: var(--blue-50);
+
+  /*
+   * A standing notice about the application itself — not about the plan, and
+   * not a state a row can be in. Its own role rather than a borrowed one, so it
+   * cannot drift into meaning something about the data.
+   *
+   * blue-200 rather than one of the paler blues, because the page ground is
+   * itself a very light blue-grey: blue-50 measures 1.04:1 against it and
+   * blue-100 1.08:1, which separate by hue alone and so not at all for a reader
+   * who cannot see the hue. This one carries 1.32:1 as well as the hue, and
+   * still leaves the text at 11.9:1.
+   *
+   * The rule on top is blue-600: 3.46:1 against the band and 4.57:1 against the
+   * page, so the edge holds on both sides. blue-300 was the obvious choice and
+   * measured 1.21:1 against the band — a border nobody would see.
+   */
+  --color-notice-bg:       var(--blue-200);
+  --color-notice-border:   var(--blue-600);
   --color-surface-frame:    var(--steel-50);   /* app frame + table header   */
   --color-scrim:            var(--alpha-ink-28);
 
@@ -390,6 +408,14 @@
    * second line in a 52px column, and a total that wraps reads as two numbers.
    * What the scale changes is what a column means and how many there are.
    */
+  /*
+   * One column of a dashboard chart. Derived, not chosen: the widest value a
+   * chart carries sets 37px and the widest axis label 31px, so anything below
+   * this breaks the label onto a second line. Charts scroll past it rather than
+   * squeezing, exactly as the grids do.
+   */
+  --chart-col:          40px;
+
   --grid-col-ampel:     62px;
   --grid-col-id:        62px;
   --grid-col-title:     285px;   /* the floor; the column takes the slack */
