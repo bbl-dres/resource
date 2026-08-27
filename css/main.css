@@ -1743,7 +1743,20 @@ h1, h2, h3,
   min-width: calc(var(--gantt-lead) + var(--gantt-cols, 8) * var(--grid-period));
   background: var(--color-surface-frame);
 }
-.capband__label { display: flex; align-items: center; padding-left: var(--space-6); }
+/*
+ * left: 0, and not only `sticky`.
+ *
+ * The shared rule above pins these three, but the offset is written inline by
+ * pinLeft() — which the row labels get from the column registry and this one,
+ * being a single cell over the whole lead, never did. Sticky with an offset of
+ * auto does nothing horizontally, so the rule read as correct and the label
+ * scrolled away with the plan: at 350px of scroll it stood at x = -322 while
+ * every row label above it held at 28.
+ */
+.capband__label {
+  display: flex; align-items: center; padding-left: var(--space-6);
+  left: 0;
+}
 .capband__title { font-size: var(--text-base); font-weight: var(--font-semibold); color: var(--color-text-strong); }
 .capband__cells { display: grid; grid-template-columns: repeat(var(--gantt-cols, 8), minmax(0, 1fr)); }
 .capband__cell {

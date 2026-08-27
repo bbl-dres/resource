@@ -165,6 +165,34 @@ const FORMATS = {
 };
 
 /*
+ * One printed time column of the demand table, in px. Measured on a rendered
+ * sheet; the table keeps this width and lets a wider sheet become margin.
+ */
+const sheetQuarter = (sheet) => (sheet.orientation === 'portrait' ? 54 : 50);
+
+/*
+ * The bar plan does not do that — its track is 1fr and fills the paper, which is
+ * the point of a bar plan. So its column is whatever is left over, and the
+ * label rule has to be told: a bar chooses its text against the width it has,
+ * and told 54 where it had 132 it printed a number where the name fitted.
+ *
+ * The ISO series in px at 96 dpi, short edge, a4 through a0 — landscape simply
+ * reads one step further along, because the long edge of one size is the short
+ * edge of the next. Verified against all ten rendered combinations: the widths
+ * this yields reproduce the measured column to the pixel in nine of ten and to
+ * one pixel in the tenth.
+ */
+const PAPER_PX = [794, 1123, 1587, 2245, 3179, 4494];
+const PAPER_ORDER = ['a4', 'a3', 'a2', 'a1', 'a0'];
+const SHEET_PAD = 65;     // the sheet's own inset, both sides together
+
+function ganttColumn(sheet, leadWidth, cols) {
+  const step = PAPER_ORDER.indexOf(sheet.paper) + (sheet.orientation === 'landscape' ? 1 : 0);
+  const paper = PAPER_PX[step] ?? PAPER_PX.at(-1);
+  return cols ? Math.max(1, (paper - SHEET_PAD - leadWidth) / cols) : 0;
+}
+
+/*
  * Two reports off the same press. They share the letterhead, the scope line,
  * the pagination and the closing method sheet; they differ in what a row is —
  * a run of numbers, or a bar over the same quarters.
@@ -459,6 +487,12 @@ function scheduleTable(rows, block, tot, last, sheet) {
     room: Infinity, axis: 0, widthOf: c => c.sheet.w[wide ? 1 : 0]
   });
   lay.tpl = [...lay.parts, 'minmax(0, 1fr)'].join(' ');
+  /*
+   * The bar labels are chosen against the width a bar actually has, so the sheet
+   * has to say how wide one of its columns is. Without it every bar on paper
+   * came out blank while the same row on screen was fully labelled.
+   */
+  lay.colWidth = ganttColumn(sheet, lay.width, cols.length);
   return html`<div class="sheet__gantt gantt"
       style="--gantt-cols:${cols.length};--gantt-lead:${lay.width}px">
     ${rows.some(r => r.kind === 'group') ? '' : ganttAxisHead(cols, lay)}
@@ -544,7 +578,7 @@ function printSheet(sheet, report, { rows, all, block, page, total, last, tot, c
    * ended up with wide columns of two-digit numbers beside truncated names.
    * A sheet wider than the table keeps the difference as margin.
    */
-  const quarter = sheet.orientation === 'portrait' ? 54 : 50;
+  const quarter = sheetQuarter(sheet);
   const cols = schedule
     ? `var(--grid-col-id) minmax(0, 1fr)`
     : lead.map(c => (c.flex ? `minmax(${c.w}px, ${SHEET_TITLE_MAX}px)` : `minmax(0, ${c.w}px)`))

@@ -53,10 +53,16 @@ function ganttLayout() {
   const floor = cols * quarterW;
   const ceiling = cols * tokenPx('--grid-period-max');
   const track = Math.min(ceiling, Math.max(floor, room - lay.width));
+  /* Stated once and handed out, because the capacity band has to be drawn to the
+     same track — given its own `1fr` it filled the card while the rows above it
+     stopped at the ceiling, and at year scale its values stood 166px wide of the
+     columns they belong to. */
+  const trackTpl = `minmax(${floor}px, ${ceiling}px)`;
   return {
     ...lay,
     colWidth: cols ? track / cols : 0,
-    tpl: [...lay.parts, `minmax(${floor}px, ${ceiling}px)`].join(' ')
+    trackTpl,
+    tpl: [...lay.parts, trackTpl].join(' ')
   };
 }
 
@@ -157,7 +163,8 @@ function ganttView() {
     <section class="capband scrollbox" style="--gantt-cols:${cols.length};--gantt-lead:${lay.width}px"
       ${attr(edge.before, 'data-before')} ${attr(edge.after, 'data-after')}>
       <div class="capband__scroll" data-scroll>
-      <div class="capband__row">
+      <div class="capband__row"
+        style="grid-template-columns:${lay.width}px ${raw(lay.trackTpl ?? 'minmax(0, 1fr)')}">
         <div class="capband__label">
           <div class="capband__title">${t('Auslastung')}</div>
         </div>
@@ -339,7 +346,14 @@ const gateX = (g, w) => g.at * w - (g.shift ?? 0);
  * early, four pixels under the diamond that opened them.
  */
 function barRun(b, at, lay, gates) {
+  /*
+   * A layout that never states its column width cannot be measured against, and
+   * the honest answer there is «show the name and let the ellipsis handle it» —
+   * not «show nothing». The printed sheet omitted colWidth and every bar on
+   * paper lost its label while the screen kept hers.
+   */
   const w = lay.colWidth || 0;
+  if (!w) return { from: 0, to: Infinity, room: Infinity };
   const x0 = at.from * w;
   const x1 = at.to * w - (b.continues ? CHEVRON : 0);
   const half = BAR_PADDING / 2;

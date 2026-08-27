@@ -60,6 +60,15 @@ export function renderDashboard() {
  */
 const personHeat = v => (v === 0 ? 0 : v <= 80 ? 1 : v <= 100 ? 2 : v <= 150 ? 3 : 4);
 
+/*
+ * The alignment classes are the same ones columns.js hands the two planning
+ * grids — a figure is flush right, a period column is centred, in every table.
+ * This one is built by hand rather than from the registry, and so it simply
+ * never applied them: the headers sat 8px from their right edge while the
+ * numbers under them stood 35 to 53px away, and the quarter headers were flush
+ * right over centred values.
+ */
+
 /** The frozen columns of the person table, in order, with their width token. */
 const PERSON_COLS = [
   { key: 'name', token: '--person-col-name', grow: true },
@@ -115,11 +124,11 @@ function personSection() {
           <div class="prow prow--head" style="grid-template-columns:${raw(tpl)}">
             ${personHead('name', t('Person'), sticky)}
             ${personHead('role', t('Rolle'), sticky)}
-            ${personHead('employment', t('Anst.'), sticky, 'pcell--num')}
-            ${personHead('projects', t('Proj.'), sticky, 'pcell--num')}
-            ${personHead('peak', t('Spitze'), sticky, 'pcell--num')}
+            ${personHead('employment', t('Anst.'), sticky, 'pcell--num align-end')}
+            ${personHead('projects', t('Proj.'), sticky, 'pcell--num align-end')}
+            ${personHead('peak', t('Spitze'), sticky, 'pcell--num align-end')}
             ${cols.map((col, i) => personHead(`q${i}`, col.short,
-              sticky, `pcell--num pcell--period ${col.isNow ? 'is-today' : ''} ${yearRule(col)}`))}
+              sticky, `pcell--num pcell--period align-center ${col.isNow ? 'is-today' : ''} ${yearRule(col)}`))}
           </div>
 
           ${rows.map(r => html`<div class="prow" style="grid-template-columns:${raw(tpl)}">
@@ -127,9 +136,9 @@ function personSection() {
                 data-act="filter-lead" data-val="${r.person.id}"
                 title="${t('Übersicht auf diese Person filtern')}">${r.person.name}</button>`)}
             ${leadCell('role', 'pcell--phase', t(r.person.role))}
-            ${leadCell('employment', 'pcell--target', `${r.person.employment} %`)}
-            ${leadCell('projects', 'pcell--target', r.leads || '—')}
-            ${leadCell('peak', `pcell--target ${r.peak > 100 ? 'is-over' : ''}`,
+            ${leadCell('employment', 'pcell--target align-end', `${r.person.employment} %`)}
+            ${leadCell('projects', 'pcell--target align-end', r.leads || '—')}
+            ${leadCell('peak', `pcell--target align-end ${r.peak > 100 ? 'is-over' : ''}`,
               r.peak === null ? '—' : `${r.peak} %`)}
             ${cols.map((col, i) => {
               const v = r.values[i];
