@@ -68,7 +68,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 /* Numbers are tabular everywhere — a system rule, not an option. */
 .kpi__value, .pcell, .capband__value, .barlist__value, .colchart__val,
 .log__date, .log__value, .sorthead__label, .capband__cell,
-.entry__metric, .minigrid__v { font-variant-numeric: tabular-nums; }
+.minigrid__v { font-variant-numeric: tabular-nums; }
 
 /* ==========================================================================
    2 · Boot / error states
@@ -362,7 +362,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 }
 /* 1.5 is for running text; a heading set on it wastes a row of the laptop. */
 h1, h2, h3,
-.page-title, .entry__title, .card__title, .bi-card__title, .changes__title,
+.page-title, .bi-card__title,
 .modal__title, .kpi__value, .sheet__title { line-height: var(--leading-snug); }
 
 /* Below ~20px the correction is under a fifth of a pixel per character and
@@ -488,8 +488,8 @@ h1, h2, h3,
  * at the same weight no longer wins on source order — seven of these ten had
  * silently stopped responding to a press.
  */
-:is(.btn, .iconbtn, .dd__item, .tabs__tab, .segmented button, .more-link,
-    .mslist__btn, .chartlink, .pgrouphead__toggle, .sheetbar button,
+:is(.btn, .iconbtn, .dd__item, .tabs__tab, .segmented button,
+    .pgrouphead__toggle, .sheetbar button,
     .pop__step, .toolbar__check, .modal__close):active:active {
   background: var(--color-surface-pressed);
 }
@@ -521,7 +521,6 @@ h1, h2, h3,
 .hdr-btn:active:active, .avatar[data-act]:active:active {
   background: var(--alpha-white-25);
 }
-.entry:active { box-shadow: none; }
 
 /* A chosen control still answers the pointer; without this it read as dead. */
 .btn--toggle.is-on:hover, .segmented button.is-on:hover { filter: brightness(1.12); }
@@ -530,7 +529,6 @@ h1, h2, h3,
   background: var(--color-toggle-on); border-color: var(--color-toggle-on);
   color: var(--color-toggle-on-fg);
 }
-.btn--danger-toggle { font-weight: var(--font-semibold); }
 /*
  * The only action in the app with no way back looks like it — and its edge is
  * visible. At --color-danger-border it measured 1.77:1 in the modal footer.
@@ -542,11 +540,6 @@ h1, h2, h3,
   background: var(--color-danger-bg); border-color: var(--color-danger-fg-strong);
 }
 .modal__foot-left { margin-right: auto; }
-.btn--danger-toggle.is-on {
-  background: var(--color-danger-bg); border-color: var(--color-danger-solid);
-  color: var(--color-danger-fg);
-}
-
 .iconbtn {
   display: inline-flex; align-items: center; justify-content: center;
   width: 28px; height: 28px; padding: 0;
@@ -579,7 +572,6 @@ h1, h2, h3,
 }
 .switch.is-on { background: var(--color-toggle-on); }
 .switch.is-on .switch__knob { left: calc(var(--switch-width) - var(--switch-knob) - 2px); }
-.switch--edit.is-on { background: var(--color-toggle-edit-on); }
 
 .badge-count {
   display: inline-flex; align-items: center; justify-content: center;
@@ -661,7 +653,6 @@ h1, h2, h3,
   display: flex; flex-direction: column; gap: 1px;
   overflow-y: auto;
 }
-
 
 .dd__item {
   display: flex; align-items: center; gap: var(--space-5);
@@ -798,112 +789,9 @@ h1, h2, h3,
 .timebar__group { display: flex; align-items: center; gap: var(--space-4); }
 .timebar__nav { display: flex; align-items: center; gap: var(--space-4); }
 
-/* ==========================================================================
-   7 · Landing page
-   ========================================================================== */
-
-.entry-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-10); }
-
-.entry {
-  display: flex; flex-direction: column; gap: var(--space-7); text-align: left;
-  padding: var(--space-10);
-  border: 0; border-radius: var(--radius-lg); background: var(--color-surface);
-  cursor: pointer;
-}
-/*
- * A card on the page ground cannot signal hover by tinting: the hover grey and
- * the ground are a single step apart, so a tinted card dissolves into the page.
- * It lifts instead, and the arrow leans towards where the click leads.
- */
-.entry { transition: box-shadow var(--dur-fast) var(--ease); box-shadow: var(--shadow-raised); }
-.entry:hover, .entry:focus-visible { box-shadow: var(--shadow-raised-hover); }
-.entry__arrow { transition: transform var(--dur-fast) var(--ease); }
-.entry:hover .entry__arrow { transform: translateX(2px); }
-.entry__head { display: block; }
-.entry__title {
-  display: flex; align-items: center; gap: var(--space-5);
-  font-size: var(--text-sub); font-weight: var(--font-semibold); color: var(--color-text-strong);
-}
-.entry__sub {
-  display: block; margin-top: var(--space-4);
-  font-size: var(--text-base); line-height: var(--leading-relaxed); color: var(--color-text-muted);
-}
-.entry__foot {
-  display: flex; align-items: center; justify-content: space-between;
-  gap: var(--space-8); margin-top: auto;
-}
-.entry__metric { font-size: var(--text-tab); }
-.entry__metric strong { font-weight: var(--font-bold); }
-.entry__arrow {
-  display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto;
-  width: 40px; height: 40px;
-  border: var(--border-hairline) solid currentColor; border-radius: var(--radius);
-}
-/* The metric earns the severity colour; the arrow is navigation and stays neutral. */
-.entry--danger .entry__metric { color: var(--color-danger-fg-strong); }
-.entry--warn .entry__metric { color: var(--color-warn-fg-alt); }
-.entry--neutral .entry__metric { color: var(--color-text-strong); }
-
-.card-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--space-10); }
-
-.card {
-  display: flex; flex-direction: column; gap: var(--space-7);
-  padding: var(--space-10);
-  border-radius: var(--radius-lg); background: var(--color-surface);
-  box-shadow: var(--shadow-raised);
-}
-.card--span4 { grid-column: span 4; }
-.card__head { display: block; }
-.card__title { font-size: var(--text-sub); font-weight: var(--font-semibold); color: var(--color-text-strong); }
-.card__sub { margin-top: var(--space-1); font-size: var(--text-sm); color: var(--color-text-muted); }
-.card__title .count-pill { margin-left: var(--space-5); vertical-align: middle; }
-/*
- * A block shows its first few rows; this is the way to the rest of them —
- * whether that means unfolding the block or opening the tab that holds it all.
- */
-.more-link {
-  align-self: start; min-height: var(--control-height);
-  margin-left: calc(var(--space-4) * -1); padding: 0 var(--space-4);
-  border: 0; border-radius: var(--radius); background: none;
-  color: var(--color-text-link); font: inherit; font-size: var(--text-base);
-  cursor: pointer; text-align: left;
-}
-.more-link:hover { background: var(--color-surface-hover); text-decoration: underline; }
-
-.mslist__row { border-top: var(--border-hairline) solid var(--color-border-subtle); }
-.mslist__btn {
-  display: grid; grid-template-columns: 64px 1fr; gap: var(--space-5); width: 100%;
-  padding: var(--space-4) 0; border: 0; background: none; text-align: left; cursor: pointer;
-}
-.mslist__btn:hover { background: var(--color-surface-hover); }
-.mslist__q { font-size: var(--text-sm); font-weight: var(--font-semibold); color: var(--color-text-strong); }
-.mslist__title { display: block; font-size: var(--text-base); font-weight: var(--font-semibold); color: var(--color-text-strong); }
-.mslist__meta { display: block; margin-top: var(--space-1); font-size: var(--text-sm); color: var(--color-text-muted); }
-.mslist__row.is-late .mslist__q, .mslist__row.is-late .mslist__meta { color: var(--color-danger-fg); }
-
-/* The metric takes the stamp column, so both cards scan down one left rail. */
-.mslist--metric .mslist__q { text-align: right; font-variant-numeric: tabular-nums; }
-.mslist__row.is-danger .mslist__q { color: var(--color-danger-fg); }
-.mslist__row.is-warn .mslist__q { color: var(--color-warn-fg-alt); }
-
-.changes { display: flex; flex-direction: column; gap: var(--space-7); }
-.changes__title {
-  font-size: var(--text-sub); font-weight: var(--font-semibold);
-  color: var(--color-text-strong);
-}
-.changes__title span {
-  font-size: var(--text-base); font-weight: var(--font-regular);
-  letter-spacing: normal; color: var(--color-text-muted);
-}
-
-
-.table-card {
-  border-radius: var(--radius-lg); background: var(--color-surface); overflow: hidden;
-  box-shadow: var(--shadow-raised);
-}
 
 /* ==========================================================================
-   8 · Pensum grid
+   7 · Pensum grid
    ========================================================================== */
 
 .grid-card { display: flex; flex-direction: column; }
@@ -1074,12 +962,8 @@ h1, h2, h3,
   color: inherit; font: inherit; cursor: pointer;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-/*
- * The name is a control only in edit mode, and a pointer says so one cell at a
- * time. A dotted rule says it for the whole column at rest — the same job the
- * hatch does for the locked quarter.
- */
-.leadbtn { text-decoration: underline dotted var(--color-border-strong); text-underline-offset: 3px; }
+/* Editable at rest looks like any other value; the pointer and the hover say
+   it is a control, which is as much as the reader asked to be told. */
 .leadbtn:hover { color: var(--color-text-link); text-decoration: underline solid; text-underline-offset: 3px; }
 .lead-open {
   display: inline-flex; align-items: center; gap: var(--space-3);
@@ -1123,65 +1007,14 @@ h1, h2, h3,
 .pcell--load.is-yearstart, .prow--head .is-yearstart {
   border-left: var(--border-hairline) solid var(--color-border);
 }
-/*
- * Only an editable cell reacts. In read mode the cell said three things at
- * once — default cursor, a hover response, and a live click — and the hover
- * itself was 1.06:1, below seeing.
- */
-/* The same resting mark the lead column carries: this number can be changed. */
-.pgrid--edit .pcell--val:not([data-locked]) {
-  text-decoration: underline dotted var(--color-border-strong);
-  text-underline-offset: 3px;
-}
-.pgrid--edit .pcell--val:not([data-locked]):hover { filter: brightness(.93); }
-
-/*
- * In edit mode the current quarter is the one column that cannot be changed, so
- * that is the column that gets marked — 111 cells instead of the 777 that stay
- * open, and it reads as a band rather than as scatter.
- *
- * A hatch rather than a grey fill, for two measured reasons. Desaturating the
- * heat step is nearly invisible where it matters most: 67 of the 111 cells are
- * heat-0 or heat-1, and that blue is already almost neutral. And a grey of our
- * own would collide with --heat-1-bg, which every grey in the palette sits
- * within one channel of — the column would have read as «small pensum».
- *
- * The hatch layers over background-color and under the text, so the 50 cells
- * that carry the overload warning keep it in red.
- */
-.pgrid--edit .pcell--val[data-locked] { background-image: var(--hatch-locked); }
-/*
- * The mark is the triangle, not the colour. Red on 37 % of 888 cells was a wash
- * rather than a signal, and it fought the blue ramp underneath it, which is
- * what this table is actually saying. The same rule the Ampel states: the shape
- * carries the meaning, so it survives a photocopy and a colour deficiency — and
- * the printed sheet, which has always marked this with ▲, now agrees with the
- * screen instead of describing it differently.
- */
-/*
- * The mark annotates the value; it must not move it. Set inline it pushed the
- * number 7px right of centre, so a column of figures lost the alignment the
- * heading is drawn to — marked and unmarked cells no longer lined up.
- *
- * It hangs off the value rather than off the cell, so the gap between the two
- * stays a single space whatever the number is wide — anchored to the cell it
- * sat at the far left and the pair read as two separate things.
- */
-.cellv { position: relative; }
-.warnmark {
-  position: absolute; right: 100%; margin-right: 3px; top: 50%; transform: translateY(-50%);
-  font-size: var(--text-sm); line-height: 1; color: var(--color-text-strong);
-  pointer-events: none;
-}
-.sheet__cell .warnmark { margin-right: 2px; font-size: var(--sheet-text); }
-.markglyph { font-size: var(--text-sm); color: var(--color-text-strong); }
-/* On the darkest heat fill the strong red falls to 4.3:1; the darker one holds. */
+/* Scoped to the pensum grid, not to .pcell--val: the person table on the
+   dashboard draws the same cell and is read-only. */
+.pgrid--editable .pcell--val:hover { filter: brightness(.93); }
 
 .pcell--val.is-editing { box-shadow: var(--ring-cell-edit); position: relative; z-index: var(--z-raised); }
 .pcell--val.is-edited { box-shadow: inset 0 -3px 0 var(--color-accent); }
 
-/* Editing is opt-in: only then does a cell present itself as clickable. */
-.pgrid--edit button.pcell--val:not([data-locked]) { cursor: pointer; }
+button.pcell--val { cursor: pointer; }
 
 .heat-null { background: var(--heat-null-bg); color: var(--heat-null-fg); }
 .heat-neg  { background: var(--heat-neg-bg);  color: var(--heat-neg-fg); }
@@ -1313,7 +1146,7 @@ h1, h2, h3,
 .legend .diamond, .legend .ampel { flex: 0 0 auto; }
 
 /* ==========================================================================
-   9 · Edit popover
+   8 · Edit popover
    ========================================================================== */
 
 .pop {
@@ -1373,7 +1206,7 @@ h1, h2, h3,
 .pop__actions .btn--primary { flex: 1; justify-content: center; }
 
 /* ==========================================================================
-   10 · Modal
+   9 · Modal
    ========================================================================== */
 
 .scrim {
@@ -1516,19 +1349,9 @@ h1, h2, h3,
  * path gets longer. Below the layout width it goes back into the flow.
  */
 .crumbbar .crumbs { position: relative; }
-.editbanner {
-  flex: 0 0 auto;
-  display: inline-flex; align-items: center; gap: var(--space-3);
-  padding: 2px var(--space-5);
-  border: var(--border-hairline) solid var(--color-warn-border);
-  border-radius: var(--radius); background: var(--color-warn-bg-subtle);
-  color: var(--color-warn-fg-alt);
-  font-size: var(--text-sm); font-weight: var(--font-semibold);
-  white-space: nowrap;
-}
 
 /* ==========================================================================
-   11 · Gantt
+   10 · Gantt
    ========================================================================== */
 
 .gantt {
@@ -1692,7 +1515,6 @@ h1, h2, h3,
   line-height: var(--row-height);
 }
 
-
 .gantt__track {
   display: grid; grid-template-columns: repeat(var(--gantt-cols, 8), minmax(0, 1fr));
   grid-template-rows: calc(var(--row-height) - 2px); align-items: center;
@@ -1821,7 +1643,7 @@ h1, h2, h3,
 .capband__value { font-size: var(--text-base); font-weight: var(--font-semibold); }
 
 /* ==========================================================================
-   12 · Dashboard
+   11 · Dashboard
    ========================================================================== */
 
 .bi-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-10); align-items: start; }
@@ -1840,14 +1662,6 @@ h1, h2, h3,
 .bi-card__tools { margin-left: auto; }
 .bi-card__section { padding-top: var(--space-8); border-top: var(--border-hairline) solid var(--color-border-subtle); }
 .bi-card__subtitle { font-size: var(--text-base); font-weight: var(--font-semibold); color: var(--color-text-strong); }
-/* A chart that leads somewhere is a control, and has to look reachable. */
-.chartlink {
-  display: block; width: 100%; border: 0; padding: var(--space-3);
-  margin: calc(-1 * var(--space-3)); border-radius: var(--radius);
-  background: none; font: inherit; color: inherit; text-align: left; cursor: pointer;
-}
-.chartlink:hover { background: var(--color-surface-hover); }
-
 /* The two dashboard sections: a control row of its own, under the KPI strip. */
 .bibar { display: flex; align-items: center; gap: var(--space-6); }
 
@@ -1919,13 +1733,14 @@ h1, h2, h3,
 .barlist__note.is-danger { color: var(--color-danger-fg-strong); font-weight: var(--font-semibold); }
 
 /* ==========================================================================
-   13 · Change log
+   12 · Change log
    ========================================================================== */
 
-/*
- * One row system for both change lists — the five recent entries on the landing
- * page and the full history tab. Only the column set differs.
- */
+.table-card {
+  border-radius: var(--radius-lg); background: var(--color-surface); overflow: hidden;
+  box-shadow: var(--shadow-raised);
+}
+
 .log {
   display: grid; align-items: center; gap: var(--space-6);
   min-height: var(--row-height-list); padding: var(--space-4) var(--space-8);
@@ -1935,10 +1750,6 @@ h1, h2, h3,
 .log--history {
   grid-template-columns:
     minmax(0, 110px) minmax(0, 150px) minmax(0, 1.4fr) minmax(0, 140px) minmax(0, 1.2fr) minmax(0, 150px);
-}
-.log--changes {
-  grid-template-columns:
-    minmax(0, 1.6fr) minmax(0, 120px) minmax(0, 140px) minmax(0, 1.4fr) minmax(0, 110px);
 }
 .log--head {
   min-height: 40px; border-top: 0; background: var(--color-surface-frame);
@@ -1971,7 +1782,7 @@ h1, h2, h3,
 }
 
 /* ==========================================================================
-   14 · API reference — Swagger UI brings its own styles; this only frames it
+   13 · API reference — Swagger UI brings its own styles; this only frames it
    ========================================================================== */
 
 #swagger { margin-inline: calc(-1 * var(--space-10)); }
@@ -2036,7 +1847,7 @@ h1, h2, h3,
 .align-center { padding-inline: 0; }
 
 /* ==========================================================================
-   15 · Print layout
+   14 · Print layout
    ========================================================================== */
 
 /* The sheet format sits where the time scale sits: below the filters, left. */
@@ -2047,7 +1858,6 @@ h1, h2, h3,
 /* Which sheet of paper and which way round are one decision, so they sit
    together rather than being spread across the bar. */
 .sheetbar__paper { display: flex; align-items: center; gap: var(--space-5); }
-
 
 .sheet {
   /* Paper is white by definition, so this one stays literal. */
@@ -2287,7 +2097,7 @@ h1, h2, h3,
 }
 
 /* ==========================================================================
-   16 · Empty state, narrow notice, toast
+   15 · Empty state, narrow notice, toast
    ========================================================================== */
 
 .empty {
@@ -2309,25 +2119,17 @@ h1, h2, h3,
 @keyframes toast-out { to { opacity: 0; transform: translate(-50%, 8px); } }
 
 /* ==========================================================================
-   17 · Responsive
+   16 · Responsive
    The mockup is designed at 1440px. Below that the order of degradation is:
    fewer quarters before narrower columns, then optional columns, then scroll.
    ========================================================================== */
 
-/*
- * A small laptop is the primary context, so four short cards stay four across
- * down to 1100px — two 600px-wide cards holding one line of text is worse.
- */
 @media (max-width: 1380px) {
-  .card--span4 { grid-column: span 6; }
-  .card--span4:last-child { grid-column: span 12; }
   .bi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .entry { gap: var(--space-7); }
 }
 
 @media (max-width: 1100px) {
   .kpi-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .entry-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   /* Below the planning widths the row may break rather than overflow. */
   .toolbar { flex-wrap: wrap; }
 }
@@ -2361,8 +2163,7 @@ h1, h2, h3,
 }
 
 @media (max-width: 760px) {
-  .kpi-strip, .entry-grid { grid-template-columns: minmax(0, 1fr); }
-  .card--span4, .card--span4:last-child { grid-column: span 12; }
+  .kpi-strip { grid-template-columns: minmax(0, 1fr); }
   .page-header__row { flex-direction: column; align-items: flex-start; gap: var(--space-6); }
   .page-header__actions { flex-wrap: wrap; }
   .log { grid-template-columns: minmax(0, 1fr); gap: var(--space-2); }
@@ -2411,7 +2212,7 @@ h1, h2, h3,
   .shell-header, .tabs, .toolbar, .filterbar, .timebar, .toast, .shell-footer,
   .page-header__actions, .sheetbar, .crumbbar { display: none !important; }
   body { background: var(--color-paper); }
-  .grid-card, .table-card, .card, .bi-card, .gantt__card, .capband { break-inside: avoid; }
+  .grid-card, .table-card, .bi-card, .gantt__card, .capband { break-inside: avoid; }
 
   /* The paper mount is screen scaffolding; on paper the sheet is the page. */
   .mount { display: block; padding: 0; border: 0; background: none; overflow: visible; }

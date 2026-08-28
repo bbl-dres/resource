@@ -158,7 +158,7 @@ Two things to know before touching it:
 
 ## i18n
 
-`data/i18n.json` holds 312 terms in four languages, looked up through `t()` with
+`data/i18n.json` holds 313 terms in four languages, looked up through `t()` with
 the German string as the key and as the fallback. A user-visible string that is
 not passed through `t()` will be German in every language.
 

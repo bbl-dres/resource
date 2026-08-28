@@ -70,7 +70,7 @@ export function buildTable() {
       rows: g.projects.map(p => projectCells(p, cols))
     })),
     footer: [
-      { label: t('Bedarf total'), values: cols.map(c => periodValue(tot.demand, c)) },
+      { label: t('Summe Total'), values: cols.map(c => periodValue(tot.demand, c)) },
       { label: t('davon vor Baukredit-Freigabe'), values: cols.map(c => periodValue(tot.preCredit, c)) },
       { label: t('davon extern beauftragt'), values: cols.map(c => periodValue(tot.external, c)) },
       { label: t('Kapazität netto, nach Abwesenheiten'), values: cols.map(c => periodValue(tot.net, c)) },

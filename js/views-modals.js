@@ -128,7 +128,7 @@ function assignModal({ projectId, search = '', targetId }) {
   const candidates = data.people.filter(x => !query || x.name.toLowerCase().includes(query));
 
   return html`
-    ${modalHead(t('Projektleitung'), project.title, current
+    ${modalHead(t('Bearbeitender'), project.title, current
       ? `${t('Aktuell')}: ${current.name} · ${personUtilisation(current.id, 0)} %`
       : t('Aktuell nicht zugewiesen'))}
 
@@ -189,7 +189,7 @@ function milestoneModal({ milestoneId }) {
 
   const facts = [
     { term: 'Projekt', value: p.title, sub: `${p.number} · ${t(data.portfoliosById[p.portfolio].label)}` },
-    { term: 'SIA-Teilphase', value: t(phaseOf(m.subPhase).label) },
+    { term: 'Teilphase (ePPM)', value: t(phaseOf(m.subPhase).label) },
     { term: 'Plantermin', value: `${planQ.label} · ${deDate(m.planDate)}` },
     {
       term: 'Prognose',
@@ -197,7 +197,7 @@ function milestoneModal({ milestoneId }) {
       sub: m.impact ? t(m.impact) : null,
       tone: moved || !foreQ ? 'danger' : null
     },
-    { term: 'Projektleitung', value: lead ? lead.name : t('nicht zugewiesen') }
+    { term: 'Bearbeitender', value: lead ? lead.name : t('nicht zugewiesen') }
   ];
 
   return html`
@@ -247,11 +247,11 @@ function phaseModal({ projectId, from }) {
       value: within.length ? `${t('Spitze')} ${num(peak)}${unitSuffix()}` : '—',
       sub: within.length ? within.map(v => num(v)).join(' · ') : null
     },
-    { term: 'Projektleitung', value: lead ? lead.name : t('nicht zugewiesen') }
+    { term: 'Bearbeitender', value: lead ? lead.name : t('nicht zugewiesen') }
   ];
 
   // The number is already in the title; the kicker names the kind of thing.
-  const kicker = bar.delay ? t('Verzug') : t('SIA-Teilphase');
+  const kicker = bar.delay ? t('Verzug') : t('Teilphase (ePPM)');
   const title = bar.delay ? bar.label : (sub ? t(sub.label) : bar.label);
 
   return html`
@@ -286,12 +286,12 @@ function projectModal({ projectId }) {
   // The wireframe is explicit: five facts, always the same, in this order.
   const facts = [
     {
-      term: 'SIA-Phase',
+      term: 'Phase (ePPM)',
       value: t(phase.label),
       sub: `${t('Hauptphase')} ${phase.main}`
     },
     {
-      term: 'Projektleitung',
+      term: 'Bearbeitender',
       value: lead ? lead.name : t('— nicht zugewiesen'),
       sub: lead ? `${t('Auslastung')} ${q0.short}: ${util > 100 ? '▲ ' : ''}${util} %` : t('Bedarf offen'),
       tone: lead ? (util > 100 ? 'danger' : null) : 'warn'
@@ -366,7 +366,7 @@ function rebookModal({ projectId, q, amount, targetId, quarters = 2, search = ''
 
   return html`
     ${modalHead(t('Pensum umbuchen'), p.title,
-      `${t('Projektleitung')} · ${t('ab')} ${quarter.label}, ${quarters} ${t('Quartale')}`)}
+      `${t('Bearbeitender')} · ${t('ab')} ${quarter.label}, ${quarters} ${t('Quartale')}`)}
 
     <p class="modal__lead">${t('Ein Vorgang statt zwei Transaktionen: von, an, Betrag und Zeitraum ergeben einen Verlaufseintrag mit beiden Seiten.')}</p>
 
@@ -414,7 +414,7 @@ function rebookModal({ projectId, q, amount, targetId, quarters = 2, search = ''
       <span class="pop__reasonlabel">${t('Begründung')}
         <span>${t('— Pflicht bei jeder Umbuchung')}</span></span>
       <textarea rows="2" data-act="rebook-reason" data-fk="rebook-reason"
-        placeholder="${t('Entlastung Projektleitung gemäss Beschluss Abteilungssitzung 24.08.2026.')}">${reason}</textarea>
+        placeholder="${t('Entlastung des Bearbeitenden gemäss Beschluss Abteilungssitzung 24.08.2026.')}">${reason}</textarea>
     </label>
 
     <footer class="modal__foot">

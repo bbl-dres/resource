@@ -26,6 +26,36 @@
     }
   ],
   "terms": {
+    "Bearbeitender": {
+      "en": "Assignee",
+      "fr": "Personne en charge",
+      "it": "Incaricato"
+    },
+    "Daten als CSV": {
+      "en": "Data as CSV",
+      "fr": "Données en CSV",
+      "it": "Dati in CSV"
+    },
+    "Daten als Excel": {
+      "en": "Data as Excel",
+      "fr": "Données en Excel",
+      "it": "Dati in Excel"
+    },
+    "Organisation": {
+      "en": "Organisation",
+      "fr": "Organisation",
+      "it": "Organizzazione"
+    },
+    "Übersicht als PDF": {
+      "en": "Overview as PDF",
+      "fr": "Vue d'ensemble en PDF",
+      "it": "Panoramica in PDF"
+    },
+    "Termine als PDF": {
+      "en": "Schedule as PDF",
+      "fr": "Échéances en PDF",
+      "it": "Scadenze in PDF"
+    },
     "— nicht zugewiesen": {
       "en": "— unassigned",
       "fr": "— non attribué",
@@ -45,11 +75,6 @@
       "en": "— required when over capacity",
       "fr": "— obligatoire en cas de surcharge",
       "it": "— obbligatorio in caso di sovraccarico"
-    },
-    "▲ Projektleitung über 100 % im Quartal": {
-      "en": "▲ Project lead over 100 % in the quarter",
-      "fr": "▲ Direction de projet à plus de 100 % dans le trimestre",
-      "it": "▲ Direzione del progetto oltre il 100 % nel trimestre"
     },
     "1 Strategische Planung": {
       "en": "1 Strategic planning",
@@ -276,10 +301,10 @@
       "fr": "taux d'activité",
       "it": "grado di occupazione"
     },
-    "Anzahl Projekte nach SIA-Phase": {
-      "en": "Project count by SIA phase",
-      "fr": "Nombre de projets par phase SIA",
-      "it": "Numero di progetti per fase SIA"
+    "Anzahl Projekte nach Phase (ePPM)": {
+      "en": "Project count by phase (ePPM)",
+      "fr": "Nombre de projets par phase (ePPM)",
+      "it": "Numero di progetti per fase (ePPM)"
     },
     "anzeigen": {
       "en": "show",
@@ -381,10 +406,10 @@
       "fr": "Besoin ouvert",
       "it": "Fabbisogno aperto"
     },
-    "Bedarf total": {
-      "en": "Total demand",
-      "fr": "Besoin total",
-      "it": "Fabbisogno totale"
+    "Summe Total": {
+      "en": "Grand total",
+      "fr": "Total général",
+      "it": "Totale generale"
     },
     "Bedürfnis freigegeben": {
       "en": "Need approved",
@@ -435,11 +460,6 @@
       "en": "the window is too narrow",
       "fr": "la fenêtre est trop étroite",
       "it": "la finestra è troppo stretta"
-    },
-    "Das laufende Quartal ist für Änderungen gesperrt.": {
-      "en": "The current quarter is locked for changes.",
-      "fr": "Le trimestre en cours est verrouillé.",
-      "it": "Il trimestre corrente è bloccato per le modifiche."
     },
     "Dashboard": {
       "en": "Dashboard",
@@ -541,10 +561,10 @@
       "fr": "entrées",
       "it": "voci"
     },
-    "Entlastung Projektleitung gemäss Beschluss Abteilungssitzung 24.08.2026.": {
-      "en": "Relief for the project lead per division meeting decision of 24.08.2026.",
-      "fr": "Décharge de la direction de projet selon décision de la séance de division du 24.08.2026.",
-      "it": "Sgravio della direzione del progetto secondo decisione della riunione di divisione del 24.08.2026."
+    "Entlastung des Bearbeitenden gemäss Beschluss Abteilungssitzung 24.08.2026.": {
+      "en": "Relief for the assignee per division meeting decision of 24.08.2026.",
+      "fr": "Décharge de la personne en charge selon décision de la séance de division du 24.08.2026.",
+      "it": "Sgravio dell'incaricato secondo decisione della riunione di divisione del 24.08.2026."
     },
     "Erstellt am": {
       "en": "Created on",
@@ -646,15 +666,15 @@
       "fr": "Grouper par",
       "it": "Raggruppa per"
     },
-    "Handlungsbedarf": {
-      "en": "Needs action",
-      "fr": "Action requise",
-      "it": "Interventi necessari"
-    },
     "Hauptphase": {
       "en": "Main phase",
       "fr": "Phase principale",
       "it": "Fase principale"
+    },
+    "Hauptphase (ePPM)": {
+      "en": "Main phase (ePPM)",
+      "fr": "Phase principale (ePPM)",
+      "it": "Fase principale (ePPM)"
     },
     "heruntergeladen": {
       "en": "downloaded",
@@ -761,15 +781,10 @@
       "fr": "Aucune personne trouvée.",
       "it": "Nessuna persona trovata."
     },
-    "keine Projektleitung": {
-      "en": "no project lead",
-      "fr": "pas de direction de projet",
-      "it": "nessuna direzione del progetto"
-    },
-    "Keine Projektleitung zugewiesen — das Pensum kann noch auf keine Person gebucht werden.": {
-      "en": "No project lead assigned — the workload cannot yet be booked to anyone.",
-      "fr": "Aucune direction de projet attribuée — la charge ne peut encore être imputée à personne.",
-      "it": "Nessuna direzione del progetto assegnata — il carico non può ancora essere imputato."
+    "Kein Bearbeitender zugewiesen — das Pensum kann noch auf keine Person gebucht werden.": {
+      "en": "No assignee — the workload cannot yet be booked to anyone.",
+      "fr": "Aucune personne en charge — la charge ne peut encore être imputée à personne.",
+      "it": "Nessun incaricato — il carico non può ancora essere imputato."
     },
     "Klassifizierung: intern": {
       "en": "Classification: internal",
@@ -811,10 +826,10 @@
       "fr": "Crédit par année",
       "it": "Credito per anno"
     },
-    "Kredit nach SIA-Phase": {
-      "en": "Credit by SIA phase",
-      "fr": "Crédit par phase SIA",
-      "it": "Credito per fase SIA"
+    "Kredit nach Phase (ePPM)": {
+      "en": "Credit by phase (ePPM)",
+      "fr": "Crédit par phase (ePPM)",
+      "it": "Credito per fase (ePPM)"
     },
     "Kultur und Denkmäler": {
       "en": "Culture and monuments",
@@ -911,11 +926,6 @@
       "fr": "Mois",
       "it": "Mese"
     },
-    "Nächste Meilensteine": {
-      "en": "Next milestones",
-      "fr": "Prochains jalons",
-      "it": "Prossimi traguardi"
-    },
     "Nächste Seite": {
       "en": "Next page",
       "fr": "Page suivante",
@@ -941,40 +951,20 @@
       "fr": "Masquer les zéros",
       "it": "Nascondi gli zeri"
     },
-    "Nur Überlast": {
-      "en": "Over capacity only",
-      "fr": "Surcharge uniquement",
-      "it": "Solo sovraccarico"
-    },
     "offen": {
       "en": "open",
       "fr": "ouvert",
       "it": "aperto"
-    },
-    "öffnet die Übersicht": {
-      "en": "opens the overview",
-      "fr": "ouvre la vue d'ensemble",
-      "it": "apre la panoramica"
-    },
-    "öffnet die Übersicht, auf die Person gefiltert": {
-      "en": "opens the overview filtered to that person",
-      "fr": "ouvre la vue d'ensemble filtrée sur la personne",
-      "it": "apre la panoramica filtrata sulla persona"
-    },
-    "öffnet Meilensteine": {
-      "en": "opens milestones",
-      "fr": "ouvre les jalons",
-      "it": "apre i traguardi"
     },
     "ohne Filter": {
       "en": "no filters",
       "fr": "sans filtre",
       "it": "senza filtri"
     },
-    "ohne Projektleitung": {
-      "en": "no project lead",
-      "fr": "sans direction de projet",
-      "it": "senza direzione del progetto"
+    "ohne Bearbeitenden": {
+      "en": "no assignee",
+      "fr": "sans personne en charge",
+      "it": "senza incaricato"
     },
     "ok": {
       "en": "ok",
@@ -1131,15 +1121,10 @@
       "fr": "Direction de projet",
       "it": "Direzione del progetto"
     },
-    "Projektleitung über 100 % im Quartal": {
-      "en": "Project lead over 100 % in the quarter",
-      "fr": "Direction de projet à plus de 100 % dans le trimestre",
-      "it": "Direzione del progetto oltre il 100 % nel trimestre"
-    },
-    "Projektleitung zuweisen": {
-      "en": "Assign project lead",
-      "fr": "Attribuer la direction de projet",
-      "it": "Assegna la direzione del progetto"
+    "Bearbeitenden zuweisen": {
+      "en": "Assign a person",
+      "fr": "Attribuer la personne en charge",
+      "it": "Assegna incaricato"
     },
     "Prototyp, fiktive Inhalte — nur zur Demonstration": {
       "en": "Prototype, fictional content — for demonstration only",
@@ -1186,35 +1171,25 @@
       "fr": "Administration fédérale suisse",
       "it": "Amministrazione federale svizzera"
     },
-    "seit letztem Besuch": {
-      "en": "since your last visit",
-      "fr": "depuis votre dernière visite",
-      "it": "dall'ultima visita"
-    },
     "Seite": {
       "en": "Page",
       "fr": "Page",
       "it": "Pagina"
     },
-    "SIA 112": {
-      "en": "SIA 112",
-      "fr": "SIA 112",
-      "it": "SIA 112"
+    "Phase (ePPM) · Mehrfachauswahl": {
+      "en": "Phase (ePPM) · multiple selection",
+      "fr": "Phase (ePPM) · sélection multiple",
+      "it": "Fase (ePPM) · selezione multipla"
     },
-    "SIA 112 · Mehrfachauswahl": {
-      "en": "SIA 112 · multiple selection",
-      "fr": "SIA 112 · sélection multiple",
-      "it": "SIA 112 · selezione multipla"
+    "Phase (ePPM)": {
+      "en": "Phase (ePPM)",
+      "fr": "Phase (ePPM)",
+      "it": "Fase (ePPM)"
     },
-    "SIA-Phase": {
-      "en": "SIA phase",
-      "fr": "Phase SIA",
-      "it": "Fase SIA"
-    },
-    "SIA-Teilphase": {
-      "en": "SIA sub-phase",
-      "fr": "Sous-phase SIA",
-      "it": "Sottofase SIA"
+    "Teilphase (ePPM)": {
+      "en": "Sub-phase (ePPM)",
+      "fr": "Sous-phase (ePPM)",
+      "it": "Sottofase (ePPM)"
     },
     "Soll": {
       "en": "Target",
@@ -1421,11 +1396,6 @@
       "fr": "Continuer",
       "it": "Avanti"
     },
-    "Weniger anzeigen": {
-      "en": "Show less",
-      "fr": "Afficher moins",
-      "it": "Mostra meno"
-    },
     "Wert": {
       "en": "Value",
       "fr": "Valeur",
@@ -1456,11 +1426,6 @@
       "fr": "Vers la page d'accueil, sans filtre",
       "it": "Alla pagina iniziale, senza filtri"
     },
-    "Zur Planung": {
-      "en": "To planning",
-      "fr": "Vers la planification",
-      "it": "Alla pianificazione"
-    },
     "Zurück": {
       "en": "Back",
       "fr": "Retour",
@@ -1481,15 +1446,15 @@
       "fr": "Retirer l'attribution",
       "it": "Revoca assegnazione"
     },
-    "Höchste Auslastung der Projektleitung im sichtbaren Zeitraum": {
-      "en": "Highest workload of the project lead in the visible period",
-      "fr": "Charge maximale de la direction de projet sur la période affichée",
-      "it": "Carico massimo della direzione di progetto nel periodo visualizzato"
+    "Höchste Auslastung des Bearbeitenden im sichtbaren Zeitraum": {
+      "en": "Highest workload of the assignee in the visible period",
+      "fr": "Charge maximale de la personne en charge sur la période affichée",
+      "it": "Carico massimo dell'incaricato nel periodo visualizzato"
     },
-    "Höchste Auslastung der Projektleitung gegen die eigene Anstellung im dargestellten Zeitraum. Die Form trägt die Aussage, damit sie auch auf einer Fotokopie lesbar bleibt.": {
-      "en": "Highest workload of the project lead against their own contract over the period shown. The shape carries the message so it stays legible on a photocopy.",
-      "fr": "Charge maximale de la direction de projet par rapport à son propre taux d'engagement sur la période affichée. La forme porte le message afin qu'il reste lisible sur une photocopie.",
-      "it": "Carico massimo della direzione di progetto rispetto al proprio grado di occupazione nel periodo rappresentato. La forma veicola il messaggio, così resta leggibile anche su una fotocopia."
+    "Höchste Auslastung des Bearbeitenden gegen die eigene Anstellung im dargestellten Zeitraum. Die Form trägt die Aussage, damit sie auch auf einer Fotokopie lesbar bleibt.": {
+      "en": "Highest workload of the assignee against their own contract over the period shown. The shape carries the message so it stays legible on a photocopy.",
+      "fr": "Charge maximale de la personne en charge par rapport à son propre taux d'engagement sur la période affichée. La forme porte le message afin qu'il reste lisible sur une photocopie.",
+      "it": "Carico massimo dell'incaricato rispetto al proprio grado di occupazione nel periodo rappresentato. La forma veicola il messaggio, così resta leggibile anche su una fotocopia."
     },
     "Überlast in": {
       "en": "overload in",
@@ -1516,11 +1481,6 @@
       "fr": "Rien en attente pour vous.",
       "it": "Nulla in sospeso per voi."
     },
-    "Pensum und Projektleitung änderbar · laufendes Quartal gesperrt · Änderungen werden protokolliert": {
-      "en": "Workload and project lead editable · current quarter locked · changes are logged",
-      "fr": "Charge et direction de projet modifiables · trimestre en cours verrouillé · modifications journalisées",
-      "it": "Carico e direzione di progetto modificabili · trimestre corrente bloccato · modifiche registrate"
-    },
     "Darstellung, Funktionalität und Inhalte dienen ausschliesslich der Demonstration; die verwendeten Daten sind fiktiv oder öffentlich zugänglich.": {
       "en": "Presentation, functionality and content serve demonstration purposes only; the data used is fictitious or publicly available.",
       "fr": "La présentation, les fonctionnalités et les contenus servent uniquement à la démonstration; les données utilisées sont fictives ou publiquement accessibles.",
@@ -1530,11 +1490,6 @@
       "en": "Creating PDF …",
       "fr": "Création du PDF …",
       "it": "Creazione del PDF …"
-    },
-    "öffnet das Dashboard": {
-      "en": "opens the dashboard",
-      "fr": "ouvre le tableau de bord",
-      "it": "apre la dashboard"
     },
     "Konto": {
       "en": "Account",

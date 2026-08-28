@@ -141,7 +141,7 @@
     "net": "Kapazität netto, nach Abwesenheiten",
     "external": "davon extern beauftragt",
     "preCredit": "davon vor Baukredit-Freigabe",
-    "demand": "Bedarf total",
+    "demand": "Summe Total",
     "utilisation": "Auslastung"
   }
 }

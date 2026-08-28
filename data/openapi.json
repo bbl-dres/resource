@@ -79,7 +79,7 @@
           {
             "name": "phase",
             "in": "query",
-            "description": "SIA-Hauptphase, mehrfach erlaubt.",
+            "description": "Hauptphase (ePPM), mehrfach erlaubt.",
             "schema": {
               "type": "array",
               "items": {
@@ -102,7 +102,7 @@
           {
             "name": "lead",
             "in": "query",
-            "description": "Kürzel der Projektleitung, mehrfach erlaubt.",
+            "description": "Kürzel des Bearbeitenden, mehrfach erlaubt.",
             "schema": {
               "type": "array",
               "items": {
@@ -3169,7 +3169,7 @@
           },
           "phase": {
             "type": "string",
-            "description": "SIA-112-Teilphase.",
+            "description": "Teilphase (ePPM), SIA 112.",
             "examples": [
               "32"
             ]
@@ -3179,7 +3179,7 @@
               "string",
               "null"
             ],
-            "description": "Kürzel der Projektleitung, null wenn offen."
+            "description": "Kürzel des Bearbeitenden, null wenn offen."
           },
           "location": {
             "type": "string",
@@ -3563,7 +3563,7 @@
           "phase": {
             "type": "string",
             "pattern": "^[1-6][1-9]$",
-            "description": "SIA-112-Teilphase.",
+            "description": "Teilphase (ePPM), SIA 112.",
             "examples": [
               "32"
             ]
@@ -3573,7 +3573,7 @@
               "string",
               "null"
             ],
-            "description": "Kürzel der Projektleitung, null wenn offen."
+            "description": "Kürzel des Bearbeitenden, null wenn offen."
           },
           "location": {
             "type": "string",
@@ -3635,7 +3635,7 @@
           "phase": {
             "type": "string",
             "pattern": "^[1-6][1-9]$",
-            "description": "SIA-112-Teilphase.",
+            "description": "Teilphase (ePPM), SIA 112.",
             "examples": [
               "32"
             ]
@@ -3645,7 +3645,7 @@
               "string",
               "null"
             ],
-            "description": "Kürzel der Projektleitung, null wenn offen."
+            "description": "Kürzel des Bearbeitenden, null wenn offen."
           },
           "location": {
             "type": "string",
@@ -4054,7 +4054,7 @@
         "properties": {
           "person": {
             "type": "string",
-            "description": "Weglassen, um die Projektleitung des Projekts zu buchen."
+            "description": "Weglassen, um den Bearbeitenden des Projekts zu buchen."
           },
           "role": {
             "type": "string",

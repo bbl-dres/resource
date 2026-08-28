@@ -248,6 +248,13 @@ export function menuPanel({ align = 'left', width = 244, body, label }) {
       ${label ? raw(`aria-label="${esc(label)}"`) : ''} style="--dd-w:${width}px">${body}</div>`;
 }
 
+/*
+ * The one line that names a whole dropdown, at the top of its panel — never a
+ * section head inside it. Labelled runs made a menu read as a form with
+ * headings rather than as a list of choices, so the reader had to take in the
+ * structure before the options. Where a run needed naming, the items were
+ * renamed instead: «Daten als CSV» rather than «Daten» above «CSV».
+ */
 export function menuGroupLabel(text) {
   return html`<div class="dd__grouplabel">${text}</div>`;
 }
@@ -301,7 +308,7 @@ export function appHeader() {
   const open = state.menu === 'lang';
   return html`<header class="shell-header">
     <div class="wrap shell-header__inner">
-      <a class="brand" href="#?tab=start" data-act="tab" data-val="start">
+      <a class="brand" href="#?tab=overview" data-act="home">
         <img src="assets/swiss-logo-flag.svg" alt="" width="22" height="24">
         <span class="brand__text">${m.org.name}<span class="brand__sub">${t(m.org.app)}</span></span>
       </a>
@@ -473,11 +480,6 @@ export function pageHeader({ crumbs, title, actions = [], chrome = true }) {
             : html`<a class="crumbs__link" href="." data-act="home"
                 title="${t('Zur Einstiegsseite, ohne Filter')}">${t(c)}</a>`}`;
         })}</nav>
-        ${state.edit && html`<span class="editbanner">${icons.pencil(13)}
-          ${t('Pensum und Projektleitung änderbar · laufendes Quartal gesperrt · Änderungen werden protokolliert')}</span>`}
-        <!-- Also the counterweight that keeps the edit banner on the centre of
-             the bar: the slot was there either way, and standing empty it was
-             an element whose whole job was to be invisible. -->
         <span class="crumbs__stand">${t('Datenstand ePPM')}: ${data.meta.asOf}</span>
       </div>
     </div>
@@ -494,16 +496,9 @@ export function pageHeader({ crumbs, title, actions = [], chrome = true }) {
  * The standing page-header actions. Five views built this by hand, each free to
  * forget one of them.
  */
-export function pageActions({ edit = false, extra = '' } = {}) {
-  return html`${edit ? editToggle() : ''}${exportMenu()}
+export function pageActions({ extra = '' } = {}) {
+  return html`${exportMenu()}
     <button type="button" class="btn" data-act="share">${icons.share(15)}${t('Teilen')}</button>${extra}`;
-}
-
-export function editToggle() {
-  return html`<button type="button" class="btn btn--toggle ${state.edit ? 'is-on' : ''}"
-      data-act="edit-toggle" aria-pressed="${state.edit}">
-    ${pillSwitch(state.edit, 'switch--edit')}${t('Bearbeiten')}
-  </button>`;
 }
 
 /** One row of the export menu. The group label above it says the rest. */
@@ -516,13 +511,11 @@ export function exportMenu() {
     <button type="button" class="btn ${open ? 'is-open' : ''}" data-act="menu" data-val="export"
             aria-expanded="${open}" aria-haspopup="menu">${t('Exportieren')}${icons.chevronDown()}</button>
     ${open && html`<div class="dd__panel dd__panel--right" role="menu" style="width:190px">
-      ${menuGroupLabel(t('Daten'))}
-      ${exportItem('csv', 'CSV')}
-      ${exportItem('xlsx', 'Excel')}
+      ${exportItem('csv', t('Daten als CSV'))}
+      ${exportItem('xlsx', t('Daten als Excel'))}
       ${divider()}
-      ${menuGroupLabel(t('Drucklayout'))}
-      ${exportItem('pdf-demand', t('Übersicht'))}
-      ${exportItem('pdf-schedule', t('Termine'))}
+      ${exportItem('pdf-demand', t('Übersicht als PDF'))}
+      ${exportItem('pdf-schedule', t('Termine als PDF'))}
     </div>`}
   </div>`;
 }
@@ -558,8 +551,9 @@ export function kpiStrip() {
 const SORTS = ['project', 'id', 'phase', 'lead', 'credit', 'q0'];
 const GROUPS = [
   { id: 'none', label: 'Keine' },
-  { id: 'lead', label: 'Projektleitung' },
-  { id: 'phase', label: 'SIA-Hauptphase' },
+  { id: 'lead', label: 'Bearbeitender' },
+  { id: 'organisation', label: 'Organisation' },
+  { id: 'phase', label: 'Hauptphase (ePPM)' },
   { id: 'portfolio', label: 'Teilportfolio' }
 ];
 /*
@@ -600,22 +594,6 @@ export function toolbar({ attributes = true, exclude = [] } = {}) {
     <span class="toolbar__sep" aria-hidden="true"></span>
 
     ${dropdown({
-      id: 'phase', label: t('Phase'), count: state.phases.length, width: 284,
-      body: html`${menuGroupLabel(t('SIA 112 · Mehrfachauswahl'))}
-        <div class="dd__bulk">
-          <button type="button" data-act="bulk" data-kind="phases" data-val="all">${t('Alle')}</button>
-          <span aria-hidden="true">·</span>
-          <button type="button" data-act="bulk" data-kind="phases" data-val="none">${t('Keine')}</button>
-        </div>
-        ${data.phases.main.map(m => menuTick(t(m.label), state.phases.includes(m.id), 'toggle-phase', m.id))}`
-    })}
-
-    ${dropdown({
-      id: 'lead', label: t('Projektleitung'), count: state.leads.length, width: 312,
-      body: leadMenuBody()
-    })}
-
-    ${dropdown({
       id: 'portfolio', label: t('Teilportfolio'), count: state.portfolios.length, width: 276,
       body: html`${menuGroupLabel(t('Mehrfachauswahl'))}
         <div class="dd__bulk">
@@ -626,10 +604,34 @@ export function toolbar({ attributes = true, exclude = [] } = {}) {
         ${data.meta.portfolios.map(pf => menuTick(t(pf.label), state.portfolios.includes(pf.id), 'toggle-portfolio', pf.id))}`
     })}
 
+    ${dropdown({
+      id: 'phase', label: t('Phase'), count: state.phases.length, width: 284,
+      body: html`${menuGroupLabel(t('Phase (ePPM) · Mehrfachauswahl'))}
+        <div class="dd__bulk">
+          <button type="button" data-act="bulk" data-kind="phases" data-val="all">${t('Alle')}</button>
+          <span aria-hidden="true">·</span>
+          <button type="button" data-act="bulk" data-kind="phases" data-val="none">${t('Keine')}</button>
+        </div>
+        ${data.phases.main.map(m => menuTick(t(m.label), state.phases.includes(m.id), 'toggle-phase', m.id))}`
+    })}
+
+    ${dropdown({
+      id: 'organisation', label: t('Organisation'), count: state.organisations.length, width: 244,
+      body: html`${menuGroupLabel(t('Mehrfachauswahl'))}
+        <div class="dd__bulk">
+          <button type="button" data-act="bulk" data-kind="organisations" data-val="all">${t('Alle')}</button>
+          <span aria-hidden="true">·</span>
+          <button type="button" data-act="bulk" data-kind="organisations" data-val="none">${t('Keine')}</button>
+        </div>
+        ${data.meta.organisations.map(o => menuTick(t(o.label), state.organisations.includes(o.id), 'toggle-organisation', o.id))}`
+    })}
+
     <span class="toolbar__sep" aria-hidden="true"></span>
 
-    <button type="button" class="btn btn--danger-toggle ${state.overloadOnly ? 'is-on' : ''}"
-      data-act="overload-toggle" aria-pressed="${state.overloadOnly}">${t('Nur Überlast')}</button>
+    ${dropdown({
+      id: 'lead', label: t('Bearbeitender'), count: state.leads.length, width: 312,
+      body: leadMenuBody()
+    })}
 
     ${mine ? html`<label class="toolbar__check">
       <input type="checkbox" data-act="my-projects" ${attr(minesOnly, 'checked')}>
@@ -640,12 +642,10 @@ export function toolbar({ attributes = true, exclude = [] } = {}) {
 
     ${attributes && dropdown({
       id: 'attr', label: t('Attribute'), width: 296, align: 'right',
-      body: html`${menuGroupLabel(t('Einheit'))}
-        <div class="dd__segmented">
+      body: html`<div class="dd__segmented">
           ${segmented([{ value: 'pct', label: 'Pensum %' }, { value: 'fte', label: 'FTE' }], state.unit, 'unit')}
         </div>
         ${divider()}
-        ${menuGroupLabel(t('Spalten'))}
         ${toggleableColumns().filter(c => !exclude.includes(c.id))
           .map(c => menuCheckbox(t(c.label), !!columnSet()[c.id], 'toggle-col', c.id))}
         ${divider()}
@@ -840,10 +840,10 @@ export const AMPEL_STATES = [
   { key: 'ok', label: 'im Rahmen' },
   { key: 'tight', label: 'knapp' },
   { key: 'over', label: 'Überlast' },
-  { key: 'none', label: 'ohne Projektleitung' }
+  { key: 'none', label: 'ohne Bearbeitenden' }
 ];
 
-/* «ohne Projektleitung» is already named by the row marking. */
+/* «ohne Bearbeitenden» is already named by the row marking. */
 export const AMPEL_LEGEND = AMPEL_STATES.filter(a => a.key !== 'none');
 
 export function ampelLegend() {

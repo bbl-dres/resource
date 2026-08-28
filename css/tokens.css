@@ -195,7 +195,6 @@
      as a decorative pill rather than a control. */
   --color-toggle-off:     var(--line-strong);
   --color-toggle-knob:    var(--white);
-  --color-toggle-edit-on: var(--green-400);   /* the "Bearbeiten" switch only */
 
   /* ==========================================================================
      10 · SEMANTIC — status pairs
@@ -309,9 +308,6 @@
 
   /* The «not available» texture. An overlay, so it works over every heat step
      and leaves the value's own colour alone. */
-  --hatch-locked: repeating-linear-gradient(45deg,
-    transparent 0 4px, rgba(17, 24, 39, .055) 4px 8px);
-
   /* ==========================================================================
      14 · Spacing
      ========================================================================== */

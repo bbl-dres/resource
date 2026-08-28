@@ -9,7 +9,7 @@
 import {
   data, state, t, num, unitSuffix, cellValue, projectDemand, ampel, printPeriods, columnSet,
   periodValue,
-  personUtilisation, totals, loadStatus, heatStep, filteredProjects, activeFilters,
+  totals, loadStatus, heatStep, filteredProjects, activeFilters,
   groupProjects
 } from './store.js';
 
@@ -374,16 +374,16 @@ function printSheets(sheet, report) {
 const METHOD = [
   ['Pensum ist eine Rate, kein Vorrat',
    'Ein Jahr zeigt den Durchschnitt seiner Quartale, ein Monat den Wert seines Quartals — nie eine Summe. 80 % über vier Quartale bleiben 80 %.'],
-  ['Bedarf total',
+  ['Summe Total',
    'Summe der Projektpensen je Quartal über den gesetzten Umfang. Steht ein Filter, zählt nur die Auswahl.'],
   ['Kapazität netto',
    'Kapazität brutto abzüglich Abwesenheiten. Brutto ist die Summe der Anstellungsgrade der Abteilung.'],
   ['Auslastung',
    'Bedarf des Gesamtportfolios abzüglich extern beauftragter Leistung, geteilt durch Kapazität netto. Die Zahl beschreibt immer die ganze Abteilung — auch wenn ein Filter gesetzt ist, denn Kapazität lässt sich nicht filtern.'],
   ['Ampel',
-   'Höchste Auslastung der Projektleitung gegen die eigene Anstellung im dargestellten Zeitraum. Die Form trägt die Aussage, damit sie auch auf einer Fotokopie lesbar bleibt.'],
+   'Höchste Auslastung des Bearbeitenden gegen die eigene Anstellung im dargestellten Zeitraum. Die Form trägt die Aussage, damit sie auch auf einer Fotokopie lesbar bleibt.'],
   ['Blaustufen',
-   'Sie kodieren die Grösse eines Pensums, nicht seinen Status. Rot und das Dreieck ▲ kennzeichnen Überlast.']
+   'Sie kodieren die Grösse eines Pensums, nicht seinen Status. Rot kennzeichnet Überlast.']
 ];
 
 const GLOSSARY = [
@@ -391,7 +391,7 @@ const GLOSSARY = [
   ['Bedarf', 'Geplantes Pensum eines Projekts in einem Quartal.'],
   ['Extern beauftragt', 'Leistung, die nicht die eigene Abteilung erbringt; sie mindert den Bedarf an eigener Kapazität.'],
   ['Baukredit-Freigabe', 'Gate MS4. Davor ist ein Projekt planerisch, aber nicht finanziell gebunden — «vor Baukredit-Freigabe» weist diesen Anteil aus.'],
-  ['SIA 112', 'Phasenmodell des Bauwesens: 1 Strategische Planung, 2 Vorstudien, 3 Projektierung, 4 Ausschreibung, 5 Realisierung, 6 Bewirtschaftung.'],
+  ['Phase (ePPM)', 'Phasenmodell des Bauwesens nach SIA 112, wie ePPM es führt: 1 Strategische Planung, 2 Vorstudien, 3 Projektierung, 4 Ausschreibung, 5 Realisierung, 6 Bewirtschaftung.'],
   ['Meilenstein / Gate', 'Entscheidpunkt zwischen zwei Phasen, mit Plan- und Prognosetermin.'],
   ['Teilportfolio', 'Gebäudekategorie des BBL, etwa Verwaltung, Zoll oder Bauten im Ausland.'],
   ['Soll-Pensum', 'Vereinbartes Pensum im laufenden Quartal, zum Vergleich mit dem geplanten Bedarf.'],
@@ -547,8 +547,7 @@ const demandLegend = (cfg) => legendBlock([
   },
   {
     label: 'Markierung',
-    items: html`<span class="legend__item">${t(cfg.legend.marker)}</span>
-      ${legendItem(html`<span class="legend__swatch is-nolead"></span>`, cfg.legend.noLead)}`
+    items: legendItem(html`<span class="legend__swatch is-nolead"></span>`, cfg.legend.noLead)
   },
   { label: 'Auslastung', items: html`${t(cfg.legend.thresholds).replace(/^Auslastung:\s*/, '')}` }
 ], 'legend--sheet');
@@ -635,7 +634,6 @@ function printSheet(sheet, report, { rows, all, block, page, total, last, tot, c
 
         const p = row.p;
         const cells = projectDemand(p);
-        const who = p.leadId ? data.peopleById[p.leadId] : null;   // only for the overload marker
         return html`<div class="sheet__row ${p.leadId ? '' : 'is-unassigned'}">
           ${lead.map(c => html`<span class="${c.key === 'title' ? 'sheet__project' : `sheet__lead ${c.cls ?? ''}`}"
             >${sheetCell(c, p, {
@@ -643,15 +641,14 @@ function printSheet(sheet, report, { rows, all, block, page, total, last, tot, c
             })}</span>`)}
           ${block.map((col) => {
             const q = col.quarters[0];
-            const over = who && personUtilisation(p.leadId, q) > 100;
             const v = periodValue(cells, col);
-            return html`<span class="sheet__cell heat-${heatStep(v)} ${yearRule(col)}"><span class="cellv">${over && v > 0 ? html`<span class="warnmark" aria-hidden="true">▲</span>` : ''}${v ? num(v) : '–'}</span></span>`;
+            return html`<span class="sheet__cell heat-${heatStep(v)} ${yearRule(col)}"><span class="cellv">${v ? num(v) : '–'}</span></span>`;
           })}
         </div>`;
       })}
 
       ${last ? html`<div class="sheet__row sheet__row--sum">
-        <span style="grid-column:span ${span}">${t('Bedarf total')}</span>${numbers(tot.demand)}
+        <span style="grid-column:span ${span}">${t('Summe Total')}</span>${numbers(tot.demand)}
       </div>
       <div class="sheet__row sheet__row--foot">
         <span style="grid-column:span ${span}">${t('davon vor Baukredit-Freigabe')}</span>${numbers(tot.preCredit)}

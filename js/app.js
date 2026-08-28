@@ -11,12 +11,12 @@
 
 import {
   data, state, load, subscribe, setState, syncFromUrl, closeOverlays,
-  cellValue, toggleIn, removeFilter, resetFilters, defaultDir, t, columnSetKey,
+  cellValue, toggleIn, removeFilter, resetFilters, defaultDir, t, columnSetKey, writeUrl,
   offsetForScale, maxOffset, windowStep, pageCount
 } from './store.js';
 import { loadIcons } from './icons.js';
 import { html, appHeader, appFooter, toast, forgetTokens, signedOutView } from './ui.js';
-import { renderLanding, renderOverview, editPopover } from './views-overview.js';
+import { renderOverview, editPopover } from './views-overview.js';
 import { renderModal } from './views-modals.js';
 import { renderSchedule } from './views-schedule.js';
 import { renderDashboard, renderHistory } from './views-analysis.js';
@@ -30,7 +30,6 @@ const root = document.getElementById('app');
    -------------------------------------------------------------------------- */
 
 const VIEWS = {
-  start: renderLanding,
   overview: renderOverview,
   schedule: renderSchedule,
   dashboard: renderDashboard,
@@ -80,7 +79,7 @@ function render() {
   const scroll = captureScroll();
   const scrollY = window.scrollY;
 
-  const view = VIEWS[state.tab] ?? renderLanding;
+  const view = VIEWS[state.tab] ?? renderOverview;
 
   /*
    * Before the view runs, not after: the stylesheet widens the shell for the
@@ -321,7 +320,7 @@ function logChange(project, field, change, value) {
     id: `c-${project.id}-${data.changes.length}`,
     date: data.meta.today, dateLabel: data.meta.todayLabel,
     actor: data.meta.user.name, projectId: project.id, projectLabel: project.location,
-    field, change, value, onLanding: true
+    field, change, value
   });
 }
 
@@ -350,8 +349,8 @@ const actions = {
   tab: (val) => setState({ tab: val, menu: null, editing: null, modal: null }),
   // The breadcrumb is a way back to a clean slate, not just to another route.
   home: () => setState({
-    tab: 'start', menu: null, editing: null, modal: null,
-    phases: [], leads: [], portfolios: [], overloadOnly: false, search: '',
+    tab: 'overview', menu: null, editing: null, modal: null,
+    phases: [], leads: [], portfolios: [], organisations: [], search: '',
     searchOpen: false
   }),
   lang: (val) => setState({ lang: val, menu: null }),
@@ -406,13 +405,23 @@ const actions = {
   'toggle-phase': (val) => toggleIn('phases', val),
   'toggle-lead': (val) => toggleIn('leads', val),
   'toggle-portfolio': (val) => toggleIn('portfolios', val),
+  'toggle-organisation': (val) => toggleIn('organisations', val),
 
+  /*
+   * «Alle» needs the full id list for the menu it sits in. A lookup rather than
+   * a chain ending in a default: the chain quietly handed the portfolio ids to
+   * whatever kind it did not recognise.
+   */
   bulk: (val, el) => {
     const kind = el.dataset.kind;
-    const all = kind === 'phases' ? data.phases.main.map(m => m.id)
-      : kind === 'leads' ? [...data.people.map(p => p.id), 'none']
-        : data.meta.portfolios.map(p => p.id);
-    setState({ [kind]: val === 'all' ? all : [] });
+    const every = {
+      phases: () => data.phases.main.map(m => m.id),
+      leads: () => [...data.people.map(p => p.id), 'none'],
+      portfolios: () => data.meta.portfolios.map(p => p.id),
+      organisations: () => data.meta.organisations.map(o => o.id)
+    }[kind];
+    if (!every) return;
+    setState({ [kind]: val === 'all' ? every() : [] });
   },
 
   /* Writes into the set the visible grid is driven by, never the other one. */
@@ -421,24 +430,24 @@ const actions = {
     return { cols: { ...s.cols, [key]: { ...s.cols[key], [val]: !s.cols[key][val] } } };
   }),
   'toggle-flag': (val) => setState(s => ({ [val]: !s[val] })),
-  'overload-toggle': () => setState(s => ({ overloadOnly: !s.overloadOnly })),
 
   'filter-remove': (val, el) => removeFilter(el.dataset.kind, val),
   'filters-reset': () => resetFilters(),
   'filter-lead': (val) => setState({ tab: 'overview', leads: [val], menu: null }),
-
-  'edit-toggle': () => setState(s => ({ edit: !s.edit, editing: null })),
-  'show-all': (val) => setState(s => ({ showAll: { ...s.showAll, [val]: !s.showAll[val] } })),
 
   'foot-details': () => setState(s => ({ footDetails: !s.footDetails })),
   'toggle-group': (val) => setState(s => ({
     collapsedGroups: { ...s.collapsedGroups, [val]: !s.collapsedGroups[val] }
   })),
 
+  /*
+   * A cell opens its editor on the first click. There is no edit mode to arm
+   * first: the reader who wants the project record reaches it through the
+   * title, and asking for two clicks before any number could move was the
+   * single thing the prototype was most often faulted for.
+   */
   cell: (val, el) => {
     const q = Number(el.dataset.q);
-    if (!state.edit) return actions['open-project'](val);
-    if (q === 0) return flash(t('Das laufende Quartal ist für Änderungen gesperrt.'));
     const project = data.projectsById[val];
     const r = el.getBoundingClientRect();
     setState({
@@ -506,10 +515,9 @@ const actions = {
       id: `c-${projectId}-${q}-${data.changes.length}`,
       date: data.meta.today, dateLabel: data.meta.todayLabel,
       actor: data.meta.user.name, projectId, projectLabel: project.location,
-      field: 'Projektleitung',
+      field: 'Bearbeitender',
       change: `${t('Umgebucht')}: ${from ? from.name : t('nicht zugewiesen')} → ${target.name} · ${reason.trim()}`,
-      value: `${amount} % ${t('ab')} ${data.quarters[q].label}, ${quarters} ${t('Quartale')}`,
-      onLanding: true
+      value: `${amount} % ${t('ab')} ${data.quarters[q].label}, ${quarters} ${t('Quartale')}`
     });
 
     setState({ modal: null });
@@ -525,17 +533,17 @@ const actions = {
     const to = data.peopleById[targetId];
     project.leadId = targetId;
     project.unassigned = false;
-    logChange(project, 'Projektleitung',
+    logChange(project, 'Bearbeitender',
       from ? `${from.name} → ${to.name}` : `${t('Zugewiesen an')} ${to.name}`, to.name);
     setState({ modal: null });
-    flash(`${project.location} — ${t('Projektleitung')}: ${to.name}`);
+    flash(`${project.location} — ${t('Bearbeitender')}: ${to.name}`);
   },
   'assign-clear': () => {
     const project = data.projectsById[state.modal.projectId];
     const from = project.leadId ? data.peopleById[project.leadId] : null;
     project.leadId = null;
     project.unassigned = true;
-    logChange(project, 'Projektleitung',
+    logChange(project, 'Bearbeitender',
       from ? `${from.name} → ${t('nicht zugewiesen')}` : t('Zuweisung aufgehoben'), t('nicht zugewiesen'));
     setState({ modal: null });
     flash(`${project.location} — ${t('Zuweisung aufgehoben')}`);
@@ -604,10 +612,6 @@ const actions = {
   'sort-person': (val) => setState(s => (s.pSort === val
     ? { pDir: s.pDir === 'asc' ? 'desc' : 'asc' }
     : { pSort: val, pDir: val === 'name' || val === 'role' ? 'asc' : 'desc' })),
-
-  /* The landing chart is a glance at the dashboard's own utilisation card;
-     it opens that, at the scale that shows the whole plan. */
-  'open-utilisation': () => setState({ tab: 'dashboard', bi: 'general', scale: 'year' }),
 
   sheet: (val) => setState({ sheet: val }),
   paper: (val) => setState({ paper: val, menu: null }),
@@ -944,6 +948,14 @@ subscribe(() => {
   try {
     await Promise.all([load(), loadIcons()]);
     syncFromUrl();
+    /*
+     * Canonicalise the entry point. The bare URL and any link still pointing at
+     * a tab that no longer exists both resolve to the Übersicht, and the address
+     * bar has to say so — otherwise a reader shares a hash that does not
+     * describe what they are looking at. replaceState, so this is not a step
+     * the Back button has to walk through.
+     */
+    writeUrl();
     subscribe(render);
     render();
   } catch (error) {

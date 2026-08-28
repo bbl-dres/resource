@@ -1,265 +1,21 @@
 /* =============================================================================
-   views-overview.js — the landing page and the «Übersicht» pensum grid.
+   views-overview.js — the «Übersicht» pensum grid.
    ============================================================================= */
 
 import {
   data, state, t, num, fmt, unitSuffix, cellValue, projectDemand, isEdited, personLoad, personUtilisation,
   totals, loadStatus, heatStep, ampel, filteredProjects, groupProjects,
-  milestones, milestoneStats, periods, periodValue, windowEdges, columnSet,
-  chartTone
+  periods, periodValue, windowEdges, columnSet
 } from './store.js';
 
 import {
   html, raw, icons, pageHeader, pageActions, toolbar, activeFilterRow,
-  timeControls, columnChart, noResults, ampelLegend, ampelDot, droppedNote,
+  timeControls, noResults, ampelLegend, ampelDot, droppedNote,
   legendBlock, legendItem, attr,
-  tokenPx, yearRule, pinCls, pinLeft, sortableHead, changeProject
+  tokenPx, yearRule, pinCls, pinLeft, sortableHead
 } from './ui.js';
 
 import { leadLayout, column, titleWidth, alignCls } from './columns.js';
-
-/* -----------------------------------------------------------------------------
-   Shared helpers
-   -------------------------------------------------------------------------- */
-
-const shortName = p => {
-  const rest = p.location.split(',').slice(1).join(',').trim();
-  return rest || p.location;
-};
-
-/*
- * Two years, not the whole ten. This card is a glance on the way past — it sits
- * inside a button that opens the dashboard, and a chart that has to be dragged
- * inside a link is a chart nobody reads. Forty quarters gave it a scrollbar.
- *
- * Eight is also what lets the axis stay quarterly. Once the landing grid goes to
- * three columns the card is 396px wide whatever the window does; sixteen
- * quarters fit as bars there but not as labels, and a two-year chart labelled by
- * year would be three ticks under eight bars.
- */
-const LANDING_QUARTERS = 8;
-
-function utilisationChartRows() {
-  const tot = totals();
-  return data.quarters.slice(0, LANDING_QUARTERS).map((q, i) => ({
-    value: tot.utilisation[i],
-    label: String(tot.utilisation[i]),
-    axis: `${q.short}/${String(q.year).slice(2)}`,
-    tone: chartTone(tot.utilisation[i]),
-    title: `${q.label}: ${tot.utilisation[i]} % — ${loadStatus(tot.utilisation[i]).label}`
-  }));
-}
-
-/* =============================================================================
-   Landing page — «Einstieg»
-   ========================================================================== */
-
-export function renderLanding() {
-  const tot = totals();
-  const ms = milestoneStats();
-  const grossCap = data.people.reduce((a, p) => a + p.employment, 0);
-  const overPeople = data.people.filter(p => personLoad(p.id, 0) > 100);
-  const unassigned = data.projects.filter(p => !p.leadId);
-  const firstThree = data.quarters.slice(0, 3)
-    .map((q, i) => `${tot.utilisation[i]} % ${q.label}`).join(' · ');
-
-  const cards = [
-    {
-      title: 'Auslastung', sub: firstThree,
-      metric: tot.utilisation.filter(v => v > 100).length, metricLabel: 'Quartale in Überlast',
-      tone: 'danger', tab: 'overview'
-    },
-    {
-      title: 'Personen', count: data.people.length,
-      sub: `${tot.net[0]} % Kapazität netto · ${grossCap} % brutto`,
-      metric: overPeople.length, metricLabel: 'über 100 % belegt',
-      tone: 'danger', tab: 'dashboard'
-    },
-    {
-      title: 'Meilensteine', count: ms.total,
-      sub: `${ms.onTime} im Termin · ${ms.open} ohne Termin`,
-      metric: ms.late, metricLabel: 'überfällig',
-      tone: 'danger', tab: 'schedule'
-    },
-    {
-      title: 'Projekte', count: data.projects.length,
-      sub: `${tot.demand[0]} % Bedarf · ${tot.preCredit[0]} % vor Baukredit-Freigabe`,
-      metric: unassigned.length, metricLabel: 'ohne Projektleitung',
-      tone: 'warn', tab: 'overview'
-    }
-  ];
-
-  return html`
-    ${pageHeader({
-      crumbs: ['Bauprojekte'],
-      title: 'Ressourcenplanung',
-      chrome: false,
-      actions: pageActions({ extra: html`<button type="button" class="btn btn--primary"
-        data-act="tab" data-val="overview">${t('Zur Planung')}</button>` })
-    })}
-
-    <div class="wrap"><div class="content content--landing">
-      <div class="entry-grid">
-        ${cards.map(c => html`<button type="button" class="entry entry--${c.metric ? c.tone : 'neutral'}" data-act="tab" data-val="${c.tab}">
-          <span class="entry__head">
-            <span class="entry__title">${t(c.title)}${
-              c.count ? html`<span class="count-pill">${c.count}</span>` : ''}</span>
-            <span class="entry__sub">${c.sub}</span>
-          </span>
-          <span class="entry__foot">
-            <span class="entry__metric"><strong>${c.metric}</strong> ${t(c.metricLabel)}</span>
-            <span class="entry__arrow" aria-hidden="true">${icons.arrowRight()}</span>
-          </span>
-        </button>`)}
-      </div>
-
-      <div class="card-grid">
-        ${nextMilestonesCard()}
-        ${attentionCard(overPeople, unassigned)}
-        ${utilisationCard()}
-      </div>
-
-      ${recentChangesBlock()}
-    </div></div>`;
-}
-
-/* A card says how much there is before it says how much of it you can see. */
-const CARD_ROWS = 6;
-
-function nextMilestonesCard() {
-  const all = milestones();
-  const list = state.showAll.milestones ? all : all.slice(0, CARD_ROWS);
-  return html`<section class="card card--span4">
-    <header class="card__head">
-      <h2 class="card__title">${t('Nächste Meilensteine')}<span class="count-pill">${all.length}</span></h2>
-      <p class="card__sub">12 Monate · chronologisch · ${t('öffnet Meilensteine')}</p>
-    </header>
-    <ul class="mslist">
-      ${list.map(m => html`<li class="mslist__row is-${m.status}">
-        <button type="button" class="mslist__btn" data-act="open-schedule" data-val="${m.projectId}">
-          <span class="mslist__q">${data.quarters[m.planIdx].label}</span>
-          <span>
-            <span class="mslist__title">${m.code} ${m.short} · ${m.project.location}</span>
-            <span class="mslist__meta">${m.lead ? m.lead.name : t('nicht zugewiesen')} · ${
-              m.impact ?? (m.status === 'ok' ? t('Termin gehalten') : m.statusLabel.replace('▲ ', ''))
-            }</span>
-          </span>
-        </button>
-      </li>`)}
-    </ul>
-    ${moreLink('milestones', all.length)}
-  </section>`;
-}
-
-/** «Alle N anzeigen», or nothing when the card is already showing them all. */
-function moreLink(key, total) {
-  if (total <= CARD_ROWS) return '';
-  const open = state.showAll[key];
-  return html`<button type="button" class="more-link" data-act="show-all" data-val="${key}">
-    ${open ? t('Weniger anzeigen') : `${t('Alle')} ${total} ${t('anzeigen')}`}
-  </button>`;
-}
-
-function attentionCard(overPeople, unassigned) {
-  const rows = overPeople
-    .map(p => ({
-      severity: 'danger',
-      name: p.name,
-      context: (data.projectsByLead[p.id] ?? []).map(shortName).join(' · '),
-      value: `${personLoad(p.id, 0)} %`,
-      act: 'filter-lead', val: p.id
-    }));
-
-  unassigned.forEach(p => {
-    const start = projectDemand(p).findIndex(v => v > 0);
-    rows.push({
-      severity: 'warn',
-      name: shortName(p),
-      context: `${t('keine Projektleitung')} · ${t('ab')} ${data.quarters[start]?.label ?? '—'}`,
-      value: `${Math.max(...projectDemand(p))} %`,
-      act: 'filter-lead', val: 'none'
-    });
-  });
-
-  /*
-   * Both kinds belong in the visible few. Appended one after the other, every
-   * row the reader saw was an overload and the severity rail said nothing; the
-   * open demand — the other half of what this card exists for — never surfaced.
-   * Each kind is ordered by size, then woven so both show early.
-   */
-  const over = rows.filter(r => r.severity === 'danger').sort((a, b) => parseInt(b.value) - parseInt(a.value));
-  const open = rows.filter(r => r.severity === 'warn').sort((a, b) => parseInt(b.value) - parseInt(a.value));
-  const every = Math.min(3, Math.max(1, Math.ceil(over.length / Math.max(1, open.length))));
-  rows.length = 0;
-  while (over.length || open.length) {
-    for (let i = 0; i < every && over.length; i++) rows.push(over.shift());
-    if (open.length) rows.push(open.shift());
-  }
-
-  const list = state.showAll.attention ? rows : rows.slice(0, CARD_ROWS);
-
-  return html`<section class="card card--span4">
-    <header class="card__head">
-      <h2 class="card__title">${t('Handlungsbedarf')}<span class="count-pill">${rows.length}</span></h2>
-      <p class="card__sub">${data.quarters[0].label} · ${t('öffnet die Übersicht, auf die Person gefiltert')}</p>
-    </header>
-    <ul class="mslist mslist--metric">
-      ${list.map(r => html`<li class="mslist__row is-${r.severity}">
-        <button type="button" class="mslist__btn" data-act="${r.act}" data-val="${r.val}">
-          <span class="mslist__q">${r.value}</span>
-          <span>
-            <span class="mslist__title">${r.name}</span>
-            <span class="mslist__meta">${r.context}</span>
-          </span>
-        </button>
-      </li>`)}
-    </ul>
-    ${moreLink('attention', rows.length)}
-  </section>`;
-}
-
-/** The span the card actually draws, read back off it rather than written twice. */
-function landingRange() {
-  const shown = data.quarters.slice(0, LANDING_QUARTERS);
-  return `${shown[0].label} – ${shown.at(-1).label}`;
-}
-
-function utilisationCard() {
-  return html`<section class="card card--span4">
-    <header class="card__head">
-      <h2 class="card__title">${t('Auslastung nach Quartal')}</h2>
-      <p class="card__sub">${t('Bedarf gegen Kapazität netto')}, ${landingRange()} · ${t('öffnet das Dashboard')}</p>
-    </header>
-    <button type="button" class="chartlink" data-act="open-utilisation"
-            aria-label="${t('Auslastung nach Quartal')} — ${t('öffnet das Dashboard')}">
-      ${columnChart(utilisationChartRows(), { height: 150, refAt: 100, refLabel: '100 %', col: 34 })}
-    </button>
-  </section>`;
-}
-
-function recentChangesBlock() {
-  const rows = data.changes.filter(c => c.onLanding).slice(0, 5);
-  return html`<section class="changes">
-    <h2 class="changes__title">${t('Letzte Änderungen')}
-      <span>· ${t('seit letztem Besuch')}, ${data.meta.lastVisit}</span></h2>
-    <div class="table-card">
-      <div class="log log--changes log--head">
-        <span>${t('Projekt')}</span><span>${t('Feld')}</span><span>${t('Person')}</span>
-        <span>${t('Änderung')}</span><span>${t('Geändert')}</span>
-      </div>
-      ${rows.map((c, i) => html`<div class="log log--changes ${i % 2 === 1 ? 'is-zebra' : ''}">
-        <span class="log__project">${changeProject(c)}</span>
-        <span>${t(c.field)}</span>
-        <span>${c.landingActor ?? c.actor}</span>
-        <span class="log__change">${c.summary ?? c.change}</span>
-        <span class="log__date">${c.dateLabel}</span>
-      </div>`)}
-    </div>
-    <button type="button" class="more-link" data-act="tab" data-val="history">
-      ${t('Alle Änderungen anzeigen')}
-    </button>
-  </section>`;
-}
 
 /* =============================================================================
    Tab «Übersicht» — the pensum grid
@@ -270,7 +26,7 @@ export function renderOverview() {
     ${pageHeader({
       crumbs: ['Bauprojekte', 'Übersicht'],
       title: 'Ressourcenplanung',
-      actions: pageActions({ edit: true })
+      actions: pageActions()
     })}
     <div class="wrap"><div class="content">
       ${toolbar()}
@@ -383,7 +139,7 @@ function pensumGrid() {
 
   const foot = html`<div class="prow prow--sum" style="grid-template-columns:${raw(tpl)}">
         <div style="grid-column:span ${span}" class="prow__sumlabel is-frozen">
-          ${t('Bedarf total')}${tot.scoped ? html`<span class="prow__sumnote">${t('Auswahl')}</span>` : ''}
+          ${t('Summe Total')}${tot.scoped ? html`<span class="prow__sumnote">${t('Auswahl')}</span>` : ''}
           <button type="button" class="linkbtn" data-act="foot-details">
             ${state.footDetails ? t('Details ausblenden') : t('Details anzeigen')}
           </button>
@@ -430,7 +186,7 @@ function card(rows, { minWidth, sticky, cls = '' }) {
   const edge = windowEdges();
   return html`<div class="pblock scrollbox ${cls}" style="--sticky-w:${sticky.width}px"
       ${attr(edge.before, 'data-before')} ${attr(edge.after, 'data-after')}>
-    <div class="pgrid ${state.edit ? 'pgrid--edit' : ''}" data-scroll>
+    <div class="pgrid pgrid--editable" data-scroll>
       <div class="pgrid__track" style="min-width:${minWidth}px">${rows}</div>
     </div>
   </div>`;
@@ -447,8 +203,7 @@ export function heatLegend() {
     { label: 'Ampel', items: columnSet().ampel ? ampelLegend() : null },
     {
       label: 'Markierung',
-      items: html`${legendItem(html`<span class="markglyph">▲</span>`, 'Projektleitung über 100 % im Quartal')}
-        ${legendItem(html`<span class="legend__swatch is-nolead"></span>`, l.noLead)}`
+      items: legendItem(html`<span class="legend__swatch is-nolead"></span>`, l.noLead)
     },
     { label: 'Auslastung', items: html`${t(l.thresholds).replace(/^Auslastung:\s*/, '')}` }
   ]);
@@ -471,10 +226,8 @@ const CELL_BODY = {
 
   lead: (p, lead) => {
     const name = lead ? lead.name : html`<span class="lead-open">${t('nicht zugewiesen')}</span>`;
-    return state.edit
-      ? html`<button type="button" class="leadbtn" data-act="assign" data-val="${p.id}"
-          title="${t('Projektleitung zuweisen')}">${name}</button>`
-      : name;
+    return html`<button type="button" class="leadbtn" data-act="assign" data-val="${p.id}"
+      title="${t('Bearbeitenden zuweisen')}">${name}</button>`;
   },
 
   ampel: p => ampelDot(p),
@@ -511,7 +264,7 @@ function columnHeader(tpl, sticky, cols) {
         if (!col.sort) {
           return html`<span class="pcell--text ${col.key === 'ampel' ? 'pcell--ampelhead' : ''} ${pinCls(sticky, col.key, extra)}"
               style="${pinLeft(sticky, col.key)}"
-              title="${col.key === 'ampel' ? t('Höchste Auslastung der Projektleitung im sichtbaren Zeitraum') : ''}"
+              title="${col.key === 'ampel' ? t('Höchste Auslastung des Bearbeitenden im sichtbaren Zeitraum') : ''}"
             >${headLabel(col)}</span>`;
         }
         return sortHead(col.sort, headLabel(col), pin(sticky, col.key, extra));
@@ -536,7 +289,7 @@ function groupSum(g, tpl, span, cols) {
   if (!g.label) return '';
   const values = data.quarters.map((_, q) => g.projects.reduce((a, p) => a + cellValue(p, q), 0));
   return html`<div class="prow prow--sum prow--groupsum" style="grid-template-columns:${raw(tpl)}">
-    <div style="grid-column:span ${span}" class="prow__sumlabel is-frozen">${t('Summe')} ${g.label}</div>
+    <div style="grid-column:span ${span}" class="prow__sumlabel is-frozen">${t('Summe')} ${g.label} (${g.projects.length})</div>
     ${cols.map(period => html`<span class="pcell pcell--sum ${yearRule(period)}">${fmt(periodValue(values, period))}</span>`)}
     ${columnSet().trend && html`<span></span>`}
   </div>`;
@@ -566,17 +319,15 @@ function projectRow(p, tpl, sticky, cols, rowIdx) {
       // The lead being stretched says nothing about a quarter this project does
       // not run in, and a red nought is noise rather than a warning.
       const over = lead && v > 0 && period.quarters.some(x => personUtilisation(p.leadId, x) > 100);
-      const locked = period.quarters.includes(0);
       const editing = state.editing && state.editing.projectId === p.id && state.editing.q === q;
       const label = state.hideZeros && v === 0 ? '' : num(v);
       const description = `${p.title} · ${lead ? lead.name : t('nicht zugewiesen')}, ${period.label}: ${num(v)}${unitSuffix()}`
-        + (over ? ` — ${t('Person über 100 % belegt, Überlast')}` : '')
-        + (locked ? ` — ${t('laufendes Quartal, gesperrt')}` : '');
+        + (over ? ` — ${t('Person über 100 % belegt, Überlast')}` : '');
       return html`<button type="button"
         class="pcell pcell--val heat-${heatStep(v)} ${over ? 'is-warn' : ''} ${editing ? 'is-editing' : ''} ${isEdited(p, q) ? 'is-edited' : ''} ${yearRule(period)}"
         data-act="cell" data-val="${p.id}" data-q="${q}" data-fk="cell:${p.id}:${q}"
-        aria-label="${description}" title="${description}" ${attr(!state.edit || locked, 'data-locked="1"')}>
-        <span class="cellv">${over && v > 0 ? html`<span class="warnmark" aria-hidden="true">▲</span>` : ''}${label}</span>
+        aria-label="${description}" title="${description}">
+        <span class="cellv">${label}</span>
       </button>`;
     })}
 
@@ -637,7 +388,7 @@ export function editPopover() {
     </div>
 
     ${lead === null && html`<p class="pop__warn is-none">${t(
-      'Keine Projektleitung zugewiesen — das Pensum kann noch auf keine Person gebucht werden.')}</p>`}
+      'Kein Bearbeitender zugewiesen — das Pensum kann noch auf keine Person gebucht werden.')}</p>`}
 
     <label class="pop__reason">
       <span class="pop__reasonlabel">${t('Begründung')}

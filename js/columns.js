@@ -46,13 +46,13 @@ export const COLUMNS = [
     text: p => p.title
   },
   {
-    key: 'phase', label: 'SIA-Phase', flag: 'phase', sort: 'phase', width: '--grid-col-phase',
-    cls: 'pcell--phase', sheet: { w: [124, 128], cls: 'sheet__muted', label: 'SIA-Teilphase' },
+    key: 'phase', label: 'Phase (ePPM)', flag: 'phase', sort: 'phase', width: '--grid-col-phase',
+    cls: 'pcell--phase', sheet: { w: [124, 128], cls: 'sheet__muted', label: 'Teilphase (ePPM)' },
     xls: { type: 'text', width: 20 },
     text: p => t(phaseOf(p.phase).label)
   },
   {
-    key: 'lead', label: 'Projektleitung', flag: 'lead', sort: 'lead', width: '--grid-col-lead',
+    key: 'lead', label: 'Bearbeitender', flag: 'lead', sort: 'lead', width: '--grid-col-lead',
     cls: 'pcell--lead', sheet: { w: [86, 108], cls: 'sheet__muted' }, xls: { type: 'text', width: 20 },
     text: leadName
   },

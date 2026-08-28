@@ -697,6 +697,30 @@ dashboard.creditByYear.rows = [
   note: `${count} Projekte`
 }));
 
+/*
+ * Organisation — the team a piece of work sits in.
+ *
+ * It is really an attribute of a person: a team owns its members, not their
+ * projects. The prototype carries it on the project anyway, because that is
+ * what the grouping reads and what a denormalised feed would hand us; moving
+ * it to the roster later is a change of source, not of shape.
+ *
+ * Derived, never drawn. A draw here would take a number off the shared
+ * generator and reshuffle every value produced after it — the whole fixture,
+ * for one new field. Deriving from the lead's place in the roster also keeps
+ * the grouping honest: a project whose lead sits in Team B has no business
+ * appearing under Team C. The five projects with no lead follow their own
+ * position instead, so none of them is left without a team to group under.
+ */
+const TEAMS = ['org-a', 'org-b', 'org-c', 'org-d'];
+const teamOfPerson = new Map(people.map((person, i) => [person.id, TEAMS[i % TEAMS.length]]));
+projects.forEach((project, i) => {
+  project.organisation = project.leadId
+    ? teamOfPerson.get(project.leadId)
+    : TEAMS[i % TEAMS.length];
+});
+META.organisations = TEAMS.map((id, i) => ({ id, label: `Team ${'ABCD'[i]}` }));
+
 /* The window has one definition; the app reads it from here. */
 META.quarters = QUARTER_CAL.map((c, i) => ({
   id: QUARTER_IDS[i], label: `Q${c.q}/${c.year}`, short: `Q${c.q}`, year: c.year

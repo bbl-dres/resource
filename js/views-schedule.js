@@ -78,7 +78,7 @@ export function renderSchedule() {
     ${pageHeader({
       crumbs: ['Bauprojekte', 'Termine'],
       title: 'Ressourcenplanung',
-      actions: pageActions({ edit: true })
+      actions: pageActions()
     })}
     <div class="wrap"><div class="content">
       ${toolbar(MENU)}
@@ -198,7 +198,7 @@ export function ganttLegend(cls = '') {
     {
       label: 'Balken',
       items: html`${legendItem(html`<span class="legend__swatch is-delay"></span>`, 'Verzug')}
-        ${legendItem(html`<span class="legend__swatch is-nolead"></span>`, 'ohne Projektleitung')}`
+        ${legendItem(html`<span class="legend__swatch is-nolead"></span>`, 'ohne Bearbeitenden')}`
     },
     {
       label: 'Meilenstein',

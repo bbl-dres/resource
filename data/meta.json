@@ -306,5 +306,23 @@
       "href": "#?tab=api",
       "tab": "api"
     }
+  ],
+  "organisations": [
+    {
+      "id": "org-a",
+      "label": "Team A"
+    },
+    {
+      "id": "org-b",
+      "label": "Team B"
+    },
+    {
+      "id": "org-c",
+      "label": "Team C"
+    },
+    {
+      "id": "org-d",
+      "label": "Team D"
+    }
   ]
 }

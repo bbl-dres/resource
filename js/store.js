@@ -25,12 +25,12 @@ export const data = {};
  * for — `#?group=colour` used to reach the toolbar and throw.
  */
 export const VOCAB = {
-  tab:     ['start', 'overview', 'schedule', 'dashboard', 'history', 'api', 'export'],
+  tab:     ['overview', 'schedule', 'dashboard', 'history', 'api', 'export'],
   lang:    ['de', 'en', 'fr', 'it'],
   scale:   ['year', 'quarter', 'month'],
   unit:    ['pct', 'fte'],
   sortDir: ['asc', 'desc'],
-  group:   ['portfolio', 'lead', 'phase', 'none'],
+  group:   ['portfolio', 'lead', 'phase', 'organisation', 'none'],
   bi:      ['general', 'people'],
   report:  ['demand', 'schedule'],
   paper:   ['a4', 'a3', 'a2', 'a1', 'a0'],
@@ -40,7 +40,7 @@ export const VOCAB = {
 };
 
 const DEFAULT_STATE = {
-  tab: 'start',
+  tab: 'overview',
   paper: 'a4',             // ISO size, see VOCAB.paper
   sheet: 'portrait',       // orientation, see VOCAB.sheet
   report: 'demand',        // which printed report, see VOCAB.report
@@ -50,18 +50,17 @@ const DEFAULT_STATE = {
   unit: 'pct',             // pct | fte
   sort: 'project',         // any key in SORT_KEYS, or q0…q7 for one quarter
   sortDir: 'asc',          // asc | desc
-  group: 'portfolio',      // portfolio | lead | phase | none
+  group: 'none',           // portfolio | lead | phase | organisation | none
   search: '',
-  phases: [],              // selected SIA main phase ids, e.g. ['3','5']
+  phases: [],              // selected main phase ids, e.g. ['3','5']
   leads: [],               // selected person ids
   portfolios: [],          // selected portfolio ids
-  overloadOnly: false,
+  organisations: [],       // selected team ids
   exporting: false,        // a PDF is being written; transient, never in the URL
   // column / attribute toggles, one set per grid — see columnSet()
   cols: null,              // filled from COLUMN_DEFAULTS below
   hideZeros: false,
   // editing
-  edit: false,
   editing: null,           // { projectId, q }
   draft: 0,
   reason: '',
@@ -91,7 +90,6 @@ const DEFAULT_STATE = {
   pageSize: '25',          // see VOCAB.pageSize
   pSort: 'peak',           // person table: name | role | employment | projects | peak | q0…q7
   pDir: 'desc',
-  showAll: { attention: false, milestones: false },   // landing cards, expanded
   searchOpen: false,
   collapsedGroups: {},
   toast: null
@@ -104,7 +102,7 @@ const DEFAULT_STATE = {
  * find the row again.
  */
 const COLUMN_DEFAULTS = {
-  overview: { title: true, phase: true, lead: true, ampel: true, credit: true,
+  overview: { title: true, phase: true, lead: true, ampel: false, credit: true,
               portfolio: false, priority: false, nextMs: false, target: false, trend: false },
   schedule: { title: true, phase: false, lead: false, ampel: false, credit: false,
               portfolio: false, priority: false, nextMs: false, target: false, trend: false }
@@ -112,8 +110,7 @@ const COLUMN_DEFAULTS = {
 
 export const state = {
   ...DEFAULT_STATE,
-  cols: { overview: { ...COLUMN_DEFAULTS.overview }, schedule: { ...COLUMN_DEFAULTS.schedule } },
-  showAll: { ...DEFAULT_STATE.showAll }
+  cols: { overview: { ...COLUMN_DEFAULTS.overview }, schedule: { ...COLUMN_DEFAULTS.schedule } }
 };
 
 /**
@@ -187,8 +184,7 @@ export function readUrl() {
   if (p.has('phase')) patch.phases = list('phase');
   if (p.has('lead')) patch.leads = list('lead');
   if (p.has('portfolio')) patch.portfolios = list('portfolio');
-  if (p.get('overload') === '1') patch.overloadOnly = true;
-  if (p.get('edit') === '1') patch.edit = true;
+  if (p.has('org')) patch.organisations = list('org');
   return patch;
 }
 
@@ -207,7 +203,7 @@ export function writeUrl() {
   if (state.periodOffset) p.set('from', String(state.periodOffset));
   if (state.sort !== 'project') p.set('sort', state.sort);
   if (state.sortDir !== 'asc') p.set('dir', state.sortDir);
-  if (state.group !== 'portfolio') p.set('group', state.group);
+  if (state.group !== DEFAULT_STATE.group) p.set('group', state.group);
   if (state.tab === 'dashboard' && state.bi !== 'general') p.set('bi', state.bi);
   if (state.tab === 'history' && state.page > 1) p.set('page', String(state.page));
   if (state.tab === 'history' && state.pageSize !== '25') p.set('pageSize', state.pageSize);
@@ -215,8 +211,7 @@ export function writeUrl() {
   if (state.phases.length) p.set('phase', state.phases.join(','));
   if (state.leads.length) p.set('lead', state.leads.join(','));
   if (state.portfolios.length) p.set('portfolio', state.portfolios.join(','));
-  if (state.overloadOnly) p.set('overload', '1');
-  if (state.edit) p.set('edit', '1');
+  if (state.organisations.length) p.set('org', state.organisations.join(','));
   const next = '#?' + p.toString();
   if (next !== location.hash) history.replaceState(null, '', next);
 }
@@ -246,6 +241,7 @@ export async function load() {
   data.peopleById = Object.fromEntries(data.people.map(p => [p.id, p]));
   data.projectsById = Object.fromEntries(data.projects.map(p => [p.id, p]));
   data.portfoliosById = Object.fromEntries(data.meta.portfolios.map(p => [p.id, p]));
+  data.organisationsById = Object.fromEntries(data.meta.organisations.map(o => [o.id, o]));
   data.quarters = data.meta.quarters;
   data.quarterIndex = Object.fromEntries(data.quarters.map((q, i) => [q.id, i]));
 
@@ -442,16 +438,14 @@ export function heatStep(v) {
  * Traffic light for the row's project lead: their worst quarter in the period
  * the table is showing.
  *
- * The period matters. While this read quarter 0 alone and «Nur Überlast» spanned
- * the whole plan, that filter kept 84 rows of which 29 showed a green or amber
- * light — a filter contradicting the column beside it. Everything else in the
- * tab (totals, chart, KPI) already reports on the visible window, so the light
- * follows it too, and the filter below is now defined by the light.
+ * The period matters: everything else in the tab — totals, chart, KPI — reports
+ * on the visible window, so the light follows it too rather than reading
+ * quarter 0 alone and disagreeing with the row it sits in.
  */
 export function ampel(personId, range = windowQuarters()) {
   const person = data.peopleById[personId];
   if (!person) {
-    return { key: 'none', word: 'ohne Projektleitung', title: 'Keine Projektleitung zugewiesen — keine Ampel' };
+    return { key: 'none', word: 'ohne Bearbeitenden', title: 'Kein Bearbeitender zugewiesen — keine Ampel' };
   }
   let peak = range.from;
   for (let q = range.from + 1; q <= range.to; q++) {
@@ -477,7 +471,6 @@ export function phaseOf(subCode) {
 
 export function filteredProjects() {
   const q = state.search.trim().toLowerCase();
-  const range = state.overloadOnly ? windowQuarters() : null;
   let list = data.projects.filter(p => {
     if (state.phases.length && !state.phases.includes(p.phase[0])) return false;
     if (state.leads.length) {
@@ -485,7 +478,7 @@ export function filteredProjects() {
       if (!state.leads.includes(key)) return false;
     }
     if (state.portfolios.length && !state.portfolios.includes(p.portfolio)) return false;
-    if (state.overloadOnly && ampel(p.leadId, range).key !== 'over') return false;
+    if (state.organisations.length && !state.organisations.includes(p.organisation)) return false;
     if (q) {
       const lead = p.leadId ? data.peopleById[p.leadId].name : 'nicht zugewiesen';
       const hay = `${p.title} ${p.number} ${lead} ${p.kind}`.toLowerCase();
@@ -656,8 +649,8 @@ export function canStep(dir) {
 export const SORT_KEYS = {
   id:        { label: 'ID', numeric: false, value: p => p.number },
   project:   { label: 'Projekt', numeric: false, value: p => p.title },
-  phase:     { label: 'SIA-Phase', numeric: false, value: p => p.phase },
-  lead:      { label: 'Projektleitung', numeric: false, value: p => (p.leadId ? data.peopleById[p.leadId].name : '\uffff') },
+  phase:     { label: 'Phase (ePPM)', numeric: false, value: p => p.phase },
+  lead:      { label: 'Bearbeitender', numeric: false, value: p => (p.leadId ? data.peopleById[p.leadId].name : '\uffff') },
   portfolio: { label: 'Teilportfolio', numeric: false, value: p => data.portfoliosById[p.portfolio].label },
   priority:  { label: 'Priorität', numeric: true, value: p => ({ hoch: 3, mittel: 2, tief: 1 })[p.priority] ?? 0 },
   credit:    { label: 'Kredit CHF', numeric: true, value: p => p.credit ?? -1 },
@@ -698,6 +691,7 @@ export function groupProjects(list = filteredProjects()) {
   const keyOf = p => {
     if (state.group === 'lead') return p.leadId ?? 'none';
     if (state.group === 'phase') return p.phase[0];
+    if (state.group === 'organisation') return p.organisation;
     return p.portfolio;
   };
   const labelOf = key => {
@@ -706,6 +700,9 @@ export function groupProjects(list = filteredProjects()) {
     }
     if (state.group === 'phase') {
       return t(data.phases.main.find(m => m.id === key)?.label ?? key);
+    }
+    if (state.group === 'organisation') {
+      return t(data.organisationsById[key]?.label ?? key);
     }
     return t(data.portfoliosById[key]?.label ?? key);
   };
@@ -716,12 +713,15 @@ export function groupProjects(list = filteredProjects()) {
     if (!buckets.has(k)) buckets.set(k, []);
     buckets.get(k).push(p);
   }
-  // Keep people in roster order, phases in SIA order, portfolios in data order.
+  // Keep people in roster order, phases in SIA order, teams and portfolios in
+  // data order — never in the order the projects happened to arrive in.
   const order = state.group === 'lead'
     ? [...data.people.map(p => p.id), 'none']
     : state.group === 'phase'
       ? data.phases.main.map(m => m.id)
-      : data.meta.portfolios.map(p => p.id);
+      : state.group === 'organisation'
+        ? data.meta.organisations.map(o => o.id)
+        : data.meta.portfolios.map(p => p.id);
 
   return order
     .filter(k => buckets.has(k))
@@ -743,7 +743,10 @@ export function activeFilters() {
     const p = data.portfoliosById[id];
     if (p) chips.push({ kind: 'portfolio', id, label: p.label });
   });
-  if (state.overloadOnly) chips.push({ kind: 'overload', id: '1', label: 'Nur Überlast' });
+  state.organisations.forEach(id => {
+    const o = data.organisationsById[id];
+    if (o) chips.push({ kind: 'organisation', id, label: o.label });
+  });
   if (state.search) chips.push({ kind: 'search', id: '1', label: `Suche: ${state.search}` });
   return chips;
 }
@@ -753,12 +756,12 @@ export function removeFilter(kind, id) {
   if (kind === 'phase') setState({ phases: drop(state.phases) });
   else if (kind === 'lead') setState({ leads: drop(state.leads) });
   else if (kind === 'portfolio') setState({ portfolios: drop(state.portfolios) });
-  else if (kind === 'overload') setState({ overloadOnly: false });
+  else if (kind === 'organisation') setState({ organisations: drop(state.organisations) });
   else if (kind === 'search') setState({ search: '' });
 }
 
 export function resetFilters() {
-  setState({ phases: [], leads: [], portfolios: [], overloadOnly: false, search: '' });
+  setState({ phases: [], leads: [], portfolios: [], organisations: [], search: '' });
 }
 
 export function toggleIn(key, id) {

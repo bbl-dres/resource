@@ -30,8 +30,7 @@
         "label": "ab 120 %"
       }
     ],
-    "marker": "▲ Projektleitung über 100 % im Quartal",
-    "noLead": "ohne Projektleitung",
+    "noLead": "ohne Bearbeitenden",
     "thresholds": "Auslastung: Überlast über 100 · knapp 95 – 100 · ok 80 – 94 · frei darunter"
   },
   "notes": [

@@ -235,7 +235,7 @@ function phaseCountCard() {
     const n = list.filter(p => p.phase[0] === m.id).length;
     return { label: t(m.label), value: n, valueLabel: String(n) };
   });
-  return biCard('phasen', 'Anzahl Projekte nach SIA-Phase',
+  return biCard('phasen', 'Anzahl Projekte nach Phase (ePPM)',
     `${list.length} ${t('Projekte im gesetzten Umfang')}`,
     barList(rows, { max: Math.max(1, ...rows.map(r => r.value)) }));
 }
@@ -271,7 +271,7 @@ function creditPhaseCard() {
       return { label: t(m.label), value: v, valueLabel: fmtMio(v) };
     })
     .sort((a, b) => b.value - a.value);
-  return biCard('kreditphase', 'Kredit nach SIA-Phase',
+  return biCard('kreditphase', 'Kredit nach Phase (ePPM)',
     `${t('Gesamt')} ${fmtMio(total)} CHF · ${t('gebundene Mittel')}`,
     barList(rows), { wide: true });
 }
