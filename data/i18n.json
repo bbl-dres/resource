@@ -26,56 +26,6 @@
     }
   ],
   "terms": {
-    "Bearbeitender": {
-      "en": "Assignee",
-      "fr": "Personne en charge",
-      "it": "Incaricato"
-    },
-    "Daten als CSV": {
-      "en": "Data as CSV",
-      "fr": "Données en CSV",
-      "it": "Dati in CSV"
-    },
-    "Daten als Excel": {
-      "en": "Data as Excel",
-      "fr": "Données en Excel",
-      "it": "Dati in Excel"
-    },
-    "Organisation": {
-      "en": "Organisation",
-      "fr": "Organisation",
-      "it": "Organizzazione"
-    },
-    "Übersicht als PDF": {
-      "en": "Overview as PDF",
-      "fr": "Vue d'ensemble en PDF",
-      "it": "Panoramica in PDF"
-    },
-    "Termine als PDF": {
-      "en": "Schedule as PDF",
-      "fr": "Échéances en PDF",
-      "it": "Scadenze in PDF"
-    },
-    "— nicht zugewiesen": {
-      "en": "— unassigned",
-      "fr": "— non attribué",
-      "it": "— non assegnato"
-    },
-    "— optional": {
-      "en": "— optional",
-      "fr": "— facultatif",
-      "it": "— facoltativo"
-    },
-    "— Pflicht bei jeder Umbuchung": {
-      "en": "— required for every reallocation",
-      "fr": "— obligatoire pour toute réaffectation",
-      "it": "— obbligatorio per ogni riassegnazione"
-    },
-    "— Pflicht bei Überlast": {
-      "en": "— required when over capacity",
-      "fr": "— obligatoire en cas de surcharge",
-      "it": "— obbligatorio in caso di sovraccarico"
-    },
     "1 Strategische Planung": {
       "en": "1 Strategic planning",
       "fr": "1 Planification stratégique",
@@ -181,15 +131,10 @@
       "fr": "80 – 119 %",
       "it": "80 – 119 %"
     },
-    "ab": {
-      "en": "from",
-      "fr": "dès",
-      "it": "da"
-    },
-    "ab 120 %": {
-      "en": "120 % and above",
-      "fr": "dès 120 %",
-      "it": "dal 120 %"
+    "API": {
+      "en": "API",
+      "fr": "API",
+      "it": "API"
     },
     "Abbrechen": {
       "en": "Cancel",
@@ -236,15 +181,15 @@
       "fr": "Tous",
       "it": "Tutti"
     },
-    "Alle Änderungen anzeigen": {
-      "en": "Show all changes",
-      "fr": "Afficher toutes les modifications",
-      "it": "Mostra tutte le modifiche"
-    },
     "Alle Filter zurücksetzen": {
       "en": "Reset all filters",
       "fr": "Réinitialiser les filtres",
       "it": "Reimposta tutti i filtri"
+    },
+    "Alle Änderungen anzeigen": {
+      "en": "Show all changes",
+      "fr": "Afficher toutes les modifications",
+      "it": "Mostra tutte le modifiche"
     },
     "Allgemein": {
       "en": "General",
@@ -276,15 +221,15 @@
       "fr": "Réaffecter à une autre personne",
       "it": "Riassegnare a un'altra persona"
     },
-    "Änderung": {
-      "en": "Change",
-      "fr": "Modification",
-      "it": "Modifica"
-    },
     "Angemeldet": {
       "en": "Signed in",
       "fr": "Connecté",
       "it": "Connesso"
+    },
+    "Angemeldet über eIAM": {
+      "en": "Signed in via eIAM",
+      "fr": "Connecté via eIAM",
+      "it": "Accesso tramite eIAM"
     },
     "Ansichten": {
       "en": "Views",
@@ -305,16 +250,6 @@
       "en": "Project count by phase (ePPM)",
       "fr": "Nombre de projets par phase (ePPM)",
       "it": "Numero di progetti per fase (ePPM)"
-    },
-    "anzeigen": {
-      "en": "show",
-      "fr": "afficher",
-      "it": "mostra"
-    },
-    "API": {
-      "en": "API",
-      "fr": "API",
-      "it": "API"
     },
     "Attribute": {
       "en": "Attributes",
@@ -386,6 +321,16 @@
       "fr": "Modifier",
       "it": "Modifica"
     },
+    "Bearbeitenden zuweisen": {
+      "en": "Assign a person",
+      "fr": "Attribuer la personne en charge",
+      "it": "Assegna incaricato"
+    },
+    "Bearbeitender": {
+      "en": "Assignee",
+      "fr": "Personne en charge",
+      "it": "Incaricato"
+    },
     "Bedarf": {
       "en": "Demand",
       "fr": "Besoin",
@@ -405,11 +350,6 @@
       "en": "Demand open",
       "fr": "Besoin ouvert",
       "it": "Fabbisogno aperto"
-    },
-    "Summe Total": {
-      "en": "Grand total",
-      "fr": "Total général",
-      "it": "Totale generale"
     },
     "Bedürfnis freigegeben": {
       "en": "Need approved",
@@ -431,6 +371,11 @@
       "fr": "Notifications",
       "it": "Notifiche"
     },
+    "Berechtigungen, Kennwort und Zwei-Faktor-Anmeldung werden über eIAM verwaltet.": {
+      "en": "Permissions, password and two-factor sign-in are managed via eIAM.",
+      "fr": "Les autorisations, le mot de passe et l'authentification à deux facteurs sont gérés via eIAM.",
+      "it": "Autorizzazioni, password e autenticazione a due fattori sono gestite tramite eIAM."
+    },
     "Bereich Bauten": {
       "en": "Construction division",
       "fr": "Domaine Constructions",
@@ -440,11 +385,6 @@
       "en": "Education and research",
       "fr": "Formation et recherche",
       "it": "Formazione e ricerca"
-    },
-    "bis 39 %": {
-      "en": "up to 39 %",
-      "fr": "jusqu'à 39 %",
-      "it": "fino al 39 %"
     },
     "Blatt": {
       "en": "Sheet",
@@ -456,15 +396,25 @@
       "fr": "Office fédéral des constructions et de la logistique OFCL",
       "it": "Ufficio federale delle costruzioni e della logistica UFCL"
     },
-    "das Fenster ist zu schmal": {
-      "en": "the window is too narrow",
-      "fr": "la fenêtre est trop étroite",
-      "it": "la finestra è troppo stretta"
+    "Darstellung, Funktionalität und Inhalte dienen ausschliesslich der Demonstration; die verwendeten Daten sind fiktiv oder öffentlich zugänglich.": {
+      "en": "Presentation, functionality and content serve demonstration purposes only; the data used is fictitious or publicly available.",
+      "fr": "La présentation, les fonctionnalités et les contenus servent uniquement à la démonstration; les données utilisées sont fictives ou publiquement accessibles.",
+      "it": "Presentazione, funzionalità e contenuti servono unicamente a scopo dimostrativo; i dati utilizzati sono fittizi o pubblicamente accessibili."
     },
     "Dashboard": {
       "en": "Dashboard",
       "fr": "Tableau de bord",
       "it": "Cruscotto"
+    },
+    "Daten als CSV": {
+      "en": "Data as CSV",
+      "fr": "Données en CSV",
+      "it": "Dati in CSV"
+    },
+    "Daten als Excel": {
+      "en": "Data as Excel",
+      "fr": "Données en Excel",
+      "it": "Dati in Excel"
     },
     "Datenstand ePPM": {
       "en": "ePPM data as of",
@@ -481,25 +431,15 @@
       "fr": "Durée",
       "it": "Durata"
     },
-    "davon extern beauftragt": {
-      "en": "of which contracted externally",
-      "fr": "dont mandaté à l'externe",
-      "it": "di cui affidato all'esterno"
-    },
-    "davon vor Baukredit-Freigabe": {
-      "en": "of which before construction credit release",
-      "fr": "dont avant libération du crédit de construction",
-      "it": "di cui prima dello sblocco del credito di costruzione"
-    },
     "Defizit": {
       "en": "Deficit",
       "fr": "Déficit",
       "it": "Deficit"
     },
-    "der Anstellung": {
-      "en": "of contract",
-      "fr": "du taux d'activité",
-      "it": "del grado di occupazione"
+    "Der Zugang wird über eIAM gesteuert. Berechtigungen, Kennwort und Zwei-Faktor-Anmeldung werden dort verwaltet, nicht in dieser Anwendung.": {
+      "en": "Access is governed by eIAM. Permissions, password and two-factor sign-in are managed there, not in this application.",
+      "fr": "L'accès est géré par eIAM. Les autorisations, le mot de passe et l'authentification à deux facteurs y sont gérés, pas dans cette application.",
+      "it": "L'accesso è gestito da eIAM. Autorizzazioni, password e autenticazione a due fattori sono gestite lì, non in questa applicazione."
     },
     "Details anzeigen": {
       "en": "Show details",
@@ -511,15 +451,20 @@
       "fr": "Masquer les détails",
       "it": "Nascondi dettagli"
     },
-    "Die aktiven Filter schliessen alle": {
-      "en": "The active filters exclude all",
-      "fr": "Les filtres actifs excluent les",
-      "it": "I filtri attivi escludono tutti i"
-    },
     "Die API-Dokumentation konnte nicht geladen werden.": {
       "en": "The API reference could not be loaded.",
       "fr": "La documentation de l'API n'a pas pu être chargée.",
       "it": "Non è stato possibile caricare la documentazione dell'API."
+    },
+    "Die Ressourcenplanung zeigt Personendaten und Kredite; ohne Anmeldung wird nichts davon geladen.": {
+      "en": "Resource planning shows personal data and credits; none of it is loaded without a sign-in.",
+      "fr": "La planification des ressources affiche des données personnelles et des crédits ; rien n'est chargé sans connexion.",
+      "it": "La pianificazione delle risorse mostra dati personali e crediti; senza accesso nulla viene caricato."
+    },
+    "Die aktiven Filter schliessen alle": {
+      "en": "The active filters exclude all",
+      "fr": "Les filtres actifs excluent les",
+      "it": "I filtri attivi escludono tutti i"
     },
     "Diese Ansicht teilen": {
       "en": "Share this view",
@@ -536,10 +481,10 @@
       "fr": "Mise en page d'impression",
       "it": "Layout di stampa"
     },
-    "durch": {
-      "en": "by",
-      "fr": "par",
-      "it": "da"
+    "E-Mail-Benachrichtigungen": {
+      "en": "E-mail notifications",
+      "fr": "Notifications par e-mail",
+      "it": "Notifiche e-mail"
     },
     "Ein Vorgang statt zwei Transaktionen: von, an, Betrag und Zeitraum ergeben einen Verlaufseintrag mit beiden Seiten.": {
       "en": "One operation instead of two transactions: from, to, amount and period make a single log entry carrying both sides.",
@@ -550,6 +495,11 @@
       "en": "Unit",
       "fr": "Unité",
       "it": "Unità"
+    },
+    "Einstellungen": {
+      "en": "Settings",
+      "fr": "Paramètres",
+      "it": "Impostazioni"
     },
     "Einstieg": {
       "en": "Start",
@@ -596,6 +546,11 @@
       "fr": "Champ",
       "it": "Campo"
     },
+    "Fertig": {
+      "en": "Done",
+      "fr": "Terminé",
+      "it": "Fatto"
+    },
     "Filter": {
       "en": "Filter",
       "fr": "Filtre",
@@ -616,11 +571,6 @@
       "fr": "Suite sur la feuille suivante",
       "it": "Continua sul foglio seguente"
     },
-    "frei": {
-      "en": "free",
-      "fr": "libre",
-      "it": "libero"
-    },
     "Freie Kapazität nach Quartal": {
       "en": "Free capacity by quarter",
       "fr": "Capacité libre par trimestre",
@@ -630,21 +580,6 @@
       "en": "Release pending",
       "fr": "Libération en attente",
       "it": "Sblocco in sospeso"
-    },
-    "Geändert": {
-      "en": "Changed",
-      "fr": "Modifié",
-      "it": "Modificato"
-    },
-    "gebucht auf": {
-      "en": "booked against",
-      "fr": "imputé sur",
-      "it": "imputato su"
-    },
-    "gebundene Mittel": {
-      "en": "committed funds",
-      "fr": "fonds engagés",
-      "it": "fondi vincolati"
     },
     "Gebundene Mittel nach Jahr der Realisierung": {
       "en": "Committed funds by year of construction",
@@ -661,6 +596,16 @@
       "fr": "Portefeuille global",
       "it": "Portafoglio complessivo"
     },
+    "Geändert": {
+      "en": "Changed",
+      "fr": "Modifié",
+      "it": "Modificato"
+    },
+    "Gilt für diese Anwendung und für E-Mails.": {
+      "en": "Applies to this application and to e-mails.",
+      "fr": "S'applique à cette application et aux e-mails.",
+      "it": "Vale per questa applicazione e per le e-mail."
+    },
     "Gruppieren nach": {
       "en": "Group by",
       "fr": "Grouper par",
@@ -676,45 +621,35 @@
       "fr": "Phase principale (ePPM)",
       "it": "Fase principale (ePPM)"
     },
-    "heruntergeladen": {
-      "en": "downloaded",
-      "fr": "téléchargé",
-      "it": "scaricato"
-    },
     "Heute": {
       "en": "Today",
       "fr": "Aujourd'hui",
       "it": "Oggi"
     },
-    "hoch": {
-      "en": "high",
-      "fr": "élevée",
-      "it": "alta"
+    "Höchste Auslastung des Bearbeitenden gegen die eigene Anstellung im dargestellten Zeitraum. Die Form trägt die Aussage, damit sie auch auf einer Fotokopie lesbar bleibt.": {
+      "en": "Highest workload of the assignee against their own contract over the period shown. The shape carries the message so it stays legible on a photocopy.",
+      "fr": "Charge maximale de la personne en charge par rapport à son propre taux d'engagement sur la période affichée. La forme porte le message afin qu'il reste lisible sur une photocopie.",
+      "it": "Carico massimo dell'incaricato rispetto al proprio grado di occupazione nel periodo rappresentato. La forma veicola il messaggio, così resta leggibile anche su una fotocopia."
     },
-    "Im ePPM öffnen": {
-      "en": "Open in ePPM",
-      "fr": "Ouvrir dans ePPM",
-      "it": "Apri in ePPM"
+    "Höchste Auslastung des Bearbeitenden im sichtbaren Zeitraum": {
+      "en": "Highest workload of the assignee in the visible period",
+      "fr": "Charge maximale de la personne en charge sur la période affichée",
+      "it": "Carico massimo dell'incaricato nel periodo visualizzato"
     },
-    "im gesetzten Umfang": {
-      "en": "in the current scope",
-      "fr": "dans le périmètre défini",
-      "it": "nell'ambito definito"
+    "Ihre Auslastung": {
+      "en": "Your workload",
+      "fr": "Votre charge",
+      "it": "Il vostro carico"
     },
     "Im Prototyp nicht hinterlegt.": {
       "en": "Not implemented in the prototype.",
       "fr": "Non implémenté dans le prototype.",
       "it": "Non implementato nel prototipo."
     },
-    "im Rahmen": {
-      "en": "within limits",
-      "fr": "dans les limites",
-      "it": "entro i limiti"
-    },
-    "im Soll": {
-      "en": "on target",
-      "fr": "conforme",
-      "it": "in linea"
+    "Im ePPM öffnen": {
+      "en": "Open in ePPM",
+      "fr": "Ouvrir dans ePPM",
+      "it": "Apri in ePPM"
     },
     "In Termine öffnen": {
       "en": "Open in Schedule",
@@ -756,15 +691,10 @@
       "fr": "Exporter ou partager la carte",
       "it": "Esporta o condividi la scheda"
     },
-    "kein Gate im Zeitraum": {
-      "en": "no gate in this period",
-      "fr": "aucun jalon dans la période",
-      "it": "nessun traguardo nel periodo"
-    },
-    "keine": {
-      "en": "none",
-      "fr": "aucun",
-      "it": "nessuno"
+    "Kein Bearbeitender zugewiesen — das Pensum kann noch auf keine Person gebucht werden.": {
+      "en": "No assignee — the workload cannot yet be booked to anyone.",
+      "fr": "Aucune personne en charge — la charge ne peut encore être imputée à personne.",
+      "it": "Nessun incaricato — il carico non può ancora essere imputato."
     },
     "Keine": {
       "en": "No",
@@ -781,25 +711,20 @@
       "fr": "Aucune personne trouvée.",
       "it": "Nessuna persona trovata."
     },
-    "Kein Bearbeitender zugewiesen — das Pensum kann noch auf keine Person gebucht werden.": {
-      "en": "No assignee — the workload cannot yet be booked to anyone.",
-      "fr": "Aucune personne en charge — la charge ne peut encore être imputée à personne.",
-      "it": "Nessun incaricato — il carico non può ancora essere imputato."
-    },
     "Klassifizierung: intern": {
       "en": "Classification: internal",
       "fr": "Classification : interne",
       "it": "Classificazione: interno"
     },
-    "knapp": {
-      "en": "tight",
-      "fr": "juste",
-      "it": "al limite"
-    },
     "Kontakt": {
       "en": "Contact",
       "fr": "Contact",
       "it": "Contatto"
+    },
+    "Konto": {
+      "en": "Account",
+      "fr": "Compte",
+      "it": "Account"
     },
     "Kopiert": {
       "en": "Copied",
@@ -835,16 +760,6 @@
       "en": "Culture and monuments",
       "fr": "Culture et monuments",
       "it": "Cultura e monumenti"
-    },
-    "laufendes Quartal, gesperrt": {
-      "en": "current quarter, locked",
-      "fr": "trimestre en cours, verrouillé",
-      "it": "trimestre corrente, bloccato"
-    },
-    "läuft weiter": {
-      "en": "continues",
-      "fr": "se poursuit",
-      "it": "prosegue"
     },
     "Letzte Änderungen": {
       "en": "Recent changes",
@@ -896,6 +811,11 @@
       "fr": "Jalon / gate",
       "it": "Traguardo / gate"
     },
+    "Meilensteine meiner Projekte": {
+      "en": "Milestones on my projects",
+      "fr": "Jalons de mes projets",
+      "it": "Milestone dei miei progetti"
+    },
     "Methodik": {
       "en": "Method",
       "fr": "Méthode",
@@ -916,15 +836,30 @@
       "fr": "Qui me sont attribués",
       "it": "Assegnati a me"
     },
-    "mittel": {
-      "en": "medium",
-      "fr": "moyenne",
-      "it": "media"
+    "Mit eIAM anmelden": {
+      "en": "Sign in with eIAM",
+      "fr": "Se connecter avec eIAM",
+      "it": "Accedi con eIAM"
     },
     "Monat": {
       "en": "Month",
       "fr": "Mois",
       "it": "Mese"
+    },
+    "Montags: Auslastung, überfällige Meilensteine, offene Zuweisungen.": {
+      "en": "Mondays: utilisation, overdue milestones, open assignments.",
+      "fr": "Le lundi : charge, jalons en retard, attributions ouvertes.",
+      "it": "Il lunedì: carico, milestone scadute, assegnazioni aperte."
+    },
+    "Nichts Offenes für Sie.": {
+      "en": "Nothing open for you.",
+      "fr": "Rien en attente pour vous.",
+      "it": "Nulla in sospeso per voi."
+    },
+    "Nullwerte ausblenden": {
+      "en": "Hide zeros",
+      "fr": "Masquer les zéros",
+      "it": "Nascondi gli zeri"
     },
     "Nächste Seite": {
       "en": "Next page",
@@ -936,40 +871,15 @@
       "fr": "Prochain jalon",
       "it": "Prossimo traguardo"
     },
-    "netto": {
-      "en": "net",
-      "fr": "net",
-      "it": "netto"
+    "Organisation": {
+      "en": "Organisation",
+      "fr": "Organisation",
+      "it": "Organizzazione"
     },
-    "nicht zugewiesen": {
-      "en": "unassigned",
-      "fr": "non attribué",
-      "it": "non assegnato"
-    },
-    "Nullwerte ausblenden": {
-      "en": "Hide zeros",
-      "fr": "Masquer les zéros",
-      "it": "Nascondi gli zeri"
-    },
-    "offen": {
-      "en": "open",
-      "fr": "ouvert",
-      "it": "aperto"
-    },
-    "ohne Filter": {
-      "en": "no filters",
-      "fr": "sans filtre",
-      "it": "senza filtri"
-    },
-    "ohne Bearbeitenden": {
-      "en": "no assignee",
-      "fr": "sans personne en charge",
-      "it": "senza incaricato"
-    },
-    "ok": {
-      "en": "ok",
-      "fr": "ok",
-      "it": "ok"
+    "PDF wird erstellt …": {
+      "en": "Creating PDF …",
+      "fr": "Création du PDF …",
+      "it": "Creazione del PDF …"
     },
     "Pensum": {
       "en": "Workload",
@@ -991,15 +901,15 @@
       "fr": "Charge en %",
       "it": "Carico in %"
     },
-    "Pensum in dieser Phase": {
-      "en": "Workload in this phase",
-      "fr": "Charge dans cette phase",
-      "it": "Carico in questa fase"
-    },
     "Pensum in FTE": {
       "en": "Workload in FTE",
       "fr": "Charge en EPT",
       "it": "Carico in ETP"
+    },
+    "Pensum in dieser Phase": {
+      "en": "Workload in this phase",
+      "fr": "Charge dans cette phase",
+      "it": "Carico in questa fase"
     },
     "Pensum je Projekt und Quartal": {
       "en": "Workload by project and quarter",
@@ -1011,11 +921,6 @@
       "fr": "Charge par trimestre",
       "it": "Carico per trimestre"
     },
-    "Pensum übernommen": {
-      "en": "Workload applied",
-      "fr": "Charge appliquée",
-      "it": "Carico applicato"
-    },
     "Pensum umbuchen": {
       "en": "Reallocate workload",
       "fr": "Réaffecter la charge",
@@ -1025,6 +930,11 @@
       "en": "Decrease workload",
       "fr": "Réduire la charge",
       "it": "Riduci il carico"
+    },
+    "Pensum übernommen": {
+      "en": "Workload applied",
+      "fr": "Charge appliquée",
+      "it": "Carico applicato"
     },
     "Person": {
       "en": "Person",
@@ -1041,15 +951,15 @@
       "fr": "Rechercher une personne — nom ou initiales",
       "it": "Cerca persona — nome o sigla"
     },
-    "Person über 100 % belegt, Überlast": {
-      "en": "Person booked over 100 %, over capacity",
-      "fr": "Personne occupée à plus de 100 %, surcharge",
-      "it": "Persona impegnata oltre il 100 %, sovraccarico"
-    },
     "Person wählen": {
       "en": "Choose person",
       "fr": "Choisir une personne",
       "it": "Scegli una persona"
+    },
+    "Person über 100 % belegt, Überlast": {
+      "en": "Person booked over 100 %, over capacity",
+      "fr": "Personne occupée à plus de 100 %, surcharge",
+      "it": "Persona impegnata oltre il 100 %, sovraccarico"
     },
     "Personen": {
       "en": "People",
@@ -1061,10 +971,25 @@
       "fr": "Personnes à plus de 100 %",
       "it": "Persone oltre il 100 %"
     },
+    "Pfad": {
+      "en": "Path",
+      "fr": "Chemin",
+      "it": "Percorso"
+    },
     "Phase": {
       "en": "Phase",
       "fr": "Phase",
       "it": "Fase"
+    },
+    "Phase (ePPM)": {
+      "en": "Phase (ePPM)",
+      "fr": "Phase (ePPM)",
+      "it": "Fase (ePPM)"
+    },
+    "Phase (ePPM) · Mehrfachauswahl": {
+      "en": "Phase (ePPM) · multiple selection",
+      "fr": "Phase (ePPM) · sélection multiple",
+      "it": "Fase (ePPM) · selezione multipla"
     },
     "Plantermin": {
       "en": "Planned date",
@@ -1075,11 +1000,6 @@
       "en": "Priority",
       "fr": "Priorité",
       "it": "Priorità"
-    },
-    "pro Seite": {
-      "en": "per page",
-      "fr": "par page",
-      "it": "per pagina"
     },
     "Prognose": {
       "en": "Forecast",
@@ -1121,15 +1041,15 @@
       "fr": "Direction de projet",
       "it": "Direzione del progetto"
     },
-    "Bearbeitenden zuweisen": {
-      "en": "Assign a person",
-      "fr": "Attribuer la personne en charge",
-      "it": "Assegna incaricato"
-    },
     "Prototyp, fiktive Inhalte — nur zur Demonstration": {
       "en": "Prototype, fictional content — for demonstration only",
       "fr": "Prototype, contenu fictif — à des fins de démonstration",
       "it": "Prototipo, contenuti fittizi — solo a scopo dimostrativo"
+    },
+    "Prototyp: die Anmeldung ist simuliert und lädt denselben fiktiven Datensatz wieder.": {
+      "en": "Prototype: the sign-in is simulated and reloads the same fictional data set.",
+      "fr": "Prototype : la connexion est simulée et recharge le même jeu de données fictif.",
+      "it": "Prototipo: l'accesso è simulato e ricarica lo stesso set di dati fittizio."
     },
     "Quartal": {
       "en": "quarter",
@@ -1137,6 +1057,11 @@
       "it": "trimestre"
     },
     "Quartale": {
+      "en": "quarters",
+      "fr": "trimestres",
+      "it": "trimestri"
+    },
+    "Quartalen": {
       "en": "quarters",
       "fr": "trimestres",
       "it": "trimestri"
@@ -1176,20 +1101,15 @@
       "fr": "Page",
       "it": "Pagina"
     },
-    "Phase (ePPM) · Mehrfachauswahl": {
-      "en": "Phase (ePPM) · multiple selection",
-      "fr": "Phase (ePPM) · sélection multiple",
-      "it": "Fase (ePPM) · selezione multipla"
+    "Sie sind abgemeldet": {
+      "en": "You are signed out",
+      "fr": "Vous êtes déconnecté",
+      "it": "Sei disconnesso"
     },
-    "Phase (ePPM)": {
-      "en": "Phase (ePPM)",
-      "fr": "Phase (ePPM)",
-      "it": "Fase (ePPM)"
-    },
-    "Teilphase (ePPM)": {
-      "en": "Sub-phase (ePPM)",
-      "fr": "Sous-phase (ePPM)",
-      "it": "Sottofase (ePPM)"
+    "Sobald ein Termin verschoben wird oder ein Auftrag hängig bleibt.": {
+      "en": "As soon as a date moves or an order stays pending.",
+      "fr": "Dès qu'une échéance est reportée ou qu'un mandat reste en suspens.",
+      "it": "Non appena una scadenza slitta o un incarico resta in sospeso."
     },
     "Soll": {
       "en": "Target",
@@ -1256,10 +1176,20 @@
       "fr": "Total",
       "it": "Totale"
     },
+    "Summe Total": {
+      "en": "Grand total",
+      "fr": "Total général",
+      "it": "Totale generale"
+    },
     "Teilen": {
       "en": "Share",
       "fr": "Partager",
       "it": "Condividi"
+    },
+    "Teilphase (ePPM)": {
+      "en": "Sub-phase (ePPM)",
+      "fr": "Sous-phase (ePPM)",
+      "it": "Sottofase (ePPM)"
     },
     "Teilportfolio": {
       "en": "Sub-portfolio",
@@ -1286,45 +1216,20 @@
       "fr": "Échéances",
       "it": "Scadenze"
     },
-    "tief": {
-      "en": "low",
-      "fr": "faible",
-      "it": "bassa"
-    },
-    "über Soll": {
-      "en": "above target",
-      "fr": "au-dessus du prévu",
-      "it": "oltre il previsto"
-    },
-    "Übergabe Bewirtschaftung": {
-      "en": "Handover to operations",
-      "fr": "Remise à l'exploitation",
-      "it": "Consegna alla gestione"
-    },
-    "Überlast": {
-      "en": "Over capacity",
-      "fr": "Surcharge",
-      "it": "Sovraccarico"
-    },
-    "Übernehmen": {
-      "en": "Apply",
-      "fr": "Appliquer",
-      "it": "Applica"
-    },
-    "Übersicht": {
-      "en": "Overview",
-      "fr": "Vue d'ensemble",
-      "it": "Panoramica"
-    },
-    "Übersicht auf diese Person filtern": {
-      "en": "Filter the overview to this person",
-      "fr": "Filtrer la vue d'ensemble sur cette personne",
-      "it": "Filtra la panoramica su questa persona"
+    "Termine als PDF": {
+      "en": "Schedule as PDF",
+      "fr": "Échéances en PDF",
+      "it": "Scadenze in PDF"
     },
     "Umbuchen": {
       "en": "Reallocate",
       "fr": "Réaffecter",
       "it": "Riassegna"
+    },
+    "Umbuchungen und Pensumsänderungen an Projekten, die ich führe.": {
+      "en": "Rebookings and pensum changes on projects I lead.",
+      "fr": "Transferts et modifications de taux sur les projets que je dirige.",
+      "it": "Riassegnazioni e modifiche di impegno sui progetti che dirigo."
     },
     "Umfang": {
       "en": "Scope",
@@ -1336,11 +1241,6 @@
       "fr": "Réaffecté",
       "it": "Riassegnato"
     },
-    "umgebucht auf": {
-      "en": "reallocated to",
-      "fr": "réaffecté à",
-      "it": "riassegnato a"
-    },
     "Vergabe erfolgt": {
       "en": "Contract awarded",
       "fr": "Adjudication effectuée",
@@ -1351,10 +1251,10 @@
       "fr": "Historique",
       "it": "Cronologia"
     },
-    "verschoben": {
-      "en": "postponed",
-      "fr": "reporté",
-      "it": "rinviato"
+    "Version 0.4 · Prototyp, fiktive Inhalte — nur zur Demonstration": {
+      "en": "Version 0.4 · Prototype, fictional content — for demonstration only",
+      "fr": "Version 0.4 · Prototype, contenus fictifs — à des fins de démonstration uniquement",
+      "it": "Versione 0.4 · Prototipo, contenuti fittizi — solo a scopo dimostrativo"
     },
     "Verwaltung": {
       "en": "Administration",
@@ -1365,11 +1265,6 @@
       "en": "Delay",
       "fr": "Retard",
       "it": "Ritardo"
-    },
-    "von": {
-      "en": "of",
-      "fr": "sur",
-      "it": "di"
     },
     "Von": {
       "en": "From",
@@ -1386,11 +1281,6 @@
       "fr": "Avant-projet approuvé",
       "it": "Progetto preliminare approvato"
     },
-    "wäre damit bei": {
-      "en": "would then be at",
-      "fr": "serait alors à",
-      "it": "sarebbe quindi a"
-    },
     "Weiter": {
       "en": "Continue",
       "fr": "Continuer",
@@ -1406,6 +1296,11 @@
       "fr": "Comment les chiffres de ce rapport sont établis",
       "it": "Come nascono le cifre di questo rapporto"
     },
+    "Wöchentliche Zusammenfassung": {
+      "en": "Weekly digest",
+      "fr": "Résumé hebdomadaire",
+      "it": "Riepilogo settimanale"
+    },
     "Zeitraum": {
       "en": "Period",
       "fr": "Période",
@@ -1415,6 +1310,11 @@
       "en": "Customs",
       "fr": "Douane",
       "it": "Dogana"
+    },
+    "Zu heute": {
+      "en": "To today",
+      "fr": "À aujourd'hui",
+      "it": "A oggi"
     },
     "Zugewiesen an": {
       "en": "Assigned to",
@@ -1446,155 +1346,260 @@
       "fr": "Retirer l'attribution",
       "it": "Revoca assegnazione"
     },
-    "Höchste Auslastung des Bearbeitenden im sichtbaren Zeitraum": {
-      "en": "Highest workload of the assignee in the visible period",
-      "fr": "Charge maximale de la personne en charge sur la période affichée",
-      "it": "Carico massimo dell'incaricato nel periodo visualizzato"
+    "ab": {
+      "en": "from",
+      "fr": "dès",
+      "it": "da"
     },
-    "Höchste Auslastung des Bearbeitenden gegen die eigene Anstellung im dargestellten Zeitraum. Die Form trägt die Aussage, damit sie auch auf einer Fotokopie lesbar bleibt.": {
-      "en": "Highest workload of the assignee against their own contract over the period shown. The shape carries the message so it stays legible on a photocopy.",
-      "fr": "Charge maximale de la personne en charge par rapport à son propre taux d'engagement sur la période affichée. La forme porte le message afin qu'il reste lisible sur une photocopie.",
-      "it": "Carico massimo dell'incaricato rispetto al proprio grado di occupazione nel periodo rappresentato. La forma veicola il messaggio, così resta leggibile anche su una fotocopia."
+    "ab 120 %": {
+      "en": "120 % and above",
+      "fr": "dès 120 %",
+      "it": "dal 120 %"
     },
-    "Überlast in": {
-      "en": "overload in",
-      "fr": "surcharge sur",
-      "it": "sovraccarico in"
+    "anzeigen": {
+      "en": "show",
+      "fr": "afficher",
+      "it": "mostra"
     },
-    "Quartalen": {
-      "en": "quarters",
-      "fr": "trimestres",
-      "it": "trimestri"
+    "bis 39 %": {
+      "en": "up to 39 %",
+      "fr": "jusqu'à 39 %",
+      "it": "fino al 39 %"
     },
-    "Ihre Auslastung": {
-      "en": "Your workload",
-      "fr": "Votre charge",
-      "it": "Il vostro carico"
+    "das Fenster ist zu schmal": {
+      "en": "the window is too narrow",
+      "fr": "la fenêtre est trop étroite",
+      "it": "la finestra è troppo stretta"
     },
-    "seit": {
-      "en": "since",
-      "fr": "depuis",
-      "it": "dal"
+    "davon extern beauftragt": {
+      "en": "of which contracted externally",
+      "fr": "dont mandaté à l'externe",
+      "it": "di cui affidato all'esterno"
     },
-    "Nichts Offenes für Sie.": {
-      "en": "Nothing open for you.",
-      "fr": "Rien en attente pour vous.",
-      "it": "Nulla in sospeso per voi."
+    "davon vor Baukredit-Freigabe": {
+      "en": "of which before construction credit release",
+      "fr": "dont avant libération du crédit de construction",
+      "it": "di cui prima dello sblocco del credito di costruzione"
     },
-    "Darstellung, Funktionalität und Inhalte dienen ausschliesslich der Demonstration; die verwendeten Daten sind fiktiv oder öffentlich zugänglich.": {
-      "en": "Presentation, functionality and content serve demonstration purposes only; the data used is fictitious or publicly available.",
-      "fr": "La présentation, les fonctionnalités et les contenus servent uniquement à la démonstration; les données utilisées sont fictives ou publiquement accessibles.",
-      "it": "Presentazione, funzionalità e contenuti servono unicamente a scopo dimostrativo; i dati utilizzati sono fittizi o pubblicamente accessibili."
+    "der Anstellung": {
+      "en": "of contract",
+      "fr": "du taux d'activité",
+      "it": "del grado di occupazione"
     },
-    "PDF wird erstellt …": {
-      "en": "Creating PDF …",
-      "fr": "Création du PDF …",
-      "it": "Creazione del PDF …"
+    "durch": {
+      "en": "by",
+      "fr": "par",
+      "it": "da"
     },
-    "Konto": {
-      "en": "Account",
-      "fr": "Compte",
-      "it": "Account"
+    "frei": {
+      "en": "free",
+      "fr": "libre",
+      "it": "libero"
     },
-    "Einstellungen": {
-      "en": "Settings",
-      "fr": "Paramètres",
-      "it": "Impostazioni"
+    "gebucht auf": {
+      "en": "booked against",
+      "fr": "imputé sur",
+      "it": "imputato su"
     },
-    "Angemeldet über eIAM": {
-      "en": "Signed in via eIAM",
-      "fr": "Connecté via eIAM",
-      "it": "Accesso tramite eIAM"
+    "gebundene Mittel": {
+      "en": "committed funds",
+      "fr": "fonds engagés",
+      "it": "fondi vincolati"
     },
-    "Sie sind abgemeldet": {
-      "en": "You are signed out",
-      "fr": "Vous êtes déconnecté",
-      "it": "Sei disconnesso"
+    "heruntergeladen": {
+      "en": "downloaded",
+      "fr": "téléchargé",
+      "it": "scaricato"
     },
-    "Die Ressourcenplanung zeigt Personendaten und Kredite; ohne Anmeldung wird nichts davon geladen.": {
-      "en": "Resource planning shows personal data and credits; none of it is loaded without a sign-in.",
-      "fr": "La planification des ressources affiche des données personnelles et des crédits ; rien n'est chargé sans connexion.",
-      "it": "La pianificazione delle risorse mostra dati personali e crediti; senza accesso nulla viene caricato."
+    "hoch": {
+      "en": "high",
+      "fr": "élevée",
+      "it": "alta"
     },
-    "Der Zugang wird über eIAM gesteuert. Berechtigungen, Kennwort und Zwei-Faktor-Anmeldung werden dort verwaltet, nicht in dieser Anwendung.": {
-      "en": "Access is governed by eIAM. Permissions, password and two-factor sign-in are managed there, not in this application.",
-      "fr": "L'accès est géré par eIAM. Les autorisations, le mot de passe et l'authentification à deux facteurs y sont gérés, pas dans cette application.",
-      "it": "L'accesso è gestito da eIAM. Autorizzazioni, password e autenticazione a due fattori sono gestite lì, non in questa applicazione."
+    "im Rahmen": {
+      "en": "within limits",
+      "fr": "dans les limites",
+      "it": "entro i limiti"
     },
-    "Mit eIAM anmelden": {
-      "en": "Sign in with eIAM",
-      "fr": "Se connecter avec eIAM",
-      "it": "Accedi con eIAM"
+    "im Soll": {
+      "en": "on target",
+      "fr": "conforme",
+      "it": "in linea"
     },
-    "Prototyp: die Anmeldung ist simuliert und lädt denselben fiktiven Datensatz wieder.": {
-      "en": "Prototype: the sign-in is simulated and reloads the same fictional data set.",
-      "fr": "Prototype : la connexion est simulée et recharge le même jeu de données fictif.",
-      "it": "Prototipo: l'accesso è simulato e ricarica lo stesso set di dati fittizio."
+    "im gesetzten Umfang": {
+      "en": "in the current scope",
+      "fr": "dans le périmètre défini",
+      "it": "nell'ambito definito"
     },
-    "E-Mail-Benachrichtigungen": {
-      "en": "E-mail notifications",
-      "fr": "Notifications par e-mail",
-      "it": "Notifiche e-mail"
+    "kein Gate im Zeitraum": {
+      "en": "no gate in this period",
+      "fr": "aucun jalon dans la période",
+      "it": "nessun traguardo nel periodo"
     },
-    "Meilensteine meiner Projekte": {
-      "en": "Milestones on my projects",
-      "fr": "Jalons de mes projets",
-      "it": "Milestone dei miei progetti"
+    "keine": {
+      "en": "none",
+      "fr": "aucun",
+      "it": "nessuno"
     },
-    "Sobald ein Termin verschoben wird oder ein Auftrag hängig bleibt.": {
-      "en": "As soon as a date moves or an order stays pending.",
-      "fr": "Dès qu'une échéance est reportée ou qu'un mandat reste en suspens.",
-      "it": "Non appena una scadenza slitta o un incarico resta in sospeso."
+    "knapp": {
+      "en": "tight",
+      "fr": "juste",
+      "it": "al limite"
     },
-    "Änderungen durch andere": {
-      "en": "Changes by others",
-      "fr": "Modifications par des tiers",
-      "it": "Modifiche di altri"
+    "laufendes Quartal": {
+      "en": "current quarter",
+      "fr": "trimestre en cours",
+      "it": "trimestre in corso"
     },
-    "Umbuchungen und Pensumsänderungen an Projekten, die ich führe.": {
-      "en": "Rebookings and pensum changes on projects I lead.",
-      "fr": "Transferts et modifications de taux sur les projets que je dirige.",
-      "it": "Riassegnazioni e modifiche di impegno sui progetti che dirigo."
+    "läuft weiter": {
+      "en": "continues",
+      "fr": "se poursuit",
+      "it": "prosegue"
     },
-    "Wöchentliche Zusammenfassung": {
-      "en": "Weekly digest",
-      "fr": "Résumé hebdomadaire",
-      "it": "Riepilogo settimanale"
+    "mittel": {
+      "en": "medium",
+      "fr": "moyenne",
+      "it": "media"
     },
-    "Montags: Auslastung, überfällige Meilensteine, offene Zuweisungen.": {
-      "en": "Mondays: utilisation, overdue milestones, open assignments.",
-      "fr": "Le lundi : charge, jalons en retard, attributions ouvertes.",
-      "it": "Il lunedì: carico, milestone scadute, assegnazioni aperte."
+    "netto": {
+      "en": "net",
+      "fr": "net",
+      "it": "netto"
     },
-    "Gilt für diese Anwendung und für E-Mails.": {
-      "en": "Applies to this application and to e-mails.",
-      "fr": "S'applique à cette application et aux e-mails.",
-      "it": "Vale per questa applicazione e per le e-mail."
+    "nicht zugewiesen": {
+      "en": "unassigned",
+      "fr": "non attribué",
+      "it": "non assegnato"
     },
     "noch nicht übersetzt": {
       "en": "not yet translated",
       "fr": "pas encore traduit",
       "it": "non ancora tradotto"
     },
-    "Berechtigungen, Kennwort und Zwei-Faktor-Anmeldung werden über eIAM verwaltet.": {
-      "en": "Permissions, password and two-factor sign-in are managed via eIAM.",
-      "fr": "Les autorisations, le mot de passe et l'authentification à deux facteurs sont gérés via eIAM.",
-      "it": "Autorizzazioni, password e autenticazione a due fattori sono gestite tramite eIAM."
+    "offen": {
+      "en": "open",
+      "fr": "ouvert",
+      "it": "aperto"
     },
-    "Fertig": {
-      "en": "Done",
-      "fr": "Terminé",
-      "it": "Fatto"
+    "ohne Bearbeitenden": {
+      "en": "no assignee",
+      "fr": "sans personne en charge",
+      "it": "senza incaricato"
     },
-    "Version 0.4 · Prototyp, fiktive Inhalte — nur zur Demonstration": {
-      "en": "Version 0.4 · Prototype, fictional content — for demonstration only",
-      "fr": "Version 0.4 · Prototype, contenus fictifs — à des fins de démonstration uniquement",
-      "it": "Versione 0.4 · Prototipo, contenuti fittizi — solo a scopo dimostrativo"
+    "ohne Filter": {
+      "en": "no filters",
+      "fr": "sans filtre",
+      "it": "senza filtri"
     },
-    "Pfad": {
-      "en": "Path",
-      "fr": "Chemin",
-      "it": "Percorso"
+    "ok": {
+      "en": "ok",
+      "fr": "ok",
+      "it": "ok"
+    },
+    "pro Seite": {
+      "en": "per page",
+      "fr": "par page",
+      "it": "per pagina"
+    },
+    "seit": {
+      "en": "since",
+      "fr": "depuis",
+      "it": "dal"
+    },
+    "tief": {
+      "en": "low",
+      "fr": "faible",
+      "it": "bassa"
+    },
+    "umgebucht auf": {
+      "en": "reallocated to",
+      "fr": "réaffecté à",
+      "it": "riassegnato a"
+    },
+    "verschoben": {
+      "en": "postponed",
+      "fr": "reporté",
+      "it": "rinviato"
+    },
+    "von": {
+      "en": "of",
+      "fr": "sur",
+      "it": "di"
+    },
+    "wäre damit bei": {
+      "en": "would then be at",
+      "fr": "serait alors à",
+      "it": "sarebbe quindi a"
+    },
+    "Änderung": {
+      "en": "Change",
+      "fr": "Modification",
+      "it": "Modifica"
+    },
+    "Änderungen durch andere": {
+      "en": "Changes by others",
+      "fr": "Modifications par des tiers",
+      "it": "Modifiche di altri"
+    },
+    "Übergabe Bewirtschaftung": {
+      "en": "Handover to operations",
+      "fr": "Remise à l'exploitation",
+      "it": "Consegna alla gestione"
+    },
+    "Überlast": {
+      "en": "Over capacity",
+      "fr": "Surcharge",
+      "it": "Sovraccarico"
+    },
+    "Überlast in": {
+      "en": "overload in",
+      "fr": "surcharge sur",
+      "it": "sovraccarico in"
+    },
+    "Übernehmen": {
+      "en": "Apply",
+      "fr": "Appliquer",
+      "it": "Applica"
+    },
+    "Übersicht": {
+      "en": "Overview",
+      "fr": "Vue d'ensemble",
+      "it": "Panoramica"
+    },
+    "Übersicht als PDF": {
+      "en": "Overview as PDF",
+      "fr": "Vue d'ensemble en PDF",
+      "it": "Panoramica in PDF"
+    },
+    "Übersicht auf diese Person filtern": {
+      "en": "Filter the overview to this person",
+      "fr": "Filtrer la vue d'ensemble sur cette personne",
+      "it": "Filtra la panoramica su questa persona"
+    },
+    "über Soll": {
+      "en": "above target",
+      "fr": "au-dessus du prévu",
+      "it": "oltre il previsto"
+    },
+    "— Pflicht bei jeder Umbuchung": {
+      "en": "— required for every reallocation",
+      "fr": "— obligatoire pour toute réaffectation",
+      "it": "— obbligatorio per ogni riassegnazione"
+    },
+    "— Pflicht bei Überlast": {
+      "en": "— required when over capacity",
+      "fr": "— obligatoire en cas de surcharge",
+      "it": "— obbligatorio in caso di sovraccarico"
+    },
+    "— nicht zugewiesen": {
+      "en": "— unassigned",
+      "fr": "— non attribué",
+      "it": "— non assegnato"
+    },
+    "— optional": {
+      "en": "— optional",
+      "fr": "— facultatif",
+      "it": "— facoltativo"
     }
   }
 }

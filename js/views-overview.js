@@ -272,7 +272,7 @@ function columnHeader(tpl, sticky, cols) {
       ${cols.map(period => sortHead(`q${period.quarters[0]}`, period.short, {
         cls: `pcell--num pcell--period ${period.isNow ? 'is-today' : ''} ${yearRule(period)}`,
         title: period.isNow
-          ? `${t('Heute')}, ${data.meta.todayLabel} — ${t('laufendes Quartal, gesperrt')}`
+          ? `${t('Heute')}, ${data.meta.todayLabel} — ${t('laufendes Quartal')}`
           : period.label
       }))}
       ${columnSet().trend && html`<span class="pcell--text">${t('Verlauf')}</span>`}

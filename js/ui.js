@@ -87,6 +87,7 @@ export const icons = {
   sortAsc: (s = 15) => ico('arrow-up-narrow-wide', s),
   sortDesc: (s = 15) => ico('arrow-down-wide-narrow', s),
   grid: (s = 15) => ico('layout-grid', s),
+  filter: (s = 15) => ico('funnel', s),
   download: (s = 15) => ico('download', s),
   externalLink: (s = 13) => ico('external-link', s)
 };
@@ -563,6 +564,22 @@ const GROUPS = [
  */
 
 
+/*
+ * A control names its subject, and prints a value only where that value would
+ * otherwise be invisible.
+ *
+ * «Sortierung: Projekt» prints one, because a sort key is a single choice that
+ * cannot be seen until the menu is open. A filter does not: what it is holding
+ * shows twice already, as the count on the button and as the named chips in the
+ * «Aktive Filter» row underneath. The funnel says what kind of control it is;
+ * the count says how much it is doing.
+ *
+ * Spelling the selection out on the button instead cost more than it returned.
+ * «Teilportfolio: 2 von 7» is four words for a fact the chips state by name,
+ * and four of them together overran the bar: at 1366px — the width this is
+ * built for — every button in the row was clipping 10 to 16 pixels of its own
+ * text, because .toolbar is nowrap and the buttons shrink to fit.
+ */
 export function toolbar({ attributes = true, exclude = [] } = {}) {
   const active = sortKey();
   const groupLabel = GROUPS.find(g => g.id === state.group)?.label ?? GROUPS[0].label;
@@ -594,7 +611,8 @@ export function toolbar({ attributes = true, exclude = [] } = {}) {
     <span class="toolbar__sep" aria-hidden="true"></span>
 
     ${dropdown({
-      id: 'portfolio', label: t('Teilportfolio'), count: state.portfolios.length, width: 276,
+      id: 'portfolio', lead: icons.filter(), label: t('Teilportfolio'),
+      count: state.portfolios.length, width: 276,
       body: html`${menuGroupLabel(t('Mehrfachauswahl'))}
         <div class="dd__bulk">
           <button type="button" data-act="bulk" data-kind="portfolios" data-val="all">${t('Alle')}</button>
@@ -605,7 +623,8 @@ export function toolbar({ attributes = true, exclude = [] } = {}) {
     })}
 
     ${dropdown({
-      id: 'phase', label: t('Phase'), count: state.phases.length, width: 284,
+      id: 'phase', lead: icons.filter(), label: t('Phase (ePPM)'),
+      count: state.phases.length, width: 284,
       body: html`${menuGroupLabel(t('Phase (ePPM) · Mehrfachauswahl'))}
         <div class="dd__bulk">
           <button type="button" data-act="bulk" data-kind="phases" data-val="all">${t('Alle')}</button>
@@ -616,7 +635,8 @@ export function toolbar({ attributes = true, exclude = [] } = {}) {
     })}
 
     ${dropdown({
-      id: 'organisation', label: t('Organisation'), count: state.organisations.length, width: 244,
+      id: 'organisation', lead: icons.filter(), label: t('Organisation'),
+      count: state.organisations.length, width: 244,
       body: html`${menuGroupLabel(t('Mehrfachauswahl'))}
         <div class="dd__bulk">
           <button type="button" data-act="bulk" data-kind="organisations" data-val="all">${t('Alle')}</button>
@@ -629,7 +649,8 @@ export function toolbar({ attributes = true, exclude = [] } = {}) {
     <span class="toolbar__sep" aria-hidden="true"></span>
 
     ${dropdown({
-      id: 'lead', label: t('Bearbeitender'), count: state.leads.length, width: 312,
+      id: 'lead', lead: icons.filter(), label: t('Bearbeitender'),
+      count: state.leads.length, width: 312,
       body: leadMenuBody()
     })}
 
@@ -732,7 +753,7 @@ export function timeControls() {
       <button type="button" class="btn btn--square" data-act="period" data-val="-1"
               ${attr(!canStep(-1), 'disabled')} aria-label="${t('Zurück')}">${icons.chevronLeft()}</button>
       <button type="button" class="btn" data-act="period" data-val="today"
-              ${attr(state.periodOffset === 0, 'disabled')}>${t('Heute')}</button>
+              ${attr(state.periodOffset === 0, 'disabled')}>${t('Zu heute')}</button>
       <button type="button" class="btn btn--square" data-act="period" data-val="1"
               ${attr(!canStep(1), 'disabled')} aria-label="${t('Weiter')}">${icons.chevronRight()}</button>
     </div>

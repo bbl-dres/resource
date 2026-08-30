@@ -713,7 +713,7 @@
           "Pensen"
         ],
         "summary": "Pensum setzen",
-        "description": "Pensum je Person und Quartal setzen. Verlangt `reason`, sobald die Person damit über ihren Anstellungsgrad kommt. Das laufende Quartal ist gesperrt.",
+        "description": "Pensum je Person und Quartal setzen. Verlangt `reason`, sobald die Person damit über ihren Anstellungsgrad kommt. Das laufende Quartal ist ebenfalls buchbar.",
         "operationId": "patchAllocations",
         "parameters": [
           {
@@ -777,7 +777,7 @@
             "$ref": "#/components/responses/Forbidden"
           },
           "422": {
-            "description": "Begründung fehlt, oder das Quartal ist gesperrt.",
+            "description": "Begründung fehlt.",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -931,7 +931,7 @@
           "Pensen"
         ],
         "summary": "Pensum eines Quartals entfernen",
-        "description": "Entfernt die Zuteilung. Das laufende Quartal ist gesperrt und antwortet mit 409.",
+        "description": "Entfernt die Zuteilung.",
         "operationId": "deleteAllocation",
         "parameters": [
           {
