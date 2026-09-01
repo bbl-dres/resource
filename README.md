@@ -18,12 +18,10 @@ Resource-planning prototype for the [Federal Office for Buildings and Logistics 
 
 **Live demo:** https://bbl-dres.github.io/resource/
 
-<table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
-  <tr>
-    <td width="50%" valign="top"><img src="assets/preview-1.jpg" alt="Resource planning workload overview" width="100%"/></td>
-    <td width="50%" valign="top"><img src="assets/preview-2.jpg" alt="Resource planning schedule" width="100%"/></td>
-  </tr>
-</table>
+<p align="center">
+  <img src="assets/preview-1.jpg" alt="Resource planning workload overview" width="49%"/>
+  <img src="assets/preview-2.jpg" alt="Resource planning schedule" width="49%"/>
+</p>
 
 ## Features
 
