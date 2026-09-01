@@ -9,10 +9,10 @@
 [![Demo](https://img.shields.io/badge/demo-GitHub%20Pages-2ea44f?logo=github&logoColor=white)](https://bbl-dres.github.io/resource/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-Resource-planning prototype for the [Federal Office for Buildings and Logistics (BBL)](https://www.bbl.admin.ch), connecting project demand, schedules, milestones, project leads, and team capacity.
-
 > [!CAUTION]
 > This is an unofficial demonstration prototype with fictional people, projects, and operational data. Edits remain in browser memory, the API view is a reference rather than a live service, and the app is not intended for production use.
+
+Resource-planning prototype for the [Federal Office for Buildings and Logistics (BBL)](https://www.bbl.admin.ch), connecting project demand, schedules, milestones, project leads, and team capacity.
 
 ## Demo
 
