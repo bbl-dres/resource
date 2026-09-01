@@ -6,6 +6,9 @@
   </a>
 </p>
 
+[![Demo](https://img.shields.io/badge/demo-GitHub%20Pages-2ea44f?logo=github&logoColor=white)](https://bbl-dres.github.io/resource/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 Resource-planning prototype for the [Federal Office for Buildings and Logistics (BBL)](https://www.bbl.admin.ch), connecting project demand, schedules, milestones, project leads, and team capacity.
 
 > [!CAUTION]
@@ -14,6 +17,13 @@ Resource-planning prototype for the [Federal Office for Buildings and Logistics 
 ## Demo
 
 **Live demo:** https://bbl-dres.github.io/resource/
+
+<table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+  <tr>
+    <td width="50%" valign="top"><img src="assets/preview-1.jpg" alt="Resource planning workload overview" width="100%"/></td>
+    <td width="50%" valign="top"><img src="assets/preview-2.jpg" alt="Resource planning schedule" width="100%"/></td>
+  </tr>
+</table>
 
 ## Features
 
