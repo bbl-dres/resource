@@ -329,12 +329,19 @@ export function popoverPosition(anchor, { width, height, x }) {
 }
 
 /** A person in a list to choose from: a mark, the name, and what they carry. */
-export function personOption({ id, name, meta = '', mark = '', selected = false, act, cls = '' }) {
+/*
+ * A person to choose: the name, and on the right the unit they sit in — the
+ * short form, with the name of the unit as the hint, since «Programm- und
+ * Projektentwicklung II» wrapped to two lines and squeezed the name. The
+ * load mark and the role used to be here too, and the users asked for them
+ * to go — who is free is a question for the Personen table, not for a list
+ * whose one job is to find a name.
+ */
+export function personOption({ id, name, meta = '', metaTitle = '', selected = false, act, cls = '' }) {
   return html`<li role="option" tabindex="-1" class="${cls} ${selected ? 'is-on' : ''}"
       aria-selected="${selected}" data-act="${act}" data-val="${id}">
-    ${mark && html`<span class="ampel ampel--${mark}" aria-hidden="true"></span>`}
     <span class="person__name">${name}</span>
-    ${meta && html`<span class="rebook__role">${meta}</span>`}
+    ${meta && html`<span class="rebook__role" title="${metaTitle}">${meta}</span>`}
   </li>`;
 }
 

@@ -910,8 +910,9 @@ h1, h2, h3,
 /* Editable at rest looks like any other value; the pointer and the hover say
    it is a control, which is as much as the reader asked to be told. */
 .leadbtn:hover { color: var(--color-text-link); text-decoration: underline solid; text-underline-offset: 3px; }
+/* Block-level, so it is exactly one line box tall and no row grows for it. */
 .lead-open {
-  display: inline-flex; align-items: center; gap: var(--space-3);
+  display: flex; align-items: center; gap: var(--space-3);
   font-style: italic;
 }
 .lead-open::before {
@@ -938,9 +939,16 @@ h1, h2, h3,
  * The bar plan is the other case: a bar spans columns, so reading where it ends
  * means projecting down from the heading. There the rules stay.
  */
+/*
+ * The fill spans the row, not a fixed 38px inside it. A row is 38px unless
+ * one of its frozen cells is taller — the «nicht zugewiesen» marker made a
+ * few 40px — and a 38px cell centred in a 40px row left a white hairline
+ * above and below the colour on exactly those rows, which read as a rule
+ * nobody had drawn.
+ */
 .pcell--val {
   justify-content: center; gap: 3px;
-  height: var(--row-height); padding: 0 var(--space-3);
+  align-self: stretch; min-height: var(--row-height); padding: 0 var(--space-3);
   border: 0;
   font-weight: var(--font-regular); cursor: default;
 }
@@ -1259,8 +1267,10 @@ button.pcell--val { cursor: pointer; }
   max-height: 176px; overflow-y: auto;
   border: var(--border-hairline) solid var(--color-border); border-radius: var(--radius);
 }
+/* The unit follows the name rather than sitting at the far edge: the right
+   edge of a list is where figures go, and this is a word. */
 .rebook__list li {
-  display: flex; align-items: center; justify-content: space-between; gap: var(--space-5);
+  display: flex; align-items: center; justify-content: flex-start; gap: var(--space-5);
   min-height: var(--control-height-xl); padding: var(--space-3) var(--space-6);
   border-bottom: var(--border-hairline) solid var(--color-border-subtle);
   font-size: var(--text-base); cursor: pointer;
@@ -1270,7 +1280,7 @@ button.pcell--val { cursor: pointer; }
 .rebook__list li.is-on {
   background: var(--color-surface-selected); color: var(--color-text-strong); font-weight: var(--font-semibold);
 }
-.rebook__role { color: var(--color-text-muted); font-size: var(--text-sm); font-weight: var(--font-regular); }
+.rebook__role { flex: 0 0 auto; white-space: nowrap; color: var(--color-text-muted); font-size: var(--text-sm); font-weight: var(--font-regular); }
 .rebook__empty { color: var(--color-text-muted); cursor: default; }
 .rebook__reason { padding: 0 var(--space-11) var(--space-8); }
 
@@ -2410,7 +2420,7 @@ button.pcell--val { cursor: pointer; }
 .pop--assign .dd__searchfield { margin: var(--space-6) 0 var(--space-5); }
 .assign__list { max-height: 232px; }
 .assign__list li { gap: var(--space-4); }
-.person__name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.person__name { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .assign__list .ampel { flex: 0 0 auto; }
 .assign__list li.is-on { background: var(--color-surface-selected); font-weight: var(--font-semibold); }
 .assign__list li:focus-visible { outline: var(--focus-ring); outline-offset: -2px; }

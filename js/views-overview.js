@@ -5,8 +5,8 @@
 
 import {
   data, state, t, num, fmt, unitSuffix, cellValue, projectDemand, isEdited, personUtilisation,
-  totals, loadStatus, heatStep, ampel, filteredProjects, groupProjects,
-  periods, periodValue, windowEdges, columnSet, coloured, nowIndex, compareDe, phaseOf
+  totals, loadStatus, heatStep, filteredProjects, groupProjects,
+  periods, periodValue, windowEdges, columnSet, coloured, compareDe, phaseOf
 } from './store.js';
 
 import {
@@ -454,29 +454,27 @@ export function assignPicker() {
   const { projectId, anchor, search = '' } = state.picking;
   const p = data.projectsById[projectId];
   const current = p.leadId ? data.peopleById[p.leadId] : null;
-  const now = nowIndex();
   const q = search.trim().toLowerCase();
+  const unit = person => data.organisationsById[person.organisation];
+  const unitOf = person => t(unit(person)?.label ?? '');
   const rows = data.people
-    .map(person => ({ person, a: ampel(person.id, { from: now, to: now }) }))
-    .filter(r => !q || `${r.person.name} ${r.person.role}`.toLowerCase().includes(q))
-    .sort((x, y) => x.a.pct - y.a.pct || compareDe(x.person.name, y.person.name));
+    .filter(person => !q || `${person.name} ${unitOf(person)}`.toLowerCase().includes(q))
+    .sort((x, y) => compareDe(x.name, y.name));
 
   return html`<div class="pop pop--assign" role="dialog" aria-modal="false" aria-label="${t('Bearbeitenden zuweisen')}"
       style="${popoverPosition(anchor, { width: PICK_WIDTH, height: PICK_HEIGHT, x: anchor.left })}">
     <div class="pop__kicker">${t('Bearbeitender')}</div>
     <div class="pop__who">${p.title}</div>
-    <div class="pop__what">${current
-      ? `${t('Aktuell')}: ${current.name} · ${personUtilisation(current.id, now)} %`
-      : t('Aktuell nicht zugewiesen')}</div>
+    <div class="pop__what">${current ? `${t('Aktuell')}: ${current.name}` : t('Aktuell nicht zugewiesen')}</div>
     ${personSearch({ act: 'pick-search', fk: 'pick-search', value: search, listId: 'pick-list' })}
     ${rows.length ? '' : html`<p class="rebook__empty">${t('Keine Person gefunden.')}</p>`}
     <ul class="rebook__list assign__list" id="pick-list" role="listbox" aria-label="${t('Person wählen')}">
-      ${rows.map(r => personOption({
-        id: r.person.id, name: r.person.name, mark: r.a.key, act: 'pick',
-        meta: `${t(r.person.role)} · ${r.a.pct} %`, selected: r.person.id === p.leadId
+      ${rows.map(person => personOption({
+        id: person.id, name: person.name, act: 'pick', selected: person.id === p.leadId,
+        meta: t(unit(person)?.short ?? ''), metaTitle: unitOf(person)
       }))}
       ${personOption({
-        id: '', mark: 'none', act: 'pick', selected: !p.leadId,
+        id: '', act: 'pick', selected: !p.leadId,
         name: html`<span class="assign__none">${t('Niemand zuweisen')}</span>`
       })}
     </ul>

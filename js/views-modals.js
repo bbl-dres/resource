@@ -363,7 +363,9 @@ function rebookModal({ projectId, q, amount, targetId, quarters = 2, search = ''
       ${candidates.length ? '' : html`<p class="rebook__empty">${t('Keine Person gefunden.')}</p>`}
       <ul class="rebook__list" id="rebook-list" role="listbox" aria-label="${t('Person wählen')}">
         ${candidates.map(c => personOption({
-          id: c.id, name: c.name, meta: t(c.role), act: 'rebook-target', selected: c.id === targetId
+          id: c.id, name: c.name, act: 'rebook-target', selected: c.id === targetId,
+          meta: t(data.organisationsById[c.organisation]?.short ?? ''),
+          metaTitle: t(data.organisationsById[c.organisation]?.label ?? '')
         }))}
       </ul>
     </div>
