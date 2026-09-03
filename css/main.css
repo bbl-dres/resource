@@ -2317,11 +2317,11 @@ button.pcell--val { cursor: pointer; }
   pointer-events: none;
 }
 .pband .gantt__gate { pointer-events: auto; }
+/* The bar too: under the figures it is the same control as in the bar plan. */
+.pband .gantt__bar { pointer-events: auto; }
 /* In the bar plan the bars are the controls, exactly as they were on the
    Termine tab. */
 .grid-card.is-values-off .pband { pointer-events: auto; }
-.grid-card:not(.is-values-off) .pband .gantt__bar { cursor: default; }
-.grid-card:not(.is-values-off) .pband .gantt__bar:hover { filter: none; }
 
 .pband .gantt__bar {
   height: var(--band-h);

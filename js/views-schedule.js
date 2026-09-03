@@ -337,22 +337,17 @@ function ganttBar(at, placed, cols, p, lay, gates, compact = false) {
   const full = t(phaseOf(b.phase).label);
   const pos = `left:${left}%;width:${width}%;padding-left:${inset}px`;
   /*
-   * Under the figures the bar is scenery: the cell above it is the control,
-   * and a bar that answered the pointer would take the bottom 14px of every
-   * cell away from the editor. So it is not a button there — a button that
-   * cannot be reached by pointer or by keyboard was still announced as one,
-   * five hundred times a grid — and not announced at all.
+   * The bar is the same control under the figures as in the bar plan: it
+   * carries its hint and opens the phase. It takes the bottom of the cell
+   * away from the editor, and the users chose that — whoever wants the whole
+   * cell back switches the bars off in the Ansicht menu. Under the figures it
+   * shows only its number; the name is one hover away.
    */
-  if (compact) {
-    return html`<span class="${cls}" style="${pos}" aria-hidden="true">
-      <span class="gantt__barlabel">${bandText(b, run)}</span>
-    </span>`;
-  }
   return html`<button type="button" class="${cls}" style="${pos}"
       data-act="open-phase" data-val="${p.id}:${b.from}"
       title="${barHint(b, p)}" aria-label="${p.title}: ${full}">
-    <span class="gantt__barlabel">${barText(b, run)}</span>
-    ${b.continues && html`<span class="gantt__more" aria-hidden="true">${icons.chevronRight(13)}</span>`}
+    <span class="gantt__barlabel">${compact ? bandText(b, run) : barText(b, run)}</span>
+    ${!compact && b.continues && html`<span class="gantt__more" aria-hidden="true">${icons.chevronRight(13)}</span>`}
   </button>`;
 }
 

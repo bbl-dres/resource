@@ -355,8 +355,8 @@ function projectRow(p, lay, cols, rowIdx) {
       /* With the figures switched off the cell is a slot for the band, not a
          control: nothing to read, nothing to edit. */
       const label = !L.values || (state.hideZeros && v === 0) ? '' : num(v);
-      /* With the band drawn under the figures, the cell is the only thing the
-         pointer can reach, so it says which phase runs in that quarter. */
+      /* With the band drawn under the figures, the cell names the phase that
+         runs in its quarter too — the same fact the bar below it carries. */
       const running = L.phases ? p.bars.find(b => b.from <= q && q < b.to) : null;
       const description = `${p.title} · ${lead ? lead.name : t('nicht zugewiesen')}, ${period.label}: ${num(v)}${unitSuffix()}`
         + (running ? ` · ${t(phaseOf(running.phase).label)}` : '')
