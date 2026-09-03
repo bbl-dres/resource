@@ -33,7 +33,8 @@ that way is the point.
 | 0 | `pdf.js` | Writes a PDF by walking rendered sheets |
 | 1 | `columns.js` | The column registry |
 | 2 | `ui.js` | The `html` template layer, and every shared control |
-| 3 | `views-overview.js`, `views-schedule.js`, `views-analysis.js`, `views-modals.js`, `export.js` | One view each |
+| 3 | `views-schedule.js` | The bar plan's row: bars and gates on a time track, and the band the grid draws under its figures |
+| 3 | `views-overview.js`, `views-analysis.js`, `views-modals.js`, `export.js` | One view each; the Planung grid imports the band from the row module |
 | 4 | `views-docs.js` | The printed sheets; reuses the Gantt row |
 | 5 | `app.js` | Boot, render loop, event dispatch |
 
@@ -89,6 +90,34 @@ A lock written as `el.disabled = true` protects nothing.
 Anything that collects DOM nodes and then `await`s must collect **after** the
 await and filter by `isConnected`.
 
+## The Planung tab and its views
+
+One tab draws both the pensum figures and the bar plan. The bar plan is a
+*band* inside each pensum row — `phaseBand()` in `views-schedule.js`, placed
+by the same `unitAt` arithmetic as the printed Gantt row — and what the row
+shows is a set of four **layers**: `values`, `phases`, `gates`, `today`.
+
+A **view** is a name for a set of layers (`VIEW_PRESETS` in `store.js`):
+Pensum, Pensum + Termine, Termine, and Individuell for any other combination.
+`state.view` and `state.layers` are always written together, through
+`viewPatch()` and `layerPatch()`; flipping a layer renames the view from what
+the layers now say, so the menu never claims a view it is not showing.
+`tab=schedule` in an old link resolves to Planung in the Termine view.
+
+The stylesheet reads the layers as classes on `.grid-card` (`is-values-off`,
+`is-bars-off`, `is-gates-off`, `is-uncoloured`) and derives everything else
+from two custom properties, `--band-h` and `--values-h`. Do not add a third
+arrangement rule; change one of the two numbers.
+
+Colouring by pensum (`state.colour`) is a switch of its own and means nothing
+while the figures are hidden — `coloured()` is the one place that says so.
+
+The chrome above the grid is measured for a 1366×768 laptop: one toolbar row
+carries the filters, the time steps and the «Ansicht» menu; the tabs share a
+line with the page actions; there is no breadcrumb bar and no page title.
+The measurements are in the comments of the last three sections of
+`main.css`, and in `docs/PLANUNG-MERGE.md`.
+
 ## Events
 
 One delegated listener. Controls carry `data-act` (and usually `data-val`), and
@@ -101,7 +130,8 @@ all, and every control needs clicking twice.
 ## State and the URL
 
 `state` is one object in `store.js`, mirrored into the URL hash so a view can be
-shared and reloaded. Every value read back from the hash is validated against
+shared and reloaded. The hash carries the view (`view=`), the layers only for
+Individuell (`layers=`), and the colouring only when it is off (`colour=none`). Every value read back from the hash is validated against
 `VOCAB`, a closed vocabulary — an unknown value falls back to the default rather
 than reaching a view.
 
@@ -110,9 +140,9 @@ history layer double-pushes. See “Still open” in `CODE-REVIEW-3.md`.
 
 ## Grids
 
-Both planning grids are CSS Grid, one grid per row, all rows sharing a single
-inline `grid-template-columns` string. Frozen columns are `position: sticky` with
-an inline `left`.
+The planning grid and the printed Gantt sheet are CSS Grid, one grid per row,
+all rows sharing a single inline `grid-template-columns` string. Frozen columns
+are `position: sticky` with an inline `left`.
 
 **`columns.js` is the registry.** One declaration per column — width, alignment,
 which tab shows it, how a cell renders, how it sorts, what the header says —

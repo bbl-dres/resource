@@ -25,10 +25,14 @@ export const data = {};
  * for — `#?group=colour` used to reach the toolbar and throw.
  */
 export const VOCAB = {
-  tab:     ['overview', 'schedule', 'dashboard', 'history', 'api', 'export'],
+  /* «schedule» is gone from the set but not from the world: readUrl() maps an
+     old link to the Planung tab in its Termine view. */
+  tab:     ['overview', 'dashboard', 'history', 'api', 'export'],
   lang:    ['de', 'en', 'fr', 'it'],
   scale:   ['year', 'quarter', 'month'],
   unit:    ['pct', 'fte'],
+  view:    ['pensum', 'both', 'termine', 'custom'],
+  colour:  ['pensum', 'none'],
   sortDir: ['asc', 'desc'],
   group:   ['portfolio', 'lead', 'phase', 'organisation', 'none'],
   bi:      ['general', 'people'],
@@ -48,6 +52,16 @@ const DEFAULT_STATE = {
   scale: 'quarter',
   periodOffset: 0,         // how far the visible window has been stepped
   unit: 'pct',             // pct | fte
+  /*
+   * What the planning grid draws. `view` is a name for a set of layers —
+   * VIEW_PRESETS below — and `layers` is the set itself; the two are always
+   * written together, so a switch that leaves a named set turns the view
+   * into «custom» on its own. `colour` is whether the figures carry the heat
+   * ramp; it means nothing while the figures are hidden.
+   */
+  view: 'pensum',          // see VOCAB.view
+  layers: { values: true, phases: false, gates: false, today: false },
+  colour: 'pensum',        // see VOCAB.colour
   sort: 'project',         // any key in SORT_KEYS, or q0…q7 for one quarter
   sortDir: 'asc',          // asc | desc
   group: 'none',           // portfolio | lead | phase | organisation | none
@@ -62,6 +76,7 @@ const DEFAULT_STATE = {
   hideZeros: false,
   // editing
   editing: null,           // { projectId, q }
+  picking: null,           // { projectId, anchor, search } — the Bearbeitender picker
   draft: 0,
   reason: '',
   overrides: {},           // 'projectId:q' -> value
@@ -101,8 +116,14 @@ const DEFAULT_STATE = {
  * needs enough master data to judge a number, the bar plan needs only enough to
  * find the row again.
  */
+/*
+ * The phase column starts off. The band under the figures already says «31»,
+ * and the column said «31 Vorprojekt» three pixels above it — the same fact
+ * twice, for 152px of a frozen block that took two thirds of a small laptop.
+ * It is one click away in the Ansicht menu.
+ */
 const COLUMN_DEFAULTS = {
-  overview: { title: true, phase: true, lead: true, ampel: false, credit: true,
+  overview: { title: true, phase: false, lead: true, ampel: false, credit: true,
               portfolio: false, priority: false, nextMs: false, target: false, trend: false },
   schedule: { title: true, phase: false, lead: false, ampel: false, credit: false,
               portfolio: false, priority: false, nextMs: false, target: false, trend: false }
@@ -110,8 +131,48 @@ const COLUMN_DEFAULTS = {
 
 export const state = {
   ...DEFAULT_STATE,
+  layers: { ...DEFAULT_STATE.layers },
   cols: { overview: { ...COLUMN_DEFAULTS.overview }, schedule: { ...COLUMN_DEFAULTS.schedule } }
 };
+
+/* -----------------------------------------------------------------------------
+   Views — three named sets of layers, and the fourth that is none of them
+   -------------------------------------------------------------------------- */
+
+export const LAYER_KEYS = ['values', 'phases', 'gates', 'today'];
+
+/*
+ * Of the sixteen combinations the switches allow, these are the three anyone
+ * asked for: the heat map, the bar plan with its today line, and both on one
+ * row. «Heute» belongs to the bar plan, which is why only Termine turns it on.
+ */
+export const VIEW_PRESETS = {
+  pensum:  { values: true,  phases: false, gates: false, today: false },
+  both:    { values: true,  phases: true,  gates: true,  today: false },
+  termine: { values: false, phases: true,  gates: true,  today: true }
+};
+
+/** The name of the set these layers are, or «custom» when they are none. */
+export function viewOf(layers = state.layers) {
+  const hit = Object.keys(VIEW_PRESETS).find(id =>
+    LAYER_KEYS.every(k => !!layers[k] === VIEW_PRESETS[id][k]));
+  return hit ?? 'custom';
+}
+
+/** The state patch that selects a view. «custom» changes nothing but the name. */
+export function viewPatch(view) {
+  const preset = VIEW_PRESETS[view];
+  return preset ? { view, layers: { ...preset } } : { view: 'custom' };
+}
+
+/** The state patch that flips one layer and renames the view to match. */
+export function layerPatch(key) {
+  const layers = { ...state.layers, [key]: !state.layers[key] };
+  return { layers, view: viewOf(layers) };
+}
+
+/** Are the figures coloured? Never while there are no figures to colour. */
+export const coloured = () => state.layers.values && state.colour === 'pensum';
 
 /**
  * Which set of switches the view in front of the reader is driven by.
@@ -151,8 +212,8 @@ export function setState(patch, opts = {}) {
 
 /** Close every transient overlay. Used by Escape and by outside-clicks. */
 export function closeOverlays() {
-  if (state.menu === null && state.modal === null && state.editing === null) return false;
-  setState({ menu: null, modal: null, editing: null });
+  if (state.menu === null && state.modal === null && state.editing === null && state.picking === null) return false;
+  setState({ menu: null, modal: null, editing: null, picking: null });
   return true;
 }
 
@@ -177,6 +238,20 @@ export function readUrl() {
     const v = p.get(key === 'sortDir' ? 'dir' : key);
     if (v && allowed.includes(v)) patch[key] = v;
   }
+  /* The old bar plan's address still opens the bar plan. */
+  if (p.get('tab') === 'schedule') { patch.tab = 'overview'; patch.view ??= 'termine'; }
+  /*
+   * A named view brings its layers; «custom» reads them off the hash and takes
+   * the default set for anything it does not name. A view named without its
+   * layers, or layers without a view, resolve to what the layers say.
+   */
+  if (patch.view === 'custom' || p.has('layers')) {
+    const on = list('layers');
+    patch.layers = Object.fromEntries(LAYER_KEYS.map(k => [k, on.includes(k)]));
+    patch.view = viewOf(patch.layers);
+  } else if (patch.view) {
+    patch.layers = { ...VIEW_PRESETS[patch.view] };
+  }
   if (isSortKey(p.get('sort'))) patch.sort = p.get('sort');
   if (p.get('from')) patch.periodOffset = Math.max(0, Number(p.get('from')) || 0);
   if (p.get('page')) patch.page = Math.max(1, Number(p.get('page')) || 1);
@@ -199,6 +274,9 @@ export function writeUrl() {
   if (state.tab === 'export' && state.report !== 'demand') p.set('report', state.report);
   if (state.lang !== 'de') p.set('lang', state.lang);
   if (state.unit !== 'pct') p.set('unit', state.unit);
+  if (state.view !== 'pensum') p.set('view', state.view);
+  if (state.view === 'custom') p.set('layers', LAYER_KEYS.filter(k => state.layers[k]).join(','));
+  if (state.colour !== 'pensum') p.set('colour', state.colour);
   if (state.scale !== 'quarter') p.set('scale', state.scale);
   if (state.periodOffset) p.set('from', String(state.periodOffset));
   if (state.sort !== 'project') p.set('sort', state.sort);

@@ -65,7 +65,31 @@ does this quarter fall”.
 
 **A phase bar is neutral.** Colour on a bar means an exception — delay, no lead —
 and nothing else. Phases are not colour-coded; a portfolio of eleven pastel
-categories tells the reader nothing they were looking for.
+categories tells the reader nothing they were looking for. Tried again as a
+«Farbe: Phase» switch in the September wireframe and dropped in review.
+
+**The bar plan is a view of the Planung grid, not a tab.** The bars and gates
+are a band inside the pensum row, drawn by the same code as the printed Gantt
+row. A view is a name for a set of layers (`VIEW_PRESETS`); the four switches
+stay for everyone else, and touching one turns the view into «Individuell» by
+itself. `state.view` and `state.layers` are written together, never apart.
+
+**The band derives its geometry from two numbers.** `--band-h` and
+`--values-h`, on `.grid-card`, switched by the classes the view sets. Every
+arrangement — figures over a strip, the strip alone at the bar plan's height,
+no strip at all — is arithmetic on the pair. An earlier draft wrote each one
+out as its own rule, and every new switch multiplied the ones already there.
+
+**Assigning a person is a popover on the cell, and the pick is the commit.** A
+single-select list has nothing to confirm; the change is logged like any
+other. The list is ordered by free capacity, because capacity is why one name
+is right and another is wrong. The rebooking dialog, which moves an amount
+over a period, keeps its form and its button.
+
+**The chrome above the grid is measured on a 1366×768 laptop.** One toolbar
+row, no breadcrumb bar, no page title, gaps of 20 / 8 / 24px above the first
+group heading (16 / 6 / 16 below 1440px). The figures behind each rule are in
+the last three sections of `main.css`; change the number, keep the comment.
 
 ---
 
@@ -114,6 +138,12 @@ application must not wear the colour that means one row's data is wrong.
 meaning, 24 px minimum target height. “Looks fine” has been wrong three times:
 the phase-bar border measured 1.38:1, the notice background 1.04:1 against the
 page, and a scroll fade 0.055 alpha.
+
+**The bar ground is a true neutral and the heat ramp has a chroma floor.** The
+two share a row now, and measured in CIE Lab the old ground sat dE 2.2 from
+the first ramp step — a step of the ramp, not a grey beside it. Both moved:
+`--color-bar-bg` to `#eeeeee`, the ramp to values at least dE 5.7 from it and
+from each other. The measurements are on the tokens.
 
 ---
 

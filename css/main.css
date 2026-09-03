@@ -279,29 +279,29 @@ button, input, select, textarea { font: inherit; color: inherit; }
 [data-scroll] { scrollbar-width: none; }
 [data-scroll]::-webkit-scrollbar { width: 0; height: 0; }
 
-.gantt__scroll, .capband__scroll { overflow-x: auto; }
+.gantt__scroll { overflow-x: auto; }
 .gantt__card.scrollbox { overflow: hidden; }
 
 .wrap { max-width: var(--layout-width); margin: 0 auto; padding-inline: var(--shell-pad-x); }
 /*
  * A table wants width, prose wants a measure. On a 1920 or 2560 screen the
- * planning grids were an island: 1440px used, 480 to 1120px empty. The landing
- * page and the API reference keep the narrower measure, where long lines cost
- * more than they buy.
+ * planning grid was an island: 1440px used, 480 to 1120px empty.
+ *
+ * One measure for every page that carries the toolbar. The dashboard used to
+ * keep the narrower one, and the toolbar — the same control row on every tab
+ * — changed width on the way there, which read as a different page rather
+ * than a different tab. Only the API reference stays at 1440px: it is prose,
+ * where long lines cost more than they buy.
  */
 :root[data-tab="overview"],
-:root[data-tab="schedule"],
-:root[data-tab="history"] { --layout-width: var(--layout-width-grid); }
+:root[data-tab="dashboard"],
+:root[data-tab="history"],
+:root[data-tab="export"] { --layout-width: var(--layout-width-grid); }
 
 /*
  * Ground rules: navy chrome, one white strip that answers "where am I", then a
  * grey canvas on which every white box is content. Three grounds, one meaning each.
  */
-.crumbbar {
-  background: var(--color-surface);
-  border-bottom: var(--border-hairline) solid var(--color-border);
-}
-.crumbbar .crumbs { min-height: var(--control-height-xl); }
 
 .shell-footer {
   margin-top: auto;
@@ -323,38 +323,6 @@ button, input, select, textarea { font: inherit; color: inherit; }
 
 .page-header { padding-block: var(--space-6) 0; }
 
-.crumbs {
-  display: flex; align-items: center; gap: var(--space-4); flex-wrap: wrap;
-  font-size: var(--text-base); color: var(--color-text-muted);
-}
-/*
- * Three slots — trail, banner, balance. Two equal flexible sides hold the banner
- * on the centre of the bar whatever the path says, in any language; the trail
- * truncates rather than running into it. Absolute centring could not yield: at
- * 1024px the French wording ran 40px into the breadcrumb.
- */
-.crumbs__trail {
-  display: flex; align-items: center; gap: var(--space-4);
-  flex: 1 1 0; min-width: 0;
-}
-/*
- * The right-hand slot: the counterweight for the centred edit banner, and the
- * data timestamp. It sits here rather than in the footer because a reader who
- * has scrolled six thousand pixels of plan has long since lost sight of how old
- * the numbers are — and that is the one fact the plan is worthless without.
- */
-.crumbs__stand {
-  flex: 1 1 0; min-width: 0;
-  text-align: right; white-space: nowrap;
-  overflow: hidden; text-overflow: ellipsis;
-  font-size: var(--text-sm); color: var(--color-text-muted);
-}
-.crumbs__current {
-  color: var(--color-text); font-weight: var(--font-semibold);
-  min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-.crumbs__link { display: inline-flex; align-items: center; min-height: var(--target-min); color: var(--color-text-secondary); text-decoration: none; }
-.crumbs__link:hover { color: var(--color-text-link); text-decoration: underline; text-underline-offset: 2px; }
 
 .page-header__row {
   display: flex; align-items: center; justify-content: space-between;
@@ -478,7 +446,7 @@ h1, h2, h3,
 
 .btn--square { width: var(--control-height); height: var(--control-height); padding: 0; justify-content: center; }
 .toolbar .btn, .timebar .btn, .sheetbar .btn { height: var(--control-height-lg); }
-.timebar .btn--square { width: var(--control-height-lg); height: var(--control-height-lg); }
+.toolbar .btn--square { width: var(--control-height-lg); height: var(--control-height-lg); }
 
 /*
  * A press has to register visually. With a full re-render on every click, a
@@ -732,7 +700,7 @@ h1, h2, h3,
  * Toolbar, filter summary and time scale are one cluster; spaced like the other
  * peers they read as four unrelated bars and cost 20px of a 800px laptop.
  */
-.toolbar + .filterbar, .filterbar + .timebar, .toolbar + .timebar,
+.toolbar + .filterbar,
 .filterbar + .sheetbar, .toolbar + .sheetbar { margin-top: calc(var(--space-5) - var(--space-8)); }
 
 .toolbar {
@@ -782,12 +750,6 @@ h1, h2, h3,
 }
 .dropped-note .icon { flex: 0 0 auto; }
 
-.timebar {
-  display: flex; align-items: center; justify-content: space-between;
-  gap: var(--space-8); flex-wrap: wrap;
-}
-.timebar__group { display: flex; align-items: center; gap: var(--space-4); }
-.timebar__nav { display: flex; align-items: center; gap: var(--space-4); }
 
 
 /* ==========================================================================
@@ -855,26 +817,26 @@ h1, h2, h3,
  * where the axis continues past the card. One strip per card, not one per
  * cell — drawn per cell it broke at every row separator.
  */
-.pblock, .gantt__card, .capband { position: relative; }
-.pblock::before, .gantt__card::before, .capband::before,
-.pblock::after, .gantt__card::after, .capband::after {
+.pblock, .gantt__card { position: relative; }
+.pblock::before, .gantt__card::before,
+.pblock::after, .gantt__card::after {
   content: ''; position: absolute; top: 0; bottom: 0;
   width: var(--scroll-edge-w);
   pointer-events: none; opacity: 0;
   z-index: var(--z-overlay);
 }
 /* Left: anchored to the right edge of the frozen pane. */
-.pblock::after, .gantt__card::after, .capband::after {
+.pblock::after, .gantt__card::after {
   left: var(--frozen-w);
   background: linear-gradient(to right, var(--scroll-edge), transparent);
 }
 /* Right: anchored to the card's own edge. */
-.pblock::before, .gantt__card::before, .capband::before {
+.pblock::before, .gantt__card::before {
   right: 0;
   background: linear-gradient(to left, var(--scroll-edge), transparent);
 }
 .pblock { --frozen-w: var(--sticky-w); }
-.gantt__card, .capband { --frozen-w: var(--gantt-lead); }
+.gantt__card { --frozen-w: var(--gantt-lead); }
 
 .has-less::after { opacity: 1; }
 .has-more::before { opacity: 1; }
@@ -1348,7 +1310,6 @@ button.pcell--val { cursor: pointer; }
  * centre of the bar rather than after the crumbs, so it does not move when the
  * path gets longer. Below the layout width it goes back into the flow.
  */
-.crumbbar .crumbs { position: relative; }
 
 /* ==========================================================================
    10 · Gantt
@@ -1405,7 +1366,7 @@ button.pcell--val { cursor: pointer; }
  * axis moved and the rows the reader was following moved with it. The offset is
  * inline, because which columns precede this one is a question of the menu.
  */
-.gantt__axislabel, .gantt__rowlabel, .capband__label {
+.gantt__axislabel, .gantt__rowlabel {
   position: sticky; z-index: var(--z-frozen);
   /* Full row height, or the bars and the today marker show through the gaps
      between rows — the same reason .is-frozen stretches in the pensum grid. */
@@ -1605,42 +1566,6 @@ button.pcell--val { cursor: pointer; }
 .diamond.is-late { background: var(--color-danger-solid); }
 .diamond.is-open { background: var(--color-surface); border: 2px solid var(--color-border-emphasis); }
 
-.capband {
-  border-radius: var(--radius-lg); background: var(--color-surface);
-  box-shadow: var(--shadow-raised); overflow: hidden;
-}
-.capband__row {
-  display: grid; grid-template-columns: var(--gantt-lead) minmax(0, 1fr);
-  min-height: 42px; align-items: stretch;
-  min-width: calc(var(--gantt-lead) + var(--gantt-cols, 8) * var(--grid-period));
-  background: var(--color-surface-frame);
-}
-/*
- * left: 0, and not only `sticky`.
- *
- * The shared rule above pins these three, but the offset is written inline by
- * pinLeft() — which the row labels get from the column registry and this one,
- * being a single cell over the whole lead, never did. Sticky with an offset of
- * auto does nothing horizontally, so the rule read as correct and the label
- * scrolled away with the plan: at 350px of scroll it stood at x = -322 while
- * every row label above it held at 28.
- */
-.capband__label {
-  display: flex; align-items: center; padding-left: var(--space-6);
-  left: 0;
-}
-.capband__title { font-size: var(--text-base); font-weight: var(--font-semibold); color: var(--color-text-strong); }
-.capband__cells { display: grid; grid-template-columns: repeat(var(--gantt-cols, 8), minmax(0, 1fr)); }
-.capband__cell {
-  display: flex; align-items: center; justify-content: center;
-  padding-inline: var(--space-3);
-  background: var(--color-neutral-bg); color: var(--color-neutral-fg);
-}
-.capband__cell.is-yearstart { border-left: var(--border-hairline) solid var(--color-border); }
-.capband__cell.is-danger  { background: var(--color-danger-bg); color: var(--color-danger-fg); }
-.capband__cell.is-warn    { background: var(--color-warn-bg);   color: var(--color-warn-fg); }
-.capband__cell.is-ok      { background: var(--color-ok-bg);     color: var(--color-ok-fg); }
-.capband__value { font-size: var(--text-base); font-weight: var(--font-semibold); }
 
 /* ==========================================================================
    11 · Dashboard
@@ -2196,7 +2121,6 @@ button.pcell--val { cursor: pointer; }
  */
 @media (max-height: 460px) and (orientation: landscape) {
   :root { --header-height: 48px; --tabbar-height: 34px; }
-  .crumbbar { display: none; }
   .page-header { padding-block: var(--space-4) 0; }
   .page-header__row { margin-top: var(--space-3); }
 }
@@ -2209,10 +2133,10 @@ button.pcell--val { cursor: pointer; }
   /* .crumbbar, not .crumbs: hiding the nav left its container's 1px bottom rule
      standing, which pushed the stack down by a pixel and spilled an empty
      twelfth page out of an eleven-sheet report. */
-  .shell-header, .tabs, .toolbar, .filterbar, .timebar, .toast, .shell-footer,
-  .page-header__actions, .sheetbar, .crumbbar { display: none !important; }
+  .shell-header, .tabs, .toolbar, .filterbar, .toast, .shell-footer,
+  .page-header__actions, .sheetbar { display: none !important; }
   body { background: var(--color-paper); }
-  .grid-card, .table-card, .bi-card, .gantt__card, .capband { break-inside: avoid; }
+  .grid-card, .table-card, .bi-card, .gantt__card { break-inside: avoid; }
 
   /* The paper mount is screen scaffolding; on paper the sheet is the page. */
   .mount { display: block; padding: 0; border: 0; background: none; overflow: visible; }
@@ -2328,4 +2252,230 @@ button.pcell--val { cursor: pointer; }
   .settings__langs { grid-template-columns: minmax(0, 1fr); }
   .signout { padding: var(--space-8) var(--space-6); }
   .signout__card { padding: var(--space-8); }
+}
+
+/* ==========================================================================
+   17 · The tab line
+   The tabs and the page actions share one line. The breadcrumb bar and the
+   title band that used to sit above the tabs cost 100px of a 630px laptop
+   window and said nothing the tab did not.
+   ========================================================================== */
+.tabline { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-8); }
+.tabline .tabs { margin-top: 0; }
+.tabline .page-header__actions { padding-bottom: var(--space-4); }
+
+/* ==========================================================================
+   18 · The phase band — the bar plan inside the pensum row
+
+   Two numbers, and everything else is arithmetic on them.
+
+   --band-h    how tall the bar is: a 14px strip under the figures, the bar
+               plan's own height once the figures are gone, nothing at all
+               once neither bars nor gates are drawn.
+   --values-h  how much of the row the figures claim: all of it bar the band,
+               or none of it when they are hidden.
+
+   Only the rules on .grid-card test a state — the classes the view sets for
+   what it switched off. The band, the bar, the figures and the ring around an
+   edited cell all derive their geometry from the pair, so a change to either
+   moves everything together and there is no combination of switches left to
+   forget. An earlier draft wrote each arrangement out as its own rule, and
+   every new switch multiplied the ones already there.
+   ========================================================================== */
+.grid-card {
+  --band-h: var(--band-height);
+  --band-lab-size: var(--text-2xs);
+  --band-lab-pad: var(--space-2);
+  --values-h: calc(100% - var(--band-h));
+}
+/* With the figures gone the bar has the row to itself, and it is then the
+   application's own bar rather than a strip squeezed under a number: height,
+   type size and indent all come from the tokens the bar plan uses. */
+.grid-card.is-values-off {
+  --values-h: 0%;
+  --band-h: var(--bar-height);
+  --band-lab-size: var(--text-xs);
+  --band-lab-pad: var(--space-4);
+}
+.grid-card.is-bars-off.is-gates-off { --band-h: 0px; }
+
+/* The band is positioned, not placed. As a grid item spanning the quarter
+   columns it was placed before the auto-placed cells and pushed every one of
+   them into an implicit column; out of flow there is nothing to collide with.
+   Its offset follows --sticky-w, the frozen block's own width, so it stays on
+   the axis when the Ansicht menu adds or removes a column. */
+.pgrid .prow { position: relative; }
+.pband {
+  position: absolute;
+  left: var(--sticky-w); right: 0;
+  /* It takes whatever the figures do not, and centres the bar inside that. */
+  top: var(--values-h); bottom: 0;
+  display: flex; align-items: center;
+  /* Under the frozen block, which must stay opaque over it. */
+  z-index: var(--z-base);
+  /* Pointer-transparent, so the cell under it stays the control; the gates
+     take their own hits back, at 11px in a 72px cell. */
+  pointer-events: none;
+}
+.pband .gantt__gate { pointer-events: auto; }
+/* In the bar plan the bars are the controls, exactly as they were on the
+   Termine tab. */
+.grid-card.is-values-off .pband { pointer-events: auto; }
+.grid-card:not(.is-values-off) .pband .gantt__bar { cursor: default; }
+.grid-card:not(.is-values-off) .pband .gantt__bar:hover { filter: none; }
+
+.pband .gantt__bar {
+  height: var(--band-h);
+  padding-inline: var(--band-lab-pad);
+  font-size: var(--band-lab-size); line-height: 1;
+  /* Four channels share the row — fill, number, band, gate — so the band is
+     drawn at the weight the grid uses for its own boundaries, and the number
+     keeps the eye. Not below the 3:1 a meaningful boundary needs. */
+  border-color: var(--color-border-emphasis);
+}
+.pband .gantt__bar.is-first { border-left-color: var(--color-border-emphasis); }
+.pband .gantt__bar.is-delay { border-color: var(--color-danger-solid); }
+.pband .gantt__bar.is-unassigned { border-color: var(--color-warn-solid); }
+.pband .gantt__gate { width: 20px; height: 20px; }
+
+/* The figure is centred in what the band leaves: pad the cell by the band's
+   height and let align-items do the arithmetic. */
+.pgrid .prow > .pcell--val { align-items: center; padding-bottom: var(--band-h); }
+
+/* Three layers, and only three. The switch hides the pensum VALUES: the
+   figures, the totals that are sums of them, and the editor they open. The
+   fill is not part of that layer — it belongs to «Pensum einfärben». */
+.grid-card.is-values-off .pgrid .prow > .pcell--val { pointer-events: none; cursor: default; }
+.grid-card.is-values-off .cellv { visibility: hidden; }
+.grid-card.is-uncoloured .pgrid .pcell--val { background: var(--color-surface); color: var(--color-text-body); }
+
+/* ---- «Heute», the bar plan's marker ---------------------------------------
+   It spans the project rows and nothing else; clipped sideways to the axis so
+   it cannot scroll out under the frozen block, open at the top so the badge
+   can reach above the first row. The colour is the application's own: «now»
+   is a position, not a problem, and red belongs to over-capacity alone. */
+.pgrid__rows { position: relative; }
+.ptoday {
+  position: absolute; top: 0; bottom: 0;
+  left: var(--sticky-w); right: 0;
+  clip-path: inset(-40px 0 0 0);
+  z-index: var(--z-overlay);
+  pointer-events: none;
+}
+.ptoday__line {
+  position: absolute; top: 0; bottom: 0; width: 2px;
+  background: var(--color-brand); z-index: var(--z-sticky);
+}
+/* Centred on the header/body boundary rather than sitting below it, so the
+   marker costs no vertical space of its own. */
+.ptoday__badge {
+  position: absolute; top: 0; transform: translate(-50%, -50%); z-index: var(--z-label);
+  padding: 1px var(--space-3); border-radius: var(--radius-pill);
+  background: var(--color-brand); color: var(--color-text-inverse);
+  font-size: var(--text-2xs); font-weight: var(--font-bold);
+  letter-spacing: var(--tracking-caption); white-space: nowrap;
+}
+
+/* ---- the cell being edited ------------------------------------------------
+   The ring used to close around the whole cell, which was right when the cell
+   held nothing but a number. It now also carries the band, so the ring takes
+   the number's own lane and stops above the bar; and the cell drops out of the
+   heat ramp while it is in flux — a value being changed is not a value you
+   should still be reading a magnitude off. The white ground yields the same
+   lane, or it painted over the bar underneath for as long as the popover was
+   open. */
+.pgrid .pcell--val.is-editing {
+  box-shadow: none;
+  background-color: transparent;
+  background-image: linear-gradient(to bottom,
+    var(--color-surface) var(--values-h), transparent var(--values-h));
+}
+.pgrid .pcell--val.is-editing::after {
+  content: ''; position: absolute; pointer-events: none;
+  inset: 0; bottom: var(--band-h);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--ring-cell-edit);
+}
+/* The picker marks its cell the same way. That one is frozen and has no band
+   under it, so the ring takes the whole cell — and it stays sticky: made
+   relative, its frozen offset turned into a shift over the quarter columns. */
+.pgrid .pcell--lead.is-editing {
+  position: sticky; z-index: calc(var(--z-frozen) + 1);
+  box-shadow: var(--ring-cell-edit); border-radius: var(--radius-sm);
+}
+
+/* ---- the Bearbeitender picker ---------------------------------------------
+   A popover on the cell, like the pensum editor; the list reuses the rebooking
+   dialog's rows. */
+.pop--assign { width: 336px; }
+.pop--assign .dd__searchfield { margin: var(--space-6) 0 var(--space-5); }
+.assign__list { max-height: 232px; }
+.assign__list li { gap: var(--space-4); }
+.assign__name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.assign__list .ampel { flex: 0 0 auto; }
+.assign__list li.is-current { background: var(--color-surface-selected); font-weight: var(--font-semibold); }
+.assign__list li:focus-visible { outline: var(--focus-ring); outline-offset: -2px; }
+.assign__none { color: var(--color-text-muted); font-style: italic; }
+
+/* ==========================================================================
+   19 · One row for the projects and the time; the small laptop
+   ========================================================================== */
+/* Search and filters on the left say WHICH projects; the steps and «Ansicht»
+   on the right say WHICH quarters and HOW the rows are drawn. The time bar
+   that used to hold the right half is gone, and with it 40px above the first
+   row. Measured: 1060px of controls at 1280 against 1233 available; below
+   1250px the row may still break, the time half taking a second line,
+   right-aligned. */
+@media (max-width: 1250px) {
+  .toolbar { flex-wrap: wrap; }
+  .toolbar__spacer { flex-basis: 100%; }
+  .toolbar__spacer + .btn { margin-left: auto; }
+}
+
+/* «Gruppieren nach:» is read, not seen, once the row cannot hold it. The full
+   toolbar measures 1310px and a 1366 window offers 1293, so the prefix yields
+   from 1400px down. Below that the button says only «Teilportfolio» beside a
+   filter that says the same; the grid icon and the title tell them apart. */
+@media (max-width: 1400px) {
+  .btn__prefix {
+    position: absolute; width: 1px; height: 1px; margin: -1px;
+    padding: 0; border: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+  }
+}
+
+/* The mockup is designed at 1440px and the first breakpoint above was 1100px.
+   A 1366×768 laptop sits in the gap, and at that width the first project row
+   began 355px down a window whose usable height, under a browser bar and a
+   taskbar, is about 630px. Nothing is removed; every band gives back what it
+   did not need. The tab bar takes the 34px the landscape-phone rule already
+   gives it, the control bars close up, the filter summary sits at the height
+   of a small control, and the group headings and the gaps between cards
+   shrink by a step. */
+@media (max-width: 1440px) {
+  :root { --shell-pad-x: 16px; --tabbar-height: 34px; }
+  .toolbar { gap: var(--space-3); }
+  .toolbar .btn { padding-inline: var(--space-5); }
+  .toolbar__check { padding-inline: var(--space-3); }
+  .page-header { padding-top: var(--space-4); }
+  .filterbar { min-height: var(--control-height-sm); }
+  .pgrouphead { padding-bottom: var(--space-3); }
+  .pgrouphead__toggle { min-height: var(--control-height-sm); }
+  .pblock + .pgroup, .pgroup + .pblock, .pgroup + .pgroup { margin-top: var(--space-10); }
+}
+
+/* ---- rhythm at the top ------------------------------------------------------
+   Four bands of different rank sat 10 to 16px apart, which read as one dense
+   block: the tabs, the toolbar, the filter readout and the first group
+   heading. The gaps now say what each band is. The tabs are page navigation,
+   so the toolbar stands 20px clear of their rule; the filter readout belongs
+   to the toolbar and stays close at 8px; the content starts at the group
+   heading, which gets the widest gap on the page, 24px. On a small laptop the
+   same shape at 16 / 6 / 16. */
+.content { padding-top: var(--space-10); }
+.toolbar + .filterbar { margin-top: calc(var(--space-4) - var(--space-8)); }
+.filterbar + .grid-card { margin-top: var(--space-4); }
+@media (max-width: 1440px) {
+  .content { padding-top: var(--space-8); gap: var(--space-6); }
+  .toolbar + .filterbar { margin-top: calc(var(--space-3) - var(--space-6)); }
+  .filterbar + .grid-card { margin-top: var(--space-2); }
 }

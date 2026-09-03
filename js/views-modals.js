@@ -95,14 +95,15 @@ function modalHead(kicker, title, meta = '') {
   </header>`;
 }
 
-/* One entry per dialog; app.js sets state.modal.type to one of these keys. */
+/* One entry per dialog; app.js sets state.modal.type to one of these keys.
+   Assigning a person is not one of them any more: it is a popover on the cell,
+   like the pensum editor — see assignPicker() in views-overview.js. */
 const MODALS = {
   settings: settingsModal,
   phase: phaseModal,
   milestone: milestoneModal,
   project: projectModal,
   share: shareModal,
-  assign: assignModal,
   rebook: rebookModal
 };
 
@@ -120,43 +121,6 @@ export function renderModal() {
  * The URL already carries tab, view, filters, grouping, unit and search, so the
  * share dialog only has to show it and make it easy to take.
  */
-/** Give a project a lead, or hand it to somebody else. */
-function assignModal({ projectId, search = '', targetId }) {
-  const project = data.projectsById[projectId];
-  const current = project.leadId ? data.peopleById[project.leadId] : null;
-  const query = search.trim().toLowerCase();
-  const candidates = data.people.filter(x => !query || x.name.toLowerCase().includes(query));
-
-  return html`
-    ${modalHead(t('Bearbeitender'), project.title, current
-      ? `${t('Aktuell')}: ${current.name} · ${personUtilisation(current.id, 0)} %`
-      : t('Aktuell nicht zugewiesen'))}
-
-    <div class="rebook__to">
-      <label class="dd__searchfield">
-        ${icons.search(15)}
-        <input type="search" role="combobox" aria-expanded="true" aria-controls="assign-list"
-               data-act="assign-search" data-fk="assign-search" value="${search}"
-               placeholder="${t('Person suchen')}" aria-label="${t('Person suchen')}" autocomplete="off">
-      </label>
-      <ul class="rebook__list" id="assign-list" role="listbox" aria-label="${t('Person wählen')}">
-        ${candidates.length ? candidates.map(c => html`<li role="option" tabindex="-1"
-            aria-selected="${c.id === targetId}" class="${c.id === targetId ? 'is-on' : ''}"
-            data-act="assign-target" data-val="${c.id}">
-          <span>${c.name}</span>
-          <span class="rebook__role">${c.role} · ${personUtilisation(c.id, 0)} %</span>
-        </li>`) : html`<li class="rebook__empty">${t('Keine Person gefunden.')}</li>`}
-      </ul>
-    </div>
-
-    <footer class="modal__foot">
-      ${current && html`<button type="button" class="btn btn--danger modal__foot-left"
-        data-act="assign-clear">${t('Zuweisung aufheben')}</button>`}
-      <button type="button" class="btn" data-act="close-modal">${t('Abbrechen')}</button>
-      <button type="button" class="btn btn--primary" data-act="assign-apply" ${attr(!targetId, 'disabled')}>${t('Zuweisen')}</button>
-    </footer>`;
-}
-
 function shareModal({ copied }) {
   return html`
     ${modalHead(t('Teilen'), t('Diese Ansicht teilen'))}
@@ -343,7 +307,7 @@ function projectModal({ projectId }) {
     </section>` : ''}
 
     <footer class="modal__foot">
-      <button type="button" class="btn" data-act="open-schedule" data-val="${p.id}">${t('In Termine öffnen')}</button>
+      <button type="button" class="btn" data-act="open-schedule" data-val="${p.id}">${t('Termine anzeigen')}</button>
       <button type="button" class="btn btn--primary" data-act="noop">${t('Im ePPM öffnen')}</button>
     </footer>`;
 }

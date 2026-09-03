@@ -6,8 +6,8 @@
    ============================================================================= */
 
 import {
-  data, state, t, activeFilters, kpis, filteredProjects, sortKey, canStep, notifications,
-  columnSet, ampel
+  data, state, t, activeFilters, kpis, filteredProjects, canStep, notifications,
+  columnSet, ampel, coloured
 } from './store.js';
 import { toggleableColumns } from './columns.js';
 import { icon } from './icons.js';
@@ -229,11 +229,11 @@ export function badge(n) {
  * A dropdown trigger + panel. `body` is the panel content.
  * `id` doubles as the state.menu key.
  */
-export function dropdown({ id, label, lead, count, width = 244, align = 'left', body, cls = '' }) {
+export function dropdown({ id, label, lead, count, width = 244, align = 'left', body, cls = '', title = '' }) {
   const open = state.menu === id;
   return html`<div class="dd ${cls}" data-menu="${id}">
     <button type="button" class="btn ${open ? 'is-open' : ''}" data-act="menu" data-val="${id}"
-            aria-expanded="${open}" aria-haspopup="menu">
+            aria-expanded="${open}" aria-haspopup="menu" ${title && raw(`title="${esc(title)}"`)}>
       ${lead ?? ''}${label}${count ? badge(count) : ''}${icons.chevronDown()}
     </button>
     ${open && menuPanel({ align, width, body })}
@@ -250,11 +250,13 @@ export function menuPanel({ align = 'left', width = 244, body, label }) {
 }
 
 /*
- * The one line that names a whole dropdown, at the top of its panel — never a
- * section head inside it. Labelled runs made a menu read as a form with
- * headings rather than as a list of choices, so the reader had to take in the
- * structure before the options. Where a run needed naming, the items were
- * renamed instead: «Daten als CSV» rather than «Daten» above «CSV».
+ * The one line that names a whole dropdown, at the top of its panel. A filter
+ * menu never carries a second one: labelled runs made it read as a form with
+ * headings rather than as a list of choices, so where a run needed naming the
+ * items were renamed instead — «Daten als CSV» rather than «Daten» above
+ * «CSV». The Ansicht menu is the exception, and deliberately so: it holds
+ * four subjects that used to be four controls, and the label is what keeps
+ * «Termine» the view apart from «Meilensteine» the layer.
  */
 export function menuGroupLabel(text) {
   return html`<div class="dd__grouplabel">${text}</div>`;
@@ -267,9 +269,15 @@ export function menuRadio(label, checked, act, val, meta) {
   </button>`;
 }
 
-export function menuCheckbox(label, on, act, val, meta) {
+/*
+ * A switch that cannot apply right now is greyed rather than hidden, so the
+ * reader can see what would come back — «Pensum einfärben» while the figures
+ * are off. Disabled for real: a greyed control that still answers is worse
+ * than one that ignores you.
+ */
+export function menuCheckbox(label, on, act, val, meta, { disabled = false } = {}) {
   return html`<button type="button" class="dd__item" role="menuitemcheckbox" aria-checked="${on}"
-      data-act="${act}" data-val="${val}">
+      data-act="${act}" data-val="${val}" ${attr(disabled, 'aria-disabled="true" disabled')}>
     <span>${label}</span>${meta && html`<span class="dd__meta">${meta}</span>`}${pillSwitch(on)}
   </button>`;
 }
@@ -296,9 +304,12 @@ export function divider() { return html`<div class="dd__divider"></div>`; }
    Application shell
    -------------------------------------------------------------------------- */
 
+/*
+ * «Übersicht» and «Termine» were two tabs over the same rows. They are one tab
+ * now, and the bar plan is a view of it — see VIEW_PRESETS in store.js.
+ */
 const TABS = [
-  { id: 'overview', label: 'Übersicht' },
-  { id: 'schedule', label: 'Termine' },
+  { id: 'overview', label: 'Planung' },
   { id: 'dashboard', label: 'Dashboard' },
   { id: 'history', label: 'Verlauf' }
 ];
@@ -467,30 +478,27 @@ export function expandableSearch({ placeholder }) {
   </div>`;
 }
 
-export function pageHeader({ crumbs, title, actions = [], chrome = true }) {
-  return html`
-    <div class="crumbbar">
-      <div class="wrap crumbs">
-        <nav class="crumbs__trail" aria-label="${t('Pfad')}">${crumbs.map((c, i) => {
-          const last = i === crumbs.length - 1;
-          const sep = i > 0 ? html`<span aria-hidden="true">›</span>` : '';
-          // Everything above the current level returns to the entry page, which
-          // is the application root — so it is a real href, not just a handler.
-          return html`${sep}${last
-            ? html`<span class="crumbs__current" aria-current="page">${t(c)}</span>`
-            : html`<a class="crumbs__link" href="." data-act="home"
-                title="${t('Zur Einstiegsseite, ohne Filter')}">${t(c)}</a>`}`;
-        })}</nav>
-        <span class="crumbs__stand">${t('Datenstand ePPM')}: ${data.meta.asOf}</span>
-      </div>
-    </div>
-    <div class="wrap page-header">
-      <div class="page-header__row">
-        <h1 class="page-title">${t(title)}</h1>
-        <div class="page-header__actions">${actions}</div>
-      </div>
-      ${chrome && tabBar()}
-    </div>`;
+/*
+ * The head of a page: the tabs and the page actions on one line.
+ *
+ * The breadcrumb bar and the title band above them are gone. Measured on a
+ * 1366×768 laptop, the two cost 100px of a window that has about 630 to give,
+ * and said nothing the tab did not — «Bauprojekte › Übersicht» over a tab
+ * called «Übersicht», and «Ressourcenplanung» under a header that already
+ * carries the name. The data timestamp they held moved to the footer.
+ *
+ * A page without tabs — the export and the API reference — keeps a title
+ * row, because there the title is the only thing that says where you are.
+ */
+export function pageHeader({ title, actions = [], chrome = true }) {
+  return html`<div class="wrap page-header">
+    ${chrome
+      ? html`<div class="tabline">${tabBar()}<div class="page-header__actions">${actions}</div></div>`
+      : html`<div class="page-header__row">
+          <h1 class="page-title">${t(title)}</h1>
+          <div class="page-header__actions">${actions}</div>
+        </div>`}
+  </div>`;
 }
 
 /**
@@ -515,14 +523,14 @@ export function exportMenu() {
       ${exportItem('csv', t('Daten als CSV'))}
       ${exportItem('xlsx', t('Daten als Excel'))}
       ${divider()}
-      ${exportItem('pdf-demand', t('Übersicht als PDF'))}
+      ${exportItem('pdf-demand', t('Pensum als PDF'))}
       ${exportItem('pdf-schedule', t('Termine als PDF'))}
     </div>`}
   </div>`;
 }
 
 export function tabBar() {
-  return html`<nav class="tabs" aria-label="${t('Ansichten')}">
+  return html`<nav class="tabs" aria-label="${t('Bereiche')}">
     ${TABS.map(tab => {
       const current = state.tab === tab.id;
       return html`<a class="tabs__tab ${current ? 'is-active' : ''}" href="#?tab=${tab.id}"
@@ -549,7 +557,6 @@ export function kpiStrip() {
    Toolbar — search, sort, group, filters, attributes
    -------------------------------------------------------------------------- */
 
-const SORTS = ['project', 'id', 'phase', 'lead', 'credit', 'q0'];
 const GROUPS = [
   { id: 'none', label: 'Keine' },
   { id: 'lead', label: 'Bearbeitender' },
@@ -568,20 +575,27 @@ const GROUPS = [
  * A control names its subject, and prints a value only where that value would
  * otherwise be invisible.
  *
- * «Sortierung: Projekt» prints one, because a sort key is a single choice that
- * cannot be seen until the menu is open. A filter does not: what it is holding
- * shows twice already, as the count on the button and as the named chips in the
- * «Aktive Filter» row underneath. The funnel says what kind of control it is;
- * the count says how much it is doing.
+ * «Gruppieren nach: Teilportfolio» prints one, because a grouping is a single
+ * choice that cannot be seen until the menu is open. A filter does not: what
+ * it is holding shows twice already, as the count on the button and as the
+ * named chips in the «Aktive Filter» row underneath. The funnel says what kind
+ * of control it is; the count says how much it is doing.
  *
  * Spelling the selection out on the button instead cost more than it returned.
  * «Teilportfolio: 2 von 7» is four words for a fact the chips state by name,
  * and four of them together overran the bar: at 1366px — the width this is
  * built for — every button in the row was clipping 10 to 16 pixels of its own
  * text, because .toolbar is nowrap and the buttons shrink to fit.
+ *
+ * No sort menu. The column headers sort, and a menu that said the same thing
+ * a second way was 150px of the row.
+ *
+ * The row has three subjects, left to right: WHICH projects (search, grouping,
+ * filters), WHICH quarters (the steps beside «Zu heute») and HOW the rows are
+ * drawn («Ansicht»). The time controls used to be a bar of their own under
+ * this one; folded in they give back 40px above the first row.
  */
-export function toolbar({ attributes = true, exclude = [] } = {}) {
-  const active = sortKey();
+export function toolbar({ time = false, view = false, columns = false, exclude = [] } = {}) {
   const groupLabel = GROUPS.find(g => g.id === state.group)?.label ?? GROUPS[0].label;
   const mine = data.meta.user.personId;
   const minesOnly = state.leads.length === 1 && state.leads[0] === mine;
@@ -590,20 +604,11 @@ export function toolbar({ attributes = true, exclude = [] } = {}) {
     ${expandableSearch({ placeholder: 'Projekt, ID oder Person' })}
 
     ${dropdown({
-      id: 'sort',
-      // The direction is a glyph, but it still has to be announced.
-      lead: html`${state.sortDir === 'desc' ? icons.sortDesc() : icons.sortAsc()}
-        <span class="sr-only">${t(state.sortDir === 'desc' ? 'absteigend' : 'aufsteigend')}</span>`,
-      label: `${t('Sortierung')}: ${t(active.label)}`, width: 244,
-      body: html`${menuGroupLabel(t('Sortieren nach'))}
-        ${SORTS.map(k => menuRadio(t(sortKey(k).label), state.sort === k, 'sort', k))}
-        ${divider()}
-        ${menuRadio(t('Aufsteigend'), state.sortDir === 'asc', 'sort-dir', 'asc')}
-        ${menuRadio(t('Absteigend'), state.sortDir === 'desc', 'sort-dir', 'desc')}`
-    })}
-
-    ${dropdown({
-      id: 'group', lead: icons.grid(), label: `${t('Gruppieren nach')}: ${t(groupLabel)}`, width: 288,
+      id: 'group', lead: icons.grid(), width: 288,
+      /* The prefix yields on a small laptop and stays in the accessible name;
+         the value is the part a reader has to see. */
+      label: html`<span class="btn__prefix">${t('Gruppieren nach')}:</span><span>${t(groupLabel)}</span>`,
+      title: `${t('Gruppieren nach')}: ${t(groupLabel)}`,
       body: html`${menuGroupLabel(t('Gruppieren nach'))}
         ${GROUPS.map(g => menuRadio(t(g.label), state.group === g.id, 'group', g.id))}`
     })}
@@ -661,18 +666,84 @@ export function toolbar({ attributes = true, exclude = [] } = {}) {
 
     <span class="toolbar__spacer"></span>
 
-    ${attributes && dropdown({
-      id: 'attr', label: t('Attribute'), width: 296, align: 'right',
-      body: html`<div class="dd__segmented">
-          ${segmented([{ value: 'pct', label: 'Pensum %' }, { value: 'fte', label: 'FTE' }], state.unit, 'unit')}
-        </div>
+    ${time && html`
+      <button type="button" class="btn btn--square" data-act="period" data-val="-1"
+              ${attr(!canStep(-1), 'disabled')} aria-label="${t('Zurück')}">${icons.chevronLeft()}</button>
+      <button type="button" class="btn" data-act="period" data-val="today"
+              ${attr(state.periodOffset === 0, 'disabled')}>${t('Zu heute')}</button>
+      <button type="button" class="btn btn--square" data-act="period" data-val="1"
+              ${attr(!canStep(1), 'disabled')} aria-label="${t('Weiter')}">${icons.chevronRight()}</button>
+      <span class="toolbar__sep" aria-hidden="true"></span>`}
+
+    ${view && dropdown({
+      id: 'view', label: t('Ansicht'), width: 296, align: 'right', body: viewMenuBody(exclude)
+    })}
+
+    ${columns && dropdown({
+      id: 'columns', label: t('Spalten'), width: 296, align: 'right',
+      body: html`${unitSwitch()}
         ${divider()}
-        ${toggleableColumns().filter(c => !exclude.includes(c.id))
-          .map(c => menuCheckbox(t(c.label), !!columnSet()[c.id], 'toggle-col', c.id))}
+        ${columnSwitches(exclude)}
         ${divider()}
         ${menuCheckbox(t('Nullwerte ausblenden'), state.hideZeros, 'toggle-flag', 'hideZeros')}`
     })}
   </div>`;
+}
+
+/* -----------------------------------------------------------------------------
+   The Ansicht menu — what the planning grid draws, in one place
+   -------------------------------------------------------------------------- */
+
+const VIEWS = [
+  { id: 'pensum', label: 'Pensum' },
+  { id: 'both', label: 'Pensum + Termine' },
+  { id: 'termine', label: 'Termine' },
+  { id: 'custom', label: 'Individuell' }
+];
+const LAYERS = [
+  { id: 'values', label: 'Pensumwerte' },
+  { id: 'phases', label: 'Phasenbalken' },
+  { id: 'gates', label: 'Meilensteine' },
+  { id: 'today', label: 'Heute' }
+];
+const SCALES = [
+  { value: 'year', label: 'Jahr' },
+  { value: 'quarter', label: 'Quartal' },
+  { value: 'month', label: 'Monat' }
+];
+
+const unitSwitch = () => html`<div class="dd__segmented">
+  ${segmented([{ value: 'pct', label: 'Pensum %' }, { value: 'fte', label: 'FTE' }], state.unit, 'unit')}
+</div>`;
+
+const columnSwitches = exclude => toggleableColumns().filter(c => !exclude.includes(c.id))
+  .map(c => menuCheckbox(t(c.label), !!columnSet()[c.id], 'toggle-col', c.id));
+
+/*
+ * Four subjects that used to be four controls: the view, what it is made of,
+ * how the figures are set, and which columns and which time scale frame them.
+ * The layer switches show only while «Individuell» is chosen — a named view
+ * already says what they would say — and «Pensum einfärben» greys out while
+ * there are no figures to colour.
+ */
+function viewMenuBody(exclude = []) {
+  const noFigures = !state.layers.values;
+  return html`${menuGroupLabel(t('Ansicht'))}
+    ${VIEWS.map(v => menuRadio(t(v.label), state.view === v.id, 'view', v.id))}
+    ${state.view === 'custom' && html`${divider()}
+      ${menuGroupLabel(t('Ebenen'))}
+      ${LAYERS.map(l => menuCheckbox(t(l.label), !!state.layers[l.id], 'toggle-layer', l.id))}`}
+    ${divider()}
+    ${menuGroupLabel(t('Darstellung'))}
+    ${unitSwitch()}
+    ${menuCheckbox(t('Pensum einfärben'), coloured(), 'colour', 'toggle', null, { disabled: noFigures })}
+    ${menuCheckbox(t('Nullwerte ausblenden'), state.hideZeros, 'toggle-flag', 'hideZeros', null, { disabled: noFigures })}
+    ${divider()}
+    ${menuGroupLabel(t('Spalten'))}
+    ${columnSwitches(exclude)}
+    ${divider()}
+    ${menuGroupLabel(t('Zeitskala'))}
+    <div class="dd__segmented">${segmented(SCALES, state.scale, 'scale')}</div>`;
 }
 
 /**
@@ -737,30 +808,6 @@ export function activeFilterRow() {
 }
 
 /* -----------------------------------------------------------------------------
-   Time scale + view switcher
-   -------------------------------------------------------------------------- */
-
-export function timeControls() {
-  return html`<div class="timebar">
-    <div class="timebar__group">
-      ${segmented([
-        { value: 'year', label: 'Jahr' },
-        { value: 'quarter', label: 'Quartal' },
-        { value: 'month', label: 'Monat' }
-      ], state.scale, 'scale')}
-    </div>
-    <div class="timebar__group timebar__nav">
-      <button type="button" class="btn btn--square" data-act="period" data-val="-1"
-              ${attr(!canStep(-1), 'disabled')} aria-label="${t('Zurück')}">${icons.chevronLeft()}</button>
-      <button type="button" class="btn" data-act="period" data-val="today"
-              ${attr(state.periodOffset === 0, 'disabled')}>${t('Zu heute')}</button>
-      <button type="button" class="btn btn--square" data-act="period" data-val="1"
-              ${attr(!canStep(1), 'disabled')} aria-label="${t('Weiter')}">${icons.chevronRight()}</button>
-    </div>
-  </div>`;
-}
-
-/* -----------------------------------------------------------------------------
    Footer + design notes
    -------------------------------------------------------------------------- */
 
@@ -774,7 +821,7 @@ export function timeControls() {
 export function appFooter() {
   const m = data.meta;
   return html`<footer class="shell-footer"><div class="wrap shell-footer__inner">
-    <span>${m.version}</span>
+    <span>${t('Datenstand ePPM')}: ${m.asOf}</span><span>${m.version}</span>
     <span class="shell-footer__links">
       ${m.footerLinks.map(l => l.tab
         ? html`<a href="#?tab=${l.tab}" data-act="tab" data-val="${l.tab}">${t(l.label)}</a>`

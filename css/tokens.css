@@ -246,15 +246,28 @@
      12 · Pensum heat ramp — blue only encodes the SIZE of a pensum
      0 % · 1–39 % · 40–79 % · 80–119 % · >= 120 %, plus no-value and negative
      ========================================================================== */
+  /*
+   * Three colour jobs meet on one surface: the ramp encodes a quantity, and
+   * the phase bar's ground is structure that must never read as one. Measured
+   * in CIE Lab, the old ground (steel-150) sat dE 2.2 from heat-1 and 2.6
+   * from heat-2 — a step of the ramp, not a grey beside it — so a bar could
+   * read as a low pensum value. Turning the ground grey does not fix it on
+   * its own: the bottom of the ramp was itself all but colourless (heat-1 at
+   * a chroma of 2.8), and a plain neutral at that lightness measured dE 1.9
+   * from it. So both ends moved. The ramp keeps its hue and its lightness
+   * ladder and gains a chroma floor; the ground becomes a true neutral.
+   *   ground to nearest ramp step   dE 2.2 → 5.7
+   *   adjacent ramp steps           4.0 4.4 5.5 6.7 → 5.7 6.0 6.5 6.8
+   */
   --heat-0-bg:    var(--white);      --heat-0-fg:    var(--color-text-muted);
-  --heat-1-bg:    var(--steel-75);   --heat-1-fg:    var(--grey-800);
-  --heat-2-bg:    var(--steel-200);  --heat-2-fg:    var(--grey-800);
-  --heat-3-bg:    var(--steel-300);  --heat-3-fg:    var(--grey-900);
-  --heat-4-bg:    var(--steel-450);  --heat-4-fg:    var(--grey-900);
+  --heat-1-bg:    #eef8ff;           --heat-1-fg:    var(--grey-800);
+  --heat-2-bg:    #dfefff;           --heat-2-fg:    var(--grey-800);
+  --heat-3-bg:    #cee4fd;           --heat-3-fg:    var(--grey-900);
+  --heat-4-bg:    #b9d6f6;           --heat-4-fg:    var(--grey-900);
   --heat-null-bg: var(--steel-25);   --heat-null-fg: var(--color-text-muted);
   --heat-neg-bg:  var(--red-100);    --heat-neg-fg:  var(--red-800);
 
-  --color-bar-bg:     var(--steel-150);
+  --color-bar-bg:     #eeeeee;   /* a true neutral — see the ramp above */
   /*
    * The edge of a phase bar, and the only thing separating one phase from the
    * next where two abut. At steel-400 it measured 1.38:1 against the bar and
@@ -463,6 +476,9 @@
   --row-height-sum:     34px;
   --row-height-list:    48px;
   --bar-height:      24px;
+  /* The bar plan inside a pensum row: a strip under the figures, tall enough
+     for the sub-phase number and no more. */
+  --band-height:     14px;
 
   --control-height-sm: 26px;
   --control-height:    32px;

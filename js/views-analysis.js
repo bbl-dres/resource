@@ -29,9 +29,7 @@ export function renderDashboard() {
   const section = BI_SECTIONS.some(s => s.value === state.bi) ? state.bi : 'general';
 
   return html`
-    ${pageHeader({
-      crumbs: ['Bauprojekte', 'Dashboard'],
-      title: 'Ressourcenplanung',
+    ${pageHeader({
       actions: pageActions()
     })}
     <div class="wrap"><div class="content">
@@ -284,13 +282,11 @@ export function renderHistory() {
   const page = pageOf(visibleChanges());
 
   return html`
-    ${pageHeader({
-      crumbs: ['Bauprojekte', 'Verlauf'],
-      title: 'Ressourcenplanung',
+    ${pageHeader({
       actions: pageActions()
     })}
     <div class="wrap"><div class="content">
-      ${toolbar({ attributes: false })}
+      ${toolbar()}
       ${activeFilterRow()}
 
       <section class="table-card">

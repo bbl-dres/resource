@@ -231,6 +231,11 @@
       "fr": "Connecté via eIAM",
       "it": "Accesso tramite eIAM"
     },
+    "Ansicht": {
+      "en": "View",
+      "fr": "Affichage",
+      "it": "Vista"
+    },
     "Ansichten": {
       "en": "Views",
       "fr": "Vues",
@@ -381,6 +386,11 @@
       "fr": "Domaine Constructions",
       "it": "Settore Costruzioni"
     },
+    "Bereiche": {
+      "en": "Sections",
+      "fr": "Sections",
+      "it": "Sezioni"
+    },
     "Bildung und Forschung": {
       "en": "Education and research",
       "fr": "Formation et recherche",
@@ -395,6 +405,11 @@
       "en": "Federal Office for Buildings and Logistics FOBL",
       "fr": "Office fédéral des constructions et de la logistique OFCL",
       "it": "Ufficio federale delle costruzioni e della logistica UFCL"
+    },
+    "Darstellung": {
+      "en": "Display",
+      "fr": "Présentation",
+      "it": "Visualizzazione"
     },
     "Darstellung, Funktionalität und Inhalte dienen ausschliesslich der Demonstration; die verwendeten Daten sind fiktiv oder öffentlich zugänglich.": {
       "en": "Presentation, functionality and content serve demonstration purposes only; the data used is fictitious or publicly available.",
@@ -486,6 +501,11 @@
       "fr": "Notifications par e-mail",
       "it": "Notifiche e-mail"
     },
+    "Ebenen": {
+      "en": "Layers",
+      "fr": "Couches",
+      "it": "Livelli"
+    },
     "Ein Vorgang statt zwei Transaktionen: von, an, Betrag und Zeitraum ergeben einen Verlaufseintrag mit beiden Seiten.": {
       "en": "One operation instead of two transactions: from, to, amount and period make a single log entry carrying both sides.",
       "fr": "Une opération au lieu de deux transactions : de, à, montant et période forment une seule entrée d'historique portant les deux côtés.",
@@ -540,6 +560,11 @@
       "en": "Contracted externally",
       "fr": "Mandaté à l'externe",
       "it": "Affidato all'esterno"
+    },
+    "FTE": {
+      "en": "FTE",
+      "fr": "EPT",
+      "it": "FTE"
     },
     "Feld": {
       "en": "Field",
@@ -655,6 +680,11 @@
       "en": "Open in Schedule",
       "fr": "Ouvrir dans Échéances",
       "it": "Apri in Scadenze"
+    },
+    "Individuell": {
+      "en": "Custom",
+      "fr": "Personnalisé",
+      "it": "Personalizzato"
     },
     "Jahr": {
       "en": "Year",
@@ -811,6 +841,11 @@
       "fr": "Jalon / gate",
       "it": "Traguardo / gate"
     },
+    "Meilensteine": {
+      "en": "Milestones",
+      "fr": "Jalons",
+      "it": "Milestone"
+    },
     "Meilensteine meiner Projekte": {
       "en": "Milestones on my projects",
       "fr": "Jalons de mes projets",
@@ -856,6 +891,11 @@
       "fr": "Rien en attente pour vous.",
       "it": "Nulla in sospeso per voi."
     },
+    "Niemand zuweisen": {
+      "en": "Assign nobody",
+      "fr": "N'attribuer à personne",
+      "it": "Non assegnare a nessuno"
+    },
     "Nullwerte ausblenden": {
       "en": "Hide zeros",
       "fr": "Masquer les zéros",
@@ -886,10 +926,30 @@
       "fr": "Charge",
       "it": "Carico"
     },
+    "Pensum %": {
+      "en": "Workload %",
+      "fr": "Charge %",
+      "it": "Carico %"
+    },
+    "Pensum + Termine": {
+      "en": "Workload + Schedule",
+      "fr": "Charge + Échéances",
+      "it": "Carico + Scadenze"
+    },
+    "Pensum als PDF": {
+      "en": "Workload as PDF",
+      "fr": "Charge en PDF",
+      "it": "Carico in PDF"
+    },
     "Pensum bearbeiten": {
       "en": "Edit workload",
       "fr": "Modifier la charge",
       "it": "Modifica carico"
+    },
+    "Pensum einfärben": {
+      "en": "Colour by workload",
+      "fr": "Colorer selon la charge",
+      "it": "Colora per carico"
     },
     "Pensum erhöhen": {
       "en": "Increase workload",
@@ -935,6 +995,11 @@
       "en": "Workload applied",
       "fr": "Charge appliquée",
       "it": "Carico applicato"
+    },
+    "Pensumwerte": {
+      "en": "Workload figures",
+      "fr": "Valeurs de charge",
+      "it": "Valori di carico"
     },
     "Person": {
       "en": "Person",
@@ -991,10 +1056,20 @@
       "fr": "Phase (ePPM) · sélection multiple",
       "it": "Fase (ePPM) · selezione multipla"
     },
+    "Phasenbalken": {
+      "en": "Phase bars",
+      "fr": "Barres de phase",
+      "it": "Barre di fase"
+    },
     "Plantermin": {
       "en": "Planned date",
       "fr": "Date planifiée",
       "it": "Data pianificata"
+    },
+    "Planung": {
+      "en": "Planning",
+      "fr": "Planification",
+      "it": "Pianificazione"
     },
     "Priorität": {
       "en": "Priority",
@@ -1221,6 +1296,11 @@
       "fr": "Échéances en PDF",
       "it": "Scadenze in PDF"
     },
+    "Termine anzeigen": {
+      "en": "Show schedule",
+      "fr": "Afficher les échéances",
+      "it": "Mostra scadenze"
+    },
     "Umbuchen": {
       "en": "Reallocate",
       "fr": "Réaffecter",
@@ -1305,6 +1385,11 @@
       "en": "Period",
       "fr": "Période",
       "it": "Periodo"
+    },
+    "Zeitskala": {
+      "en": "Time scale",
+      "fr": "Échelle de temps",
+      "it": "Scala temporale"
     },
     "Zoll": {
       "en": "Customs",

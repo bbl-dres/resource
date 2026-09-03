@@ -12,13 +12,12 @@
 import {
   data, state, load, subscribe, setState, syncFromUrl, closeOverlays,
   cellValue, toggleIn, removeFilter, resetFilters, defaultDir, t, columnSetKey, writeUrl,
-  offsetForScale, maxOffset, windowStep, pageCount
+  offsetForScale, maxOffset, windowStep, pageCount, viewPatch, layerPatch
 } from './store.js';
 import { loadIcons } from './icons.js';
 import { html, appHeader, appFooter, toast, forgetTokens, signedOutView } from './ui.js';
-import { renderOverview, editPopover } from './views-overview.js';
+import { renderOverview, editPopover, assignPicker } from './views-overview.js';
 import { renderModal } from './views-modals.js';
-import { renderSchedule } from './views-schedule.js';
 import { renderDashboard, renderHistory } from './views-analysis.js';
 import { renderApi, renderExport, mountSwagger } from './views-docs.js';
 import { exportCsv, exportXlsx } from './export.js';
@@ -31,7 +30,6 @@ const root = document.getElementById('app');
 
 const VIEWS = {
   overview: renderOverview,
-  schedule: renderSchedule,
   dashboard: renderDashboard,
   history: renderHistory,
   api: renderApi,
@@ -105,6 +103,7 @@ function render() {
     <main id="main">${state.signedIn ? view() : signedOutView()}</main>
     ${appFooter()}
     ${state.editing ? editPopover() : ''}
+    ${state.picking ? assignPicker() : ''}
     ${renderModal()}
     ${toast()}
   `);
@@ -346,10 +345,10 @@ function flash(message) {
 const actions = {
   noop: () => flash(t('Im Prototyp nicht hinterlegt.')),
 
-  tab: (val) => setState({ tab: val, menu: null, editing: null, modal: null }),
-  // The breadcrumb is a way back to a clean slate, not just to another route.
+  tab: (val) => setState({ tab: val, menu: null, editing: null, picking: null, modal: null }),
+  // The brand is a way back to a clean slate, not just to another route.
   home: () => setState({
-    tab: 'overview', menu: null, editing: null, modal: null,
+    tab: 'overview', menu: null, editing: null, picking: null, modal: null,
     phases: [], leads: [], portfolios: [], organisations: [], search: '',
     searchOpen: false
   }),
@@ -363,7 +362,7 @@ const actions = {
      * answer was always false — which is why arrow keys never reached the panel.
      */
     const byKeyboard = el.matches(':focus-visible');
-    setState({ menu: opening ? val : null, menuSearch: '' });
+    setState({ menu: opening ? val : null, menuSearch: '', picking: null });
     if (!opening) return;
     if (byKeyboard) {
       requestAnimationFrame(() => {
@@ -431,6 +430,11 @@ const actions = {
   }),
   'toggle-flag': (val) => setState(s => ({ [val]: !s[val] })),
 
+  /* A view is a named set of layers; a layer switch renames the view to match. */
+  view: (val) => setState(viewPatch(val)),
+  'toggle-layer': (val) => setState(layerPatch(val)),
+  colour: () => setState(s => ({ colour: s.colour === 'pensum' ? 'none' : 'pensum' })),
+
   'filter-remove': (val, el) => removeFilter(el.dataset.kind, val),
   'filters-reset': () => resetFilters(),
   'filter-lead': (val) => setState({ tab: 'overview', leads: [val], menu: null }),
@@ -454,7 +458,8 @@ const actions = {
       editing: { projectId: val, q, anchor: { top: r.top, bottom: r.bottom, right: r.right } },
       draft: cellValue(project, q),
       reason: '',
-      menu: null
+      menu: null,
+      picking: null
     });
   },
 
@@ -524,29 +529,35 @@ const actions = {
     flash(`${amount} % ${t('umgebucht auf')} ${target.name} — ${project.location}, ${t('ab')} ${data.quarters[q].label}`);
   },
 
-  assign: (val) => setState({ modal: { type: 'assign', projectId: val, search: '', targetId: null }, editing: null }),
-  'assign-target': (val) => setState(s => ({ modal: { ...s.modal, targetId: val } })),
-  'assign-apply': () => {
-    const { projectId, targetId } = state.modal;
-    const project = data.projectsById[projectId];
-    const from = project.leadId ? data.peopleById[project.leadId] : null;
-    const to = data.peopleById[targetId];
-    project.leadId = targetId;
-    project.unassigned = false;
-    logChange(project, 'Bearbeitender',
-      from ? `${from.name} → ${to.name}` : `${t('Zugewiesen an')} ${to.name}`, to.name);
-    setState({ modal: null });
-    flash(`${project.location} — ${t('Bearbeitender')}: ${to.name}`);
+  /*
+   * The picker opens on the cell, like the editor, and is anchored in viewport
+   * space for the same reason: no scroll container can clip it.
+   */
+  assign: (val, el) => {
+    const r = (el.closest('.pcell') ?? el).getBoundingClientRect();
+    setState({
+      picking: { projectId: val, anchor: { left: r.left, top: r.top, bottom: r.bottom }, search: '' },
+      editing: null, menu: null
+    });
   },
-  'assign-clear': () => {
-    const project = data.projectsById[state.modal.projectId];
+  /* The pick is the commit. An empty value clears the assignment. */
+  pick: (val) => {
+    const project = data.projectsById[state.picking.projectId];
     const from = project.leadId ? data.peopleById[project.leadId] : null;
-    project.leadId = null;
-    project.unassigned = true;
-    logChange(project, 'Bearbeitender',
-      from ? `${from.name} → ${t('nicht zugewiesen')}` : t('Zuweisung aufgehoben'), t('nicht zugewiesen'));
-    setState({ modal: null });
-    flash(`${project.location} — ${t('Zuweisung aufgehoben')}`);
+    const to = val ? data.peopleById[val] : null;
+    setState({ picking: null });
+    if ((to ? to.id : null) === (from ? from.id : null)) return;
+    project.leadId = to ? to.id : null;
+    project.unassigned = !to;
+    if (to) {
+      logChange(project, 'Bearbeitender',
+        from ? `${from.name} → ${to.name}` : `${t('Zugewiesen an')} ${to.name}`, to.name);
+      flash(`${project.location} — ${t('Bearbeitender')}: ${to.name}`);
+    } else {
+      logChange(project, 'Bearbeitender',
+        from ? `${from.name} → ${t('nicht zugewiesen')}` : t('Zuweisung aufgehoben'), t('nicht zugewiesen'));
+      flash(`${project.location} — ${t('Zuweisung aufgehoben')}`);
+    }
   },
 
   'open-phase': (val) => {
@@ -557,7 +568,10 @@ const actions = {
   'open-milestone': (val) => setState({ modal: { type: 'milestone', milestoneId: val }, menu: null, editing: null }),
 
   'open-project': (val) => setState({ modal: { type: 'project', projectId: val }, menu: null, editing: null }),
-  'open-schedule': (val) => setState({ tab: 'schedule', modal: null, search: data.projectsById[val].location }),
+  /* The bar plan is a view of the Planung tab now, not a tab of its own. */
+  'open-schedule': (val) => setState({
+    tab: 'overview', modal: null, search: data.projectsById[val].location, ...viewPatch('termine')
+  }),
 
   share: () => setState({ modal: { type: 'share', copied: false }, menu: null }),
   'share-select': (val, el) => el.select(),
@@ -697,7 +711,6 @@ root.addEventListener('click', (event) => {
  * table rather than a chain: the field name and how to read the value.
  */
 const MODAL_FIELDS = {
-  'assign-search':   { field: 'search' },
   'rebook-search':   { field: 'search' },
   'rebook-reason':   { field: 'reason' },
   'rebook-amount':   { field: 'amount', parse: v => Math.max(0, Number(v) || 0) },
@@ -722,6 +735,8 @@ root.addEventListener('input', (event) => {
     searchTimer = setTimeout(() => setState({}), 180);
   } else if (act === 'menu-search') {
     setState({ menuSearch: el.value });
+  } else if (act === 'pick-search') {
+    setState(s => ({ picking: { ...s.picking, search: el.value } }));
   } else if (act === 'reason') {
     setState({ reason: el.value });
   } else if (act === 'draft-input') {
@@ -791,7 +806,7 @@ document.addEventListener('keydown', (event) => {
    * an aria-modal dialog onto the brand link and the header search, behind the
    * scrim, with no way to tell you had left.
    */
-  const modal = (state.modal || state.editing)
+  const modal = (state.modal || state.editing || state.picking)
     && (root.querySelector('.modal') ?? root.querySelector('.pop'));
   if (modal && event.key === 'Tab') {
     const items = trapFocusables(modal);
@@ -821,14 +836,19 @@ document.addEventListener('keydown', (event) => {
       default: break;
     }
   }
-  // The rebooking picker follows the same contract the wireframe states.
+  // Both person pickers follow the same contract: a listbox answers to the
+  // keys a listbox answers to. Enter picks in the popover and selects in the
+  // rebooking dialog, which still has a button to confirm.
   const list = root.querySelector('[role="listbox"]');
-  if (list && root.contains(event.target) && event.target.closest('.rebook__to, [role="listbox"]')) {
+  if (list && root.contains(event.target) && event.target.closest('.rebook__to, .pop--assign, [role="listbox"]')) {
     if (event.key === 'ArrowDown') { event.preventDefault(); return moveOption(1); }
     if (event.key === 'ArrowUp') { event.preventDefault(); return moveOption(-1); }
     if (event.key === 'Enter') {
       const option = document.activeElement?.closest('[role="option"]');
-      if (option) { event.preventDefault(); return actions['rebook-target'](option.dataset.val); }
+      if (option) {
+        event.preventDefault();
+        return actions[state.picking ? 'pick' : 'rebook-target'](option.dataset.val);
+      }
     }
   }
 
@@ -854,9 +874,12 @@ document.addEventListener('keydown', (event) => {
  * this. On click the dispatch has already run by the time we re-render.
  */
 document.addEventListener('click', (event) => {
-  if (state.menu === null) return;
-  if (event.target.closest('.dd')) return;
-  setState({ menu: null });
+  const menu = state.menu !== null && !event.target.closest('.dd');
+  /* The picker closes the same way. Its own trigger is exempt, because the
+     dispatch above has just opened it on that very click. */
+  const picker = state.picking !== null && !event.target.closest('.pop--assign, [data-act="assign"]');
+  if (!menu && !picker) return;
+  setState({ ...(menu ? { menu: null } : {}), ...(picker ? { picking: null } : {}) });
 });
 
 /**
@@ -919,9 +942,15 @@ window.addEventListener('resize', () => {
  * not once there is work in it. One inertial trackpad tick used to discard a
  * typed reason with no way to get it back.
  */
-document.addEventListener('scroll', () => {
-  if (!state.editing) return;
+document.addEventListener('scroll', (event) => {
   if (performance.now() - lastRenderAt < 150) return;
+  /* A list scrolling inside the popover is not the page moving under it. */
+  if (event.target instanceof Element && event.target.closest('.pop')) return;
+  if (state.picking) {
+    if (!state.picking.search) setState({ picking: null });
+    return;
+  }
+  if (!state.editing) return;
   const project = data.projectsById[state.editing.projectId];
   const started = state.reason.trim() !== ''
     || (project && state.draft !== cellValue(project, state.editing.q));

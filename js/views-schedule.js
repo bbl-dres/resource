@@ -1,104 +1,31 @@
 /* =============================================================================
-   views-schedule.js — Tab «Termine»: the bar plan, with a capacity band
-   underneath that answers the same question the Übersicht footer does.
+   views-schedule.js — the bar plan's rows: phase bars and milestone gates on a
+   time track.
+
+   This used to be the «Termine» tab. The tab is gone — the bar plan is a view
+   of the Planung grid now, which draws these bars as a band under its figures
+   (see phaseBand) — but the printed «Termine» report still needs a whole row,
+   so ganttRow and the placement arithmetic stay here, with the module that
+   knows what a bar is.
    ============================================================================= */
 
-import {
-  data, state, t, num, unitSuffix, totals, loadStatus, groupProjects, periods, phaseOf,
-  periodValue, windowEdges, columnSet
-} from './store.js';
+import { data, t, num, unitSuffix, phaseOf } from './store.js';
 
 import {
-  html, raw, icons, pageHeader, pageActions, toolbar, activeFilterRow,
-  timeControls, noResults, legendBlock, legendItem, yearRule, sortableHead, attr,
-  tokenPx, pinCls, pinLeft, ampelDot, droppedNote, textWidth
+  html, raw, icons, legendBlock, legendItem, yearRule,
+  pinCls, pinLeft, ampelDot, textWidth
 } from './ui.js';
 
-import { leadLayout, titleWidth, alignCls } from './columns.js';
-
-/*
- * Below three quarters the axis stops being a plan, so the lead columns give
- * way first — the same floor the pensum grid holds.
- */
-const MIN_PERIODS = 3;
-
-/** The frozen block in front of the bars, from the same registry as the table. */
-function ganttLayout() {
-  const quarterW = tokenPx('--grid-period');
-  const room = Math.min(tokenPx('--layout-width'), document.documentElement.clientWidth)
-    - 2 * tokenPx('--shell-pad-x');
-  const cols = periods().length;
-  const lay = leadLayout(columnSet(), {
-    room, axis: MIN_PERIODS * quarterW, widthOf: c => tokenPx(c.width),
-    titleW: titleWidth({ room, px: tokenPx })
-  });
-
-  /*
-   * The bar track stops at the same ceiling the pensum grid's cells stop at, so
-   * a quarter is the same width in both tabs and neither stretches to fill the
-   * card. Left to take the whole remainder, a five-column year view drew bars
-   * across 180px quarters while the table beside it held them at 96.
-   *
-   * Fixed widths otherwise: with two flexible tracks in one row they split the
-   * slack, and the frozen block would no longer be the width the capacity band
-   * below it is drawn to.
-   */
-  /*
-   * A floor as well as a ceiling, exactly as the pensum grid's columns have. The
-   * track was `minmax(0, …)`, which let it shrink to whatever was left over — so
-   * it always fitted, nothing ever overflowed, and the timeline could not be
-   * panned at all. The pensum grid never lost that because its columns have
-   * always had a minimum width.
-   */
-  const floor = cols * quarterW;
-  const ceiling = cols * tokenPx('--grid-period-max');
-  const track = Math.min(ceiling, Math.max(floor, room - lay.width));
-  /* Stated once and handed out, because the capacity band has to be drawn to the
-     same track — given its own `1fr` it filled the card while the rows above it
-     stopped at the ceiling, and at year scale its values stood 166px wide of the
-     columns they belong to. */
-  const trackTpl = `minmax(${floor}px, ${ceiling}px)`;
-  return {
-    ...lay,
-    colWidth: cols ? track / cols : 0,
-    trackTpl,
-    tpl: [...lay.parts, trackTpl].join(' ')
-  };
-}
-
-
-/* A sparkline draws over the quarter cells, which this grid has not got. */
-const MENU = { exclude: ['trend'] };
-
-export function renderSchedule() {
-  const body = groupProjects().some(g => g.projects.length) ? ganttView()
-    : noResults('Bauprojekte');
-
-  return html`
-    ${pageHeader({
-      crumbs: ['Bauprojekte', 'Termine'],
-      title: 'Ressourcenplanung',
-      actions: pageActions()
-    })}
-    <div class="wrap"><div class="content">
-      ${toolbar(MENU)}
-      ${activeFilterRow()}
-      ${timeControls()}
-      ${body}
-    </div></div>`;
-}
+import { alignCls } from './columns.js';
 
 /* =============================================================================
    Gantt
    ========================================================================== */
 
 /**
- * Where today sits along the visible track, as a 0–1 fraction — or null once
- * the window has been stepped past it. The columns flex, so the marker is
- * placed proportionally rather than in pixels.
- */
-/**
- * Where today falls on the visible axis, as a share of its whole width.
+ * Where today falls on the visible axis, as a share of its whole width — or
+ * null once the window has been stepped past it. The columns flex, so the
+ * marker is placed proportionally rather than in pixels.
  *
  * Today is first placed on the quarter axis as a fractional index — quarter 0
  * plus how far into it the date sits — and then looked up against the slice
@@ -106,7 +33,7 @@ export function renderSchedule() {
  * first of the three month columns that share a quarter, so at month scale the
  * line stood in July while the heading marked August.
  */
-function todayFraction(cols) {
+export function todayFraction(cols) {
   const today = new Date(data.meta.today + 'T00:00:00');
   const qStart = new Date(today.getFullYear(), Math.floor(today.getMonth() / 3) * 3, 1);
   const qEnd = new Date(qStart.getFullYear(), qStart.getMonth() + 3, 1);
@@ -119,73 +46,20 @@ function todayFraction(cols) {
   return (i + (at - col.from) / (col.to - col.from)) / cols.length;
 }
 
-function ganttView() {
-  const groups = groupProjects();
-  const tot = totals();
-  const cols = periods();
-  const lay = ganttLayout();
-  const edge = windowEdges(cols);
-  const f = todayFraction(cols);
-  // A share of the time axis, not of the card: the marker lives in an overlay
-  // that starts where the frozen column ends, so it can never run underneath it.
-  const todayLeft = f === null ? null : `${(f * 100).toFixed(2)}%`;
-
-  return html`<div class="gantt" style="--gantt-cols:${cols.length};--gantt-lead:${lay.width}px">
-    ${droppedNote(lay.hidden)}
-    ${groups.map(g => {
-      const collapsed = g.label ? state.collapsedGroups[`g:${g.key}`] : false;
-      return html`<section class="gantt__group">
-        ${g.label && html`<h2 class="pgrouphead">
-          <button type="button" class="pgrouphead__toggle" data-act="toggle-group" data-val="g:${g.key}"
-                  aria-expanded="${!collapsed}">
-            <span class="caret ${collapsed ? 'is-collapsed' : ''}" aria-hidden="true">${icons.chevronDown()}</span>
-            <span class="pgrouphead__name">${g.label}</span>
-            <span class="count-pill">${g.projects.length}</span>
-          </button>
-        </h2>`}
-        ${!collapsed && html`<div class="gantt__card scrollbox"
-          ${attr(edge.before, 'data-before')} ${attr(edge.after, 'data-after')}>
-          <div class="gantt__scroll" data-scroll>
-          ${ganttAxis(cols, lay)}
-          <div class="gantt__body">
-            ${todayLeft && html`<div class="gantt__overlay" aria-hidden="true">
-              <div class="gantt__today" style="left:${raw(todayLeft)}"></div>
-              <div class="gantt__todaybadge" style="left:${raw(todayLeft)}"
-                   title="${t('Heute')}, ${data.meta.todayLabel}">${t('Heute')}</div>
-            </div>`}
-            ${g.projects.map(p => ganttRow(p, cols, lay))}
-          </div>
-          </div>
-        </div>`}
-      </section>`;
-    })}
-
-    <section class="capband scrollbox" style="--gantt-cols:${cols.length};--gantt-lead:${lay.width}px"
-      ${attr(edge.before, 'data-before')} ${attr(edge.after, 'data-after')}>
-      <div class="capband__scroll" data-scroll>
-      <div class="capband__row"
-        style="grid-template-columns:${lay.width}px ${raw(lay.trackTpl ?? 'minmax(0, 1fr)')}">
-        <div class="capband__label">
-          <div class="capband__title">${t('Auslastung')}</div>
-        </div>
-        <div class="capband__cells">
-          ${cols.map(col => {
-            const pct = periodValue(tot.utilisation, col);
-            const q = col.quarters[0];
-            const st = loadStatus(pct);
-            return html`<div class="capband__cell is-${st.key} ${yearRule(col)}"
-                title="${col.label}: ${pct} % — ${t(st.label)} · ${tot.booked[q]} % ${t('gebucht auf')} ${tot.net[q]} % ${t('netto')}">
-              <span class="capband__value">${pct} %</span>
-            </div>`;
-          })}
-        </div>
-      </div>
-      </div>
-    </section>
-
-  </div>
-  ${ganttLegend()}`;
-}
+/** The legend items for what a bar and a gate can say. Both grids draw them. */
+export const barLegendGroups = () => [
+  {
+    label: 'Balken',
+    items: html`${legendItem(html`<span class="legend__swatch is-delay"></span>`, 'Verzug')}
+      ${legendItem(html`<span class="legend__swatch is-nolead"></span>`, 'ohne Bearbeitenden')}`
+  },
+  {
+    label: 'Meilenstein',
+    items: html`${legendItem(html`<span class="diamond"></span>`, 'im Termin')}
+      ${legendItem(html`<span class="diamond is-late"></span>`, 'verschoben')}
+      ${legendItem(html`<span class="diamond is-open"></span>`, 'Termin offen')}`
+  }
+];
 
 /**
  * The bar plan spends colour only on exceptions, so the legend only has to
@@ -195,46 +69,29 @@ function ganttView() {
 export function ganttLegend(cls = '') {
   const l = data.print.legend;
   return legendBlock([
-    {
-      label: 'Balken',
-      items: html`${legendItem(html`<span class="legend__swatch is-delay"></span>`, 'Verzug')}
-        ${legendItem(html`<span class="legend__swatch is-nolead"></span>`, 'ohne Bearbeitenden')}`
-    },
-    {
-      label: 'Meilenstein',
-      items: html`${legendItem(html`<span class="diamond"></span>`, 'im Termin')}
-        ${legendItem(html`<span class="diamond is-late"></span>`, 'verschoben')}
-        ${legendItem(html`<span class="diamond is-open"></span>`, 'Termin offen')}`
-    },
+    ...barLegendGroups(),
     { label: 'Auslastung', items: html`${t(l.thresholds).replace(/^Auslastung:\s*/, '')}` }
   ], cls);
 }
 
 /**
- * A lead-column header. Clicking it sorts, exactly as in the pensum grid — both
- * read the same two pieces of state, so the two tabs cannot disagree. A column
- * with no sort key is a label, not a control.
+ * The bar plan grafted onto a pensum row: every bar and gate of the project,
+ * placed on the row's time axis exactly as ganttRow places them, inside a
+ * strip the stylesheet positions under (or, with the figures hidden, in place
+ * of) the numbers.
+ *
+ * `compact` is the strip under the figures: 14px tall, so a bar can carry its
+ * sub-phase number at most. With the row to itself the full label rule
+ * applies. Which layers to draw is the caller's — the view's — decision.
  */
-function leadHead(col, lay) {
-  const cls = `gantt__axislabel gantt__col--${col.key} ${alignCls(col)} ${pinCls(lay.sticky, col.key)}`;
-  if (!col.sort) {
-    return html`<span class="${cls}" style="${pinLeft(lay.sticky, col.key)}">${t(col.label)}</span>`;
-  }
-  return sortableHead({
-    key: col.sort, label: t(col.label), act: 'sort-col', cls,
-    style: pinLeft(lay.sticky, col.key),
-    active: state.sort === col.sort, ascending: state.sortDir === 'asc'
-  });
-}
-
-function ganttAxis(cols, lay) {
-  return html`<header class="gantt__axis" style="grid-template-columns:${raw(lay.tpl)}">
-    ${lay.shown.map(col => leadHead(col, lay))}
-    <div class="gantt__quarters">
-      ${cols.map(col => html`<div class="${col.isNow ? 'is-today' : ''} ${yearRule(col)}"
-        title="${col.label}">${col.short}</div>`)}
-    </div>
-  </header>`;
+export function phaseBand(p, cols, lay, { compact = true, bars = true, gates: withGates = true } = {}) {
+  const marks = withGates ? gatePlaces(p, cols) : [];
+  const placed = bars ? placeBars(p.bars ?? [], cols) : [];
+  if (!placed.length && !marks.length) return '';
+  return html`<div class="pband">
+    ${placed.map(at => ganttBar(at, placed, cols, p, lay, marks, compact))}
+    ${gates(marks, cols, p)}
+  </div>`;
 }
 
 /** What a lead column shows in the bar plan. Three draw; the rest is text. */
@@ -283,7 +140,7 @@ export function ganttRow(p, cols, lay) {
  * one of 390 gates was drawn late — by up to 2.97 columns at month scale, which
  * is a gate skipping all three months of its own quarter.
  */
-function unitAt(cols, q) {
+export function unitAt(cols, q) {
   for (let i = 0; i < cols.length; i++) {
     const c = cols[i];
     if (q < c.from) return i;
@@ -301,7 +158,7 @@ function unitAt(cols, q) {
  * other, a full column wide. What showed was whichever happened to be painted
  * last, which is why the divider between two phases seemed to come and go.
  */
-function placeBars(bars, cols) {
+export function placeBars(bars, cols) {
   return bars
     .map((b) => ({
       b,
@@ -345,7 +202,7 @@ const gateX = (g, w) => g.at * w - (g.shift ?? 0);
  * of what still collided: not names running too long, but names starting too
  * early, four pixels under the diamond that opened them.
  */
-function barRun(b, at, lay, gates) {
+function barRun(b, at, lay, gates, padding = BAR_PADDING) {
   /*
    * A layout that never states its column width cannot be measured against, and
    * the honest answer there is «show the name and let the ellipsis handle it» —
@@ -356,7 +213,7 @@ function barRun(b, at, lay, gates) {
   if (!w) return { from: 0, to: Infinity, room: Infinity };
   const x0 = at.from * w;
   const x1 = at.to * w - (b.continues ? CHEVRON : 0);
-  const half = BAR_PADDING / 2;
+  const half = padding / 2;
 
   let from = x0 + half;
   let to = x1 - half;
@@ -392,7 +249,18 @@ function barText(b, run) {
   return textWidth(b.phase) <= run.room ? b.phase : '';
 }
 
-function ganttBar(at, placed, cols, p, lay, gates) {
+/*
+ * The strip under the figures is 14px tall and set at 10px. The full name
+ * never earns that space, so the sub-phase number is the ceiling — and even
+ * that goes where it would be cut, which is the same rule as above.
+ */
+const BAND_PADDING = 8;      // --band-lab-pad on each side
+
+function bandText(b, run) {
+  return textWidth(b.phase, '--text-2xs') <= run.room ? b.phase : '';
+}
+
+function ganttBar(at, placed, cols, p, lay, gates, compact = false) {
   const b = at.b;
   /*
    * A bar draws its own left edge unless the phase before it ends exactly
@@ -412,7 +280,7 @@ function ganttBar(at, placed, cols, p, lay, gates) {
 
   const left = (at.from / cols.length) * 100;
   const width = ((at.to - at.from) / cols.length) * 100;
-  const run = barRun(b, at, lay, gates);
+  const run = barRun(b, at, lay, gates, compact ? BAND_PADDING : BAR_PADDING);
   /*
    * Only where a label will actually be drawn. On a bar too narrow to carry
    * even its number, the clearance is 16.5px of padding on a 23.5px box —
@@ -423,12 +291,18 @@ function ganttBar(at, placed, cols, p, lay, gates) {
     ? Math.max(0, run.from - at.from * (lay.colWidth || 0))
     : 0;
   const full = t(phaseOf(b.phase).label);
+  /*
+   * Under the figures the bar is scenery: the cell above it is the control,
+   * and a bar that answered the pointer would take the bottom 14px of every
+   * cell away from the editor. It keeps its name in the title, so a bar that
+   * had to fall back to «31» can still be asked what 31 is.
+   */
   return html`<button type="button" class="${cls}"
       style="left:${left}%;width:${width}%;padding-left:${inset}px"
-      data-act="open-phase" data-val="${p.id}:${b.from}"
+      data-act="open-phase" data-val="${p.id}:${b.from}" ${compact ? raw('tabindex="-1"') : ''}
       title="${t(b.milestone) || full}" aria-label="${p.title}: ${full}">
-    <span class="gantt__barlabel">${barText(b, run)}</span>
-    ${b.continues && html`<span class="gantt__more" aria-hidden="true">${icons.chevronRight(13)}</span>`}
+    <span class="gantt__barlabel">${compact ? bandText(b, run) : barText(b, run)}</span>
+    ${b.continues && !compact && html`<span class="gantt__more" aria-hidden="true">${icons.chevronRight(13)}</span>`}
   </button>`;
 }
 
@@ -459,7 +333,7 @@ function quarterFraction(iso, qi) {
  * they do not have — 136 of them at quarter scale, 252 at month, visible as soon
  * as the track was scrolled to its end.
  */
-function gatePlaces(p, cols) {
+export function gatePlaces(p, cols) {
   const out = [];
   for (const m of data.milestonesByProject[p.id] ?? []) {
     const qi = data.quarterIndex[m.forecast ?? m.plan];

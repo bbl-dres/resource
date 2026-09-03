@@ -28,7 +28,6 @@ import { ganttRow, ganttLegend } from './views-schedule.js';
 export function renderApi() {
   return html`
     ${pageHeader({
-      crumbs: ['Bauprojekte', 'API'],
       title: 'API-Dokumentation',
       chrome: false,
       actions: html`<a class="btn" href="." data-act="home">
@@ -198,7 +197,7 @@ function ganttColumn(sheet, leadWidth, cols) {
  * a run of numbers, or a bar over the same quarters.
  */
 const REPORTS = [
-  { id: 'demand', label: 'Übersicht', sub: 'Pensum je Projekt und Quartal' },
+  { id: 'demand', label: 'Pensum', sub: 'Pensum je Projekt und Quartal' },
   { id: 'schedule', label: 'Termine', sub: 'Phasen und Meilensteine je Projekt' }
 ];
 
@@ -210,7 +209,6 @@ export function renderExport() {
   const empty = !filteredProjects().length;
   return html`
     ${pageHeader({
-      crumbs: ['Bauprojekte', 'Export'],
       title: 'PDF-Export — Drucklayout',
       chrome: false,
       actions: html`<button type="button" class="btn" data-act="tab" data-val="overview">${t('Abbrechen')}</button>
@@ -221,7 +219,7 @@ export function renderExport() {
             state.exporting ? 'PDF wird erstellt …' : 'PDF herunterladen')}</button>`
     })}
     <div class="wrap"><div class="content">
-      ${toolbar({ exclude: ['trend'] })}
+      ${toolbar({ columns: true, exclude: ['trend'] })}
       ${activeFilterRow()}
       <div class="sheetbar">
         <div class="segmented">

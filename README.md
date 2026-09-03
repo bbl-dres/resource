@@ -25,7 +25,7 @@ Resource-planning prototype for the [Federal Office for Buildings and Logistics 
 
 ## Features
 
-- Review the portfolio through overviews, dashboards, change history, and a Gantt-style schedule.
+- Review the portfolio in one planning grid that shows workload figures, the phase schedule, or both in the same rows, plus dashboards and a change history.
 - Edit demand, assign or rebook project leads, and see overload warnings with reasons.
 - Filter, group, and sort year, quarter, and month views in percent or FTE.
 - Compare demand, capacity, utilisation, free capacity, and person-level workload.

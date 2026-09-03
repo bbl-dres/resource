@@ -1,37 +1,34 @@
 /* =============================================================================
-   views-overview.js — the «Übersicht» pensum grid.
+   views-overview.js — the «Planung» grid: pensum figures per project and
+   quarter, with the bar plan drawn as a band inside the same rows.
    ============================================================================= */
 
 import {
   data, state, t, num, fmt, unitSuffix, cellValue, projectDemand, isEdited, personLoad, personUtilisation,
   totals, loadStatus, heatStep, ampel, filteredProjects, groupProjects,
-  periods, periodValue, windowEdges, columnSet
+  periods, periodValue, windowEdges, columnSet, coloured
 } from './store.js';
 
 import {
   html, raw, icons, pageHeader, pageActions, toolbar, activeFilterRow,
-  timeControls, noResults, ampelLegend, ampelDot, droppedNote,
+  noResults, ampelLegend, ampelDot, droppedNote,
   legendBlock, legendItem, attr,
   tokenPx, yearRule, pinCls, pinLeft, sortableHead
 } from './ui.js';
 
 import { leadLayout, column, titleWidth, alignCls } from './columns.js';
+import { phaseBand, todayFraction, barLegendGroups } from './views-schedule.js';
 
 /* =============================================================================
-   Tab «Übersicht» — the pensum grid
+   Tab «Planung» — the pensum grid, and the bar plan inside it
    ========================================================================== */
 
 export function renderOverview() {
   return html`
-    ${pageHeader({
-      crumbs: ['Bauprojekte', 'Übersicht'],
-      title: 'Ressourcenplanung',
-      actions: pageActions()
-    })}
+    ${pageHeader({ actions: pageActions() })}
     <div class="wrap"><div class="content">
-      ${toolbar()}
+      ${toolbar({ time: true, view: true })}
       ${activeFilterRow()}
-      ${timeControls({})}
       ${filteredProjects().length ? pensumGrid() : noResults('Bauprojekte')}
     </div></div>`;
 }
@@ -85,7 +82,16 @@ function gridLayout() {
     parts.push(`${w}px`);
     minWidth += w;
   }
-  return { tpl: parts.join(' '), minWidth, sticky, shown, hidden };
+  /*
+   * How wide a quarter is on screen, for the band's labels. The columns
+   * stretch between their floor and ceiling, and the bar plan's label rule
+   * measures against the width they actually take — a conservative reading,
+   * because the title column takes the slack once the ceiling is reached.
+   */
+  const colWidth = cols
+    ? Math.min(tokenPx('--grid-period-max'), Math.max(quarterW, (room - offset) / cols))
+    : 0;
+  return { tpl: parts.join(' '), minWidth, sticky, shown, hidden, colWidth };
 }
 
 /** How much width the card actually has, before it is in the DOM to measure. */
@@ -98,19 +104,24 @@ function pensumGrid() {
   const groups = groupProjects();
   const list = filteredProjects();
   const tot = totals(list);
-  const { tpl, minWidth, sticky, hidden } = gridLayout();
+  const lay = gridLayout();
+  const { tpl, minWidth, sticky, hidden } = lay;
   const span = sticky.shown.length;
   // One period list for the whole grid: every row must agree on the time axis.
   const cols = periods();
-  const q0 = data.quarters[0];
+  const L = state.layers;
+  // A share of the time axis, not of the card: the marker lives in an overlay
+  // that starts where the frozen block ends, so it can never run underneath it.
+  const f = L.today ? todayFraction(cols) : null;
+  const todayLeft = f === null ? null : `${(f * 100).toFixed(2)}%`;
 
   // Visual row index, so the edit popover can be positioned by calc().
   let rowIdx = 0;
   const body = groups.map(g => {
     const collapsed = g.label ? state.collapsedGroups[g.key] : false;
 
-    // The header sits on the page ground above its card, exactly as the
-    // Termine tab does it. It sticks to the left so it survives a scroll.
+    // The header sits on the page ground above its card. It sticks to the
+    // left so it survives a scroll.
     const head = g.label && html`<h2 class="pgrouphead">
       <button type="button" class="pgrouphead__toggle"
               data-act="toggle-group" data-val="${g.key}" aria-expanded="${!collapsed}">
@@ -123,21 +134,25 @@ function pensumGrid() {
     if (collapsed) return html`<section class="pgroup">${head}</section>`;
 
     const rows = g.projects.map(p => {
-      const row = projectRow(p, tpl, sticky, cols, rowIdx);
+      const row = projectRow(p, lay, cols, rowIdx);
       rowIdx++;
       return row;
     });
-    // Each card repeats the column header, the same way a Gantt group card
-    // repeats its axis — a group has to be readable on its own. It closes with
-    // its own sum for the same reason, and because the printed report already
-    // does exactly that.
+    // Each card repeats the column header — a group has to be readable on its
+    // own. It closes with its own sum for the same reason, and because the
+    // printed report already does exactly that. The project rows are wrapped
+    // once, so the today marker has something to span that is not the header
+    // or the totals.
     return html`<section class="pgroup">${head}
-      ${card(html`${columnHeader(tpl, sticky, cols)}${rows}${groupSum(g, tpl, span, cols)}`,
+      ${card(html`${columnHeader(tpl, sticky, cols)}
+        <div class="pgrid__rows">${rows}${todayMarker(todayLeft)}</div>
+        ${L.values && groupSum(g, tpl, span, cols)}`,
         { minWidth, sticky })}
     </section>`;
   });
 
-  const foot = html`<div class="prow prow--sum" style="grid-template-columns:${raw(tpl)}">
+  /* The totals are sums of the figures, so they go when the figures go. */
+  const foot = L.values && html`<div class="prow prow--sum" style="grid-template-columns:${raw(tpl)}">
         <div style="grid-column:span ${span}" class="prow__sumlabel is-frozen">
           ${t('Summe Total')}${tot.scoped ? html`<span class="prow__sumnote">${t('Auswahl')}</span>` : ''}
           <button type="button" class="linkbtn" data-act="foot-details">
@@ -168,12 +183,40 @@ function pensumGrid() {
         ${columnSet().trend && html`<span></span>`}
       </div>`;
 
+  /*
+   * What the view has switched off, as classes the stylesheet reads. Two
+   * numbers derive from them — the band's height and the figures' share of
+   * the row — and everything else is arithmetic on the pair, so there is no
+   * combination of switches left to write out by hand.
+   */
+  const mode = [
+    L.values ? '' : 'is-values-off',
+    L.phases ? '' : 'is-bars-off',
+    L.gates ? '' : 'is-gates-off',
+    coloured() ? '' : 'is-uncoloured'
+  ].join(' ');
+
   return html`${droppedNote(hidden)}
-    <section class="grid-card">
+    <section class="grid-card ${mode}">
       ${body}
-      ${card(foot, { minWidth, sticky, cls: 'pblock--foot' })}
+      ${foot && card(foot, { minWidth, sticky, cls: 'pblock--foot' })}
     </section>
     ${heatLegend()}`;
+}
+
+/*
+ * «Heute», the bar plan's marker. It spans the project rows and nothing else:
+ * the axis header names the quarters and the totals are sums under them, and a
+ * rule saying «now» has nothing to add to either. Drawn over the whole track it
+ * struck through the quarter heading.
+ */
+function todayMarker(left) {
+  if (!left) return '';
+  return html`<div class="ptoday" aria-hidden="true">
+    <div class="ptoday__line" style="left:${raw(left)}"></div>
+    <div class="ptoday__badge" style="left:${raw(left)}"
+         title="${t('Heute')}, ${data.meta.todayLabel}">${t('Heute')}</div>
+  </div>`;
 }
 
 /**
@@ -192,20 +235,30 @@ function card(rows, { minWidth, sticky, cls = '' }) {
   </div>`;
 }
 
-/** The same swatch legend the print sheet carries, so both read alike. */
+/**
+ * The legend explains what is on screen, so it says whatever the view says:
+ * the ramp only while the figures are coloured, the bars and gates only while
+ * they are drawn, the utilisation bands only while the totals are.
+ */
 export function heatLegend() {
   const l = data.print.legend;
+  const L = state.layers;
+  const bars = barLegendGroups().filter(g => (g.label === 'Balken' ? L.phases : L.gates));
   return legendBlock([
     {
       label: 'Pensum',
-      items: l.steps.map(s => legendItem(html`<span class="legend__swatch heat-${s.step}"></span>`, s.label))
+      items: coloured()
+        ? l.steps.map(s => legendItem(html`<span class="legend__swatch heat-${s.step}"></span>`, s.label))
+        : null
     },
+    ...bars,
     { label: 'Ampel', items: columnSet().ampel ? ampelLegend() : null },
     {
       label: 'Markierung',
-      items: legendItem(html`<span class="legend__swatch is-nolead"></span>`, l.noLead)
+      /* The bar legend already names «ohne Bearbeitenden». */
+      items: L.phases ? null : legendItem(html`<span class="legend__swatch is-nolead"></span>`, l.noLead)
     },
-    { label: 'Auslastung', items: html`${t(l.thresholds).replace(/^Auslastung:\s*/, '')}` }
+    { label: 'Auslastung', items: L.values ? html`${t(l.thresholds).replace(/^Auslastung:\s*/, '')}` : null }
   ]);
 }
 
@@ -303,14 +356,17 @@ function footRow(label, values, tpl, span, cols) {
   </div>`;
 }
 
-function projectRow(p, tpl, sticky, cols, rowIdx) {
+function projectRow(p, lay, cols, rowIdx) {
+  const { tpl, sticky } = lay;
+  const L = state.layers;
   const lead = p.leadId ? data.peopleById[p.leadId] : null;
   const cells = projectDemand(p);
+  const picking = state.picking && state.picking.projectId === p.id;
 
   return html`<div class="prow" style="grid-template-columns:${raw(tpl)}"
       data-row="${rowIdx}">
     ${sticky.shown.map(col => html`<span
-        class="pcell ${col.cls} ${alignCls(col)} ${cellState(col, p, lead)} ${pinCls(sticky, col.key)}"
+        class="pcell ${col.cls} ${alignCls(col)} ${cellState(col, p, lead)} ${pinCls(sticky, col.key)} ${picking && col.key === 'lead' ? 'is-editing' : ''}"
         style="${pinLeft(sticky, col.key)}">${cellBody(col, p, lead)}</span>`)}
 
     ${cols.map(period => {
@@ -320,13 +376,15 @@ function projectRow(p, tpl, sticky, cols, rowIdx) {
       // not run in, and a red nought is noise rather than a warning.
       const over = lead && v > 0 && period.quarters.some(x => personUtilisation(p.leadId, x) > 100);
       const editing = state.editing && state.editing.projectId === p.id && state.editing.q === q;
-      const label = state.hideZeros && v === 0 ? '' : num(v);
+      /* With the figures switched off the cell is a slot for the band, not a
+         control: nothing to read, nothing to edit. */
+      const label = !L.values || (state.hideZeros && v === 0) ? '' : num(v);
       const description = `${p.title} · ${lead ? lead.name : t('nicht zugewiesen')}, ${period.label}: ${num(v)}${unitSuffix()}`
         + (over ? ` — ${t('Person über 100 % belegt, Überlast')}` : '');
       return html`<button type="button"
         class="pcell pcell--val heat-${heatStep(v)} ${over ? 'is-warn' : ''} ${editing ? 'is-editing' : ''} ${isEdited(p, q) ? 'is-edited' : ''} ${yearRule(period)}"
         data-act="cell" data-val="${p.id}" data-q="${q}" data-fk="cell:${p.id}:${q}"
-        aria-label="${description}" title="${description}">
+        ${attr(!L.values, 'disabled')} aria-label="${description}" title="${description}">
         <span class="cellv">${label}</span>
       </button>`;
     })}
@@ -338,6 +396,8 @@ function projectRow(p, tpl, sticky, cols, rowIdx) {
           style="height:${v ? Math.max(8, Math.round(v / 120 * 100)) : 0}%"></span>`;
       })}
     </span>`}
+
+    ${(L.phases || L.gates) && phaseBand(p, cols, lay, { compact: L.values, bars: L.phases, gates: L.gates })}
   </div>`;
 }
 
@@ -409,5 +469,68 @@ export function editPopover() {
 }
 
 /* -----------------------------------------------------------------------------
-   Modals — project detail and rebooking
+   The Bearbeitender picker — a popover on the cell, like the pensum editor
    -------------------------------------------------------------------------- */
+
+/*
+ * The application used to open a 760px modal over the whole plan, list the
+ * roster in its stored order, and ask for two clicks: pick, then «Zuweisen».
+ * Three things follow from the merged view instead.
+ *
+ * It is a popover on the cell — the plan stays visible behind the decision, and
+ * one pattern covers both edits rather than two. The pick is the commit: a
+ * single-select list has nothing to confirm, and the change is logged like any
+ * other. And it is ordered by the number the choice actually turns on —
+ * capacity is why one name is right and another is wrong, so the people with
+ * room come first and the light beside each says the same thing without
+ * arithmetic.
+ */
+const PICK_WIDTH = 336;
+const PICK_HEIGHT = 380;
+const collator = new Intl.Collator('de');
+
+export function assignPicker() {
+  const { projectId, anchor, search = '' } = state.picking;
+  const p = data.projectsById[projectId];
+  const current = p.leadId ? data.peopleById[p.leadId] : null;
+  const now = { from: 0, to: 0 };
+  const q = search.trim().toLowerCase();
+  const rows = data.people
+    .map(person => ({ person, a: ampel(person.id, now) }))
+    .filter(r => !q || `${r.person.name} ${r.person.role}`.toLowerCase().includes(q))
+    .sort((x, y) => x.a.pct - y.a.pct || collator.compare(x.person.name, y.person.name));
+
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const left = Math.min(Math.max(8, anchor.left), vw - PICK_WIDTH - 8);
+  const below = anchor.bottom + 6;
+  const flip = below + PICK_HEIGHT > vh - 8 && anchor.top - PICK_HEIGHT - 6 > 8;
+  const top = flip ? anchor.top - PICK_HEIGHT - 6 : Math.min(below, Math.max(8, vh - PICK_HEIGHT - 8));
+
+  const option = (val, mark, name, meta, cls = '') => html`<li role="option" tabindex="-1"
+      class="${cls}" aria-selected="${val === (p.leadId ?? '')}" data-act="pick" data-val="${val}">
+    <span class="ampel ampel--${mark}" aria-hidden="true"></span>
+    <span class="assign__name">${name}</span>
+    ${meta && html`<span class="rebook__role">${meta}</span>`}
+  </li>`;
+
+  return html`<div class="pop pop--assign" role="dialog" aria-modal="false" aria-label="${t('Bearbeitenden zuweisen')}"
+      style="left:${Math.round(left)}px; top:${Math.round(top)}px">
+    <div class="pop__kicker">${t('Bearbeitender')}</div>
+    <div class="pop__who">${p.title}</div>
+    <div class="pop__what">${current
+      ? `${t('Aktuell')}: ${current.name} · ${personUtilisation(current.id, 0)} %`
+      : t('Aktuell nicht zugewiesen')}</div>
+    <label class="dd__searchfield">
+      ${icons.search(15)}
+      <input type="search" data-act="pick-search" data-fk="pick-search" value="${search}"
+             placeholder="${t('Person suchen')}" aria-label="${t('Person suchen')}" autocomplete="off">
+    </label>
+    <ul class="rebook__list assign__list" role="listbox" aria-label="${t('Person wählen')}">
+      ${rows.map(r => option(r.person.id, r.a.key, r.person.name,
+        `${t(r.person.role)} · ${r.a.pct} %`, r.person.id === p.leadId ? 'is-current' : ''))}
+      ${rows.length ? '' : html`<li class="rebook__empty" role="presentation">${t('Keine Person gefunden.')}</li>`}
+      ${option('', 'none', html`<span class="assign__none">${t('Niemand zuweisen')}</span>`, null)}
+    </ul>
+  </div>`;
+}
