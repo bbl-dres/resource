@@ -9,7 +9,7 @@
    knows what a bar is.
    ============================================================================= */
 
-import { data, t, phaseOf } from './store.js';
+import { data, t, phaseOf, deDate } from './store.js';
 
 import {
   html, raw, icons, legendBlock, legendItem, yearRule,
@@ -280,6 +280,30 @@ function bandText(b, run) {
   return textWidth(b.phase, '--text-2xs') <= run.room ? b.phase : '';
 }
 
+/**
+ * The label of the quarter `i` steps from the first of the window — before it
+ * too, since a phase may have begun there and its bar still says so.
+ */
+function quarterLabelAt(i) {
+  const q = data.quarters[i];
+  if (q) return q.label;
+  const first = data.quarters[0];
+  const n = first.year * 4 + Number(first.short.slice(1)) - 1 + i;
+  return `Q${(n % 4) + 1}/${Math.floor(n / 4)}`;
+}
+
+/*
+ * What a bar answers when pointed at: which phase of which project, over
+ * which quarters, and how long that is. A bar's `to` is the quarter after its
+ * last, so the span ends one before it.
+ */
+function barHint(b, p) {
+  const full = t(phaseOf(b.phase).label);
+  const length = b.to - b.from;
+  const span = length === 1 ? quarterLabelAt(b.from) : `${quarterLabelAt(b.from)} – ${quarterLabelAt(b.to - 1)}`;
+  return `${full} · ${p.title}\n${span} · ${length} ${t(length === 1 ? 'Quartal' : 'Quartale')}`;
+}
+
 function ganttBar(at, placed, cols, p, lay, gates, compact = false) {
   const b = at.b;
   /*
@@ -326,7 +350,7 @@ function ganttBar(at, placed, cols, p, lay, gates, compact = false) {
   }
   return html`<button type="button" class="${cls}" style="${pos}"
       data-act="open-phase" data-val="${p.id}:${b.from}"
-      title="${full}" aria-label="${p.title}: ${full}">
+      title="${barHint(b, p)}" aria-label="${p.title}: ${full}">
     <span class="gantt__barlabel">${barText(b, run)}</span>
     ${b.continues && html`<span class="gantt__more" aria-hidden="true">${icons.chevronRight(13)}</span>`}
   </button>`;
@@ -404,12 +428,25 @@ function gates(placed, cols, p) {
    */
   return html`${placed.map(({ m, at, shift }) => {
     const cat = data.milestoneCatalog[m.code];
-    const label = `${cat ? t(cat.name) : m.code} · ${data.quarters[data.quarterIndex[m.plan]].label}`;
+    const name = cat ? t(cat.name) : m.code;
+    const planQ = data.quarters[data.quarterIndex[m.plan]];
+    /*
+     * What a diamond answers when pointed at: which gate of which project,
+     * which phase it closes, when it is planned and forecast, and how it
+     * stands. The dialog behind the click says the rest.
+     */
+    const lines = [
+      `${name} · ${p.title}`,
+      m.subPhase ? `${t('Gate am Ende von')} ${t(phaseOf(m.subPhase).label)}` : '',
+      `${t('Plan')} ${deDate(m.planDate)} (${planQ.label})`
+        + (m.forecastDate ? ` · ${t('Prognose')} ${deDate(m.forecastDate)}` : ''),
+      t(m.statusLabel)
+    ].filter(Boolean);
     return html`<button type="button" class="gantt__gate"
         style="left:${(at / cols.length) * 100}%; --gate-shift:${shift}px"
         data-act="open-milestone" data-val="${m.id}"
-        title="${label} — ${t(m.statusLabel)}"
-        aria-label="${p.title}: ${label} — ${t(m.statusLabel)}">
+        title="${lines.join('\n')}"
+        aria-label="${lines.join(' — ')}">
       <span class="diamond"></span>
     </button>`;
   })}`;

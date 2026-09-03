@@ -416,11 +416,6 @@
       "fr": "Office fédéral des constructions et de la logistique OFCL",
       "it": "Ufficio federale delle costruzioni e della logistica UFCL"
     },
-    "Darstellung": {
-      "en": "Display",
-      "fr": "Présentation",
-      "it": "Visualizzazione"
-    },
     "Darstellung, Funktionalität und Inhalte dienen ausschliesslich der Demonstration; die verwendeten Daten sind fiktiv oder öffentlich zugänglich.": {
       "en": "Presentation, functionality and content serve demonstration purposes only; the data used is fictitious or publicly available.",
       "fr": "La présentation, les fonctionnalités et les contenus servent uniquement à la démonstration; les données utilisées sont fictives ou publiquement accessibles.",
@@ -625,6 +620,11 @@
       "en": "Release pending",
       "fr": "Libération en attente",
       "it": "Sblocco in sospeso"
+    },
+    "Gate am Ende von": {
+      "en": "Gate at the end of",
+      "fr": "Jalon à la fin de",
+      "it": "Gate alla fine di"
     },
     "Gate am Phasenende": {
       "en": "Gate at the end of a phase",
@@ -1140,6 +1140,11 @@
       "en": "Phase bars",
       "fr": "Barres de phase",
       "it": "Barre di fase"
+    },
+    "Plan": {
+      "en": "Plan",
+      "fr": "Plan",
+      "it": "Piano"
     },
     "Plantermin": {
       "en": "Planned date",

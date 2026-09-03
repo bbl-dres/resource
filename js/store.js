@@ -528,6 +528,13 @@ export function fmt(v) {
   return num(v) + unitSuffix();
 }
 
+/** An ISO date the Swiss way round: 27.09.2026. */
+export function deDate(iso) {
+  if (!iso) return '';
+  const [y, m, d] = iso.split('-');
+  return `${d}.${m}.${y}`;
+}
+
 export function fmtMio(v) {
   return v == null ? '—' : v.toFixed(1).replace('.', ',') + ' Mio.';
 }

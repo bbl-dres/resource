@@ -6,7 +6,7 @@
 import {
   data, state, t, num, fmt, unitSuffix, cellValue, projectDemand, isEdited, personUtilisation,
   totals, loadStatus, heatStep, ampel, filteredProjects, groupProjects,
-  periods, periodValue, windowEdges, columnSet, coloured, nowIndex, compareDe
+  periods, periodValue, windowEdges, columnSet, coloured, nowIndex, compareDe, phaseOf
 } from './store.js';
 
 import {
@@ -355,7 +355,11 @@ function projectRow(p, lay, cols, rowIdx) {
       /* With the figures switched off the cell is a slot for the band, not a
          control: nothing to read, nothing to edit. */
       const label = !L.values || (state.hideZeros && v === 0) ? '' : num(v);
+      /* With the band drawn under the figures, the cell is the only thing the
+         pointer can reach, so it says which phase runs in that quarter. */
+      const running = L.phases ? p.bars.find(b => b.from <= q && q < b.to) : null;
       const description = `${p.title} · ${lead ? lead.name : t('nicht zugewiesen')}, ${period.label}: ${num(v)}${unitSuffix()}`
+        + (running ? ` · ${t(phaseOf(running.phase).label)}` : '')
         + (over ? ` — ${t('Person über 100 % belegt, Überlast')}` : '');
       return html`<button type="button"
         class="pcell pcell--val heat-${heatStep(v)} ${over ? 'is-warn' : ''} ${editing ? 'is-editing' : ''} ${isEdited(p, q) ? 'is-edited' : ''} ${yearRule(period)}"

@@ -89,6 +89,8 @@ export const icons = {
   grid: (s = 15) => ico('layout-grid', s),
   filter: (s = 15) => ico('funnel', s),
   download: (s = 15) => ico('download', s),
+  printer: (s = 15) => ico('printer', s),
+  eye: (s = 15) => ico('eye', s),
   externalLink: (s = 13) => ico('external-link', s)
 };
 
@@ -560,7 +562,7 @@ export function pageHeader({ title, actions = [], chrome = true }) {
  */
 export function pageActions({ extra = '' } = {}) {
   return html`${exportMenu()}
-    <button type="button" class="btn" data-act="print-layout">${t('Drucken')}</button>
+    <button type="button" class="btn" data-act="print-layout">${icons.printer(15)}${t('Drucken')}</button>
     <button type="button" class="btn" data-act="share">${icons.share(15)}${t('Teilen')}</button>${extra}`;
 }
 
@@ -572,7 +574,7 @@ export function exportMenu() {
   const open = state.menu === 'export';
   return html`<div class="dd">
     <button type="button" class="btn ${open ? 'is-open' : ''}" data-act="menu" data-val="export"
-            aria-expanded="${open}" aria-haspopup="menu">${t('Exportieren')}${icons.chevronDown()}</button>
+            aria-expanded="${open}" aria-haspopup="menu">${icons.download(15)}${t('Exportieren')}${icons.chevronDown()}</button>
     ${open && html`<div class="dd__panel dd__panel--right" role="menu" style="width:190px">
       ${exportItem('csv', t('Daten als CSV'))}
       ${exportItem('xlsx', t('Daten als Excel'))}
@@ -733,7 +735,7 @@ export function toolbar({ time = false, view = false, print = false, exclude = [
       ${view && html`<span class="toolbar__sep" aria-hidden="true"></span>`}`}
 
     ${view && dropdown({
-      id: 'view', label: t('Ansicht'), width: 296, align: 'right', body: () => viewMenuBody({ exclude, print })
+      id: 'view', lead: icons.eye(), label: t('Ansicht'), width: 296, align: 'right', body: () => viewMenuBody({ exclude, print })
     })}
   </div>`;
 }
@@ -794,13 +796,13 @@ function viewMenuBody({ exclude = [], print = false } = {}) {
     ${menuGroupLabel(t('Zeitskala'))}
     <div class="dd__segmented">${segmented(SCALES, state.scale, 'scale')}</div>
     ${divider()}
-    ${menuGroupLabel(t('Darstellung'))}
+    ${menuGroupLabel(t('Spalten'))}
+    ${columnSwitches(exclude)}
+    ${divider()}
+    ${menuGroupLabel(t('Pensumwerte'))}
     ${unitSwitch()}
     ${menuCheckbox(t('Pensum einfärben'), coloured(), 'colour', 'toggle', null, { disabled: noFigures })}
-    ${menuCheckbox(t('Nullwerte ausblenden'), state.hideZeros, 'toggle-flag', 'hideZeros', null, { disabled: noFigures })}
-    ${divider()}
-    ${menuGroupLabel(t('Spalten'))}
-    ${columnSwitches(exclude)}`;
+    ${menuCheckbox(t('Nullwerte ausblenden'), state.hideZeros, 'toggle-flag', 'hideZeros', null, { disabled: noFigures })}`;
 }
 
 /**

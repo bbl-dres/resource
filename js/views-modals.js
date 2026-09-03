@@ -8,7 +8,7 @@
 
 import {
   data, state, t, num, fmt, unitSuffix, cellValue, projectDemand, heatStep, personUtilisation, phaseOf, eppmOf,
-  nowIndex
+  nowIndex, deDate
 } from './store.js';
 
 import { html, icons, attr, personOption, personSearch } from './ui.js';
@@ -314,11 +314,6 @@ function projectModal({ projectId }) {
       <button type="button" class="btn" data-act="open-schedule" data-val="${p.id}">${t('Termine anzeigen')}</button>
       <button type="button" class="btn btn--primary" data-act="noop">${t('Im ePPM öffnen')}</button>
     </footer>`;
-}
-
-function deDate(iso) {
-  const [y, m, d] = iso.split('-');
-  return `${d}.${m}.${y}`;
 }
 
 function rebookModal({ projectId, q, amount, targetId, quarters = 2, search = '', reason = '' }) {
