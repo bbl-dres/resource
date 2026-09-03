@@ -1040,7 +1040,7 @@ button.pcell--val { cursor: pointer; }
  * The frame fill and the rule above carry this row's rank instead.
  */
 .prow--load {
-  min-height: 42px; align-items: stretch;
+  min-height: var(--row-height-load); align-items: stretch;
   border-top: var(--border-hairline) solid var(--color-border);
   font-size: var(--text-base); font-weight: var(--font-semibold);
 }
@@ -1110,7 +1110,7 @@ button.pcell--val { cursor: pointer; }
    ========================================================================== */
 
 .pop {
-  position: fixed; z-index: var(--z-modal); width: 308px;
+  position: fixed; z-index: var(--z-modal); width: var(--pop-width);
   padding: var(--space-7);
   border: var(--border-hairline) solid var(--color-border-emphasis);
   border-radius: var(--radius-lg);
@@ -1176,7 +1176,7 @@ button.pcell--val { cursor: pointer; }
   background: var(--color-scrim); overflow-y: auto;
 }
 .modal {
-  width: min(760px, 100%);
+  width: min(var(--modal-width), 100%);
   border-radius: var(--radius-lg); background: var(--color-surface);
   box-shadow: var(--shadow-modal); overflow: hidden;
 }
@@ -1506,7 +1506,7 @@ button.pcell--val { cursor: pointer; }
   position: absolute; top: 50%; z-index: var(--z-label);
   transform: translate(calc(-50% - var(--gate-shift, 0px)), -50%);
   display: inline-flex; align-items: center; justify-content: center;
-  width: 24px; height: 24px;
+  width: var(--gate-size); height: var(--gate-size);
   border: 0; padding: 0; background: none; cursor: pointer;
 }
 .gantt__gate .diamond { transition: transform var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease); }
@@ -2359,7 +2359,6 @@ button.pcell--val { cursor: pointer; }
 .pband .gantt__bar.is-first { border-left-color: var(--color-border-emphasis); }
 .pband .gantt__bar.is-delay { border-color: var(--color-danger-solid); }
 .pband .gantt__bar.is-unassigned { border-color: var(--color-warn-solid); }
-.pband .gantt__gate { width: 20px; height: 20px; }
 
 /* The figure is centred in what the band leaves: pad the cell by the band's
    height and let align-items do the arithmetic. */
@@ -2430,7 +2429,7 @@ button.pcell--val { cursor: pointer; }
 /* ---- the Bearbeitender picker ---------------------------------------------
    A popover on the cell, like the pensum editor; the list reuses the rebooking
    dialog's rows. */
-.pop--assign { width: 336px; }
+.pop--assign { width: var(--pop-assign-width); }
 .pop--assign .dd__searchfield { margin: var(--space-6) 0 var(--space-5); }
 .assign__list { max-height: 232px; }
 .assign__list li { gap: var(--space-4); }

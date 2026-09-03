@@ -377,7 +377,8 @@ function projectRow(p, lay, cols, rowIdx) {
    Edit popover — anchored to the cell by grid arithmetic
    -------------------------------------------------------------------------- */
 
-const POP_WIDTH = 308;
+/* The width is the stylesheet token, read when the popover is placed. */
+const popWidth = () => tokenPx('--pop-width');
 /* The tallest the popover gets — the case with no lead, where the notice wraps
    to three lines. Sized for the worst case so the flip never clips it. */
 const POP_HEIGHT = 400;
@@ -393,7 +394,7 @@ export function editPopover() {
   const over = newUtil != null && newUtil > 100;
 
   return html`<div class="pop" role="dialog" aria-modal="false" aria-label="${t('Pensum bearbeiten')}"
-      style="${popoverPosition(anchor, { width: POP_WIDTH, height: POP_HEIGHT, x: anchor.right - POP_WIDTH })}">
+      style="${popoverPosition(anchor, { width: popWidth(), height: POP_HEIGHT, x: anchor.right - popWidth() })}">
     <div class="pop__kicker">${t('Pensum bearbeiten')}</div>
     <div class="pop__who">${p.title}</div>
     <div class="pop__what">${lead ? `${lead.name} · ${t(lead.role)}` : t('nicht zugewiesen')} · ${data.quarters[q].label}</div>
@@ -447,7 +448,7 @@ export function editPopover() {
  * room come first and the light beside each says the same thing without
  * arithmetic.
  */
-const PICK_WIDTH = 336;
+const pickWidth = () => tokenPx('--pop-assign-width');
 const PICK_HEIGHT = 380;
 
 export function assignPicker() {
@@ -462,7 +463,7 @@ export function assignPicker() {
     .sort((x, y) => compareDe(x.name, y.name));
 
   return html`<div class="pop pop--assign" role="dialog" aria-modal="false" aria-label="${t('Bearbeitenden zuweisen')}"
-      style="${popoverPosition(anchor, { width: PICK_WIDTH, height: PICK_HEIGHT, x: anchor.left })}">
+      style="${popoverPosition(anchor, { width: pickWidth(), height: PICK_HEIGHT, x: anchor.left })}">
     <div class="pop__kicker">${t('Bearbeitender')}</div>
     <div class="pop__who">${p.title}</div>
     <div class="pop__what">${current ? `${t('Aktuell')}: ${current.name}` : t('Aktuell nicht zugewiesen')}</div>

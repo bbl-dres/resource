@@ -463,6 +463,17 @@
   /* Rows and controls */
   --row-height:         38px;
   --row-height-sum:     34px;
+  --row-height-load:    42px;   /* the Auslastung row under the totals */
+
+  /* Popovers and the dialog: one width each, read by the stylesheet and by
+     the code that places them (tokenPx), so the two cannot drift apart. */
+  --pop-width:          308px;  /* the pensum editor */
+  --pop-assign-width:   336px;  /* the Bearbeitender picker */
+  --modal-width:        760px;
+
+  /* The milestone diamond's hit area. Every diamond sits in a band, so there
+     is one size; the printed sheet scales its own down. */
+  --gate-size:          20px;
   --row-height-list:    48px;
   --bar-height:      24px;
   /* The bar plan inside a pensum row: a strip under the figures, tall enough
