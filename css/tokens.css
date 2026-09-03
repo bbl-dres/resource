@@ -28,8 +28,10 @@
   --grey-200: #e5e7eb;
   --grey-300: #d1d5db;
   --grey-400: #9ca3af;
-  --grey-550: #636b7a;   /* the lightest grey that clears AA on white and on the page ground */
-  --grey-600: #4b5563;
+  --grey-500: #6b7280;   /* 4.8:1 on white — disabled text, and nothing lighter says a word */
+  --grey-550: #636b7a;   /* 5.4:1 — clears AA, and was judged too light to read; borders only now */
+  --grey-600: #4b5563;   /* 7.6:1 on white, 6.7:1 on the page ground */
+  --grey-650: #414b5a;   /* 8.8:1 — one step under the body text, for headings and captions */
   --grey-700: #374151;
   --grey-800: #1f2937;
   --grey-900: #111827;
@@ -98,8 +100,16 @@
   --color-text-strong:        var(--grey-900);
   --color-text:               var(--grey-700);
   --color-text-body:          var(--grey-800);
-  --color-text-secondary:     var(--grey-600);
-  --color-text-muted:         var(--grey-550);   /* 5.4:1 on white, 4.7:1 on the page ground */
+  /*
+   * The two quiet tiers moved one step darker in the contrast review: muted
+   * text sat at 5.4:1 on white and 4.7:1 on the page ground — AA, and still
+   * the grey the users called too light, on IDs, zero values, captions and
+   * notes, some 5 800 places on one screen. Both keep their rank: muted is
+   * lighter than secondary, secondary lighter than the body text.
+   */
+  --color-text-secondary:     var(--grey-650);   /* 8.8:1 on white, 7.8:1 on the page ground */
+  --color-text-muted:         var(--grey-600);   /* 7.6:1 on white, 6.7:1 on the page ground */
+  --color-text-disabled:      var(--grey-500);   /* 4.8:1 — greyed, and still a word */
   --color-text-subtle:        var(--grey-400);   /* NON-TEXT ONLY — 2.5:1, for disabled glyphs and empty markers */
   --color-text-inverse:       var(--white);
   --color-text-link:          var(--blue-700);

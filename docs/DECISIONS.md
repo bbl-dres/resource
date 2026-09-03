@@ -219,3 +219,10 @@ the new person's unit without anyone writing a field, and a project without an
 assignee has no unit, which the grouping and the dashboard cards say as
 «(nicht zugewiesen)». Modelled the other way round, the generator had stamped
 a unit on unassigned projects at random.
+
+**AA is the floor, not the target, for the quiet text.** The muted tier passed
+AA at 5.4:1 and the users still called it too light — it carries IDs, zero
+values and captions, thousands of small figures a reader scans rather than
+reads. The quiet tiers now sit at 7.6:1 and 8.8:1, one step under the body
+text and still distinct from it; only disabled entries go below 5:1, and even
+those stay a word. See `CONTRAST-REVIEW.md` for the measurements.

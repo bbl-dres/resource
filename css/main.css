@@ -397,7 +397,7 @@ h1, h2, h3,
 
 .btn {
   display: inline-flex; align-items: center; gap: var(--space-3);
-  height: var(--control-height-2xl); padding: 0 var(--space-7);
+  height: var(--control-height-lg); padding: 0 var(--space-7);
   border: var(--border-hairline) solid var(--color-border-strong);
   border-radius: var(--radius);
   background: transparent; color: var(--color-text);
@@ -436,9 +436,12 @@ h1, h2, h3,
  * unreadable, and it still read as a washed-out primary.
  */
 
-.btn--square { width: var(--control-height); height: var(--control-height); padding: 0; justify-content: center; }
-.toolbar .btn, .sheetbar .btn { height: var(--control-height-lg); }
-.toolbar .btn--square { width: var(--control-height-lg); height: var(--control-height-lg); }
+/*
+ * One height for every button. The actions in the tab line were 38px over a
+ * toolbar of 34px controls — a weight difference from when they sat in the
+ * page header, and 20px apart it read as a mistake.
+ */
+.btn--square { width: var(--control-height-lg); height: var(--control-height-lg); padding: 0; justify-content: center; }
 
 /*
  * A press has to register visually. With a full re-render on every click, a
@@ -620,8 +623,10 @@ h1, h2, h3,
   background: var(--color-surface-selected); color: var(--color-text-strong);
   font-weight: var(--font-semibold);
 }
+/* Greyed, not gone: a switch that cannot apply right now still has to be
+   read to be understood. 4.8:1 — the subtle tone at 2.5:1 was a shape. */
 .dd__item[aria-disabled="true"], .dd__item:disabled {
-  color: var(--color-text-subtle); cursor: default; background: transparent;
+  color: var(--color-text-disabled); cursor: default; background: transparent;
 }
 .dd__label { flex: 1; min-width: 0; }
 .dd__meta { flex: 0 0 auto; color: var(--color-text-muted); font-size: var(--text-sm); font-weight: var(--font-regular); }
@@ -879,6 +884,10 @@ h1, h2, h3,
 
 .caret { display: inline-flex; color: var(--color-text-secondary); transition: transform var(--dur-fast) var(--ease); }
 .caret.is-collapsed { transform: rotate(-90deg); }
+
+/* Placeholders take the muted tier; the browser default is a grey of its own
+   choosing, lighter than anything else on the page. */
+::placeholder { color: var(--color-text-muted); opacity: 1; }
 
 /* Cells -------------------------------------------------------------------- */
 
@@ -1712,6 +1721,11 @@ button.pcell--val { cursor: pointer; }
  * version pill and licence link are similarly thin. Fills darkened until the
  * white text clears AA; nothing else about the widget is touched.
  */
+/* Inline code in the introduction: Swagger sets it violet at 4.5:1 on its own
+   grey; the text colour on the sunken surface reads like the rest of the page. */
+#swagger .swagger-ui .markdown code, #swagger .swagger-ui .renderedMarkdown code {
+  color: var(--color-text-body); background: var(--color-surface-sunken);
+}
 #swagger .swagger-ui .opblock-get .opblock-summary-method    { background: var(--method-get); }
 #swagger .swagger-ui .opblock-post .opblock-summary-method   { background: var(--method-post); }
 #swagger .swagger-ui .opblock-patch .opblock-summary-method  { background: var(--method-patch); }
