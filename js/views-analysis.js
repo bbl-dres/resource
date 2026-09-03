@@ -6,12 +6,12 @@
 import {
   data, state, t, fmtMio, totals, loadStatus, cellValue,
   filteredProjects, visibleChanges,
-  periods, personRows, sortPersonRows, windowEdges, pageOf, chartTone
+  periods, personRows, sortPersonRows, windowEdges, pageOf, chartTone, nowIndex
 } from './store.js';
 
 import {
   html, raw, icons, pageHeader, pageActions, toolbar, activeFilterRow,
-  columnChart, barList, kpiStrip, segmented,
+  columnCharts, barList, kpiStrip, segmented,
   tokenPx, yearRule, pinCls, pinLeft, sortableHead, attr, dropdown, menuRadio, changeProject
 } from './ui.js';
 
@@ -40,7 +40,9 @@ export function renderDashboard() {
       ${section === 'people' ? personSection() : html`<div class="bi-grid">
         ${utilisationCard()}
         ${phaseCountCard()}
+        ${organisationCountCard()}
         ${portfolioCard()}
+        ${organisationFteCard()}
         ${creditPhaseCard()}
         ${creditYearCard()}
       </div>`}
@@ -180,9 +182,9 @@ const CARD_MENU = [
   { label: 'Link teilen', act: 'share' }
 ];
 
-function biCard(id, title, subtitle, body, { full = false, wide = false } = {}) {
+function biCard(id, title, subtitle, body, { full = false } = {}) {
   const open = state.menu === `card:${id}`;
-  return html`<section class="bi-card ${full ? 'bi-card--full' : ''} ${wide ? 'bi-card--wide' : ''}" id="card-${id}">
+  return html`<section class="bi-card ${full ? 'bi-card--full' : ''}" id="card-${id}">
     <header class="bi-card__head">
       <div>
         <h2 class="bi-card__title">${t(title)}</h2>
@@ -204,10 +206,11 @@ function biCard(id, title, subtitle, body, { full = false, wide = false } = {}) 
 
 function utilisationCard() {
   const tot = totals();
+  const axis = q => `${q.short}/${String(q.year).slice(2)}`;
   const util = data.quarters.map((q, i) => ({
     value: tot.utilisation[i],
     label: `${tot.utilisation[i]} %`,
-    axis: `${q.short}/${String(q.year).slice(2)}`,
+    axis: axis(q),
     tone: chartTone(tot.utilisation[i]),
     title: `${q.label} — ${t(loadStatus(tot.utilisation[i]).label)}`
   }));
@@ -218,7 +221,7 @@ function utilisationCard() {
     return {
       value: v > 0 ? v : null,
       label: v > 0 ? `${v} %` : '—',
-      axis: `${q.short}/${String(q.year).slice(2)}`,
+      axis: axis(q),
       tone: v > 0 ? 'ok' : 'deficit',
       title: v > 0 ? `${q.label}: ${v} % ${t('frei')}` : `${q.label}: ${Math.abs(v)} % ${t('Defizit')}`
     };
@@ -227,14 +230,15 @@ function utilisationCard() {
   const from = data.quarters[0].label;
   const to = data.quarters[data.quarters.length - 1].label;
 
+  /* Two charts, one scroller: the ratio and the remainder read against the
+     same quarters, so they scroll as one. */
   return biCard('auslastung', 'Auslastung nach Quartal',
-    `${t('Bedarf gegen Kapazität netto')}, ${from} – ${to}`,
-    html`${columnChart(util, { height: 190, refAt: 100, refLabel: `${t('Kapazität')} 100 %` })}
-      <div class="bi-card__section">
-        <h3 class="bi-card__subtitle">${t('Freie Kapazität nach Quartal')}</h3>
-        <p class="bi-card__sub">${t('Kapazität netto minus gebuchtem Bedarf')}</p>
-        ${columnChart(free, { height: 120, max: maxFree, refAt: 0 })}
-      </div>`,
+    `${t('Pensum gegen Kapazität netto')}, ${from} – ${to}`,
+    columnCharts([
+      { rows: util, height: 190, refAt: 100, refLabel: `${t('Kapazität')} 100 %` },
+      { rows: free, height: 120, max: maxFree, refAt: 0,
+        title: 'Freie Kapazität nach Quartal', sub: 'Kapazität netto minus gebuchtem Pensum' }
+    ]),
     { full: true });
 }
 
@@ -249,18 +253,49 @@ function phaseCountCard() {
     barList(rows, { max: Math.max(1, ...rows.map(r => r.value)) }));
 }
 
+function organisationCountCard() {
+  const list = filteredProjects();
+  const rows = data.meta.organisations.map(o => {
+    const n = list.filter(p => p.organisation === o.id).length;
+    return { label: t(o.label), value: n, valueLabel: String(n) };
+  });
+  return biCard('organisationen', 'Anzahl Projekte nach Organisation',
+    `${list.length} ${t('Projekte im gesetzten Umfang')}`,
+    barList(rows, { max: Math.max(1, ...rows.map(r => r.value)) }));
+}
+
+/** A pensum in FTE, the Swiss way round: 1,25. */
+const fte = v => (v / 100).toFixed(2).replace('.', ',');
+
 function portfolioCard() {
   const list = filteredProjects();
+  const now = nowIndex();
   const rows = data.meta.portfolios
     .map(pf => {
-      const v = list.filter(p => p.portfolio === pf.id).reduce((a, p) => a + cellValue(p, 0), 0);
-      return { label: t(pf.label), value: v, valueLabel: `${v} %` };
+      const v = list.filter(p => p.portfolio === pf.id).reduce((a, p) => a + cellValue(p, now), 0);
+      return { label: t(pf.label), value: v, valueLabel: `${fte(v)} FTE` };
     })
     .filter(r => r.value > 0)
     .sort((a, b) => b.value - a.value);
-  return biCard('portfolio', 'Bedarf nach Teilportfolio',
-    `${data.quarters[0].label} · ${t('Pensum in %')}`,
-    barList(rows), { wide: true });
+  return biCard('portfolio', 'FTE nach Teilportfolio',
+    `${data.quarters[now].label} · ${t('Pensum in FTE')}`,
+    barList(rows));
+}
+
+/** The same pensum, cut by who carries it rather than by whom it is for. */
+function organisationFteCard() {
+  const list = filteredProjects();
+  const now = nowIndex();
+  const rows = data.meta.organisations
+    .map(o => {
+      const v = list.filter(p => p.organisation === o.id).reduce((a, p) => a + cellValue(p, now), 0);
+      return { label: t(o.label), value: v, valueLabel: `${fte(v)} FTE` };
+    })
+    .filter(r => r.value > 0)
+    .sort((a, b) => b.value - a.value);
+  return biCard('organisation-fte', 'FTE nach Organisation',
+    `${data.quarters[now].label} · ${t('Pensum in FTE')}`,
+    barList(rows));
 }
 
 function creditYearCard() {
@@ -283,7 +318,7 @@ function creditPhaseCard() {
     .sort((a, b) => b.value - a.value);
   return biCard('kreditphase', 'Kredit nach Phase (ePPM)',
     `${t('Gesamt')} ${fmtMio(total)} CHF · ${t('gebundene Mittel')}`,
-    barList(rows), { wide: true });
+    barList(rows));
 }
 
 /* =============================================================================

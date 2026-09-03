@@ -169,7 +169,7 @@ function milestoneModal({ milestoneId }) {
   ];
 
   return html`
-    ${modalHead(`${m.code} · ${t(m.statusLabel)}`, cat ? t(cat.name) : m.code)}
+    ${modalHead(t(m.statusLabel), cat ? t(cat.name) : m.code)}
 
     <dl class="facts">
       ${facts.map(f => html`<div class="facts__row">
@@ -261,7 +261,7 @@ function projectModal({ projectId }) {
     {
       term: 'Bearbeitender',
       value: lead ? lead.name : t('— nicht zugewiesen'),
-      sub: lead ? `${t('Auslastung')} ${q0.short}: ${util > 100 ? '▲ ' : ''}${util} %` : t('Bedarf offen'),
+      sub: lead ? `${t('Auslastung')} ${q0.short}: ${util > 100 ? '▲ ' : ''}${util} %` : t('Pensum offen'),
       tone: lead ? (util > 100 ? 'danger' : null) : 'warn'
     },
     {
@@ -277,8 +277,8 @@ function projectModal({ projectId }) {
     },
     {
       term: 'Nächster Meilenstein',
-      value: nextMs ? `${nextMs.code} · ${deDate(nextMs.planDate)}` : '—',
-      sub: nextMs ? `${t(nextName ?? nextMs.code)} · ${t(nextMs.statusLabel).replace('▲ ', '')}` : t('kein Gate im Zeitraum'),
+      value: nextMs ? `${t(nextName ?? nextMs.code)} · ${deDate(nextMs.planDate)}` : '—',
+      sub: nextMs ? t(nextMs.statusLabel).replace('▲ ', '') : t('kein Gate im Zeitraum'),
       tone: nextMs && nextMs.status !== 'ok' ? 'danger' : null
     }
   ];

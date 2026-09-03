@@ -590,16 +590,14 @@ export function tabBar() {
   </nav>`;
 }
 
+/* Two neutral figures, no alert state: what the strip says is the size of the
+   work, not a verdict on the people doing it. */
 export function kpiStrip() {
-  const k = kpis();
-  const cards = [k.credit, k.utilisation, k.people, k.unassigned];
   return html`<div class="kpi-strip">
-    ${cards.map(c => html`<div class="kpi ${c.alert ? 'is-alert' : ''}">
+    ${kpis().map(c => html`<div class="kpi">
       <div class="kpi__label">${t(c.label)}</div>
       <div class="kpi__value">${c.value}</div>
-      <div class="kpi__note">${c.note}${c.overflow ? html`<span aria-hidden="true"> · </span><button
-      type="button" class="kpi__more" data-act="bi" data-val="people"
-      >${c.overflow} ${t('weitere')}</button>` : ''}</div>
+      <div class="kpi__note">${c.note}</div>
     </div>`)}
   </div>`;
 }
@@ -886,32 +884,46 @@ export function appFooter() {
    Charts shared by the landing page and the dashboard
    -------------------------------------------------------------------------- */
 
-/** Vertical bar chart with a 100 % reference line. */
-export function columnChart(rows, { max, height = 150, refAt = 100, refLabel = '100 %', axis = true, col }) {
-  const top = max ?? Math.max(refAt * 1.2, ...rows.map(r => r.value || 0));
-  const refPct = (refAt / top) * 100;
-  /*
-    * The plot and the axis scroll as one. They are two separate grids over the
-    * same columns, so a scroller around only one of them would slide the bars
-    * out from under their own labels.
-    */
-  return html`<div class="colchart" style="--chart-h:${height}px;--chart-cols:${rows.length}${col ? `;--chart-col:${col}px` : ''}">
+/**
+ * Column charts over the same periods, one above the other, in one scroller.
+ * The plots and the axis are separate grids over the same columns, so a
+ * scroller around only one of them would slide the bars out from under their
+ * labels — and a scroller per chart gave the card two scrollbars for one axis.
+ * A panel's heading sticks to the left edge so it stays readable while the
+ * columns scroll under it.
+ */
+export function columnCharts(panels, { col } = {}) {
+  const rows = panels[0].rows;
+  return html`<div class="colchart" style="--chart-cols:${rows.length}${col ? `;--chart-col:${col}px` : ''}">
     <div class="colchart__scroll">
-    <div class="colchart__plot">
-      ${refAt ? html`<div class="colchart__ref" style="bottom:${refPct.toFixed(1)}%"></div>
-                     <div class="colchart__reflabel" style="bottom:${(refPct + 1.2).toFixed(1)}%">${refLabel}</div>` : ''}
-      <div class="colchart__grid">
-        ${rows.map(r => html`<div class="colchart__col is-${r.tone}">
-          <span class="colchart__val">${r.label}</span>
-          <span class="colchart__bar" style="height:${r.value == null ? 8 : Math.max(2, (r.value / top) * 100).toFixed(1)}%"
-                title="${r.title ?? ''}"></span>
-        </div>`)}
-      </div>
-    </div>
-    ${axis ? html`<div class="colchart__axis">${rows.map(r => html`<span>${r.axis}</span>`)}</div>` : ''}
+    ${panels.map(({ rows: r, height = 150, refAt = 100, refLabel = '100 %', max, title, sub }) => {
+      const top = max ?? Math.max(refAt * 1.2, ...r.map(x => x.value || 0));
+      const refPct = (refAt / top) * 100;
+      return html`<div class="colchart__panel">
+        ${title && html`<div class="colchart__panelhead">
+          <h3 class="bi-card__subtitle">${t(title)}</h3>
+          ${sub && html`<p class="bi-card__sub">${t(sub)}</p>`}
+        </div>`}
+        <div class="colchart__plot" style="--chart-h:${height}px">
+          ${refAt ? html`<div class="colchart__ref" style="bottom:${refPct.toFixed(1)}%"></div>
+                         <div class="colchart__reflabel" style="bottom:${(refPct + 1.2).toFixed(1)}%">${refLabel}</div>` : ''}
+          <div class="colchart__grid">
+            ${r.map(x => html`<div class="colchart__col is-${x.tone}">
+              <span class="colchart__val">${x.label}</span>
+              <span class="colchart__bar" style="height:${x.value == null ? 8 : Math.max(2, (x.value / top) * 100).toFixed(1)}%"
+                    title="${x.title ?? ''}"></span>
+            </div>`)}
+          </div>
+        </div>
+      </div>`;
+    })}
+    <div class="colchart__axis">${rows.map(x => html`<span>${x.axis}</span>`)}</div>
     </div>
   </div>`;
 }
+
+/** One chart on its own. */
+export const columnChart = (rows, opts = {}) => columnCharts([{ rows, ...opts }], opts);
 
 /** Horizontal bar list used by five of the six dashboard cards. */
 export function barList(rows, { max, gap = 12 } = {}) {

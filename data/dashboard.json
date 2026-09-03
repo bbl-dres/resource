@@ -13,27 +13,27 @@
     "rows": [
       {
         "label": "2026",
-        "value": 371.9,
-        "valueLabel": "371,9 Mio.",
-        "note": "28 Projekte"
+        "value": 495.4,
+        "valueLabel": "495,4 Mio.",
+        "note": "46 Projekte"
       },
       {
         "label": "2027",
-        "value": 108.1,
-        "valueLabel": "108,1 Mio.",
+        "value": 107.1,
+        "valueLabel": "107,1 Mio.",
         "note": "14 Projekte"
       },
       {
         "label": "2028",
-        "value": 44.1,
-        "valueLabel": "44,1 Mio.",
-        "note": "9 Projekte"
+        "value": 109.1,
+        "valueLabel": "109,1 Mio.",
+        "note": "16 Projekte"
       },
       {
         "label": "2029 und später",
-        "value": 405.6,
-        "valueLabel": "405,6 Mio.",
-        "note": "47 Projekte"
+        "value": 210.2,
+        "valueLabel": "210,2 Mio.",
+        "note": "23 Projekte"
       }
     ]
   }

@@ -119,6 +119,7 @@ function leadCell(col, p) {
     return html`<button type="button" class="gantt__rowtitle" data-act="open-project"
         data-val="${p.id}" title="${p.title}">${p.title}</button>`;
   }
+  if (col.short) return html`<span title="${col.text(p)}">${col.short(p)}</span>`;
   return col.text ? col.text(p) : '';
 }
 
@@ -403,7 +404,7 @@ function gates(placed, cols, p) {
    */
   return html`${placed.map(({ m, at, shift }) => {
     const cat = data.milestoneCatalog[m.code];
-    const label = `${m.code} ${cat ? t(cat.name) : ''} · ${data.quarters[data.quarterIndex[m.plan]].label}`;
+    const label = `${cat ? t(cat.name) : m.code} · ${data.quarters[data.quarterIndex[m.plan]].label}`;
     return html`<button type="button" class="gantt__gate"
         style="left:${(at / cols.length) * 100}%; --gate-shift:${shift}px"
         data-act="open-milestone" data-val="${m.id}"

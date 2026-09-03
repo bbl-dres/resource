@@ -18,7 +18,8 @@
      width    the design token holding its width in the grid
      sheet    { w: [portrait, landscape], cls } for the printed sheet
      xls      { type, width } for the spreadsheet
-     text     the plain value, used by the sheet, the CSV and the workbook
+     text     the plain value, used by the CSV and the workbook
+     short    a shorter form for a cell, with `text` as its hint (optional)
    ============================================================================= */
 
 import { data, t, eppmOf } from './store.js';
@@ -65,9 +66,13 @@ export const COLUMNS = [
   },
   {
     key: 'organisation', label: 'Organisation', flag: 'organisation', sort: 'organisation',
-    width: '--grid-col-organisation', cls: 'pcell--text', sheet: { w: [110, 140], cls: 'sheet__muted' },
+    width: '--grid-col-organisation', cls: 'pcell--text', sheet: { w: [70, 84], cls: 'sheet__muted' },
     xls: { type: 'text', width: 30 },
-    text: p => t(data.organisationsById[p.organisation]?.label ?? p.organisation)
+    text: p => t(data.organisationsById[p.organisation]?.label ?? p.organisation),
+    // The house's own short form — «PPE I», «PM Inland II» — for the cell, with
+    // the name as the hint; the filter, the group heading and the export keep
+    // the name.
+    short: p => t(data.organisationsById[p.organisation]?.short ?? p.organisation)
   },
   {
     key: 'credit', label: 'Kredit CHF', flag: 'credit', sort: 'credit',

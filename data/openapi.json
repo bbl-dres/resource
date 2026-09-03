@@ -79,7 +79,7 @@
           {
             "name": "phase",
             "in": "query",
-            "description": "Phase (ePPM), mehrfach erlaubt: Vorstudien, 1, 22, 2, 31, 3, 32, 4, 53, 5, 61, 6.",
+            "description": "Phase (ePPM), mehrfach erlaubt: Vorstudien, 22, 31, 32, 53, 61.",
             "schema": {
               "type": "array",
               "items": {
@@ -357,7 +357,7 @@
                   ],
                   "milestones": [
                     {
-                      "code": "MS4",
+                      "code": "4",
                       "name": "Baukredit bewilligt",
                       "sub_phase": "33",
                       "plan_date": "2027-06-15",
@@ -1245,7 +1245,7 @@
                   {
                     "id": "ms-44-5",
                     "project_id": 8640100044,
-                    "code": "MS5",
+                    "code": "5",
                     "name": "Vergabe erfolgt",
                     "sub_phase": "41",
                     "plan_date": "2026-10-15",
@@ -1255,7 +1255,7 @@
                   {
                     "id": "ms-06-3",
                     "project_id": 8640100006,
-                    "code": "MS3",
+                    "code": "3",
                     "name": "Vorprojekt genehmigt",
                     "sub_phase": "31",
                     "plan_date": "2026-11-30",
@@ -1301,7 +1301,7 @@
               },
               "example": {
                 "project_id": 51,
-                "code": "MS4",
+                "code": "4",
                 "name": "Baukredit-Freigabe",
                 "sub_phase": "33",
                 "plan_date": "2027-05-14"
@@ -3169,7 +3169,7 @@
           },
           "phase": {
             "type": "string",
-            "description": "Phase (ePPM). BBL-Werteliste, die SIA-Hauptphasen und -Teilphasen mischt: Vorstudien, 1, 22, 2, 31, 3, 32, 4, 53, 5, 61, 6.",
+            "description": "Teilphase (ePPM): Vorstudien, 22, 31, 32, 53, 61. Die Hauptphasen 1 bis 6 sind die Gates dazwischen (siehe milestones).",
             "examples": [
               "32"
             ]
@@ -3319,7 +3319,7 @@
           "code": {
             "type": "string",
             "examples": [
-              "MS4"
+              "4"
             ]
           },
           "name": {
@@ -3563,7 +3563,7 @@
           "phase": {
             "type": "string",
             "pattern": "^[1-6][1-9]$",
-            "description": "Phase (ePPM). BBL-Werteliste, die SIA-Hauptphasen und -Teilphasen mischt: Vorstudien, 1, 22, 2, 31, 3, 32, 4, 53, 5, 61, 6.",
+            "description": "Teilphase (ePPM): Vorstudien, 22, 31, 32, 53, 61. Die Hauptphasen 1 bis 6 sind die Gates dazwischen (siehe milestones).",
             "examples": [
               "32"
             ]
@@ -3635,7 +3635,7 @@
           "phase": {
             "type": "string",
             "pattern": "^[1-6][1-9]$",
-            "description": "Phase (ePPM). BBL-Werteliste, die SIA-Hauptphasen und -Teilphasen mischt: Vorstudien, 1, 22, 2, 31, 3, 32, 4, 53, 5, 61, 6.",
+            "description": "Teilphase (ePPM): Vorstudien, 22, 31, 32, 53, 61. Die Hauptphasen 1 bis 6 sind die Gates dazwischen (siehe milestones).",
             "examples": [
               "32"
             ]
@@ -3936,7 +3936,7 @@
           "code": {
             "type": "string",
             "examples": [
-              "MS4"
+              "4"
             ]
           },
           "name": {
@@ -3980,7 +3980,7 @@
           "code": {
             "type": "string",
             "examples": [
-              "MS4"
+              "4"
             ]
           },
           "name": {

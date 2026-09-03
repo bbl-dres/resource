@@ -95,13 +95,26 @@ the last three sections of `main.css`; change the number, keep the comment.
 
 ## Numbers
 
-**The phases are ePPM's, as given.** Its list is BBL's own — Vorstudien, 1,
-22, 2, 31, 3, 32, 4, 53, 5, 61, 6 — mixing SIA main and sub-phases and
-opening with a stage of its own. Every project walks that chain in that order;
-the project's phase, every bar and every gate carry one of those ids, and the
-filter, the grouping and the column speak them. The list lives once, in
-`data/phases.json`, and is not rearranged into SIA order: what ePPM shows is
-what the plan shows.
+**The phases are ePPM's Teilphasen; the Hauptphasen are the gates.** ePPM's
+value list — Vorstudien, 1, 22, 2, 31, 3, 32, 4, 53, 5, 61, 6 — alternates
+phase and gate. A project sits in one of the six Teilphasen (Vorstudien, 22,
+31, 32, 53, 61), and the six Hauptphasen are the milestones between them: 1
+closes Vorstudien, 2 closes 22, up to 6 closing 61. The Teilphasen live once
+in `data/phases.json`, the gates once in the milestone catalogue, and neither
+is rearranged into SIA order: what ePPM shows is what the plan shows. An
+earlier reading made all twelve values phases; users corrected it.
+
+**The dashboard strip is neutral.** Three figures — projects in scope, their
+credits, their pensum as FTE in the current quarter — and no alert state. It
+used to lead with utilisation, people over 100 % and unassigned demand, and
+the project managers it was meant for read it as a verdict on themselves
+rather than a measure of the work. The overload stays on the dashboard, in
+the charts that show where and when.
+
+**An organisation has a short form for cells.** «PPE I», «PM Inland II»,
+«PM Ausland» — the house's own abbreviations, with the full name as the
+hint. The filter, the group heading and the export keep the name; a grid
+column of «Programm- und Projektentwicklung II» truncated in every row.
 
 **Bedarf follows the filter; Auslastung does not.** A demand row describes the
 projects in scope. Utilisation is always the whole department against its own net

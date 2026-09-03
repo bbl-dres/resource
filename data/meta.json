@@ -310,27 +310,33 @@
   "organisations": [
     {
       "id": "ppe-1",
-      "label": "Programm- und Projektentwicklung I"
+      "label": "Programm- und Projektentwicklung I",
+      "short": "PPE I"
     },
     {
       "id": "ppe-2",
-      "label": "Programm- und Projektentwicklung II"
+      "label": "Programm- und Projektentwicklung II",
+      "short": "PPE II"
     },
     {
       "id": "bpi-1",
-      "label": "Bauprojekte Inland I"
+      "label": "Bauprojekte Inland I",
+      "short": "PM Inland I"
     },
     {
       "id": "bpi-2",
-      "label": "Bauprojekte Inland II"
+      "label": "Bauprojekte Inland II",
+      "short": "PM Inland II"
     },
     {
       "id": "bpi-3",
-      "label": "Bauprojekte Inland III"
+      "label": "Bauprojekte Inland III",
+      "short": "PM Inland III"
     },
     {
       "id": "bpa",
-      "label": "Bauprojekte Ausland"
+      "label": "Bauprojekte Ausland",
+      "short": "PM Ausland"
     }
   ]
 }

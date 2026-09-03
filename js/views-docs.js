@@ -377,7 +377,7 @@ const METHOD = [
   ['Kapazität netto',
    'Kapazität brutto abzüglich Abwesenheiten. Brutto ist die Summe der Anstellungsgrade der Abteilung.'],
   ['Auslastung',
-   'Bedarf des Gesamtportfolios abzüglich extern beauftragter Leistung, geteilt durch Kapazität netto. Die Zahl beschreibt immer die ganze Abteilung — auch wenn ein Filter gesetzt ist, denn Kapazität lässt sich nicht filtern.'],
+   'Pensum des Gesamtportfolios abzüglich extern beauftragter Leistung, geteilt durch Kapazität netto. Die Zahl beschreibt immer die ganze Abteilung — auch wenn ein Filter gesetzt ist, denn Kapazität lässt sich nicht filtern.'],
   ['Ampel',
    'Höchste Auslastung des Bearbeitenden gegen die eigene Anstellung im dargestellten Zeitraum. Die Form trägt die Aussage, damit sie auch auf einer Fotokopie lesbar bleibt.'],
   ['Blaustufen',
@@ -386,11 +386,11 @@ const METHOD = [
 
 const GLOSSARY = [
   ['Pensum', 'Arbeitsanteil in Prozent einer Vollzeitstelle. 100 % entspricht einer Person Vollzeit.'],
-  ['Bedarf', 'Geplantes Pensum eines Projekts in einem Quartal.'],
-  ['Extern beauftragt', 'Leistung, die nicht die eigene Abteilung erbringt; sie mindert den Bedarf an eigener Kapazität.'],
-  ['Baukredit-Freigabe', 'Gate MS4. Davor ist ein Projekt planerisch, aber nicht finanziell gebunden — «vor Baukredit-Freigabe» weist diesen Anteil aus.'],
-  ['Phase (ePPM)', 'Phase, wie ePPM sie führt — eine BBL-eigene Liste aus SIA-Haupt- und Teilphasen: Vorstudien, 1 Strategische Planung, 22 Auswahlverfahren, 2 Vorstudien, 31 Vorprojekt, 3 Projektierung, 32 Bauprojekt, 4 Ausschreibung, 53 Inbetriebnahme, 5 Realisierung, 61 Betrieb, 6 Bewirtschaftung.'],
-  ['Meilenstein / Gate', 'Entscheidpunkt zwischen zwei Phasen, mit Plan- und Prognosetermin.'],
+  ['Pensum', 'Geplanter Einsatz eines Projekts in einem Quartal, in Prozent einer Stelle oder in FTE.'],
+  ['Extern beauftragt', 'Leistung, die nicht die eigene Abteilung erbringt; sie mindert das Pensum, das die Abteilung selbst leisten muss.'],
+  ['Baukredit-Freigabe', 'Gate 4 Ausschreibung. Davor ist ein Projekt planerisch, aber nicht finanziell gebunden — «vor Baukredit-Freigabe» weist diesen Anteil aus.'],
+  ['Phase (ePPM)', 'Teilphase, wie ePPM sie führt: Vorstudien, 22 Auswahlverfahren, 31 Vorprojekt, 32 Bauprojekt, 53 Inbetriebnahme, 61 Betrieb.'],
+  ['Meilenstein / Gate', 'Die Hauptphasen 1 bis 6, als Entscheidpunkte zwischen den Teilphasen, mit Plan- und Prognosetermin.'],
   ['Teilportfolio', 'Gebäudekategorie des BBL, etwa Verwaltung, Zoll oder Bauten im Ausland.'],
   ['Überlast · knapp · ok · frei', 'Auslastung über 100 · 95 – 100 · 80 – 94 · darunter.']
 ];
@@ -454,7 +454,7 @@ function sheetColumns(sheet) {
 
 /** One project's value for a lead column: the registry's plain text. */
 function sheetCell(col, p) {
-  return col.text(p) || '—';
+  return (col.short ?? col.text)(p) || '—';
 }
 
 /** Said at the foot of every sheet whose table carries on. */

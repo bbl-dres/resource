@@ -1,45 +1,40 @@
 {
   "catalog": [
     {
-      "code": "MS1",
-      "name": "Bedürfnis freigegeben",
-      "short": "Strategie"
+      "code": "1",
+      "name": "1 Strategische Planung",
+      "short": "1"
     },
     {
-      "code": "MS2",
-      "name": "Machbarkeit bestätigt",
-      "short": "Machbarkeit"
+      "code": "2",
+      "name": "2 Vorstudien",
+      "short": "2"
     },
     {
-      "code": "MS3",
-      "name": "Vorprojekt genehmigt",
-      "short": "Vorprojekt"
+      "code": "3",
+      "name": "3 Projektierung",
+      "short": "3"
     },
     {
-      "code": "MS4",
-      "name": "Baukredit bewilligt",
-      "short": "Baukredit"
+      "code": "4",
+      "name": "4 Ausschreibung",
+      "short": "4"
     },
     {
-      "code": "MS5",
-      "name": "Vergabe erfolgt",
-      "short": "Vergabe"
+      "code": "5",
+      "name": "5 Realisierung",
+      "short": "5"
     },
     {
-      "code": "MS6",
-      "name": "Abnahme, Inbetriebsetzung",
-      "short": "Abnahme"
-    },
-    {
-      "code": "MS7",
-      "name": "Übergabe Bewirtschaftung",
-      "short": "Übergabe"
+      "code": "6",
+      "name": "6 Bewirtschaftung",
+      "short": "6"
     }
   ],
   "items": [
     {
       "id": "ms-44-5",
-      "code": "MS5",
+      "code": "5",
       "projectId": "pr44",
       "subPhase": "41",
       "plan": "2026Q4",
@@ -51,7 +46,7 @@
     },
     {
       "id": "ms-06-3",
-      "code": "MS3",
+      "code": "3",
       "projectId": "pr06",
       "subPhase": "31",
       "plan": "2026Q4",
@@ -64,7 +59,7 @@
     },
     {
       "id": "ms-26-1",
-      "code": "MS1",
+      "code": "1",
       "projectId": "pr26",
       "subPhase": "11",
       "plan": "2026Q4",
@@ -77,7 +72,7 @@
     },
     {
       "id": "ms-03-2",
-      "code": "MS2",
+      "code": "2",
       "projectId": "pr03",
       "subPhase": "21",
       "plan": "2027Q1",
@@ -88,8 +83,8 @@
       "statusLabel": "Termin gehalten"
     },
     {
-      "id": "ms-10-7",
-      "code": "MS7",
+      "id": "ms-10-6",
+      "code": "6",
       "projectId": "pr10",
       "subPhase": "62",
       "plan": "2027Q1",
@@ -102,7 +97,7 @@
     },
     {
       "id": "ms-57-4",
-      "code": "MS4",
+      "code": "4",
       "projectId": "pr57",
       "subPhase": "33",
       "plan": "2027Q1",
@@ -115,7 +110,7 @@
     },
     {
       "id": "ms-39-2",
-      "code": "MS2",
+      "code": "2",
       "projectId": "pr39",
       "subPhase": "22",
       "plan": "2027Q2",
@@ -127,7 +122,7 @@
     },
     {
       "id": "ms-51-4",
-      "code": "MS4",
+      "code": "4",
       "projectId": "pr51",
       "subPhase": "33",
       "plan": "2027Q2",
@@ -139,7 +134,7 @@
     },
     {
       "id": "ms-12-6",
-      "code": "MS6",
+      "code": "6",
       "projectId": "pr12",
       "subPhase": "52",
       "plan": "2027Q2",
@@ -152,7 +147,7 @@
     },
     {
       "id": "ms-39-3",
-      "code": "MS3",
+      "code": "3",
       "projectId": "pr39",
       "subPhase": "31",
       "plan": "2027Q3",
@@ -164,7 +159,7 @@
     },
     {
       "id": "ms-51-5",
-      "code": "MS5",
+      "code": "5",
       "projectId": "pr51",
       "subPhase": "41",
       "plan": "2027Q4",

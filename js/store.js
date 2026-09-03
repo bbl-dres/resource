@@ -161,10 +161,14 @@ export function viewPatch(view) {
   return preset ? { view, layers: { ...preset } } : { view: 'custom' };
 }
 
-/** The state patch that flips one layer and renames the view to match. */
+/**
+ * The state patch that flips one layer. The view stays «Individuell»: the
+ * switches are only reachable there, and a combination that happened to equal
+ * a named view used to snap the tick to that view and take the switches away
+ * with it — mid-adjustment, the control the reader was using vanished.
+ */
 export function layerPatch(key) {
-  const layers = { ...state.layers, [key]: !state.layers[key] };
-  return { layers, view: viewOf(layers) };
+  return { layers: { ...state.layers, [key]: !state.layers[key] }, view: 'custom' };
 }
 
 /** Are the figures coloured? Never while there are no figures to colour. */
@@ -287,12 +291,13 @@ export function readUrl() {
   /*
    * A named view brings its layers; «custom» reads them off the hash, and a
    * layer the hash does not name is off. Layers without a view resolve to
-   * whatever set they are.
+   * whatever set they are; a link that says «custom» stays custom even where
+   * its layers happen to equal a named view.
    */
   if (patch.view === 'custom' || p.has('layers')) {
     const on = new Set((p.get('layers') || '').split(','));
     patch.layers = Object.fromEntries(LAYER_KEYS.map(k => [k, on.has(k)]));
-    patch.view = viewOf(patch.layers);
+    if (patch.view !== 'custom') patch.view = viewOf(patch.layers);
   } else {
     patch.layers = { ...VIEW_PRESETS[patch.view] };
   }
@@ -989,7 +994,7 @@ export function notifications() {
     if (!mineIds.has(m.projectId) || m.status === 'ok') continue;
     out.push({
       key: m.id, mark: 'tight',
-      title: `${m.code} ${data.milestoneCatalog[m.code]?.name ?? ''}`.trim(),
+      title: data.milestoneCatalog[m.code]?.name ?? m.code,
       text: `${data.projectsById[m.projectId].title} · ${m.statusLabel}`,
       meta: data.quarters[data.quarterIndex[m.forecast ?? m.plan]]?.label ?? '',
       act: 'open-milestone', val: m.id
@@ -1116,62 +1121,51 @@ export function sortPersonRows(rows) {
   });
 }
 
+/**
+ * The figures at the head of the dashboard: how many projects are in scope,
+ * what they add up to in credits, and how much of the office they take as FTE
+ * in the current quarter.
+ * Neutral by design. The strip used to lead with the overload — utilisation,
+ * people over 100 %, unassigned demand — and the project managers it was
+ * meant for read it as a verdict on themselves rather than a measure of the
+ * work. The overload is still on the dashboard, in the charts that show
+ * where and when.
+ */
 export function kpis() {
   const list = filteredProjects();
   const tot = totals(list);
   const now = nowIndex();
+  const fte = grouped((tot.demand[now] / 100).toFixed(2)).replace('.', ',');
   const credit = list.reduce((a, p) => a + (p.credit ?? 0), 0);
-  const peak = data.dashboard.creditByYear.rows.reduce((a, r) => (r.value > a.value ? r : a));
-  /* Over their own contract, as the Ampel and the bell count it — by
-     utilisation, not by pensum points, which agree only for full-time leads. */
-  const over = data.people.filter(p => personUtilisation(p.id, now) > 100)
-    .sort((a, b) => personUtilisation(b.id, now) - personUtilisation(a.id, now));
-  const overQuarters = tot.utilisation.filter(v => v > 100).length;
-  const lastOver = tot.utilisation.reduce((last, v, i) => (v > 100 ? i : last), -1);
-  const unassigned = list.filter(p => !p.leadId);
-  const unassignedDemand = unassigned.reduce((a, p) => a + Math.max(...projectDemand(p)), 0);
-  const unassignedStart = unassigned.length
-    ? data.quarters[projectDemand(unassigned[0]).findIndex(v => v > 0)]?.label
-    : null;
-
-  return {
-    credit: {
-      label: 'Gebundene Kredite CHF',
+  const funded = list.filter(p => p.credit !== null).length;
+  const ids = new Set(list.map(p => p.id));
+  return [
+    {
+      label: 'Bauprojekte',
+      value: String(list.length),
+      note: list.length === data.projects.length
+        ? t('Gesamtportfolio')
+        : `${t('von')} ${data.projects.length} ${t('im Gesamtportfolio')}`
+    },
+    {
+      /* «Kredite», not «gebundene Kredite»: the qualifier asked the reader to
+         know what binds a credit, and the number is the same either way. */
+      label: 'Kredite CHF',
       value: fmtMio(credit),
-      note: `Spitzenjahr ${peak.label}: ${peak.valueLabel} — trifft die Überlastquartale`,
-      alert: false
+      note: `${t('Total')} · ${funded} ${t('Projekte mit Kredit')}`
     },
-    utilisation: {
-      label: 'Auslastung',
-      value: `${tot.utilisation[now]} %`,
-      note: `${tot.portfolio[now]} % Bedarf auf ${tot.net[now]} % netto · ` + (lastOver >= 0
-        ? `Überlast bis ${data.quarters[lastOver].label}`
-        : 'keine Überlast im Zeitraum'),
-      alert: tot.utilisation[now] > 100
+    {
+      label: 'Pensum total',
+      value: `${fte} FTE`,
+      note: `${data.quarters[now].label} · ${t('Pensum der Projekte im Umfang')}`
     },
-    people: {
-      label: 'Personen über 100 %',
-      value: `${over.length} von ${data.people.length}`,
-      // Three names give the note a face; a list of twenty is a wall.
-      note: over.length
-        ? '▲ ' + over.slice(0, 3).map(p => `${p.shortName} ${personUtilisation(p.id, now)}`).join(' · ')
-        : 'alle innerhalb der Anstellung',
-      /* A number, not an instruction. This used to name a DOM id and an
-         action — #card-people, which nothing has rendered since the person
-         card was replaced, so the button was a silent no-op. The store is
-         layer 0 and has no business knowing what a control does. */
-      overflow: Math.max(0, over.length - 3),
-      alert: over.length > 0
-    },
-    unassigned: {
-      label: 'Nicht zugewiesener Bedarf',
-      value: `${unassignedDemand} %`,
-      note: unassigned.length
-        ? `${unassigned[0].location.split(',').pop().trim()}, ab ${unassignedStart}`
-        : 'alles zugewiesen',
-      alert: false
-    },
-    overQuarters,
-    overPeople: over
-  };
+    {
+      /* What is due, not who is short: the gates the projects in scope reach
+         this quarter. Neutral, and the one figure here that changes what the
+         reader does next. */
+      label: 'Meilensteine im Quartal',
+      value: String(data.milestones.items.filter(m => ids.has(m.projectId) && m.plan === data.quarters[now].id).length),
+      note: `${data.quarters[now].label} · ${t('Gates mit Plantermin')}`
+    }
+  ];
 }

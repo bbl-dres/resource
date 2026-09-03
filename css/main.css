@@ -373,9 +373,9 @@ h1, h2, h3,
   border-bottom-color: var(--color-text-strong);
 }
 
+/* The tiles share the row: four of them, each a quarter of the width. */
 .kpi-strip {
-  grid-column: 1 / -1;
-  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-10);
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-8);
 }
 .kpi {
   padding: var(--space-10);
@@ -387,15 +387,7 @@ h1, h2, h3,
   margin-top: var(--space-3); font-size: var(--text-xl);
   font-weight: var(--font-semibold); color: var(--color-text-strong);
 }
-.kpi__more {
-  display: inline-flex; align-items: center; min-height: var(--target-min);
-  border: 0; padding: 0; background: none;
-  font: inherit; color: var(--color-text-link); cursor: pointer;
-}
-.kpi__more:hover { text-decoration: underline; text-underline-offset: 2px; }
 .kpi__note { margin-top: var(--space-1); font-size: var(--text-sm); color: var(--color-text-muted); }
-.kpi.is-alert .kpi__value { color: var(--color-danger-fg); }
-.kpi.is-alert .kpi__note { color: var(--color-danger-fg); font-weight: var(--font-semibold); }
 
 /* ==========================================================================
    5 · Buttons, switches, chips, dropdowns
@@ -1523,7 +1515,13 @@ button.pcell--val { cursor: pointer; }
    11 · Dashboard
    ========================================================================== */
 
-.bi-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-10); align-items: start; }
+/*
+ * Two columns. The quarter chart takes the row; every other card is one tile,
+ * so the cards pair up and each pair shares a height — a mosaic rather than a
+ * stagger. Stretching, not starting: a short list next to a long one keeps
+ * the same bottom edge.
+ */
+.bi-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-10); }
 .bi-card {
   display: flex; flex-direction: column; gap: var(--space-7);
   padding: var(--space-10);
@@ -1531,7 +1529,6 @@ button.pcell--val { cursor: pointer; }
   box-shadow: var(--shadow-raised);
 }
 .bi-card--full { grid-column: 1 / -1; }
-.bi-card--wide { grid-column: span 2; }
 .bi-card__head { display: flex; align-items: flex-start; gap: var(--space-6); }
 .bi-card__head > div:first-child { flex: 1; min-width: 0; }
 .bi-card__title { font-size: var(--text-sub); font-weight: var(--font-semibold); color: var(--color-text-strong); }
@@ -1597,6 +1594,11 @@ button.pcell--val { cursor: pointer; }
 .colchart__col.is-ok .colchart__bar { background: var(--color-bar-bg); border-color: var(--color-bar-border); }
 .colchart__col.is-free .colchart__val { color: var(--color-text-secondary); }
 .colchart__col.is-free .colchart__bar { background: var(--color-bar-bg); border-color: var(--color-bar-border); }
+
+.colchart__panel + .colchart__panel { margin-top: var(--space-8); }
+/* Sticks to the left edge, so a heading inside the scroller stays put while
+   the columns scroll under it. */
+.colchart__panelhead { position: sticky; left: 0; width: max-content; margin-bottom: var(--space-4); }
 
 .barlist { display: flex; flex-direction: column; }
 .barlist__row { display: flex; flex-direction: column; gap: var(--space-2); }
@@ -2018,10 +2020,6 @@ button.pcell--val { cursor: pointer; }
    fewer quarters before narrower columns, then optional columns, then scroll.
    ========================================================================== */
 
-@media (max-width: 1380px) {
-  .bi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
-
 @media (max-width: 1100px) {
   .kpi-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   /* Below the planning widths the row may break rather than overflow. */
@@ -2031,8 +2029,6 @@ button.pcell--val { cursor: pointer; }
 @media (max-width: 1024px) {
   .wrap { padding-inline: var(--space-8); }
   .bi-grid { grid-template-columns: minmax(0, 1fr); }
-  /* Left at span 2 the grid invents a second column and the chart falls to 40px. */
-  .bi-card--wide { grid-column: 1 / -1; }
   .proto-pill { display: none; }
   /* The pull cancels Swagger's own 20px padding; the rail is 16px here. */
   #swagger { margin-inline: calc(-1 * var(--space-8)); }

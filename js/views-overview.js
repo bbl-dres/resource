@@ -268,8 +268,11 @@ const CELL_BODY = {
   }
 };
 
-const cellBody = (col, p, lead) =>
-  (CELL_BODY[col.key] ? CELL_BODY[col.key](p, lead) : (col.text(p) || '—'));
+const cellBody = (col, p, lead) => {
+  if (CELL_BODY[col.key]) return CELL_BODY[col.key](p, lead);
+  if (col.short) return html`<span title="${col.text(p)}">${col.short(p)}</span>`;
+  return col.text(p) || '—';
+};
 
 /** The one cell that also carries a state class. */
 function cellState(col, p, lead) {

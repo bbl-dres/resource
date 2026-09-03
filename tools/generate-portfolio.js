@@ -80,11 +80,12 @@ const PORTFOLIOS = [
 const PRIORITIES = [['hoch', 26], ['mittel', 52], ['tief', 22]];
 
 /*
- * The chain every project walks: the twelve phases as ePPM names them, in the
- * order ePPM lists them — Vorstudien, 1, 22, 2, 31, 3, 32, 4, 53, 5, 61, 6.
- * BBL's list mixes SIA main phases with sub-phases and opens with a stage of
- * its own, so it is read from phases.json rather than written down a second
- * time; that file is the one place the order lives.
+ * The chain every project walks: the six Teilphasen as ePPM names them —
+ * Vorstudien, 22, 31, 32, 53, 61. ePPM's full list reads Vorstudien, 1, 22,
+ * 2, 31, 3, 32, 4, 53, 5, 61, 6: phase, gate, phase, gate. The Hauptphasen
+ * 1 to 6 are the gates between the Teilphasen, and are the milestone
+ * catalogue (tools/seed/milestones.json); the Teilphasen are read from
+ * phases.json, the one place their order lives.
  */
 const EPPM = read('phases').eppm;
 const SEQ = EPPM.map(e => e.id);
@@ -93,26 +94,23 @@ const LABEL = Object.fromEntries(EPPM.map(e => [e.id, e.label]));
  * What a phase asks of the office, in per cent of one person. Operation asks
  * little and asks it for years, which is why it is on the list at all.
  */
-const WEIGHT = {
-  'Vorstudien': 15, '1': 10, '22': 30, '2': 25, '31': 45, '3': 40,
-  '32': 60, '4': 55, '53': 45, '5': 85, '61': 10, '6': 5
-};
+const WEIGHT = { 'Vorstudien': 15, '22': 30, '31': 45, '32': 60, '53': 85, '61': 10 };
 /*
- * Quarters per phase, before the project's own pace is applied.
+ * Quarters per phase, before the project's own pace is applied. A Teilphase
+ * runs up to its gate, so it carries the work SIA files under the main phase
+ * it sits in:
  *
  *   22  an open design competition runs about twelve months, and the award
  *       follows it.
- *   3   a building permit averaged 140–160 days in 2023 and passes a year in
- *       the cities; an objection stretches it much further.
- *   5   the construction: a Teilsanierung inside two years, a Gesamtsanierung
- *       of a building that stays in use, four or more.
- *   6   Bewirtschaftung is what happens to the building afterwards; the chain
- *       carries it so a finished project still has a phase, at next to no
- *       demand.
+ *   32  the Bauprojekt, and with it the permit: 140–160 days on average in
+ *       2023, a year in the cities, much longer with an objection.
+ *   53  from tender to commissioning — a Teilsanierung inside two years, a
+ *       Gesamtsanierung of a building that stays in use, four or more.
+ *   61  Betrieb is what happens to the building afterwards; the chain carries
+ *       it so a finished project still has a phase, at next to no demand.
  */
 const DURATION = {
-  'Vorstudien': [1, 3], '1': [2, 4], '22': [3, 5], '2': [2, 4], '31': [2, 4], '3': [2, 6],
-  '32': [3, 6], '4': [2, 4], '53': [1, 2], '5': [6, 16], '61': [2, 4], '6': [4, 8]
+  'Vorstudien': [1, 3], '22': [3, 5], '31': [2, 4], '32': [4, 8], '53': [6, 16], '61': [4, 8]
 };
 
 /*
@@ -149,7 +147,7 @@ const LAST_START = 2;
 const FIRST_QUARTER = { year: 2026, q: 3 };
 
 /*
- * A whole project: Vorstudien through to Bewirtschaftung, every phase in
+ * A whole project: Vorstudien through to Betrieb, every phase in
  * between, at this project's own pace. Every project has all of them — what
  * differs is how long each takes and when the first one began.
  *
@@ -201,9 +199,9 @@ const stage = phase => SEQ.indexOf(phase);
 
 function creditFor(phase, size) {
   // Nothing is committed before the project has been through Vorstudien.
-  if (stage(phase) <= stage('1')) return null;
+  if (stage(phase) <= stage('Vorstudien')) return null;
   const base = 1.2 + rnd() * 9;
-  const value = Math.round(base * size * (stage(phase) >= stage('4') ? 2.4 : 1.6) * 100) / 100;
+  const value = Math.round(base * size * (stage(phase) >= stage('53') ? 2.4 : 1.6) * 100) / 100;
   return Math.min(value, 128);
 }
 
@@ -260,7 +258,7 @@ function makeProject(n, usedNumbers, usedAddresses) {
     priority: weighted(PRIORITIES),
     credit,
     creditLabel: credit === null ? 'offen' : mio(credit),
-    // The construction credit is released at MS4, which closes the Bauprojekt.
+    // The construction credit is released at gate 4, which closes the Bauprojekt.
     preCredit: stage(phase) <= stage('32'),
     demand,
     // The agreed pensum: usually what is planned, sometimes less than reality.
@@ -343,11 +341,10 @@ function makeTeam(rosterTarget) {
    -------------------------------------------------------------------------- */
 
 /* The odds that a gate has no forecast at all, by gate — see makeMilestones. */
-const OPEN = { MS1: 0.30, MS2: 0.20, MS3: 0.12, MS4: 0.34, MS5: 0.10, MS6: 0.06, MS7: 0.06 };
+const OPEN = { '1': 0.30, '2': 0.20, '3': 0.12, '4': 0.34, '5': 0.06, '6': 0.06 };
 
-/* The gate at the end of each phase that has one. */
-const GATE = { '1': 'MS1', '2': 'MS2', '31': 'MS3', '32': 'MS4', '4': 'MS5',
-  '53': 'MS6', '5': 'MS7' };
+/* The gate at the end of each Teilphase: the Hauptphase it opens. */
+const GATE = { 'Vorstudien': '1', '22': '2', '31': '3', '32': '4', '53': '5', '61': '6' };
 const META = read('meta');
 
 /* The calendar follows QUARTERS, so the window has one definition. */
@@ -404,7 +401,7 @@ function makeMilestones(projects) {
       const pending = rnd() < (OPEN[code] ?? 0.10) * (near ? 0.35 : 1);
 
       items.push({
-        id: `ms-${p.id.slice(2)}-${code.slice(2)}`,
+        id: `ms-${p.id.slice(2)}-${code}`,
         code,
         projectId: p.id,
         subPhase: bar.phase,
@@ -617,9 +614,9 @@ const WORDS = {
     'Aufwand nach Einsprache erhöht', 'Planungsaufwand nach Vorprojekt angepasst'
   ],
   Meilenstein: [
-    'MS3 Vorprojekt neu terminiert', 'MS4 Baukredit neu terminiert',
-    'MS5 Vergabe neu terminiert', 'MS2 Machbarkeit bestätigt',
-    'MS6 Abnahme neu terminiert'
+    'Gate 3 Projektierung neu terminiert', 'Gate 4 Ausschreibung neu terminiert',
+    'Gate 5 Realisierung neu terminiert', 'Gate 2 Vorstudien bestätigt',
+    'Gate 6 Bewirtschaftung neu terminiert'
   ],
   Termin: [
     'Bauende verschoben', 'Baubeginn vorgezogen', 'Bezug neu terminiert',
@@ -701,7 +698,7 @@ const buckets = { later: [0, 0] };
 for (const y of BUCKET_YEARS) buckets[y] = [0, 0];
 for (const p of projects) {
   if (p.credit === null) continue;
-  const build = p.bars.find(b => b.phase === '5');   // Realisierung, in ePPM's own id
+  const build = p.bars.find(b => b.phase === '53');   // tender to commissioning
   const key = !build ? 'later' : (YEAR_OF[Math.min(QUARTERS - 1, Math.max(0, build.from))] ?? 'later');
   const bucket = buckets[key] ?? buckets.later;
   bucket[0] += p.credit;
@@ -738,12 +735,12 @@ dashboard.creditByYear.rows = [
  * ids are stable slugs so a shared link survives a renaming.
  */
 const TEAMS = [
-  { id: 'ppe-1', label: 'Programm- und Projektentwicklung I' },
-  { id: 'ppe-2', label: 'Programm- und Projektentwicklung II' },
-  { id: 'bpi-1', label: 'Bauprojekte Inland I' },
-  { id: 'bpi-2', label: 'Bauprojekte Inland II' },
-  { id: 'bpi-3', label: 'Bauprojekte Inland III' },
-  { id: 'bpa', label: 'Bauprojekte Ausland' }
+  { id: 'ppe-1', label: 'Programm- und Projektentwicklung I', short: 'PPE I' },
+  { id: 'ppe-2', label: 'Programm- und Projektentwicklung II', short: 'PPE II' },
+  { id: 'bpi-1', label: 'Bauprojekte Inland I', short: 'PM Inland I' },
+  { id: 'bpi-2', label: 'Bauprojekte Inland II', short: 'PM Inland II' },
+  { id: 'bpi-3', label: 'Bauprojekte Inland III', short: 'PM Inland III' },
+  { id: 'bpa', label: 'Bauprojekte Ausland', short: 'PM Ausland' }
 ];
 const teamOfPerson = new Map(people.map((person, i) => [person.id, TEAMS[i % TEAMS.length].id]));
 projects.forEach((project, i) => {
@@ -751,7 +748,9 @@ projects.forEach((project, i) => {
     ? teamOfPerson.get(project.leadId)
     : TEAMS[i % TEAMS.length].id;
 });
-META.organisations = TEAMS.map(({ id, label }) => ({ id, label }));
+/* The short form is the house's own — «PPE» and «PM» — and is what a
+   grid column has room for; the filter and the group headings say the name. */
+META.organisations = TEAMS.map(({ id, label, short }) => ({ id, label, short }));
 
 /* The window has one definition; the app reads it from here. */
 META.quarters = QUARTER_CAL.map((c, i) => ({

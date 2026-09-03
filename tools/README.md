@@ -60,18 +60,19 @@ whole plan at once is what the A0 report is for.
 
 ### The shape of a project
 
-Every project has the whole chain, `Vorstudien` through `6`: the twelve phases
-as ePPM names them, in ePPM's order — Vorstudien, 1, 22, 2, 31, 3, 32, 4, 53,
-5, 61, 6. What differs is how long each phase takes and when the first one
-began. The list is read from `data/phases.json`; it is the one place the order
-lives, and the app reads the same file for its filter and its grouping.
+Every project has the whole chain, `Vorstudien` through `61`: the six
+Teilphasen as ePPM names them — Vorstudien, 22, 31, 32, 53, 61. What differs
+is how long each phase takes and when the first one began. The list is read
+from `data/phases.json`; it is the one place the order lives, and the app
+reads the same file for its filter and its grouping.
 
-The list is BBL's own. It mixes SIA 112 main phases with sub-phases and opens
-with a stage of its own, and it is used as given rather than rearranged into
-SIA order: what ePPM shows is what the plan shows. The last two phases, 61
-Betrieb and 6 Bewirtschaftung, are what happens to the building afterwards;
-they carry next to no demand and are in the chain so a finished project still
-has a phase.
+ePPM's full value list reads Vorstudien, 1, 22, 2, 31, 3, 32, 4, 53, 5, 61, 6:
+phase, gate, phase, gate. The Hauptphasen 1 to 6 are not phases a project
+sits in but the gates between the Teilphasen — 1 closes Vorstudien, 2 closes
+22, and so on to 6, which closes 61 — and they are the milestone catalogue in
+`tools/seed/milestones.json`. The last Teilphase, 61 Betrieb, is what happens
+to the building afterwards; it carries next to no demand and is in the chain
+so a finished project still has a phase.
 
 `LAST_START = 2`: nothing begins after Q1/2027. A project two years out is not in
 this tool, it is a line in a Botschaft — no Auftrag, no lead, no pensum. So the
@@ -87,21 +88,16 @@ is applied:
 | Phase (ePPM) | Quartale | woher |
 |---|---|---|
 | Vorstudien | 1–3 | |
-| 1 Strategische Planung | 2–4 | |
 | 22 Auswahlverfahren | 3–5 | an open design competition runs about twelve months, and the award follows it |
-| 2 Vorstudien | 2–4 | |
 | 31 Vorprojekt | 2–4 | |
-| 3 Projektierung | 2–6 | a building permit averaged 140–160 days in 2023 and passes a year in the cities; an objection stretches it much further |
-| 32 Bauprojekt | 3–6 | |
-| 4 Ausschreibung | 2–4 | |
-| 53 Inbetriebnahme | 1–2 | |
-| 5 Realisierung | 6–16 | a Teilsanierung inside two years, a Gesamtsanierung of a building that stays in use, four or more |
-| 61 Betrieb | 2–4 | |
-| 6 Bewirtschaftung | 4–8 | |
+| 32 Bauprojekt | 4–8 | the Bauprojekt and its permit: 140–160 days on average in 2023, a year in the cities, much longer with an objection |
+| 53 Inbetriebnahme | 6–16 | tender to commissioning: a Teilsanierung inside two years, a Gesamtsanierung of a building that stays in use, four or more |
+| 61 Betrieb | 4–8 | |
 
-The gates: MS1 closes phase 1, MS2 phase 2, MS3 the Vorprojekt, MS4 the
-Bauprojekt (the construction credit is released there), MS5 the Ausschreibung,
-MS6 the Inbetriebnahme and MS7 the Realisierung.
+The gates, each at the end of the Teilphase it closes: 1 Strategische Planung
+closes Vorstudien, 2 Vorstudien closes 22, 3 Projektierung closes 31, 4
+Ausschreibung closes 32 (the construction credit is released there), 5
+Realisierung closes 53, 6 Bewirtschaftung closes 61.
 
 `paceOf(size)` multiplies all of them. Money is half of it — a three-million
 Instandsetzung is decided and built while a thirty-million Gesamtsanierung is

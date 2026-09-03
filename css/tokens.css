@@ -441,7 +441,7 @@
   --grid-col-phase:     152px;  /* «33 Bewilligungsverfahren» in full, 144px + padding */
   --grid-col-lead:      132px;
   --grid-col-portfolio: 110px;
-  --grid-col-organisation: 200px;  /* «Programm- und Projektentwicklung II» truncates past this */
+  --grid-col-organisation: 112px;  /* «PM Inland III», the longest short form, plus its padding */
   --grid-col-credit:    112px;
 
   /* The person table has its own five lead columns. */

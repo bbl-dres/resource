@@ -251,6 +251,11 @@
       "fr": "taux d'activité",
       "it": "grado di occupazione"
     },
+    "Anzahl Projekte nach Organisation": {
+      "en": "Projects by organisation",
+      "fr": "Nombre de projets par organisation",
+      "it": "Numero di progetti per organizzazione"
+    },
     "Anzahl Projekte nach Phase (ePPM)": {
       "en": "Project count by phase (ePPM)",
       "fr": "Nombre de projets par phase (ePPM)",
@@ -355,26 +360,6 @@
       "en": "Assignee",
       "fr": "Personne en charge",
       "it": "Incaricato"
-    },
-    "Bedarf": {
-      "en": "Demand",
-      "fr": "Besoin",
-      "it": "Fabbisogno"
-    },
-    "Bedarf gegen Kapazität netto": {
-      "en": "Demand against net capacity",
-      "fr": "Besoin rapporté à la capacité nette",
-      "it": "Fabbisogno rapportato alla capacità netta"
-    },
-    "Bedarf nach Teilportfolio": {
-      "en": "Demand by sub-portfolio",
-      "fr": "Besoin par sous-portefeuille",
-      "it": "Fabbisogno per sottoportafoglio"
-    },
-    "Bedarf offen": {
-      "en": "Demand open",
-      "fr": "Besoin ouvert",
-      "it": "Fabbisogno aperto"
     },
     "Bedürfnis freigegeben": {
       "en": "Need approved",
@@ -586,6 +571,16 @@
       "fr": "EPT",
       "it": "FTE"
     },
+    "FTE nach Organisation": {
+      "en": "FTE by organisation",
+      "fr": "EPT par organisation",
+      "it": "FTE per organizzazione"
+    },
+    "FTE nach Teilportfolio": {
+      "en": "FTE by sub-portfolio",
+      "fr": "EPT par sous-portefeuille",
+      "it": "FTE per sottoportafoglio"
+    },
     "Feld": {
       "en": "Field",
       "fr": "Champ",
@@ -630,6 +625,11 @@
       "en": "Gate at the end of a phase",
       "fr": "Jalon en fin de phase",
       "it": "Gate a fine fase"
+    },
+    "Gates mit Plantermin": {
+      "en": "gates with a planned date",
+      "fr": "jalons avec date planifiée",
+      "it": "gate con data pianificata"
     },
     "Gebundene Mittel nach Jahr der Realisierung": {
       "en": "Committed funds by year of construction",
@@ -731,8 +731,8 @@
       "fr": "Capacité nette",
       "it": "Capacità netta"
     },
-    "Kapazität netto minus gebuchtem Bedarf": {
-      "en": "Net capacity minus booked demand",
+    "Kapazität netto minus gebuchtem Pensum": {
+      "en": "Net capacity minus booked workload",
       "fr": "Capacité nette moins besoin imputé",
       "it": "Capacità netta meno fabbisogno imputato"
     },
@@ -811,6 +811,11 @@
       "fr": "Crédit par phase (ePPM)",
       "it": "Credito per fase (ePPM)"
     },
+    "Kredite CHF": {
+      "en": "Credits CHF",
+      "fr": "Crédits CHF",
+      "it": "Crediti CHF"
+    },
     "Kultur und Denkmäler": {
       "en": "Culture and monuments",
       "fr": "Culture et monuments",
@@ -870,6 +875,11 @@
       "en": "Milestones",
       "fr": "Jalons",
       "it": "Milestone"
+    },
+    "Meilensteine im Quartal": {
+      "en": "Milestones this quarter",
+      "fr": "Jalons du trimestre",
+      "it": "Milestone del trimestre"
     },
     "Meilensteine meiner Projekte": {
       "en": "Milestones on my projects",
@@ -946,6 +956,26 @@
       "fr": "Création du PDF …",
       "it": "Creazione del PDF …"
     },
+    "PM Ausland": {
+      "en": "PM abroad",
+      "fr": "PM étranger",
+      "it": "PM estero"
+    },
+    "PM Inland I": {
+      "en": "PM Switzerland I",
+      "fr": "PM Suisse I",
+      "it": "PM Svizzera I"
+    },
+    "PM Inland II": {
+      "en": "PM Switzerland II",
+      "fr": "PM Suisse II",
+      "it": "PM Svizzera II"
+    },
+    "PM Inland III": {
+      "en": "PM Switzerland III",
+      "fr": "PM Suisse III",
+      "it": "PM Svizzera III"
+    },
     "Pensum": {
       "en": "Workload",
       "fr": "Charge",
@@ -971,6 +1001,11 @@
       "fr": "Modifier la charge",
       "it": "Modifica carico"
     },
+    "Pensum der Projekte im Umfang": {
+      "en": "workload of the projects in scope",
+      "fr": "besoin des projets sélectionnés",
+      "it": "fabbisogno dei progetti selezionati"
+    },
     "Pensum einfärben": {
       "en": "Colour by workload",
       "fr": "Colorer selon la charge",
@@ -980,6 +1015,11 @@
       "en": "Increase workload",
       "fr": "Augmenter la charge",
       "it": "Aumenta il carico"
+    },
+    "Pensum gegen Kapazität netto": {
+      "en": "Workload against net capacity",
+      "fr": "Besoin rapporté à la capacité nette",
+      "it": "Fabbisogno rapportato alla capacità netta"
     },
     "Pensum in %": {
       "en": "Workload in %",
@@ -1010,6 +1050,16 @@
       "en": "Workload by quarter",
       "fr": "Charge par trimestre",
       "it": "Carico per trimestre"
+    },
+    "Pensum offen": {
+      "en": "Workload open",
+      "fr": "Besoin ouvert",
+      "it": "Fabbisogno aperto"
+    },
+    "Pensum total": {
+      "en": "Total workload",
+      "fr": "Charge totale",
+      "it": "Carico totale"
     },
     "Pensum umbuchen": {
       "en": "Reallocate workload",
@@ -1150,6 +1200,11 @@
       "en": "projects in the current scope",
       "fr": "projets dans le périmètre défini",
       "it": "progetti nell'ambito definito"
+    },
+    "Projekte mit Kredit": {
+      "en": "projects with a credit",
+      "fr": "projets avec crédit",
+      "it": "progetti con credito"
     },
     "Projektleitung": {
       "en": "Project lead",
@@ -1345,6 +1400,11 @@
       "en": "Show schedule",
       "fr": "Afficher les échéances",
       "it": "Mostra scadenze"
+    },
+    "Total": {
+      "en": "Total",
+      "fr": "Total",
+      "it": "Totale"
     },
     "Umbuchen": {
       "en": "Reallocate",
@@ -1546,6 +1606,11 @@
       "fr": "libre",
       "it": "libero"
     },
+    "gebucht": {
+      "en": "booked",
+      "fr": "réservé",
+      "it": "prenotato"
+    },
     "gebucht auf": {
       "en": "booked against",
       "fr": "imputé sur",
@@ -1565,6 +1630,11 @@
       "en": "high",
       "fr": "élevée",
       "it": "alta"
+    },
+    "im Gesamtportfolio": {
+      "en": "in the whole portfolio",
+      "fr": "du portefeuille complet",
+      "it": "del portafoglio complessivo"
     },
     "im Rahmen": {
       "en": "within limits",
