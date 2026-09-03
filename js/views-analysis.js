@@ -6,8 +6,9 @@
 import {
   data, state, t, fmtMio, totals, loadStatus, cellValue,
   filteredProjects, visibleChanges,
-  periods, personRows, sortPersonRows, windowEdges, pageOf, chartTone, nowIndex
+  periods, periodValue, personRows, sortPersonRows, groupPeople, pageOf, chartTone, nowIndex
 } from './store.js';
+import { card } from './views-overview.js';
 
 import {
   html, raw, icons, pageHeader, pageActions, toolbar, activeFilterRow,
@@ -33,7 +34,7 @@ export function renderDashboard() {
       actions: pageActions()
     })}
     <div class="wrap"><div class="content">
-      ${toolbar()}
+      ${toolbar(section === 'people' ? { time: true, groups: PEOPLE_GROUPS } : {})}
       ${activeFilterRow()}
       ${kpiStrip()}
       <div class="bibar">${segmented(BI_SECTIONS, section, 'bi')}</div>
@@ -69,10 +70,14 @@ const personHeat = v => (v === 0 ? 0 : v <= 80 ? 1 : v <= 100 ? 2 : v <= 150 ? 3
  * right over centred values.
  */
 
+/** What a person can be grouped by — see groupPeople(). */
+const PEOPLE_GROUPS = ['none', 'organisation'];
+
 /** The frozen columns of the person table, in order, with their width token. */
 const PERSON_COLS = [
   { key: 'name', token: '--person-col-name', grow: true },
-  { key: 'role', token: '--person-col-role' },
+  /* The same short form and width as the planning grid's column. */
+  { key: 'organisation', token: '--grid-col-organisation' },
   { key: 'employment', token: '--person-col-employment' },
   { key: 'projects', token: '--person-col-projects' },
   { key: 'peak', token: '--person-col-peak' }
@@ -91,81 +96,111 @@ function personLayout(cols) {
   sticky.width = offset;
   sticky.last = PERSON_COLS.at(-1).key;
 
-  const quarterW = tokenPx('--grid-quarter');
-  parts.push(`repeat(${cols.length}, minmax(${quarterW}px, 1fr))`);
+  /* The same floor and ceiling as the planning grid, so the two tables share
+     a column width — and, past the ceiling, the name takes the slack. */
+  const quarterW = tokenPx('--grid-period');
+  parts.push(`repeat(${cols.length}, minmax(${quarterW}px, ${tokenPx('--grid-period-max')}px))`);
   return { tpl: parts.join(' '), minWidth: offset + quarterW * cols.length, sticky };
 }
 
 /** A sortable header cell for the person table. */
-const personHead = (key, label, sticky, cls = '') => sortableHead({
+const personHead = (key, label, sticky, cls = '', title = '') => sortableHead({
   key, label, act: 'sort-person', cls: pinCls(sticky, key, cls),
-  style: pinLeft(sticky, key),
+  style: pinLeft(sticky, key), title,
   active: state.pSort === key, ascending: state.pDir === 'asc'
 });
 
 function personSection() {
   const cols = periods();
-  const edge = windowEdges(cols);
   const { tpl, minWidth, sticky } = personLayout(cols);
   const rows = sortPersonRows(personRows());
-  // The one figure this table alone can give: how many people are over their
-  // own contract, quarter by quarter.
-  const overPerCol = cols.map((_, i) => rows.filter(r => r.leads && r.values[i] > 100).length);
+  const groups = groupPeople(rows);
+  const span = PERSON_COLS.length;
+  /*
+   * A total adds up what is booked, not the percentages: a row's figure is a
+   * share of that person's own contract, and a sum of shares of different
+   * contracts says nothing. In FTE, which is what the booked pensum of a whole
+   * office reads as.
+   */
+  const sumOf = list => cols.map(col => list.reduce((a, r) => a + periodValue(r.load, col), 0));
 
   /* The frozen lead cells differ only in their class and their content. */
-  const leadCell = (key, cls, body) => html`<span class="pcell ${cls} ${pinCls(sticky, key)}"
-      style="${pinLeft(sticky, key)}">${body}</span>`;
+  const leadCell = (key, cls, body, title = '') => html`<span class="pcell ${cls} ${pinCls(sticky, key)}"
+      style="${pinLeft(sticky, key)}" title="${title}">${body}</span>`;
 
-  return html`<section class="grid-card">
-    <div class="scrollbox" ${attr(edge.before, 'data-before')} ${attr(edge.after, 'data-after')}>
-    <div class="pgrid" data-scroll>
-      <div class="pgrid__track" style="min-width:${minWidth}px; --sticky-w:${sticky.width}px">
-        <div class="pblock">
-          <div class="prow prow--head" style="grid-template-columns:${raw(tpl)}">
-            ${personHead('name', t('Person'), sticky)}
-            ${personHead('role', t('Rolle'), sticky)}
-            ${personHead('employment', t('Anst.'), sticky, 'pcell--num align-end')}
-            ${personHead('projects', t('Proj.'), sticky, 'pcell--num align-end')}
-            ${personHead('peak', t('Spitze'), sticky, 'pcell--num align-end')}
-            ${cols.map((col, i) => personHead(`q${i}`, col.short,
-              sticky, `pcell--num pcell--period align-center ${col.isNow ? 'is-today' : ''} ${yearRule(col)}`))}
-          </div>
+  const head = html`<div class="prow prow--head" style="grid-template-columns:${raw(tpl)}">
+    ${personHead('name', t('Person'), sticky)}
+    ${personHead('organisation', t('Organisation'), sticky)}
+    ${personHead('employment', t('Anstellung'), sticky, 'pcell--num align-end')}
+    ${personHead('projects', t('Projekte'), sticky, 'pcell--num align-end')}
+    ${personHead('peak', t('Spitze'), sticky, 'pcell--num align-end', t('Höchste Auslastung im sichtbaren Zeitraum'))}
+    ${cols.map((col, i) => personHead(`q${i}`, col.short,
+      sticky, `pcell--num pcell--period align-center ${col.isNow ? 'is-today' : ''} ${yearRule(col)}`,
+      /* The heading is a short form; the hint says the whole quarter, as on Planung. */
+      col.isNow ? `${t('Heute')}, ${data.meta.todayLabel} — ${t('laufendes Quartal')}` : col.label))}
+  </div>`;
 
-          ${rows.map(r => html`<div class="prow" style="grid-template-columns:${raw(tpl)}">
-            ${leadCell('name', 'pcell--title', html`<button type="button" class="prow__title"
-                data-act="filter-lead" data-val="${r.person.id}"
-                title="${t('Übersicht auf diese Person filtern')}">${r.person.name}</button>`)}
-            ${leadCell('role', 'pcell--phase', t(r.person.role))}
-            ${leadCell('employment', 'pcell--target align-end', `${r.person.employment} %`)}
-            ${leadCell('projects', 'pcell--target align-end', r.leads || '—')}
-            ${leadCell('peak', `pcell--target align-end ${r.peak > 100 ? 'is-over' : ''}`,
-              r.peak === null ? '—' : `${r.peak} %`)}
-            ${cols.map((col, i) => {
-              const v = r.values[i];
-              const label = r.leads ? `${v} %` : '—';
-              return html`<span class="pcell pcell--val ${r.leads ? `heat-${personHeat(v)}` : ''}
-                  ${r.leads && v > 100 ? 'is-warn' : ''} ${yearRule(col)}"
-                  title="${r.person.name}, ${col.label}: ${label} ${t('der Anstellung')}">${label}</span>`;
-            })}
-          </div>`)}
-        </div>
+  const personRow = r => {
+    const org = data.organisationsById[r.person.organisation];
+    return html`<div class="prow" style="grid-template-columns:${raw(tpl)}">
+      ${leadCell('name', 'pcell--title', html`<button type="button" class="prow__title"
+          data-act="filter-lead" data-val="${r.person.id}"
+          title="${t('Übersicht auf diese Person filtern')}">${r.person.name}</button>`)}
+      ${leadCell('organisation', 'pcell--phase', org ? t(org.short) : '—', org ? t(org.label) : '')}
+      ${leadCell('employment', 'pcell--target align-end', `${r.person.employment} %`)}
+      ${leadCell('projects', 'pcell--target align-end', r.leads || '—')}
+      ${leadCell('peak', `pcell--target align-end ${r.peak > 100 ? 'is-over' : ''}`,
+        r.peak === null ? '—' : `${r.peak} %`)}
+      ${cols.map((col, i) => {
+        const v = r.values[i];
+        const label = r.leads ? `${v} %` : '—';
+        return html`<span class="pcell pcell--val ${r.leads ? `heat-${personHeat(v)}` : ''}
+            ${r.leads && v > 100 ? 'is-warn' : ''} ${yearRule(col)}"
+            title="${r.person.name}, ${col.label}: ${label} ${t('der Anstellung')}">${label}</span>`;
+      })}
+    </div>`;
+  };
 
-        <div class="pblock pblock--foot">
-          <div class="prow prow--load" style="grid-template-columns:${raw(tpl)}">
-            <div style="grid-column:span ${PERSON_COLS.length}" class="prow__sumlabel is-frozen">
-              ${t('Personen über 100 %')}
-              <span class="prow__sumnote">${data.people.length} ${t('Personen')} · ${
-                data.people.reduce((a, p) => a + p.employment, 0)} % ${t('Anstellung')}</span>
-            </div>
-            ${overPerCol.map((v, i) => html`<span class="pcell pcell--load is-${v > 0 ? 'danger' : 'neutral'}
-                ${yearRule(cols[i])}">
-              <span class="pcell__pct">${v}</span>
-            </span>`)}
-          </div>
-        </div>
-      </div>
+  const sumRow = (label, note, list, cls = '') => html`<div class="prow prow--sum ${cls}"
+      style="grid-template-columns:${raw(tpl)}">
+    <div style="grid-column:span ${span}" class="prow__sumlabel is-frozen">
+      ${label}${note && html`<span class="prow__sumnote">${note}</span>`}
     </div>
-    </div>
+    ${sumOf(list).map((v, i) => html`<span class="pcell pcell--sum ${yearRule(cols[i])}">${fte(v)}</span>`)}
+  </div>`;
+
+  /* Built like the planning grid's groups: a heading on the page ground, the
+     rows in a card under it, and the group's own sum closing the card. */
+  const body = groups.map(g => {
+    const collapsed = g.label ? state.collapsedGroups[g.key] : false;
+    const heading = g.label && html`<h2 class="pgrouphead">
+      <button type="button" class="pgrouphead__toggle"
+              data-act="toggle-group" data-val="${g.key}" aria-expanded="${!collapsed}">
+        <span class="caret ${collapsed ? 'is-collapsed' : ''}" aria-hidden="true">${icons.chevronDown()}</span>
+        <span class="pgrouphead__name">${g.label}</span>
+        <span class="count-pill">${g.rows.length}</span>
+      </button>
+    </h2>`;
+    if (collapsed) return html`<section class="pgroup">${heading}</section>`;
+    return html`<section class="pgroup">${heading}
+      ${card(html`${head}${g.rows.map(personRow)}
+        ${g.label && sumRow(`${t('Summe')} ${g.label} (${g.rows.length})`, '', g.rows, 'prow--groupsum')}`,
+        { minWidth, sticky })}
+    </section>`;
+  });
+
+  const foot = sumRow(t('Summe Total'), `${rows.length} ${t('Personen')} · ${t('Pensum in FTE')}`, rows);
+
+  /*
+   * The same cards as the planning grid — the groups and, under them, the
+   * total — each wrapping its own scroller, so the frame stays put while the
+   * quarters move and the fades sit on the frozen edge. The switches say the
+   * table has no band: without them the figures kept a band's worth of room
+   * under every number.
+   */
+  return html`<section class="grid-card is-bars-off is-gates-off">
+    ${body}
+    ${card(foot, { minWidth, sticky, cls: 'pblock--foot' })}
   </section>`;
 }
 
@@ -259,6 +294,10 @@ function organisationCountCard() {
     const n = list.filter(p => p.organisation === o.id).length;
     return { label: t(o.label), value: n, valueLabel: String(n) };
   });
+  /* A project without an assignee belongs to no unit; the bars still have to
+     add up to the number in the subtitle. */
+  const open = list.filter(p => !p.organisation).length;
+  if (open) rows.push({ label: `(${t('nicht zugewiesen')})`, value: open, valueLabel: String(open) });
   return biCard('organisationen', 'Anzahl Projekte nach Organisation',
     `${list.length} ${t('Projekte im gesetzten Umfang')}`,
     barList(rows, { max: Math.max(1, ...rows.map(r => r.value)) }));
@@ -286,12 +325,12 @@ function portfolioCard() {
 function organisationFteCard() {
   const list = filteredProjects();
   const now = nowIndex();
+  const pensumOf = pick => list.filter(pick).reduce((a, p) => a + cellValue(p, now), 0);
   const rows = data.meta.organisations
-    .map(o => {
-      const v = list.filter(p => p.organisation === o.id).reduce((a, p) => a + cellValue(p, now), 0);
-      return { label: t(o.label), value: v, valueLabel: `${fte(v)} FTE` };
-    })
+    .map(o => ({ label: t(o.label), value: pensumOf(p => p.organisation === o.id) }))
+    .concat({ label: `(${t('nicht zugewiesen')})`, value: pensumOf(p => !p.organisation) })
     .filter(r => r.value > 0)
+    .map(r => ({ ...r, valueLabel: `${fte(r.value)} FTE` }))
     .sort((a, b) => b.value - a.value);
   return biCard('organisation-fte', 'FTE nach Organisation',
     `${data.quarters[now].label} · ${t('Pensum in FTE')}`,

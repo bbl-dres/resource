@@ -241,11 +241,6 @@
       "fr": "Vues",
       "it": "Viste"
     },
-    "Anst.": {
-      "en": "Empl.",
-      "fr": "Taux",
-      "it": "Grado"
-    },
     "Anstellung": {
       "en": "contract",
       "fr": "taux d'activité",
@@ -350,6 +345,11 @@
       "en": "Edit",
       "fr": "Modifier",
       "it": "Modifica"
+    },
+    "Bearbeitende zugewiesen": {
+      "en": "people assigned",
+      "fr": "personnes attribuées",
+      "it": "persone assegnate"
     },
     "Bearbeitenden zuweisen": {
       "en": "Assign a person",
@@ -685,6 +685,11 @@
       "en": "Highest workload of the assignee in the visible period",
       "fr": "Charge maximale de la personne en charge sur la période affichée",
       "it": "Carico massimo dell'incaricato nel periodo visualizzato"
+    },
+    "Höchste Auslastung im sichtbaren Zeitraum": {
+      "en": "Highest utilisation in the visible period",
+      "fr": "Charge maximale sur la période visible",
+      "it": "Carico massimo nel periodo visibile"
     },
     "Ihre Auslastung": {
       "en": "Your workload",
@@ -1111,11 +1116,6 @@
       "fr": "Personnes",
       "it": "Persone"
     },
-    "Personen über 100 %": {
-      "en": "People over 100 %",
-      "fr": "Personnes à plus de 100 %",
-      "it": "Persone oltre il 100 %"
-    },
     "Pfad": {
       "en": "Path",
       "fr": "Chemin",
@@ -1170,11 +1170,6 @@
       "en": "Programme and project development II",
       "fr": "Développement de programmes et de projets II",
       "it": "Sviluppo di programmi e progetti II"
-    },
-    "Proj.": {
-      "en": "Proj.",
-      "fr": "Proj.",
-      "it": "Prog."
     },
     "Projekt": {
       "en": "Project",

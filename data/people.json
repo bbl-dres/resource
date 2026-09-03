@@ -47,7 +47,8 @@
       0,
       0,
       0
-    ]
+    ],
+    "organisation": "ppe-1"
   },
   {
     "id": "lars",
@@ -97,7 +98,8 @@
       0,
       0,
       0
-    ]
+    ],
+    "organisation": "ppe-2"
   },
   {
     "id": "alina",
@@ -147,7 +149,8 @@
       0,
       0,
       0
-    ]
+    ],
+    "organisation": "bpi-1"
   },
   {
     "id": "tobias",
@@ -197,7 +200,8 @@
       0,
       0,
       0
-    ]
+    ],
+    "organisation": "bpi-2"
   },
   {
     "id": "paula",
@@ -247,7 +251,8 @@
       0,
       0,
       0
-    ]
+    ],
+    "organisation": "bpi-3"
   },
   {
     "id": "nadia",
@@ -297,7 +302,8 @@
       55,
       50,
       50
-    ]
+    ],
+    "organisation": "bpa"
   },
   {
     "id": "annamuster",
@@ -347,7 +353,8 @@
       15,
       15,
       15
-    ]
+    ],
+    "organisation": "ppe-1"
   },
   {
     "id": "hansbeispiel",
@@ -397,7 +404,8 @@
       0,
       0,
       0
-    ]
+    ],
+    "organisation": "ppe-2"
   },
   {
     "id": "oliviamusterli",
@@ -447,7 +455,8 @@
       110,
       110,
       110
-    ]
+    ],
+    "organisation": "bpi-1"
   },
   {
     "id": "walterbeispieler",
@@ -497,7 +506,8 @@
       0,
       0,
       0
-    ]
+    ],
+    "organisation": "bpi-2"
   },
   {
     "id": "evamustermann",
@@ -547,7 +557,8 @@
       0,
       0,
       0
-    ]
+    ],
+    "organisation": "bpi-3"
   },
   {
     "id": "leonbeispielmann",
@@ -597,7 +608,8 @@
       0,
       0,
       0
-    ]
+    ],
+    "organisation": "bpa"
   },
   {
     "id": "ursinamuster",
@@ -647,7 +659,8 @@
       0,
       0,
       0
-    ]
+    ],
+    "organisation": "ppe-1"
   },
   {
     "id": "damianbeispiel",
@@ -697,7 +710,8 @@
       0,
       0,
       0
-    ]
+    ],
+    "organisation": "ppe-2"
   },
   {
     "id": "ginamusterli",
@@ -747,7 +761,8 @@
       110,
       15,
       15
-    ]
+    ],
+    "organisation": "bpi-1"
   },
   {
     "id": "nicobeispieler",
@@ -797,7 +812,8 @@
       0,
       0,
       0
-    ]
+    ],
+    "organisation": "bpi-2"
   },
   {
     "id": "veramustermann",
@@ -847,7 +863,8 @@
       0,
       0,
       0
-    ]
+    ],
+    "organisation": "bpi-3"
   },
   {
     "id": "dariobeispielmann",
@@ -897,7 +914,8 @@
       0,
       0,
       0
-    ]
+    ],
+    "organisation": "bpa"
   },
   {
     "id": "katjamuster",
@@ -947,7 +965,8 @@
       0,
       0,
       0
-    ]
+    ],
+    "organisation": "ppe-1"
   },
   {
     "id": "timobeispiel",
@@ -997,7 +1016,8 @@
       0,
       0,
       0
-    ]
+    ],
+    "organisation": "ppe-2"
   },
   {
     "id": "corinamusterli",
@@ -1047,7 +1067,8 @@
       0,
       0,
       0
-    ]
+    ],
+    "organisation": "bpi-1"
   },
   {
     "id": "fabiobeispieler",
@@ -1097,7 +1118,8 @@
       5,
       0,
       0
-    ]
+    ],
+    "organisation": "bpi-2"
   },
   {
     "id": "martamustermann",
@@ -1147,7 +1169,8 @@
       0,
       0,
       0
-    ]
+    ],
+    "organisation": "bpi-3"
   },
   {
     "id": "ursbeispielmann",
@@ -1197,7 +1220,8 @@
       0,
       0,
       0
-    ]
+    ],
+    "organisation": "bpa"
   },
   {
     "id": "carlamuster",
@@ -1247,7 +1271,8 @@
       0,
       0,
       0
-    ]
+    ],
+    "organisation": "ppe-1"
   },
   {
     "id": "janbeispiel",
@@ -1297,7 +1322,8 @@
       0,
       0,
       0
-    ]
+    ],
+    "organisation": "ppe-2"
   },
   {
     "id": "saramusterli",
@@ -1347,7 +1373,8 @@
       0,
       0,
       0
-    ]
+    ],
+    "organisation": "bpi-1"
   },
   {
     "id": "bernhardbeispieler",
@@ -1397,7 +1424,8 @@
       0,
       0,
       0
-    ]
+    ],
+    "organisation": "bpi-2"
   },
   {
     "id": "elenamustermann",
@@ -1447,7 +1475,8 @@
       0,
       0,
       0
-    ]
+    ],
+    "organisation": "bpi-3"
   },
   {
     "id": "lucabeispielmann",
@@ -1497,7 +1526,8 @@
       0,
       0,
       0
-    ]
+    ],
+    "organisation": "bpa"
   },
   {
     "id": "tanjamuster",
@@ -1547,7 +1577,8 @@
       110,
       110,
       110
-    ]
+    ],
+    "organisation": "ppe-1"
   },
   {
     "id": "brunobeispiel",
@@ -1597,7 +1628,8 @@
       0,
       0,
       0
-    ]
+    ],
+    "organisation": "ppe-2"
   },
   {
     "id": "inesmusterli",
@@ -1647,7 +1679,8 @@
       0,
       0,
       0
-    ]
+    ],
+    "organisation": "bpi-1"
   },
   {
     "id": "retobeispieler",
@@ -1697,7 +1730,8 @@
       0,
       0,
       0
-    ]
+    ],
+    "organisation": "bpi-2"
   },
   {
     "id": "alinemustermann",
@@ -1747,7 +1781,8 @@
       0,
       0,
       0
-    ]
+    ],
+    "organisation": "bpi-3"
   },
   {
     "id": "danielbeispielmann",
@@ -1797,7 +1832,8 @@
       0,
       0,
       0
-    ]
+    ],
+    "organisation": "bpa"
   },
   {
     "id": "karinmuster",
@@ -1847,7 +1883,8 @@
       0,
       0,
       0
-    ]
+    ],
+    "organisation": "ppe-1"
   },
   {
     "id": "simonbeispiel",
@@ -1897,7 +1934,8 @@
       0,
       0,
       0
-    ]
+    ],
+    "organisation": "ppe-2"
   },
   {
     "id": "andreamusterli",
@@ -1947,7 +1985,8 @@
       0,
       0,
       0
-    ]
+    ],
+    "organisation": "bpi-1"
   },
   {
     "id": "heinzbeispieler",
@@ -1997,7 +2036,8 @@
       0,
       0,
       0
-    ]
+    ],
+    "organisation": "bpi-2"
   },
   {
     "id": "petramustermann",
@@ -2047,7 +2087,8 @@
       110,
       110,
       110
-    ]
+    ],
+    "organisation": "bpi-3"
   },
   {
     "id": "zoebeispielmann",
@@ -2097,7 +2138,8 @@
       0,
       0,
       0
-    ]
+    ],
+    "organisation": "bpa"
   },
   {
     "id": "chiaramuster",
@@ -2147,7 +2189,8 @@
       110,
       110,
       110
-    ]
+    ],
+    "organisation": "ppe-1"
   },
   {
     "id": "jonasbeispiel",
@@ -2197,7 +2240,8 @@
       0,
       0,
       0
-    ]
+    ],
+    "organisation": "ppe-2"
   },
   {
     "id": "rahelmusterli",
@@ -2247,7 +2291,8 @@
       0,
       0,
       0
-    ]
+    ],
+    "organisation": "bpi-1"
   },
   {
     "id": "zenobeispieler",
@@ -2297,7 +2342,8 @@
       15,
       15,
       15
-    ]
+    ],
+    "organisation": "bpi-2"
   },
   {
     "id": "gretamustermann",
@@ -2347,7 +2393,8 @@
       15,
       15,
       15
-    ]
+    ],
+    "organisation": "bpi-3"
   },
   {
     "id": "noahbeispielmann",
@@ -2397,7 +2444,8 @@
       0,
       0,
       0
-    ]
+    ],
+    "organisation": "bpa"
   },
   {
     "id": "yvesmuster",
@@ -2447,7 +2495,8 @@
       0,
       0,
       0
-    ]
+    ],
+    "organisation": "ppe-1"
   },
   {
     "id": "beatbeispiel",
@@ -2497,6 +2546,7 @@
       0,
       0,
       0
-    ]
+    ],
+    "organisation": "ppe-2"
   }
 ]

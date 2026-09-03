@@ -231,7 +231,7 @@ function todayMarker(left) {
  * axis moves underneath. Built the other way round, the frame travelled with
  * the content and left the window.
  */
-function card(rows, { minWidth, sticky, cls = '' }) {
+export function card(rows, { minWidth, sticky, cls = '' }) {
   const edge = windowEdges();
   return html`<div class="pblock scrollbox ${cls}" style="--sticky-w:${sticky.width}px"
       ${attr(edge.before, 'data-before')} ${attr(edge.after, 'data-after')}>

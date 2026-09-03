@@ -923,6 +923,9 @@ h1, h2, h3,
   padding-right: var(--space-4);
   color: var(--color-text-secondary);
 }
+/* The person table's figures — Anst., Proj., Spitze — the same way: they had
+   no padding at all, and ran to the column edge 8px past their headings. */
+.pcell--target { padding-right: var(--space-4); }
 
 /*
  * No rule between quarters. Every value sits in its own column, right-aligned
@@ -1724,6 +1727,14 @@ button.pcell--val { cursor: pointer; }
 .align-center, .align-center .sorthead { justify-content: center; text-align: center; }
 /* Centred means centred in the cell, so it cannot carry padding on one side. */
 .align-center { padding-inline: 0; }
+/*
+ * The last frozen column meets the time axis, and a figure 8px from that
+ * edge read as the first quarter's neighbour rather than the master data's
+ * last. A step more air there — for the heading and the cell alike, so the
+ * two stay flush with each other.
+ */
+.prow--head .pcell--num.is-frozen-last,
+.pcell.align-end.is-frozen-last { padding-right: var(--space-6); }
 
 /* ==========================================================================
    14 · Print layout

@@ -68,11 +68,11 @@ export const COLUMNS = [
     key: 'organisation', label: 'Organisation', flag: 'organisation', sort: 'organisation',
     width: '--grid-col-organisation', cls: 'pcell--text', sheet: { w: [70, 84], cls: 'sheet__muted' },
     xls: { type: 'text', width: 30 },
-    text: p => t(data.organisationsById[p.organisation]?.label ?? p.organisation),
+    text: p => t(data.organisationsById[p.organisation]?.label ?? ''),
     // The house's own short form — «PPE I», «PM Inland II» — for the cell, with
     // the name as the hint; the filter, the group heading and the export keep
     // the name.
-    short: p => t(data.organisationsById[p.organisation]?.short ?? p.organisation)
+    short: p => t(data.organisationsById[p.organisation]?.short ?? '')
   },
   {
     key: 'credit', label: 'Kredit CHF', flag: 'credit', sort: 'credit',

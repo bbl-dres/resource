@@ -373,6 +373,19 @@ export async function load() {
 
   // Index lookups used all over the views.
   data.peopleById = Object.fromEntries(data.people.map(p => [p.id, p]));
+  /*
+   * A project's organisation is its assignee's: people belong to a unit, and
+   * a project follows the person who carries it. The join is a getter so that
+   * every reader of `p.organisation` — column, filter, grouping, the cards,
+   * the export — sees the same answer, and a re-assignment moves the project
+   * without anyone writing the field. Unassigned means no organisation.
+   */
+  for (const p of data.projects) {
+    Object.defineProperty(p, 'organisation', {
+      enumerable: true,
+      get() { return data.peopleById[this.leadId]?.organisation ?? null; }
+    });
+  }
   data.projectsById = Object.fromEntries(data.projects.map(p => [p.id, p]));
   data.portfoliosById = Object.fromEntries(data.meta.portfolios.map(p => [p.id, p]));
   data.organisationsById = Object.fromEntries(data.meta.organisations.map(o => [o.id, o]));
@@ -875,7 +888,7 @@ export function groupProjects(list = filteredProjects()) {
   const keyOf = p => {
     if (state.group === 'lead') return p.leadId ?? 'none';
     if (state.group === 'phase') return p.phase;
-    if (state.group === 'organisation') return p.organisation;
+    if (state.group === 'organisation') return p.organisation ?? 'none';
     return p.portfolio;
   };
   const labelOf = key => {
@@ -886,7 +899,7 @@ export function groupProjects(list = filteredProjects()) {
       return t(eppmOf(key).label);
     }
     if (state.group === 'organisation') {
-      return t(data.organisationsById[key]?.label ?? key);
+      return key === 'none' ? `(${t('nicht zugewiesen')})` : t(data.organisationsById[key]?.label ?? key);
     }
     return t(data.portfoliosById[key]?.label ?? key);
   };
@@ -904,7 +917,7 @@ export function groupProjects(list = filteredProjects()) {
     : state.group === 'phase'
       ? data.phases.eppm.map(e => e.id)
       : state.group === 'organisation'
-        ? data.meta.organisations.map(o => o.id)
+        ? [...data.meta.organisations.map(o => o.id), 'none']
         : data.meta.portfolios.map(p => p.id);
 
   return order
@@ -1094,17 +1107,34 @@ export function personRows() {
       Math.round(periodValue(load, col) / person.employment * 100));
     const leads = projectsOf(person.id).length;
     return {
-      person, values, leads,
+      person, values, load, leads,
       peak: leads ? Math.max(...values) : null,
       now: values[0]
     };
   });
 }
 
+/**
+ * The person table cut the way the planning grid is, as far as the grouping
+ * is about people: a person has an organisation, and nothing else the menu
+ * offers. Any other choice leaves the table in one piece.
+ */
+export function groupPeople(rows) {
+  if (state.group !== 'organisation') return [{ key: 'all', label: null, rows }];
+  return data.meta.organisations
+    .map(o => ({
+      /* Its own key: a group folded on the Planung tab stays open here. */
+      key: `people:${o.id}`,
+      label: t(o.label),
+      rows: rows.filter(r => r.person.organisation === o.id)
+    }))
+    .filter(g => g.rows.length);
+}
+
 /** Sorters for the person table, one per column the header offers. */
 export const P_SORTS = {
   name: r => r.person.name,
-  role: r => r.person.role,
+  organisation: r => data.organisationsById[r.person.organisation]?.label ?? '',
   employment: r => r.person.employment,
   projects: r => r.leads,
   peak: r => r.peak ?? -1
@@ -1139,6 +1169,7 @@ export function kpis() {
   const credit = list.reduce((a, p) => a + (p.credit ?? 0), 0);
   const funded = list.filter(p => p.credit !== null).length;
   const ids = new Set(list.map(p => p.id));
+  const assigned = new Set(list.map(p => p.leadId).filter(Boolean)).size;
   return [
     {
       label: 'Bauprojekte',
@@ -1157,7 +1188,7 @@ export function kpis() {
     {
       label: 'Pensum total',
       value: `${fte} FTE`,
-      note: `${data.quarters[now].label} · ${t('Pensum der Projekte im Umfang')}`
+      note: `${data.quarters[now].label} · ${assigned} ${t('Bearbeitende zugewiesen')}`
     },
     {
       /* What is due, not who is short: the gates the projects in scope reach

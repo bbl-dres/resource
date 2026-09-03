@@ -46,6 +46,7 @@ Then open <http://localhost:8000/>.
 
 - [Architecture](docs/ARCHITECTURE.md) — code structure, state, rendering, grids, time, exports, and data.
 - [Decisions](docs/DECISIONS.md) — standing implementation and design rules.
+- [Data model](docs/DATAMODEL.md) — the entities in `data/`, their fields, and how they join.
 - [Current code review](docs/CODE-REVIEW-3.md) — remaining technical limitations.
 - [Dashboard study](docs/DASHBOARD-STUDY.md) — proposal still under discussion.
 - [Data generator](tools/README.md) — deterministic fixture generation and known data limitations.

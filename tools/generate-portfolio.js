@@ -743,11 +743,12 @@ const TEAMS = [
   { id: 'bpa', label: 'Bauprojekte Ausland', short: 'PM Ausland' }
 ];
 const teamOfPerson = new Map(people.map((person, i) => [person.id, TEAMS[i % TEAMS.length].id]));
-projects.forEach((project, i) => {
-  project.organisation = project.leadId
-    ? teamOfPerson.get(project.leadId)
-    : TEAMS[i % TEAMS.length].id;
-});
+/*
+ * A person belongs to a team; a project does not. Its organisation is its
+ * assignee's, joined in the app when it is read, so an unassigned project has
+ * none and a re-assignment moves the project with the person.
+ */
+people.forEach(person => { person.organisation = teamOfPerson.get(person.id); });
 /* The short form is the house's own — «PPE» and «PM» — and is what a
    grid column has room for; the filter and the group headings say the name. */
 META.organisations = TEAMS.map(({ id, label, short }) => ({ id, label, short }));

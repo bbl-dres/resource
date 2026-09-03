@@ -195,7 +195,7 @@ export function sortableHead({ key, label, act, active, ascending, cls = '', sty
   return html`<span class="pcell--text ${cls} ${active ? 'is-sorted' : ''}" style="${style}">
     <button type="button" class="sorthead" data-act="${act}" data-val="${key}"
             title="${title || `${t('Sortieren nach')} ${name}`}"
-            aria-label="${t('Sortieren nach')} ${name}${dir}"
+            aria-label="${t('Sortieren nach')} ${name}${dir}">
       <span class="sorthead__label">${label}</span>
       <span class="sorthead__dir" aria-hidden="true">${active ? (ascending ? '↑' : '↓') : ''}</span>
     </button>
@@ -644,8 +644,16 @@ const GROUPS = [
  * drawn («Ansicht»). The time controls used to be a bar of their own under
  * this one; folded in they give back 40px above the first row.
  */
-export function toolbar({ time = false, view = false, print = false, exclude = [] } = {}) {
-  const groupLabel = GROUPS.find(g => g.id === state.group)?.label ?? GROUPS[0].label;
+export function toolbar({ time = false, view = false, print = false, exclude = [], groups = null } = {}) {
+  /*
+   * The groupings that apply to the rows under the bar. The person table can
+   * only be cut by what a person has, so it names the ones it understands;
+   * a state that says anything else reads as «Keine» there, and a choice made
+   * there is one the planning grid understands as well.
+   */
+  const options = groups ? GROUPS.filter(g => groups.includes(g.id)) : GROUPS;
+  const current = options.find(g => g.id === state.group) ?? GROUPS[0];
+  const groupLabel = current.label;
   const mine = data.meta.user.personId;
   const minesOnly = state.leads.length === 1 && state.leads[0] === mine;
 
@@ -659,7 +667,7 @@ export function toolbar({ time = false, view = false, print = false, exclude = [
       label: html`<span class="btn__prefix">${t('Gruppieren nach')}:</span><span>${t(groupLabel)}</span>`,
       title: `${t('Gruppieren nach')}: ${t(groupLabel)}`,
       body: () => html`${menuGroupLabel(t('Gruppieren nach'))}
-        ${GROUPS.map(g => menuRadio(t(g.label), state.group === g.id, 'group', g.id))}`
+        ${options.map(g => menuRadio(t(g.label), current.id === g.id, 'group', g.id))}`
     })}
 
     <span class="toolbar__sep" aria-hidden="true"></span>
@@ -722,7 +730,7 @@ export function toolbar({ time = false, view = false, print = false, exclude = [
               ${attr(state.periodOffset === 0, 'disabled')}>${t('Zu heute')}</button>
       <button type="button" class="btn btn--square" data-act="period" data-val="1"
               ${attr(!canStep(1), 'disabled')} aria-label="${t('Weiter')}">${icons.chevronRight()}</button>
-      <span class="toolbar__sep" aria-hidden="true"></span>`}
+      ${view && html`<span class="toolbar__sep" aria-hidden="true"></span>`}`}
 
     ${view && dropdown({
       id: 'view', label: t('Ansicht'), width: 296, align: 'right', body: () => viewMenuBody({ exclude, print })

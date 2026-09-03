@@ -209,7 +209,7 @@ Two things to know before touching it:
 
 ## i18n
 
-`data/i18n.json` holds 313 terms in four languages, looked up through `t()` with
+`data/i18n.json` holds 359 terms in four languages, looked up through `t()` with
 the German string as the key and as the fallback. A user-visible string that is
 not passed through `t()` will be German in every language.
 
@@ -228,9 +228,11 @@ carries meaning (WCAG 1.4.11), 24 px minimum target height.
 Seven of the eleven files in `data/` are generated — see `tools/README.md`.
 `i18n.json`, `phases.json`, `print.json` and `openapi.json` are hand-written.
 
-Current fixtures: 111 projects, 44 people (4,160 % contracted), 40 quarters,
-390 milestones (47 undated, 81 late), 249 history entries, 7 sub-portfolios,
-5 projects without a lead.
+Which file carries which fact, and how they join, is in `DATAMODEL.md`.
+
+Current fixtures: 111 projects, 50 people (4'540 % contracted), 40 quarters,
+323 milestones (40 undated, 57 late), 249 history entries, 7 sub-portfolios,
+6 organisations, 8 projects without a lead.
 
 ## Checks
 

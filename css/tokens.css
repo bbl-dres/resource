@@ -446,9 +446,8 @@
 
   /* The person table has its own five lead columns. */
   --person-col-name:       150px;
-  --person-col-role:       130px;
-  --person-col-employment: 70px;
-  --person-col-projects:   60px;
+  --person-col-employment: 96px;   /* «Anstellung» in full, with its sort arrow */
+  --person-col-projects:   84px;   /* «Projekte», likewise */
   --person-col-peak:       76px;
 
   /* Rows and controls */

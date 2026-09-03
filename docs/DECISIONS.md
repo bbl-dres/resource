@@ -208,3 +208,14 @@ Carried over from `docs/archive/GAP-ANALYSIS.md`; neither is decided.
 - **Whether the person table follows the active filters.** It currently does not:
   all 44 people render under a scope of zero projects. That is an accident of the
   code rather than a decision.
+
+**People belong to an organisation; projects do not.** The unit is a fact
+about the person — the roster says who sits in «PM Inland II» — and a project
+only has one through the person who carries it. So `people.json` carries the
+field and `projects.json` does not: the app joins it on the assignee when the
+project is read, in one getter in store.js, and every reader of
+`p.organisation` sees the same answer. A re-assignment moves the project to
+the new person's unit without anyone writing a field, and a project without an
+assignee has no unit, which the grouping and the dashboard cards say as
+«(nicht zugewiesen)». Modelled the other way round, the generator had stamped
+a unit on unassigned projects at random.

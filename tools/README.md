@@ -143,7 +143,9 @@ forecast; a late forecast is in the dialog and the dashboard, not on the bar.
 ### What it writes
 
 `data/meta.json` (the quarter list only), `projects.json`, `people.json`,
-`capacity.json`, `milestones.json`, `dashboard.json`, `changes.json`.
+`capacity.json`, `milestones.json`, `dashboard.json`, `changes.json`. A person
+carries their organisation; a project does not — the app joins it on the
+assignee (see `docs/DATAMODEL.md`).
 
 Everything else in `data/` is hand-written and untouched: `i18n.json`,
 `phases.json`, `print.json`, `openapi.json`.

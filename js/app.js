@@ -666,7 +666,7 @@ const actions = {
   /* Clicking the sorted column flips it; a new column starts on its own default. */
   'sort-person': (val) => setState(s => (s.pSort === val
     ? { pDir: s.pDir === 'asc' ? 'desc' : 'asc' }
-    : { pSort: val, pDir: val === 'name' || val === 'role' ? 'asc' : 'desc' })),
+    : { pSort: val, pDir: val === 'name' || val === 'organisation' ? 'asc' : 'desc' })),
 
   sheet: (val) => setState({ sheet: val }),
   paper: (val) => setState({ paper: val, menu: null }),
