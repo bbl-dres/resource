@@ -610,7 +610,7 @@ const GROUPS = [
   { id: 'none', label: 'Keine' },
   { id: 'lead', label: 'Bearbeitender' },
   { id: 'organisation', label: 'Organisation' },
-  { id: 'phase', label: 'Hauptphase (ePPM)' },
+  { id: 'phase', label: 'Phase (ePPM)' },   // the current Teilphase, as the column and the filter say
   { id: 'portfolio', label: 'Teilportfolio' }
 ];
 /*
