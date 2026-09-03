@@ -10,7 +10,15 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 
-html { -webkit-text-size-adjust: 100%; }
+/*
+ * The gutter for the page scrollbar is always reserved. The planning grid
+ * measures the page width while it builds its column template, and on a fresh
+ * load the page is still short: no scrollbar, a page 15px wider, a Projekt
+ * column 15px wider — until the next render measured the page with the
+ * scrollbar the grid itself had brought, and the column snapped narrower.
+ * Every render now sees the same width, scrollbar or not.
+ */
+html { -webkit-text-size-adjust: 100%; scrollbar-gutter: stable; }
 
 body {
   margin: 0; min-height: 100vh; min-height: 100dvh;
@@ -892,8 +900,11 @@ h1, h2, h3,
 /* Cells -------------------------------------------------------------------- */
 
 .pcell { display: flex; align-items: center; min-width: 0; font-size: var(--text-base); }
+/* Air on both sides of a text column, heading and cell alike: a name that
+   started on the column edge sat against the ring when the cell was being
+   edited, and against the hairline of the column before it. */
 .pcell--text, .pcell--title, .pcell--lead, .pcell--phase {
-  padding-right: var(--space-4);
+  padding-inline: var(--space-4);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;
   line-height: var(--row-height);
 }
@@ -1276,10 +1287,11 @@ button.pcell--val { cursor: pointer; }
   max-height: 176px; overflow-y: auto;
   border: var(--border-hairline) solid var(--color-border); border-radius: var(--radius);
 }
-/* The unit follows the name rather than sitting at the far edge: the right
-   edge of a list is where figures go, and this is a word. */
+/* Two columns, name and unit, at 60/40: the units line up down the list and
+   read as a column of their own, and none of them sits at the far edge, which
+   is where figures go. */
 .rebook__list li {
-  display: flex; align-items: center; justify-content: flex-start; gap: var(--space-5);
+  display: grid; grid-template-columns: 3fr 2fr; align-items: center; column-gap: var(--space-5);
   min-height: var(--control-height-xl); padding: var(--space-3) var(--space-6);
   border-bottom: var(--border-hairline) solid var(--color-border-subtle);
   font-size: var(--text-base); cursor: pointer;
@@ -1289,7 +1301,7 @@ button.pcell--val { cursor: pointer; }
 .rebook__list li.is-on {
   background: var(--color-surface-selected); color: var(--color-text-strong); font-weight: var(--font-semibold);
 }
-.rebook__role { flex: 0 0 auto; white-space: nowrap; color: var(--color-text-muted); font-size: var(--text-sm); font-weight: var(--font-regular); }
+.rebook__role { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--color-text-muted); font-size: var(--text-sm); font-weight: var(--font-regular); }
 .rebook__empty { color: var(--color-text-muted); cursor: default; }
 .rebook__reason { padding: 0 var(--space-11) var(--space-8); }
 
@@ -2433,7 +2445,9 @@ button.pcell--val { cursor: pointer; }
 .pop--assign .dd__searchfield { margin: var(--space-6) 0 var(--space-5); }
 .assign__list { max-height: 232px; }
 .assign__list li { gap: var(--space-4); }
-.person__name { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.person__name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* «Niemand zuweisen» has no unit and takes the row. */
+.person__name:only-child { grid-column: 1 / -1; }
 .assign__list .ampel { flex: 0 0 auto; }
 .assign__list li.is-on { background: var(--color-surface-selected); font-weight: var(--font-semibold); }
 .assign__list li:focus-visible { outline: var(--focus-ring); outline-offset: -2px; }

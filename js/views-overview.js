@@ -89,8 +89,15 @@ function gridLayout() {
 }
 
 /** How much width the card actually has, before it is in the DOM to measure. */
+/*
+ * Measured on the body, not on the root: the stylesheet reserves the page
+ * scrollbar's gutter (scrollbar-gutter: stable), and the body is what that
+ * gutter narrows. The root reports the full viewport until a real scrollbar
+ * appears — which it did on the first render of a fresh load, when the page
+ * was still short, so the first grid was 15px wider than every grid after it.
+ */
 function cardWidth() {
-  return Math.min(tokenPx('--layout-width'), document.documentElement.clientWidth)
+  return Math.min(tokenPx('--layout-width'), document.body.clientWidth)
     - 2 * tokenPx('--shell-pad-x');
 }
 
