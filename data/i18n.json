@@ -1001,6 +1001,11 @@
       "fr": "Charge par projet et par trimestre",
       "it": "Carico per progetto e trimestre"
     },
+    "Pensum je Projekt und Quartal, mit Phasen und Meilensteinen": {
+      "en": "Workload per project and quarter, with phases and milestones",
+      "fr": "Charge par projet et trimestre, avec phases et jalons",
+      "it": "Carico per progetto e trimestre, con fasi e milestone"
+    },
     "Pensum je Quartal": {
       "en": "Workload by quarter",
       "fr": "Charge par trimestre",
@@ -1440,6 +1445,11 @@
       "en": "Customs",
       "fr": "Douane",
       "it": "Dogana"
+    },
+    "Zoom": {
+      "en": "Zoom",
+      "fr": "Zoom",
+      "it": "Zoom"
     },
     "Zu heute": {
       "en": "To today",

@@ -1,39 +1,16 @@
 {
-  "main": [
-    { "id": "1", "label": "1 Strategische Planung", "short": "1 Strategie", "sub": "11", "family": "neutral" },
-    { "id": "2", "label": "2 Vorstudien", "short": "2 Vorstudien", "sub": "21, 22", "family": "info" },
-    { "id": "3", "label": "3 Projektierung", "short": "3 Projektierung", "sub": "31–33", "family": "ok" },
-    { "id": "4", "label": "4 Ausschreibung", "short": "4 Ausschreibung", "sub": "41", "family": "warn" },
-    { "id": "5", "label": "5 Realisierung", "short": "5 Realisierung", "sub": "51–53", "family": "violet" },
-    { "id": "6", "label": "6 Bewirtschaftung", "short": "6 Bewirtschaftung", "sub": "61–63", "family": "cyan" }
-  ],
-  "sub": {
-    "11": { "code": "11", "label": "11 Strategische Planung", "main": "1", "family": "neutral" },
-    "21": { "code": "21", "label": "21 Machbarkeit", "main": "2", "family": "info" },
-    "22": { "code": "22", "label": "22 Auswahlverfahren", "main": "2", "family": "info" },
-    "31": { "code": "31", "label": "31 Vorprojekt", "main": "3", "family": "ok" },
-    "32": { "code": "32", "label": "32 Bauprojekt", "main": "3", "family": "ok" },
-    "33": { "code": "33", "label": "33 Bewilligungsverfahren", "main": "3", "family": "ok" },
-    "41": { "code": "41", "label": "41 Ausschreibung", "main": "4", "family": "warn" },
-    "51": { "code": "51", "label": "51 Ausführungsprojekt", "main": "5", "family": "violet" },
-    "52": { "code": "52", "label": "52 Ausführung", "main": "5", "family": "violet" },
-    "53": { "code": "53", "label": "53 Inbetriebnahme", "main": "5", "family": "violet" },
-    "61": { "code": "61", "label": "61 Betrieb", "main": "6", "family": "cyan" },
-    "62": { "code": "62", "label": "62 Überwachung", "main": "6", "family": "cyan" },
-    "63": { "code": "63", "label": "63 Erhaltung", "main": "6", "family": "cyan" }
-  },
   "eppm": [
-    { "id": "Vorstudien", "label": "Vorstudien", "sub": [] },
-    { "id": "1", "label": "1 Strategische Planung", "sub": ["11"] },
-    { "id": "22", "label": "22 Auswahlverfahren", "sub": ["22"] },
-    { "id": "2", "label": "2 Vorstudien", "sub": ["21"] },
-    { "id": "31", "label": "31 Vorprojekt", "sub": ["31"] },
-    { "id": "3", "label": "3 Projektierung", "sub": ["33"] },
-    { "id": "32", "label": "32 Bauprojekt", "sub": ["32"] },
-    { "id": "4", "label": "4 Ausschreibung", "sub": ["41"] },
-    { "id": "53", "label": "53 Inbetriebnahme", "sub": ["53"] },
-    { "id": "5", "label": "5 Realisierung", "sub": ["51", "52"] },
-    { "id": "61", "label": "61 Betrieb", "sub": ["61"] },
-    { "id": "6", "label": "6 Bewirtschaftung", "sub": ["62", "63"] }
+    { "id": "Vorstudien", "label": "Vorstudien" },
+    { "id": "1", "label": "1 Strategische Planung" },
+    { "id": "22", "label": "22 Auswahlverfahren" },
+    { "id": "2", "label": "2 Vorstudien" },
+    { "id": "31", "label": "31 Vorprojekt" },
+    { "id": "3", "label": "3 Projektierung" },
+    { "id": "32", "label": "32 Bauprojekt" },
+    { "id": "4", "label": "4 Ausschreibung" },
+    { "id": "53", "label": "53 Inbetriebnahme" },
+    { "id": "5", "label": "5 Realisierung" },
+    { "id": "61", "label": "61 Betrieb" },
+    { "id": "6", "label": "6 Bewirtschaftung" }
   ]
 }

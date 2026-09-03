@@ -7,7 +7,7 @@
    ============================================================================= */
 
 import {
-  data, state, t, num, unitSuffix, cellValue, projectDemand, ampel, printPeriods, columnSet,
+  data, state, t, num, unitSuffix, cellValue, projectDemand, ampel, printPeriods, columnSet, coloured,
   periodValue,
   totals, loadStatus, heatStep, filteredProjects, activeFilters,
   groupProjects
@@ -19,7 +19,7 @@ import {
   scopeLine, legendBlock, legendItem, yearRule
 } from './ui.js';
 import { visibleColumns, leadLayout } from './columns.js';
-import { ganttRow, ganttLegend } from './views-schedule.js';
+import { ganttRow, ganttLegend, phaseBand, barLegendGroups } from './views-schedule.js';
 
 /* =============================================================================
    API documentation
@@ -122,11 +122,6 @@ const ORIENTATIONS = [
  * and a half years by month is 54 columns, which is what the large papers are
  * for.
  */
-const SCALES = [
-  { id: 'year', label: 'Jahr' },
-  { id: 'quarter', label: 'Quartal' },
-  { id: 'month', label: 'Monat' }
-];
 
 const ZOOMS = [
   { id: 'fit', label: 'Anpassen' },
@@ -162,6 +157,12 @@ const FORMATS = {
   'a0-portrait':  { quarters: 20, rows: { demand: 138, schedule: 126 } },
   'a0-landscape': { quarters: 24, rows: { demand: 96,  schedule: 88 } }
 };
+/*
+ * The figures with the band under them: a 36px row where the plain figures
+ * take 26, so the budget is the demand budget in that ratio. Checked on a
+ * rendered A4 in both orientations, where the table still clears the foot.
+ */
+for (const f of Object.values(FORMATS)) f.rows.both = Math.floor(f.rows.demand * 26 / 36);
 
 /*
  * One printed time column of the demand table, in px. Measured on a rendered
@@ -198,11 +199,19 @@ function ganttColumn(sheet, leadWidth, cols) {
  */
 const REPORTS = [
   { id: 'demand', label: 'Pensum', sub: 'Pensum je Projekt und Quartal' },
+  { id: 'both', label: 'Pensum + Termine', sub: 'Pensum je Projekt und Quartal, mit Phasen und Meilensteinen' },
   { id: 'schedule', label: 'Termine', sub: 'Phasen und Meilensteine je Projekt' }
 ];
 
+/** The report a view prints: what the screen shows, in one of three arrangements. */
+const reportOf = () => {
+  const L = state.layers;
+  return REPORTS.find(r => r.id === (!L.values ? 'schedule' : (L.phases || L.gates) ? 'both' : 'demand'));
+};
+
 export function renderExport() {
-  const report = REPORTS.find(r => r.id === state.report) ?? REPORTS[0];
+  /* The report follows the view, exactly as the screen does. */
+  const report = reportOf();
   const sheet = format();
   /* Nothing in scope means nothing to write: the button used to stay enabled
      over an empty report, where the click was a silent no-op. */
@@ -212,27 +221,18 @@ export function renderExport() {
       title: 'PDF-Export — Drucklayout',
       chrome: false,
       actions: html`<button type="button" class="btn" data-act="tab" data-val="overview">${t('Abbrechen')}</button>
-        <button type="button" class="btn" data-act="print">${t('Drucken')}</button>
         <button type="button" class="btn btn--primary" data-act="export-pdf"
           ${attr(state.exporting || empty, 'disabled')}
           data-val="${fileName(report, sheet)}">${icons.download(15)}${t(
             state.exporting ? 'PDF wird erstellt …' : 'PDF herunterladen')}</button>`
     })}
     <div class="wrap"><div class="content">
-      ${toolbar({ columns: true })}
+      ${toolbar({ view: true, print: true })}
       ${activeFilterRow()}
       <div class="sheetbar">
-        <div class="segmented">
-          ${REPORTS.map(r => html`<button type="button" class="${r.id === report.id ? 'is-on' : ''}"
-            aria-pressed="${r.id === report.id}" data-act="report" data-val="${r.id}">${t(r.label)}</button>`)}
-        </div>
         <div class="sheetbar__paper">
-          <div class="segmented">
-            ${SCALES.map(s => html`<button type="button" class="${s.id === state.scale ? 'is-on' : ''}"
-              aria-pressed="${s.id === state.scale}" data-act="scale" data-val="${s.id}">${t(s.label)}</button>`)}
-          </div>
           ${dropdown({
-            id: 'zoom', label: `${t('Ansicht')}: ${zoomLabel()}`, width: 180,
+            id: 'zoom', label: `${t('Zoom')}: ${zoomLabel()}`, width: 180,
             body: html`${ZOOMS.map(z => menuRadio(t(z.label), state.zoom === z.id, 'zoom', z.id))}`
           })}
           ${dropdown({
@@ -521,14 +521,18 @@ const capacityRow = (cols, tot) => html`<div class="gantt__row gantt__row--load"
 </div>`;
 
 /** What the numbers on the pensum sheet mean. */
-const demandLegend = (cfg) => legendBlock([
+const demandLegend = (cfg, band = false) => legendBlock([
   {
     label: 'Pensum',
-    items: cfg.legend.steps.map(s => legendItem(html`<span class="legend__swatch heat-${s.step}"></span>`, s.label))
+    items: coloured()
+      ? cfg.legend.steps.map(s => legendItem(html`<span class="legend__swatch heat-${s.step}"></span>`, s.label))
+      : null
   },
+  ...(band ? barLegendGroups().filter(g => (g.label === 'Balken' ? state.layers.phases : state.layers.gates)) : []),
   {
     label: 'Markierung',
-    items: legendItem(html`<span class="legend__swatch is-nolead"></span>`, cfg.legend.noLead)
+    items: band && state.layers.phases ? null
+      : legendItem(html`<span class="legend__swatch is-nolead"></span>`, cfg.legend.noLead)
   },
   { label: 'Auslastung', items: html`${t(cfg.legend.thresholds).replace(/^Auslastung:\s*/, '')}` }
 ], 'legend--sheet');
@@ -546,6 +550,7 @@ function columnHead(lead, columns) {
 function printSheet(sheet, report, { rows, all, block, page, total, last, tot, chips, lead }) {
   const cfg = data.print;
   const schedule = report.id === 'schedule';
+  const band = report.id === 'both';
 
   /*
    * Every column has a ceiling, and the table is only as wide as its columns
@@ -615,7 +620,8 @@ function printSheet(sheet, report, { rows, all, block, page, total, last, tot, c
 
         const p = row.p;
         const cells = projectDemand(p);
-        return html`<div class="sheet__row ${p.leadId ? '' : 'is-unassigned'}">
+        return html`<div class="sheet__row ${band ? 'sheet__row--band' : ''} ${p.leadId ? '' : 'is-unassigned'}"
+            style="--band-col:${span + 1}">
           ${lead.map(c => html`<span class="${c.key === 'title' ? 'sheet__project' : `sheet__lead ${c.cls ?? ''}`}"
             >${sheetCell(c, p, {
               from: block[0].quarters[0], to: block.at(-1).quarters.at(-1)
@@ -623,8 +629,10 @@ function printSheet(sheet, report, { rows, all, block, page, total, last, tot, c
           ${block.map((col) => {
             const q = col.quarters[0];
             const v = periodValue(cells, col);
-            return html`<span class="sheet__cell heat-${heatStep(v)} ${yearRule(col)}"><span class="cellv">${v ? num(v) : '–'}</span></span>`;
+            return html`<span class="sheet__cell ${coloured() ? `heat-${heatStep(v)}` : ''} ${yearRule(col)}"><span class="cellv">${v ? num(v) : '–'}</span></span>`;
           })}
+          ${band && phaseBand(p, block, { colWidth: quarter },
+            { compact: true, bars: state.layers.phases, gates: state.layers.gates })}
         </div>`;
       })}
 
@@ -649,7 +657,7 @@ function printSheet(sheet, report, { rows, all, block, page, total, last, tot, c
       </div>` : continuation(block.length + 5)}`}
     </div>
 
-    ${schedule ? ganttLegend('legend--sheet') : demandLegend(cfg)}
+    ${schedule ? ganttLegend('legend--sheet') : demandLegend(cfg, band)}
 
     <p class="sheet__disclaimer">${t(data.meta.prototypeNotice)}</p>
 

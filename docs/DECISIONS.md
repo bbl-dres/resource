@@ -95,12 +95,13 @@ the last three sections of `main.css`; change the number, keep the comment.
 
 ## Numbers
 
-**A project's phase is the ePPM value; its schedule is SIA.** ePPM's phase
-list is BBL's own — Vorstudien, 1, 22, 2, 31, 3, 32, 4, 53, 5, 61, 6 — mixing
-SIA main and sub-phases, so `project.phase` is one of those and the filter,
-the grouping and the column speak it. The SIA chain (`project.subPhase`, the
-bars, the gates) is what the schedule is drawn from. The mapping between the
-two is one table in `data/phases.json`, in ePPM's own order.
+**The phases are ePPM's, as given.** Its list is BBL's own — Vorstudien, 1,
+22, 2, 31, 3, 32, 4, 53, 5, 61, 6 — mixing SIA main and sub-phases and
+opening with a stage of its own. Every project walks that chain in that order;
+the project's phase, every bar and every gate carry one of those ids, and the
+filter, the grouping and the column speak them. The list lives once, in
+`data/phases.json`, and is not rearranged into SIA order: what ePPM shows is
+what the plan shows.
 
 **Bedarf follows the filter; Auslastung does not.** A demand row describes the
 projects in scope. Utilisation is always the whole department against its own net
@@ -132,6 +133,13 @@ generator — so a gate is never drawn in the middle of a phase.
 **The printed report covers the whole plan** and tiles it across sheets. It does
 not follow the window the reader has scrolled to on screen. If that produces 271
 A4 pages, the answer is a larger sheet — hence A0 — not a shorter report.
+
+**Every view prints, through the same Ansicht menu.** The print layout reads
+the view the screen was set to: the figures, the bars, or the figures with the
+band under them, with «Individuell» free to mix. Only «Heute» has no place on
+paper, because a sheet carries its date in the letterhead. The report is
+derived from the layers (`reportOf` in `views-docs.js`); there is no separate
+report state to drift from the view.
 
 **Page budgets are measured, not derived.** Each paper × orientation × report
 combination has a row count established by measuring a rendered sheet. A formula

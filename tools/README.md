@@ -60,14 +60,18 @@ whole plan at once is what the A0 report is for.
 
 ### The shape of a project
 
-Every project has the whole chain, `11` through `53`: Strategische Planung to the
-handover. What differs is how long each phase takes and when the first one began.
+Every project has the whole chain, `Vorstudien` through `6`: the twelve phases
+as ePPM names them, in ePPM's order — Vorstudien, 1, 22, 2, 31, 3, 32, 4, 53,
+5, 61, 6. What differs is how long each phase takes and when the first one
+began. The list is read from `data/phases.json`; it is the one place the order
+lives, and the app reads the same file for its filter and its grouping.
 
-Phase 6 is not in it. Betrieb, Überwachung and Erhaltung are what happens to the
-building afterwards, for as long as it stands — not project work, and not this
-office's. The chain ends at MS7 Übergabe Bewirtschaftung. Including it had put
-the average project at twenty-six years and left an open-ended bar running off
-every window.
+The list is BBL's own. It mixes SIA 112 main phases with sub-phases and opens
+with a stage of its own, and it is used as given rather than rearranged into
+SIA order: what ePPM shows is what the plan shows. The last two phases, 61
+Betrieb and 6 Bewirtschaftung, are what happens to the building afterwards;
+they carry next to no demand and are in the chain so a finished project still
+has a phase.
 
 `LAST_START = 2`: nothing begins after Q1/2027. A project two years out is not in
 this tool, it is a line in a Botschaft — no Auftrag, no lead, no pensum. So the
@@ -77,21 +81,27 @@ not a gap in the data.
 
 ### How long a project takes
 
-`DURATION` gives each SIA sub-phase a range in quarters, before the project's own
-pace is applied:
+`DURATION` gives each phase a range in quarters, before the project's own pace
+is applied:
 
-| Teilphase | Quartale | woher |
+| Phase (ePPM) | Quartale | woher |
 |---|---|---|
-| 11 Strategische Planung | 2–4 | |
-| 21 Machbarkeit | 3–5 | |
+| Vorstudien | 1–3 | |
+| 1 Strategische Planung | 2–4 | |
 | 22 Auswahlverfahren | 3–5 | an open design competition runs about twelve months, and the award follows it |
+| 2 Vorstudien | 2–4 | |
 | 31 Vorprojekt | 2–4 | |
+| 3 Projektierung | 2–6 | a building permit averaged 140–160 days in 2023 and passes a year in the cities; an objection stretches it much further |
 | 32 Bauprojekt | 3–6 | |
-| 33 Bewilligungsverfahren | 2–6 | a building permit averaged 140–160 days in 2023 and passes a year in the cities; an objection stretches it much further |
-| 41 Ausschreibung | 2–4 | |
-| 51 Ausführungsprojekt | 2–4 | |
-| 52 Ausführung | 6–16 | a Teilsanierung inside two years, a Gesamtsanierung of a building that stays in use, four or more |
+| 4 Ausschreibung | 2–4 | |
 | 53 Inbetriebnahme | 1–2 | |
+| 5 Realisierung | 6–16 | a Teilsanierung inside two years, a Gesamtsanierung of a building that stays in use, four or more |
+| 61 Betrieb | 2–4 | |
+| 6 Bewirtschaftung | 4–8 | |
+
+The gates: MS1 closes phase 1, MS2 phase 2, MS3 the Vorprojekt, MS4 the
+Bauprojekt (the construction credit is released there), MS5 the Ausschreibung,
+MS6 the Inbetriebnahme and MS7 the Realisierung.
 
 `paceOf(size)` multiplies all of them. Money is half of it — a three-million
 Instandsetzung is decided and built while a thirty-million Gesamtsanierung is
@@ -110,23 +120,6 @@ Build the chain once and **shift** it; do not draw it twice. `chain()` rolls new
 durations on every call, so measuring a chain and then rebuilding it placed a
 twenty-quarter project as though it were thirty — far enough off the near edge
 that one project came out with no bars at all.
-
-### The ePPM phase
-
-A project record carries two phases. `subPhase` is the SIA 112 sub-phase the
-chain is in today — what the bars, the gates and the demand curve are built
-from. `phase` is what ePPM calls it, and ePPM's value list is BBL's own:
-
-```
-Vorstudien, 1, 22, 2, 31, 3, 32, 4, 53, 5, 61, 6
-```
-
-It mixes SIA main phases with sub-phases and adds «Vorstudien», which is not
-an SIA code at all. The list and the mapping from SIA sub-phase to ePPM value
-sit in `data/phases.json` under `eppm`, in the order ePPM lists them; a
-project that has not begun is «Vorstudien», the stage before the chain. The
-filter, the grouping and the column in the app speak the ePPM value; the
-schedule underneath stays SIA.
 
 ### What is deliberately wrong
 

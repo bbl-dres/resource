@@ -79,36 +79,40 @@ const PORTFOLIOS = [
 
 const PRIORITIES = [['hoch', 26], ['mittel', 52], ['tief', 22]];
 
-/* The SIA 112 chain, and how much of a lead a phase typically takes. */
 /*
- * A construction project ends with the handover. Phase 6 — Betrieb, Überwachung,
- * Erhaltung — is what happens to the building afterwards, for as long as it
- * stands; it is not part of the project and not this office's project work.
- * The last gate, MS7 Übergabe Bewirtschaftung, is where the chain stops.
+ * The chain every project walks: the twelve phases as ePPM names them, in the
+ * order ePPM lists them — Vorstudien, 1, 22, 2, 31, 3, 32, 4, 53, 5, 61, 6.
+ * BBL's list mixes SIA main phases with sub-phases and opens with a stage of
+ * its own, so it is read from phases.json rather than written down a second
+ * time; that file is the one place the order lives.
  */
-const SEQ = ['11', '21', '22', '31', '32', '33', '41', '51', '52', '53'];
+const EPPM = read('phases').eppm;
+const SEQ = EPPM.map(e => e.id);
+const LABEL = Object.fromEntries(EPPM.map(e => [e.id, e.label]));
 /*
  * What a phase asks of the office, in per cent of one person. Operation asks
  * little and asks it for years, which is why it is on the list at all.
  */
 const WEIGHT = {
-  '11': 10, '21': 25, '22': 30, '31': 45, '32': 60, '33': 35,
-  '41': 55, '51': 70, '52': 85, '53': 45
+  'Vorstudien': 15, '1': 10, '22': 30, '2': 25, '31': 45, '3': 40,
+  '32': 60, '4': 55, '53': 45, '5': 85, '61': 10, '6': 5
 };
 /*
- * Quarters per sub-phase, before the project's own pace is applied.
+ * Quarters per phase, before the project's own pace is applied.
  *
  *   22  an open design competition runs about twelve months, and the award
  *       follows it.
- *   33  a building permit averaged 140–160 days in 2023 and passes a year in
+ *   3   a building permit averaged 140–160 days in 2023 and passes a year in
  *       the cities; an objection stretches it much further.
- *   52  the construction: a Teilsanierung inside two years, a Gesamtsanierung
+ *   5   the construction: a Teilsanierung inside two years, a Gesamtsanierung
  *       of a building that stays in use, four or more.
- *   53  commissioning, and with it the handover the project ends on.
+ *   6   Bewirtschaftung is what happens to the building afterwards; the chain
+ *       carries it so a finished project still has a phase, at next to no
+ *       demand.
  */
 const DURATION = {
-  '11': [2, 4], '21': [3, 5], '22': [3, 5], '31': [2, 4], '32': [3, 6],
-  '33': [2, 6], '41': [2, 4], '51': [2, 4], '52': [6, 16], '53': [1, 2]
+  'Vorstudien': [1, 3], '1': [2, 4], '22': [3, 5], '2': [2, 4], '31': [2, 4], '3': [2, 6],
+  '32': [3, 6], '4': [2, 4], '53': [1, 2], '5': [6, 16], '61': [2, 4], '6': [4, 8]
 };
 
 /*
@@ -121,19 +125,6 @@ const DURATION = {
 const COMPLEXITY = [[0.7, 24], [1, 42], [1.45, 24], [2.2, 10]];
 const paceOf = (size) => Math.max(0.55, size * weighted(COMPLEXITY));
 
-const SUB = read('phases').sub;
-
-/*
- * What ePPM calls the phase. Its value list is BBL's own and mixes SIA main
- * phases with sub-phases — Vorstudien, 1, 22, 2, 31, 3, 32, 4, 53, 5, 61, 6 —
- * so the project record carries one of those, while the schedule underneath
- * stays the SIA chain. The mapping lives in phases.json beside the list; a
- * project that has not begun is «Vorstudien», the stage before the chain.
- */
-const EPPM = read('phases').eppm;
-const eppmOf = (sub, begun) => (begun
-  ? (EPPM.find(e => e.sub.includes(sub))?.id ?? sub)
-  : 'Vorstudien');
 
 /* -----------------------------------------------------------------------------
    Generating a project
@@ -219,11 +210,14 @@ function demandFrom(bars, size) {
   return out;
 }
 
+/** Where a phase stands in the chain. */
+const stage = phase => SEQ.indexOf(phase);
+
 function creditFor(phase, size) {
   // Nothing is committed before the project has been through Vorstudien.
-  if (phase === '11' || phase === '21') return null;
+  if (stage(phase) <= stage('1')) return null;
   const base = 1.2 + rnd() * 9;
-  const value = Math.round(base * size * (phase >= '41' ? 2.4 : 1.6) * 100) / 100;
+  const value = Math.round(base * size * (stage(phase) >= stage('4') ? 2.4 : 1.6) * 100) / 100;
   return Math.min(value, 128);
 }
 
@@ -263,9 +257,9 @@ function makeProject(n, usedNumbers, usedAddresses) {
   const shape = chain(0, pace);
   const bars = shifted(shape, between(1 - chainLength(shape), LAST_START));
 
-  const subPhase = phaseAt(bars);
+  const phase = phaseAt(bars);
   const demand = demandFrom(bars, size);
-  const credit = creditFor(subPhase, size);
+  const credit = creditFor(phase, size);
   const peak = Math.max(...demand);
 
   return {
@@ -274,15 +268,14 @@ function makeProject(n, usedNumbers, usedAddresses) {
     title: `${address}, ${kind}`,
     location: address,
     kind,
-    phase: eppmOf(subPhase, bars[0].from <= 0),
-    subPhase,
+    phase,
     leadId: null,                       // assigned below, once the team is known
     portfolio: weighted(PORTFOLIOS),
     priority: weighted(PRIORITIES),
     credit,
     creditLabel: credit === null ? 'offen' : mio(credit),
-    // The construction credit is released at MS4, between phases 3 and 4.
-    preCredit: SEQ.indexOf(subPhase) < SEQ.indexOf('41'),
+    // The construction credit is released at MS4, which closes the Bauprojekt.
+    preCredit: stage(phase) <= stage('32'),
     demand,
     // The agreed pensum: usually what is planned, sometimes less than reality.
     target: Math.max(5, Math.round((peak * weighted([[1, 62], [0.85, 26], [0.7, 12]])) / 5) * 5),
@@ -300,7 +293,7 @@ function barsFor(bars) {
         phase: b.phase,
         from: b.from,
         to: b.to,
-        label: span >= 2 ? SUB[b.phase].label : b.phase
+        label: span >= 2 ? LABEL[b.phase] : b.phase
       };
       if (b.to > QUARTERS && i === list.length - 1) bar.continues = true;
       return bar;
@@ -364,8 +357,8 @@ function makeTeam(rosterTarget) {
    -------------------------------------------------------------------------- */
 
 /* The gate at the end of each phase that has one. */
-const GATE = { '11': 'MS1', '21': 'MS2', '31': 'MS3', '33': 'MS4', '41': 'MS5',
-  '52': 'MS6', '53': 'MS7' };
+const GATE = { '1': 'MS1', '2': 'MS2', '31': 'MS3', '32': 'MS4', '4': 'MS5',
+  '53': 'MS6', '5': 'MS7' };
 const META = read('meta');
 
 /* The calendar follows QUARTERS, so the window has one definition. */
@@ -487,13 +480,9 @@ const existing = core('projects').map(p => {
    * the phase the file gives them, rather than anywhere along it.
    */
   const shape = chain(0, pace);
-  const stage = shape[Math.max(0, SEQ.indexOf(p.phase))];
-  const bars = shifted(shape, -between(stage.from, stage.to - 1));
-  const subPhase = phaseAt(bars);
-  return {
-    ...p, bars: barsFor(bars), demand: demandFrom(bars, size),
-    phase: eppmOf(subPhase, true), subPhase
-  };
+  const at = shape[Math.max(0, stage(p.phase))];
+  const bars = shifted(shape, -between(at.from, at.to - 1));
+  return { ...p, bars: barsFor(bars), demand: demandFrom(bars, size), phase: phaseAt(bars) };
 });
 const usedNumbers = new Set(existing.map(p => p.number));
 const usedAddresses = new Set(existing.map(p => p.location));
@@ -612,10 +601,30 @@ capacity.absence = capacity.gross.map((g, q) => Math.round(g * ABSENCE_RATIO[q] 
    The things that quote the portfolio
    -------------------------------------------------------------------------- */
 
-const milestones = core('milestones');
-const existingIds = new Set(milestones.items.map(m => m.projectId));
-milestones.items = [...milestones.items,
-  ...makeMilestones(generated).filter(m => !existingIds.has(m.projectId))];
+/*
+ * Every gate is generated from the bars, the eleven core projects' included.
+ * Their hand-written gates used to be taken as they were, and their quarters
+ * no longer matched the generated phases they close: a Vergabe drawn two
+ * quarters before the Ausschreibung ended. What the seed still owns is the
+ * story — which gate is late, by how much, which has no date, and why — and
+ * that is laid over the generated gate of the same id.
+ */
+const seeded = new Map(core('milestones').items.map(m => [m.id, m]));
+const milestones = { ...core('milestones') };
+milestones.items = makeMilestones(projects).map(m => {
+  const s = seeded.get(m.id);
+  if (!s) return m;
+  const planIdx = QUARTER_IDS.indexOf(m.plan);
+  const late = s.forecast ? Math.max(0, QUARTER_IDS.indexOf(s.forecast) - QUARTER_IDS.indexOf(s.plan)) : 0;
+  const forecastIdx = Math.min(QUARTERS - 1, planIdx + late);
+  return {
+    ...m,
+    forecast: s.forecast === null ? null : QUARTER_IDS[forecastIdx],
+    forecastDate: s.forecast === null ? null : dayNearEnd(forecastIdx),
+    status: s.status, statusLabel: s.statusLabel,
+    ...(s.impact ? { impact: s.impact } : {})
+  };
+});
 
 /*
  * A change log for a portfolio this size. The nine hand-written entries stay at

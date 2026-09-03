@@ -606,12 +606,9 @@ const actions = {
   }),
 
   signin: () => setState({ signedIn: true }),
-  /* The print layout opens on the report that matches what is on screen: the
-     bar plan when the reader is looking at the bar plan, the figures otherwise. */
-  'print-layout': () => setState({
-    tab: 'export', menu: null, editing: null, picking: null,
-    report: state.layers.phases && !state.layers.values ? 'schedule' : 'demand'
-  }),
+  /* The print layout prints what is on screen: the bar plan when the reader is
+     looking at the bar plan, the figures otherwise — it reads the same view. */
+  'print-layout': () => setState({ tab: 'export', menu: null, editing: null, picking: null }),
   export: (val) => {
     setState({ menu: null });
     try {
@@ -634,7 +631,6 @@ const actions = {
   paper: (val) => setState({ paper: val, menu: null }),
   zoom: (val) => setState({ zoom: val, menu: null }),
 
-  report: (val) => setState({ report: val }),
   /*
    * Clamped where it is written. pageOf() clamps on read, so the display was
    * always right while state.page ran on past the end: nine clicks on a
@@ -652,7 +648,6 @@ const actions = {
     return { page: Math.max(1, Math.min(pages, at + Number(val))) };
   }),
   'page-size': (val) => setState({ pageSize: val, page: 1, menu: null }),
-  print: () => window.print(),
 
   /*
    * The file, not the dialog. A printer driver imposes its own paper and its

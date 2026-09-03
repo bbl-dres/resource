@@ -1948,6 +1948,24 @@ button.pcell--val { cursor: pointer; }
   font-variant-numeric: tabular-nums;
 }
 .sheet__row.is-unassigned { box-shadow: var(--rail-warn); }
+
+/*
+ * The bar plan inside a printed pensum row — «Pensum + Termine» on paper.
+ * The band is a second grid row under the figures rather than an overlay:
+ * on screen it is positioned against the frozen block's width, which a sheet
+ * has no equivalent of, and a second row costs the auto-placed cells nothing.
+ * 10px is what a two-digit sub-phase number needs at 8px; the row grows from
+ * 26 to 36px and the page budget shrinks in that ratio (see FORMATS).
+ */
+.sheet__row--band { grid-template-rows: 26px 10px; }
+.sheet .pband {
+  position: relative; inset: auto;
+  grid-row: 2; grid-column: var(--band-col) / -1;
+  height: 10px;
+  --band-h: 10px; --band-lab-size: 8px; --band-lab-pad: 3px;
+}
+.sheet .pband .gantt__gate { width: 12px; height: 12px; }
+.sheet .pband .diamond { width: 8px; height: 8px; }
 .sheet__row--more { border-bottom: 0; font-size: var(--sheet-text); color: var(--color-text-muted); font-style: italic; }
 .sheet__row--more span { padding-left: 8px; }
 .sheet__row--sum, .sheet__row--load {

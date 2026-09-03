@@ -22,34 +22,7 @@
       0,
       0
     ],
-    "target": 80,
-    "bars": [
-      {
-        "phase": "32",
-        "from": 0,
-        "to": 3,
-        "label": "32 Bauprojekt"
-      },
-      {
-        "phase": "33",
-        "from": 3,
-        "to": 4,
-        "label": "33",
-        "milestone": "MS4 Baukredit bewilligt, Q2/2027"
-      },
-      {
-        "phase": "41",
-        "from": 4,
-        "to": 5,
-        "label": "41"
-      },
-      {
-        "phase": "51",
-        "from": 5,
-        "to": 6,
-        "label": "51"
-      }
-    ]
+    "target": 80
   },
   {
     "id": "pr12",
@@ -57,7 +30,7 @@
     "title": "Beispielstadt, Place de l’Avenir 10, Unterhalt",
     "location": "Beispielstadt, Place de l’Avenir 10",
     "kind": "Unterhalt",
-    "phase": "52",
+    "phase": "5",
     "leadId": "alina",
     "portfolio": "verwaltung",
     "priority": "hoch",
@@ -74,35 +47,7 @@
       20,
       10
     ],
-    "target": 100,
-    "bars": [
-      {
-        "phase": "52",
-        "from": 0,
-        "to": 2,
-        "label": "52 Ausführung"
-      },
-      {
-        "phase": "52",
-        "from": 2,
-        "to": 4,
-        "label": "▲ Verzug 2 Quartale",
-        "delay": true,
-        "milestone": "MS6 Abnahme, Q2/27 → Q4/27"
-      },
-      {
-        "phase": "53",
-        "from": 4,
-        "to": 5,
-        "label": "53"
-      },
-      {
-        "phase": "61",
-        "from": 5,
-        "to": 8,
-        "label": "61 Betrieb"
-      }
-    ]
+    "target": 100
   },
   {
     "id": "pr06",
@@ -127,35 +72,7 @@
       20,
       10
     ],
-    "target": 40,
-    "bars": [
-      {
-        "phase": "31",
-        "from": 0,
-        "to": 2,
-        "label": "31 Vorprojekt"
-      },
-      {
-        "phase": "31",
-        "from": 2,
-        "to": 3,
-        "label": "▲ Verzug",
-        "delay": true,
-        "milestone": "MS3 Vorprojekt genehmigt, Q4/26 → Q1/27"
-      },
-      {
-        "phase": "32",
-        "from": 3,
-        "to": 6,
-        "label": "32 Bauprojekt"
-      },
-      {
-        "phase": "33",
-        "from": 6,
-        "to": 8,
-        "label": "33"
-      }
-    ]
+    "target": 40
   },
   {
     "id": "pr57",
@@ -163,7 +80,7 @@
     "title": "Musterlingen, Werkhof Ost, Teilsanierung",
     "location": "Musterlingen, Werkhof Ost",
     "kind": "Teilsanierung",
-    "phase": "33",
+    "phase": "3",
     "leadId": "sonja",
     "portfolio": "zoll",
     "priority": "hoch",
@@ -180,34 +97,7 @@
       60,
       40
     ],
-    "target": 60,
-    "bars": [
-      {
-        "phase": "33",
-        "from": 0,
-        "to": 2,
-        "label": "33 Bewilligung",
-        "milestone": "MS4 Baukredit bewilligt, Q1/2027"
-      },
-      {
-        "phase": "41",
-        "from": 2,
-        "to": 3,
-        "label": "41"
-      },
-      {
-        "phase": "51",
-        "from": 3,
-        "to": 4,
-        "label": "51"
-      },
-      {
-        "phase": "52",
-        "from": 4,
-        "to": 8,
-        "label": "52 Ausführung"
-      }
-    ]
+    "target": 60
   },
   {
     "id": "pr66",
@@ -215,7 +105,7 @@
     "title": "Musterlingen, Hauptstrasse 118, Instandsetzung",
     "location": "Musterlingen, Hauptstrasse 118",
     "kind": "Instandsetzung",
-    "phase": "51",
+    "phase": "5",
     "leadId": "sonja",
     "portfolio": "ausland",
     "priority": "mittel",
@@ -232,22 +122,7 @@
       45,
       30
     ],
-    "target": 75,
-    "bars": [
-      {
-        "phase": "51",
-        "from": 0,
-        "to": 2,
-        "label": "51 Ausf.-projekt"
-      },
-      {
-        "phase": "52",
-        "from": 2,
-        "to": 8,
-        "label": "52 Ausführung — läuft bis Q3/2028",
-        "continues": true
-      }
-    ]
+    "target": 75
   },
   {
     "id": "pr44",
@@ -255,7 +130,7 @@
     "title": "Musterbiel, Industriestrasse 22, Gesamtsanierung",
     "location": "Musterbiel, Industriestrasse 22",
     "kind": "Gesamtsanierung",
-    "phase": "41",
+    "phase": "4",
     "leadId": "tobias",
     "portfolio": "bildung",
     "priority": "hoch",
@@ -272,28 +147,7 @@
       50,
       40
     ],
-    "target": 90,
-    "bars": [
-      {
-        "phase": "41",
-        "from": 0,
-        "to": 2,
-        "label": "41 Ausschreibung",
-        "milestone": "MS5 Vergabe erfolgt, Q4/2026"
-      },
-      {
-        "phase": "51",
-        "from": 2,
-        "to": 4,
-        "label": "51 Ausf.-projekt"
-      },
-      {
-        "phase": "52",
-        "from": 4,
-        "to": 8,
-        "label": "52 Ausführung"
-      }
-    ]
+    "target": 90
   },
   {
     "id": "pr03",
@@ -301,7 +155,7 @@
     "title": "Beispielgrund, Via Sempione 3, Kauf",
     "location": "Beispielgrund, Via Sempione 3",
     "kind": "Kauf",
-    "phase": "21",
+    "phase": "2",
     "leadId": "alina",
     "portfolio": "ausland",
     "priority": "mittel",
@@ -318,18 +172,7 @@
       0,
       0
     ],
-    "target": 20,
-    "bars": [
-      {
-        "phase": "21",
-        "from": 0,
-        "to": 3,
-        "label": "21 Machbarkeit · Kauf",
-        "milestone": "MS2 Machbarkeit bestätigt, Q1/2027",
-        "milestoneOpen": true,
-        "openEnd": "Folgephasen nach Kaufentscheid offen"
-      }
-    ]
+    "target": 20
   },
   {
     "id": "pr10",
@@ -337,7 +180,7 @@
     "title": "Musterthal, Seestrasse 95, Badanlage",
     "location": "Musterthal, Seestrasse 95",
     "kind": "Badanlage",
-    "phase": "62",
+    "phase": "6",
     "leadId": "lars",
     "portfolio": "sport",
     "priority": "tief",
@@ -354,16 +197,7 @@
       0,
       0
     ],
-    "target": 30,
-    "bars": [
-      {
-        "phase": "62",
-        "from": 0,
-        "to": 3,
-        "label": "62 Überwachung / Wartung",
-        "milestone": "MS7 Übergabe Bewirtschaftung, Q1/2027"
-      }
-    ]
+    "target": 30
   },
   {
     "id": "pr26",
@@ -371,7 +205,7 @@
     "title": "Beispielbach, Via Motta 14, Mehrzweckbau",
     "location": "Beispielbach, Via Motta 14",
     "kind": "Mehrzweckbau",
-    "phase": "11",
+    "phase": "1",
     "leadId": "tobias",
     "portfolio": "kultur",
     "priority": "mittel",
@@ -388,29 +222,7 @@
       50,
       35
     ],
-    "target": 25,
-    "bars": [
-      {
-        "phase": "11",
-        "from": 0,
-        "to": 2,
-        "label": "11 Strategische Planung",
-        "milestone": "MS1 Bedürfnis freigegeben, Q4/2026",
-        "milestoneOpen": true
-      },
-      {
-        "phase": "21",
-        "from": 2,
-        "to": 5,
-        "label": "21 Machbarkeit"
-      },
-      {
-        "phase": "22",
-        "from": 5,
-        "to": 8,
-        "label": "22 Auswahlverfahren"
-      }
-    ]
+    "target": 25
   },
   {
     "id": "pr39",
@@ -435,23 +247,7 @@
       5,
       5
     ],
-    "target": 40,
-    "bars": [
-      {
-        "phase": "22",
-        "from": 0,
-        "to": 4,
-        "label": "22 Auswahlverfahren",
-        "milestone": "MS2 Machbarkeit bestätigt, Q2/2027",
-        "milestoneOpen": true
-      },
-      {
-        "phase": "31",
-        "from": 4,
-        "to": 8,
-        "label": "31 Vorprojekt"
-      }
-    ]
+    "target": 40
   },
   {
     "id": "pr53",
@@ -459,7 +255,7 @@
     "title": "Musterlingen, Arealentwicklung Nord",
     "location": "Musterlingen, Arealentwicklung Nord",
     "kind": "Arealentwicklung",
-    "phase": "21",
+    "phase": "2",
     "leadId": null,
     "portfolio": "justiz",
     "priority": "mittel",
@@ -477,15 +273,6 @@
       0
     ],
     "target": 40,
-    "unassigned": true,
-    "bars": [
-      {
-        "phase": "21",
-        "from": 2,
-        "to": 6,
-        "label": "21 Machbarkeit — 40 % Bedarf offen",
-        "unassigned": true
-      }
-    ]
+    "unassigned": true
   }
 ]

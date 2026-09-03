@@ -251,9 +251,9 @@ export function menuGroupLabel(text) {
   return html`<div class="dd__grouplabel">${text}</div>`;
 }
 
-export function menuRadio(label, checked, act, val, meta) {
+export function menuRadio(label, checked, act, val, meta, { disabled = false } = {}) {
   return html`<button type="button" class="dd__item ${checked ? 'is-checked' : ''}" role="menuitemradio"
-      aria-checked="${checked}" data-act="${act}" data-val="${val}">
+      aria-checked="${checked}" data-act="${act}" data-val="${val}" ${attr(disabled, 'aria-disabled="true" disabled')}>
     <span>${label}</span>${meta && html`<span class="dd__meta">${meta}</span>`}${checked && html`<span class="dd__check">${icons.check()}</span>`}
   </button>`;
 }
@@ -589,7 +589,7 @@ const GROUPS = [
  * drawn («Ansicht»). The time controls used to be a bar of their own under
  * this one; folded in they give back 40px above the first row.
  */
-export function toolbar({ time = false, view = false, columns = false, exclude = [] } = {}) {
+export function toolbar({ time = false, view = false, print = false, exclude = [] } = {}) {
   const groupLabel = GROUPS.find(g => g.id === state.group)?.label ?? GROUPS[0].label;
   const mine = data.meta.user.personId;
   const minesOnly = state.leads.length === 1 && state.leads[0] === mine;
@@ -670,16 +670,7 @@ export function toolbar({ time = false, view = false, columns = false, exclude =
       <span class="toolbar__sep" aria-hidden="true"></span>`}
 
     ${view && dropdown({
-      id: 'view', label: t('Ansicht'), width: 296, align: 'right', body: viewMenuBody(exclude)
-    })}
-
-    ${columns && dropdown({
-      id: 'columns', label: t('Spalten'), width: 296, align: 'right',
-      body: html`${unitSwitch()}
-        ${divider()}
-        ${columnSwitches(exclude)}
-        ${divider()}
-        ${menuCheckbox(t('Nullwerte ausblenden'), state.hideZeros, 'toggle-flag', 'hideZeros')}`
+      id: 'view', label: t('Ansicht'), width: 296, align: 'right', body: viewMenuBody({ exclude, print })
     })}
   </div>`;
 }
@@ -721,14 +712,21 @@ const columnSwitches = exclude => toggleableColumns().filter(c => !exclude.inclu
  * nothing down. The layer switches show only while «Individuell» is chosen —
  * a named view already says what they would say — and «Pensum einfärben»
  * greys out while there are no figures to colour.
+ *
+ * The print layout carries the same menu, so the reader sets the paper up the
+ * way they set the screen up, and every view prints: the figures, the bars,
+ * or the figures with the band under them. The one switch paper has no use
+ * for is «Heute» — a printed sheet carries its date in the letterhead — so
+ * that one is greyed there.
  */
-function viewMenuBody(exclude = []) {
+function viewMenuBody({ exclude = [], print = false } = {}) {
   const noFigures = !state.layers.values;
   return html`${menuGroupLabel(t('Ansicht'))}
     ${VIEWS.map(v => menuRadio(t(v.label), state.view === v.id, 'view', v.id))}
     ${state.view === 'custom' && html`${divider()}
       ${menuGroupLabel(t('Ebenen'))}
-      ${LAYERS.map(l => menuCheckbox(t(l.label), !!state.layers[l.id], 'toggle-layer', l.id))}`}
+      ${LAYERS.map(l => menuCheckbox(t(l.label), !!state.layers[l.id], 'toggle-layer', l.id, null,
+        { disabled: print && l.id === 'today' }))}`}
     ${divider()}
     ${menuGroupLabel(t('Zeitskala'))}
     <div class="dd__segmented">${segmented(SCALES, state.scale, 'scale')}</div>

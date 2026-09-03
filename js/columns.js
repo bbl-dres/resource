@@ -48,7 +48,7 @@ export const COLUMNS = [
   },
   {
     key: 'phase', label: 'Phase (ePPM)', flag: 'phase', sort: 'phase', width: '--grid-col-phase',
-    cls: 'pcell--phase', sheet: { w: [124, 128], cls: 'sheet__muted', label: 'Teilphase (ePPM)' },
+    cls: 'pcell--phase', sheet: { w: [124, 128], cls: 'sheet__muted' },
     xls: { type: 'text', width: 20 },
     text: p => t(eppmOf(p.phase).label)
   },

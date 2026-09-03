@@ -36,7 +36,6 @@ export const VOCAB = {
   sortDir: ['asc', 'desc'],
   group:   ['portfolio', 'lead', 'phase', 'organisation', 'none'],
   bi:      ['general', 'people'],
-  report:  ['demand', 'schedule'],
   paper:   ['a4', 'a3', 'a2', 'a1', 'a0'],
   zoom:    ['fit', '50', '100', '200', '400'],
   sheet:   ['portrait', 'landscape'],
@@ -47,7 +46,6 @@ const DEFAULT_STATE = {
   tab: 'overview',
   paper: 'a4',             // ISO size, see VOCAB.paper
   sheet: 'portrait',       // orientation, see VOCAB.sheet
-  report: 'demand',        // which printed report, see VOCAB.report
   lang: 'de',
   scale: 'quarter',
   periodOffset: 0,         // how far the visible window has been stepped
@@ -175,9 +173,10 @@ export const coloured = () => state.layers.values && state.colour === 'pensum';
 /**
  * Which set of switches the view in front of the reader is driven by.
  *
- * The export tab has no grid of its own — it prints one of the two, so it
- * follows whichever report is selected. Anything else reads the pensum grid's
- * set, which is also what the spreadsheet export takes its columns from.
+ * The export tab has no grid of its own — it prints one of the two reports,
+ * and the bar plan on paper has columns of its own. Anything else reads the
+ * planning grid's set, which is also what the spreadsheet export takes its
+ * columns from.
  */
 export function columnSet() {
   return state.cols[columnSetKey()];
@@ -185,8 +184,7 @@ export function columnSet() {
 
 /** The name of the set columnSet() returns, for the action that writes to it. */
 export function columnSetKey() {
-  return state.tab === 'schedule' || (state.tab === 'export' && state.report === 'schedule')
-    ? 'schedule' : 'overview';
+  return state.tab === 'export' && !state.layers.values ? 'schedule' : 'overview';
 }
 
 const listeners = new Set();
@@ -269,7 +267,6 @@ export function writeUrl() {
   p.set('tab', state.tab);
   if (state.tab === 'export') p.set('sheet', state.sheet);
   if (state.tab === 'export' && state.paper !== 'a4') p.set('paper', state.paper);
-  if (state.tab === 'export' && state.report !== 'demand') p.set('report', state.report);
   if (state.lang !== 'de') p.set('lang', state.lang);
   if (state.unit !== 'pct') p.set('unit', state.unit);
   if (state.view !== 'pensum') p.set('view', state.view);
@@ -537,20 +534,20 @@ export function ampel(personId, range = windowQuarters()) {
  * A SIA sub-phase by its code. An unknown code returns a stand-in rather than
  * undefined, so one bad record cannot take a whole view down.
  */
-export function phaseOf(subCode) {
-  return data.phases.sub[subCode] ?? { label: String(subCode ?? '—'), main: null };
-}
-
 /*
- * The phase as ePPM records it — the value on the project, and the one the
- * filter, the grouping and the column speak. BBL's list mixes SIA main phases
- * with sub-phases and adds «Vorstudien» of its own, so it is a list of values
- * in phases.json rather than anything derivable from the SIA codes; the SIA
- * chain stays what the schedule and the gates are drawn from.
+ * A phase as ePPM names it — the value on the project, on every bar and on
+ * every gate, and the one the filter, the grouping and the column speak. BBL's
+ * list mixes SIA main phases with sub-phases and opens with «Vorstudien» of
+ * its own, so it is a list of values in phases.json, in ePPM's order, rather
+ * than anything derivable from SIA codes. An unknown id returns a stand-in
+ * rather than undefined, so one bad record cannot take a whole view down.
  */
 export function eppmOf(id) {
-  return data.phases.eppm.find(e => e.id === id) ?? { id: String(id ?? '—'), label: String(id ?? '—'), sub: [] };
+  return data.phases.eppm.find(e => e.id === id) ?? { id: String(id ?? '—'), label: String(id ?? '—') };
 }
+
+/** The same lookup under the name the bar plan has always used. */
+export const phaseOf = eppmOf;
 
 /** Where an ePPM phase stands in the list, for sorting — as a fixed-width string. */
 const eppmRank = id => String(Math.max(0, data.phases.eppm.findIndex(e => e.id === id))).padStart(2, '0');

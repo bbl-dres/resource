@@ -153,7 +153,7 @@ function milestoneModal({ milestoneId }) {
 
   const facts = [
     { term: 'Projekt', value: p.title, sub: `${p.number} · ${t(data.portfoliosById[p.portfolio].label)}` },
-    { term: 'Teilphase (ePPM)', value: t(phaseOf(m.subPhase).label) },
+    { term: 'Phase (ePPM)', value: t(phaseOf(m.subPhase).label) },
     { term: 'Plantermin', value: `${planQ.label} · ${deDate(m.planDate)}` },
     {
       term: 'Prognose',
@@ -190,7 +190,7 @@ function phaseModal({ projectId, from }) {
   const bar = p?.bars.find(x => x.from === from);
   if (!bar) return '';
   const lead = p.leadId ? data.peopleById[p.leadId] : null;
-  const sub = data.phases.sub[bar.phase];
+  const sub = phaseOf(bar.phase);
   const cells = projectDemand(p);
 
   const first = Math.max(0, bar.from);
@@ -215,7 +215,7 @@ function phaseModal({ projectId, from }) {
   ];
 
   // The number is already in the title; the kicker names the kind of thing.
-  const kicker = bar.delay ? t('Verzug') : t('Teilphase (ePPM)');
+  const kicker = bar.delay ? t('Verzug') : t('Phase (ePPM)');
   const title = bar.delay ? bar.label : (sub ? t(sub.label) : bar.label);
 
   return html`
@@ -249,10 +249,9 @@ function projectModal({ projectId }) {
   // The wireframe is explicit: five facts, always the same, in this order.
   const facts = [
     {
-      /* The value ePPM records, and the SIA sub-phase the schedule is in. */
       term: 'Phase (ePPM)',
       value: t(eppmOf(p.phase).label),
-      sub: `${t('Teilphase (SIA)')} ${t(phaseOf(p.subPhase).label)}`
+      sub: `${t('Phase')} ${data.phases.eppm.findIndex(e => e.id === p.phase) + 1} ${t('von')} ${data.phases.eppm.length}`
     },
     {
       term: 'Bearbeitender',
