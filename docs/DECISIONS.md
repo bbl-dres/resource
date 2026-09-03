@@ -95,6 +95,13 @@ the last three sections of `main.css`; change the number, keep the comment.
 
 ## Numbers
 
+**A project's phase is the ePPM value; its schedule is SIA.** ePPM's phase
+list is BBL's own — Vorstudien, 1, 22, 2, 31, 3, 32, 4, 53, 5, 61, 6 — mixing
+SIA main and sub-phases, so `project.phase` is one of those and the filter,
+the grouping and the column speak it. The SIA chain (`project.subPhase`, the
+bars, the gates) is what the schedule is drawn from. The mapping between the
+two is one table in `data/phases.json`, in ePPM's own order.
+
 **Bedarf follows the filter; Auslastung does not.** A demand row describes the
 projects in scope. Utilisation is always the whole department against its own net
 capacity, because a filtered subset has no meaningful denominator. `totals()`
@@ -110,6 +117,13 @@ A year is the average of its quarters.
 
 **Red belongs to over-capacity alone.** “Now” is a position, not a problem; late
 is marked with a triangle and black text, not with colour on its own.
+
+**A gate is one plain diamond at its plan date.** Late and undated gates were
+drawn red and hollow; a hundred diamonds in three states read as a status board
+laid over the schedule, so the mark is now the same for every gate and what
+became of the date lives in the tooltip, the dialog and the dashboard. The
+plan date sits in the closing weeks of the phase it ends — `dayNearEnd` in the
+generator — so a gate is never drawn in the middle of a phase.
 
 ---
 

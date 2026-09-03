@@ -450,7 +450,6 @@
    */
   --chart-col:          40px;
 
-  --grid-col-ampel:     62px;
   --grid-col-id:        62px;
   --grid-col-title:     285px;   /* the floor; the column takes the slack */
   --grid-col-title-max: 460px;   /* and its ceiling — the width at which the
@@ -458,11 +457,8 @@
   --grid-col-phase:     152px;  /* «33 Bewilligungsverfahren» in full, 144px + padding */
   --grid-col-lead:      132px;
   --grid-col-portfolio: 110px;
-  --grid-col-priority:  90px;
-  --grid-col-nextms:    150px;
+  --grid-col-organisation: 200px;  /* «Programm- und Projektentwicklung II» truncates past this */
   --grid-col-credit:    112px;
-  --grid-col-target:    76px;
-  --grid-col-trend:     130px;
 
   /* The person table has its own five lead columns. */
   --person-col-name:       150px;

@@ -16,7 +16,7 @@ import {
 import {
   html, raw, attr, icons, pageHeader, toolbar, activeFilterRow, noResults,
   dropdown, menuRadio,
-  scopeLine, AMPEL_STATES, legendBlock, legendItem, yearRule, ampelDot
+  scopeLine, legendBlock, legendItem, yearRule
 } from './ui.js';
 import { visibleColumns, leadLayout } from './columns.js';
 import { ganttRow, ganttLegend } from './views-schedule.js';
@@ -219,7 +219,7 @@ export function renderExport() {
             state.exporting ? 'PDF wird erstellt …' : 'PDF herunterladen')}</button>`
     })}
     <div class="wrap"><div class="content">
-      ${toolbar({ columns: true, exclude: ['trend'] })}
+      ${toolbar({ columns: true })}
       ${activeFilterRow()}
       <div class="sheetbar">
         <div class="segmented">
@@ -389,10 +389,9 @@ const GLOSSARY = [
   ['Bedarf', 'Geplantes Pensum eines Projekts in einem Quartal.'],
   ['Extern beauftragt', 'Leistung, die nicht die eigene Abteilung erbringt; sie mindert den Bedarf an eigener Kapazität.'],
   ['Baukredit-Freigabe', 'Gate MS4. Davor ist ein Projekt planerisch, aber nicht finanziell gebunden — «vor Baukredit-Freigabe» weist diesen Anteil aus.'],
-  ['Phase (ePPM)', 'Phasenmodell des Bauwesens nach SIA 112, wie ePPM es führt: 1 Strategische Planung, 2 Vorstudien, 3 Projektierung, 4 Ausschreibung, 5 Realisierung, 6 Bewirtschaftung.'],
+  ['Phase (ePPM)', 'Phase, wie ePPM sie führt — eine BBL-eigene Liste aus SIA-Haupt- und Teilphasen: Vorstudien, 1 Strategische Planung, 22 Auswahlverfahren, 2 Vorstudien, 31 Vorprojekt, 3 Projektierung, 32 Bauprojekt, 4 Ausschreibung, 53 Inbetriebnahme, 5 Realisierung, 61 Betrieb, 6 Bewirtschaftung.'],
   ['Meilenstein / Gate', 'Entscheidpunkt zwischen zwei Phasen, mit Plan- und Prognosetermin.'],
   ['Teilportfolio', 'Gebäudekategorie des BBL, etwa Verwaltung, Zoll oder Bauten im Ausland.'],
-  ['Soll-Pensum', 'Vereinbartes Pensum im laufenden Quartal, zum Vergleich mit dem geplanten Bedarf.'],
   ['Überlast · knapp · ok · frei', 'Auslastung über 100 · 95 – 100 · 80 – 94 · darunter.']
 ];
 
@@ -445,9 +444,7 @@ function sheetColumns(sheet) {
   return visibleColumns(columnSet()).map(c => ({
     key: c.key,
     // The sheet has room for the longer name where the grid header does not.
-    label: c.key === 'target'
-      ? `${t('Soll')} ${data.quarters[0].short}`
-      : t(c.sheet.label ?? c.label),
+    label: t(c.sheet.label ?? c.label),
     w: c.sheet.w[wide ? 1 : 0],
     cls: c.sheet.cls,
     flex: c.sheet.flex,
@@ -455,16 +452,9 @@ function sheetColumns(sheet) {
   }));
 }
 
-/**
- * One project's value for a lead column, already formatted for paper. Most
- * columns are the registry's plain text; only these three draw something.
- */
-function sheetCell(col, p, range) {
-  switch (col.key) {
-    case 'ampel': return ampelDot(p, range);
-    case 'target': return `${num(p.target)}${unitSuffix()}`;
-    default: return col.text(p) || '—';
-  }
+/** One project's value for a lead column: the registry's plain text. */
+function sheetCell(col, p) {
+  return col.text(p) || '—';
 }
 
 /** Said at the foot of every sheet whose table carries on. */
@@ -535,13 +525,6 @@ const demandLegend = (cfg) => legendBlock([
   {
     label: 'Pensum',
     items: cfg.legend.steps.map(s => legendItem(html`<span class="legend__swatch heat-${s.step}"></span>`, s.label))
-  },
-  {
-    label: 'Ampel',
-    items: columnSet().ampel
-      ? AMPEL_STATES.filter(a => a.key !== 'none')
-        .map(a => legendItem(html`<span class="ampel ampel--${a.key}"></span>`, a.label))
-      : null
   },
   {
     label: 'Markierung',

@@ -123,6 +123,18 @@ const paceOf = (size) => Math.max(0.55, size * weighted(COMPLEXITY));
 
 const SUB = read('phases').sub;
 
+/*
+ * What ePPM calls the phase. Its value list is BBL's own and mixes SIA main
+ * phases with sub-phases — Vorstudien, 1, 22, 2, 31, 3, 32, 4, 53, 5, 61, 6 —
+ * so the project record carries one of those, while the schedule underneath
+ * stays the SIA chain. The mapping lives in phases.json beside the list; a
+ * project that has not begun is «Vorstudien», the stage before the chain.
+ */
+const EPPM = read('phases').eppm;
+const eppmOf = (sub, begun) => (begun
+  ? (EPPM.find(e => e.sub.includes(sub))?.id ?? sub)
+  : 'Vorstudien');
+
 /* -----------------------------------------------------------------------------
    Generating a project
    -------------------------------------------------------------------------- */
@@ -251,9 +263,9 @@ function makeProject(n, usedNumbers, usedAddresses) {
   const shape = chain(0, pace);
   const bars = shifted(shape, between(1 - chainLength(shape), LAST_START));
 
-  const phase = phaseAt(bars);
+  const subPhase = phaseAt(bars);
   const demand = demandFrom(bars, size);
-  const credit = creditFor(phase, size);
+  const credit = creditFor(subPhase, size);
   const peak = Math.max(...demand);
 
   return {
@@ -262,14 +274,15 @@ function makeProject(n, usedNumbers, usedAddresses) {
     title: `${address}, ${kind}`,
     location: address,
     kind,
-    phase,
+    phase: eppmOf(subPhase, bars[0].from <= 0),
+    subPhase,
     leadId: null,                       // assigned below, once the team is known
     portfolio: weighted(PORTFOLIOS),
     priority: weighted(PRIORITIES),
     credit,
     creditLabel: credit === null ? 'offen' : mio(credit),
     // The construction credit is released at MS4, between phases 3 and 4.
-    preCredit: SEQ.indexOf(phase) < SEQ.indexOf('41'),
+    preCredit: SEQ.indexOf(subPhase) < SEQ.indexOf('41'),
     demand,
     // The agreed pensum: usually what is planned, sometimes less than reality.
     target: Math.max(5, Math.round((peak * weighted([[1, 62], [0.85, 26], [0.7, 12]])) / 5) * 5),
@@ -375,6 +388,20 @@ function dayIn(qi) {
   return `${c.year}-${String(month + 1).padStart(2, '0')}-${String(between(1, days)).padStart(2, '0')}`;
 }
 
+/*
+ * A gate closes a phase, so its day lies in the phase's closing weeks: the
+ * last three weeks of the quarter the phase ends in, never its middle. Drawn
+ * to its date, a gate picked anywhere in the quarter stood up to eleven weeks
+ * short of the bar it closes and read as a milestone inside the phase.
+ */
+function dayNearEnd(qi) {
+  const c = QUARTER_CAL[qi];
+  const month = c.q * 3 - 1;
+  const days = [31, [28, 29][+(c.year % 4 === 0)], 31, 30, 31, 30,
+    31, 31, 30, 31, 30, 31][month];
+  return `${c.year}-${String(month + 1).padStart(2, '0')}-${String(between(days - 20, days - 1)).padStart(2, '0')}`;
+}
+
 const QUARTER_END = QUARTER_CAL.map(c =>
   `${c.year}-${String(c.q * 3).padStart(2, '0')}-${[31, 30, 30, 31][c.q - 1]}`);
 
@@ -418,9 +445,9 @@ function makeMilestones(projects) {
         projectId: p.id,
         subPhase: bar.phase,
         plan: QUARTER_IDS[planIdx],
-        planDate: dayIn(planIdx),
+        planDate: dayNearEnd(planIdx),
         forecast: pending ? null : QUARTER_IDS[forecastIdx],
-        forecastDate: pending ? null : dayIn(forecastIdx),
+        forecastDate: pending ? null : dayNearEnd(forecastIdx),
         status: pending ? 'pending' : late ? 'late' : 'ok',
         statusLabel: pending ? '▲ Auftrag noch hängig'
           : late ? `▲ ${late} Quartal${late > 1 ? 'e' : ''} verspätet`
@@ -462,7 +489,11 @@ const existing = core('projects').map(p => {
   const shape = chain(0, pace);
   const stage = shape[Math.max(0, SEQ.indexOf(p.phase))];
   const bars = shifted(shape, -between(stage.from, stage.to - 1));
-  return { ...p, bars: barsFor(bars), demand: demandFrom(bars, size), phase: phaseAt(bars) };
+  const subPhase = phaseAt(bars);
+  return {
+    ...p, bars: barsFor(bars), demand: demandFrom(bars, size),
+    phase: eppmOf(subPhase, true), subPhase
+  };
 });
 const usedNumbers = new Set(existing.map(p => p.number));
 const usedAddresses = new Set(existing.map(p => p.location));
@@ -712,14 +743,26 @@ dashboard.creditByYear.rows = [
  * appearing under Team C. The five projects with no lead follow their own
  * position instead, so none of them is left without a team to group under.
  */
-const TEAMS = ['org-a', 'org-b', 'org-c', 'org-d'];
-const teamOfPerson = new Map(people.map((person, i) => [person.id, TEAMS[i % TEAMS.length]]));
+/*
+ * The six organisational units as ePPM names them, in ePPM's order. Two
+ * development teams, three domestic construction teams, one for abroad. The
+ * ids are stable slugs so a shared link survives a renaming.
+ */
+const TEAMS = [
+  { id: 'ppe-1', label: 'Programm- und Projektentwicklung I' },
+  { id: 'ppe-2', label: 'Programm- und Projektentwicklung II' },
+  { id: 'bpi-1', label: 'Bauprojekte Inland I' },
+  { id: 'bpi-2', label: 'Bauprojekte Inland II' },
+  { id: 'bpi-3', label: 'Bauprojekte Inland III' },
+  { id: 'bpa', label: 'Bauprojekte Ausland' }
+];
+const teamOfPerson = new Map(people.map((person, i) => [person.id, TEAMS[i % TEAMS.length].id]));
 projects.forEach((project, i) => {
   project.organisation = project.leadId
     ? teamOfPerson.get(project.leadId)
-    : TEAMS[i % TEAMS.length];
+    : TEAMS[i % TEAMS.length].id;
 });
-META.organisations = TEAMS.map((id, i) => ({ id, label: `Team ${'ABCD'[i]}` }));
+META.organisations = TEAMS.map(({ id, label }) => ({ id, label }));
 
 /* The window has one definition; the app reads it from here. */
 META.quarters = QUARTER_CAL.map((c, i) => ({

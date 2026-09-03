@@ -7,7 +7,7 @@
    ============================================================================= */
 
 import {
-  data, state, t, num, fmt, unitSuffix, cellValue, projectDemand, heatStep, personUtilisation, phaseOf
+  data, state, t, num, fmt, unitSuffix, cellValue, projectDemand, heatStep, personUtilisation, phaseOf, eppmOf
 } from './store.js';
 
 import { html, icons, attr } from './ui.js';
@@ -238,7 +238,6 @@ function projectModal({ projectId }) {
   const p = data.projectsById[projectId];
   const lead = p.leadId ? data.peopleById[p.leadId] : null;
   const cells = projectDemand(p);
-  const phase = phaseOf(p.phase);
   const q0 = data.quarters[0];
   const nextMs = data.milestones.items
     .filter(m => m.projectId === p.id)
@@ -250,9 +249,10 @@ function projectModal({ projectId }) {
   // The wireframe is explicit: five facts, always the same, in this order.
   const facts = [
     {
+      /* The value ePPM records, and the SIA sub-phase the schedule is in. */
       term: 'Phase (ePPM)',
-      value: t(phase.label),
-      sub: `${t('Hauptphase')} ${phase.main}`
+      value: t(eppmOf(p.phase).label),
+      sub: `${t('Teilphase (SIA)')} ${t(phaseOf(p.subPhase).label)}`
     },
     {
       term: 'Bearbeitender',

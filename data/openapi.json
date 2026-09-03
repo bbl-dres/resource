@@ -79,7 +79,7 @@
           {
             "name": "phase",
             "in": "query",
-            "description": "Hauptphase (ePPM), mehrfach erlaubt.",
+            "description": "Phase (ePPM), mehrfach erlaubt: Vorstudien, 1, 22, 2, 31, 3, 32, 4, 53, 5, 61, 6.",
             "schema": {
               "type": "array",
               "items": {
@@ -3169,7 +3169,7 @@
           },
           "phase": {
             "type": "string",
-            "description": "Teilphase (ePPM), SIA 112.",
+            "description": "Phase (ePPM). BBL-Werteliste, die SIA-Hauptphasen und -Teilphasen mischt: Vorstudien, 1, 22, 2, 31, 3, 32, 4, 53, 5, 61, 6.",
             "examples": [
               "32"
             ]
@@ -3563,7 +3563,7 @@
           "phase": {
             "type": "string",
             "pattern": "^[1-6][1-9]$",
-            "description": "Teilphase (ePPM), SIA 112.",
+            "description": "Phase (ePPM). BBL-Werteliste, die SIA-Hauptphasen und -Teilphasen mischt: Vorstudien, 1, 22, 2, 31, 3, 32, 4, 53, 5, 61, 6.",
             "examples": [
               "32"
             ]
@@ -3635,7 +3635,7 @@
           "phase": {
             "type": "string",
             "pattern": "^[1-6][1-9]$",
-            "description": "Teilphase (ePPM), SIA 112.",
+            "description": "Phase (ePPM). BBL-Werteliste, die SIA-Hauptphasen und -Teilphasen mischt: Vorstudien, 1, 22, 2, 31, 3, 32, 4, 53, 5, 61, 6.",
             "examples": [
               "32"
             ]

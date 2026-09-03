@@ -21,16 +21,17 @@
      text     the plain value, used by the sheet, the CSV and the workbook
    ============================================================================= */
 
-import { data, t, ampel, phaseOf } from './store.js';
+import { data, t, eppmOf } from './store.js';
 
 /** The project lead's name, or the words that stand in for an empty one. */
 const leadName = p => (p.leadId ? data.peopleById[p.leadId].name : t('nicht zugewiesen'));
 
-/** The first gate ahead of this project, as code and quarter. */
-const nextGate = (p) => {
-  const ms = data.milestonesByProject[p.id]?.[0];
-  return ms ? `${ms.code} · ${data.quarters[data.quarterIndex[ms.plan]].label}` : '';
-};
+/*
+ * Six columns, not eleven. Ampel, Priorität, Nächster Meilenstein, Soll-Pensum
+ * and Verlauf were taken out in review: nobody switched them on, and a menu
+ * of eleven switches hid the five that matter. The facts are still in the
+ * data and in the project dialog; only the columns are gone.
+ */
 
 export const COLUMNS = [
   {
@@ -49,20 +50,12 @@ export const COLUMNS = [
     key: 'phase', label: 'Phase (ePPM)', flag: 'phase', sort: 'phase', width: '--grid-col-phase',
     cls: 'pcell--phase', sheet: { w: [124, 128], cls: 'sheet__muted', label: 'Teilphase (ePPM)' },
     xls: { type: 'text', width: 20 },
-    text: p => t(phaseOf(p.phase).label)
+    text: p => t(eppmOf(p.phase).label)
   },
   {
     key: 'lead', label: 'Bearbeitender', flag: 'lead', sort: 'lead', width: '--grid-col-lead',
     cls: 'pcell--lead', sheet: { w: [86, 108], cls: 'sheet__muted' }, xls: { type: 'text', width: 20 },
     text: leadName
-  },
-  {
-    // The signal reports on the project lead, so it sits beside that column.
-    key: 'ampel', label: 'Ampel', flag: 'ampel', sort: null, width: '--grid-col-ampel',
-    align: 'center',
-    cls: 'pcell--ampel', sheet: { w: [34, 38], cls: 'sheet__mark' }, xls: { type: 'text', width: 14 },
-    // A coloured dot carries nothing in a spreadsheet, so it exports as its word.
-    text: p => t(ampel(p.leadId).word)
   },
   {
     key: 'portfolio', label: 'Teilportfolio', flag: 'portfolio', sort: 'portfolio',
@@ -71,35 +64,16 @@ export const COLUMNS = [
     text: p => t(data.portfoliosById[p.portfolio].label)
   },
   {
-    key: 'priority', label: 'Priorität', flag: 'priority', sort: 'priority',
-    width: '--grid-col-priority', cls: 'pcell--text', sheet: { w: [50, 62], cls: 'sheet__muted' },
-    xls: { type: 'text', width: 12 },
-    text: p => t(p.priority)
-  },
-  {
-    key: 'nextMs', label: 'Nächster Meilenstein', flag: 'nextMs', sort: null,
-    width: '--grid-col-nextms', cls: 'pcell--text', sheet: { w: [92, 116], cls: 'sheet__muted' },
-    xls: { type: 'text', width: 24 },
-    text: nextGate
+    key: 'organisation', label: 'Organisation', flag: 'organisation', sort: 'organisation',
+    width: '--grid-col-organisation', cls: 'pcell--text', sheet: { w: [110, 140], cls: 'sheet__muted' },
+    xls: { type: 'text', width: 30 },
+    text: p => t(data.organisationsById[p.organisation]?.label ?? p.organisation)
   },
   {
     key: 'credit', label: 'Kredit CHF', flag: 'credit', sort: 'credit',
     width: '--grid-col-credit', cls: 'pcell--credit', numeric: true, align: 'end',
     sheet: { w: [62, 76], cls: 'sheet__num sheet__muted' }, xls: { type: 'num', width: 14 },
     text: p => t(p.creditLabel)
-  },
-  {
-    key: 'target', label: 'Soll-Pensum', flag: 'target', sort: 'target',
-    width: '--grid-col-target', cls: 'pcell--target', numeric: true, align: 'end',
-    sheet: { w: [44, 52], cls: 'sheet__num' }, xls: { type: 'pct', width: 10 }
-    // `text` is omitted: the value is a pensum and every consumer formats it
-    // in the unit the toolbar has selected.
-  },
-  {
-    // Not master data: a sparkline of the row's own numbers, so it sits after
-    // the time axis and no other consumer has a use for it.
-    key: 'trend', label: 'Verlauf', flag: 'trend', sort: null,
-    width: '--grid-col-trend', cls: 'pcell--trend', afterQuarters: true
   }
 ];
 
@@ -111,8 +85,7 @@ export const column = key => BY_KEY[key];
  * load-bearing to most. `id` is not in the list — it is the floor, and on a
  * phone the list runs to its end and leaves exactly that.
  */
-const YIELD_ORDER = ['nextMs', 'priority', 'portfolio', 'target', 'credit',
-                     'phase', 'ampel', 'lead', 'title'];
+const YIELD_ORDER = ['organisation', 'portfolio', 'credit', 'phase', 'lead', 'title'];
 
 /**
  * The columns that fit. `room` is the width available to the card and
@@ -172,7 +145,7 @@ export function leadLayout(set, fit) {
  * defaults. Not what is switched on right now, so toggling an attribute never
  * moves the name either.
  */
-const TITLE_REFERENCE = ['id', 'phase', 'lead', 'ampel', 'credit'];
+const TITLE_REFERENCE = ['id', 'phase', 'lead', 'credit'];
 
 /*
  * And against a fixed number of quarter columns, not however many the current

@@ -9,11 +9,11 @@
    knows what a bar is.
    ============================================================================= */
 
-import { data, t, num, unitSuffix, phaseOf } from './store.js';
+import { data, t, phaseOf } from './store.js';
 
 import {
   html, raw, icons, legendBlock, legendItem, yearRule,
-  pinCls, pinLeft, ampelDot, textWidth
+  pinCls, pinLeft, textWidth
 } from './ui.js';
 
 import { alignCls } from './columns.js';
@@ -55,9 +55,7 @@ export const barLegendGroups = () => [
   },
   {
     label: 'Meilenstein',
-    items: html`${legendItem(html`<span class="diamond"></span>`, 'im Termin')}
-      ${legendItem(html`<span class="diamond is-late"></span>`, 'verschoben')}
-      ${legendItem(html`<span class="diamond is-open"></span>`, 'Termin offen')}`
+    items: legendItem(html`<span class="diamond"></span>`, 'Gate am Phasenende')
   }
 ];
 
@@ -94,14 +92,12 @@ export function phaseBand(p, cols, lay, { compact = true, bars = true, gates: wi
   </div>`;
 }
 
-/** What a lead column shows in the bar plan. Three draw; the rest is text. */
+/** What a lead column shows in the bar plan. The title is a link; the rest is text. */
 function leadCell(col, p) {
   if (col.key === 'title') {
     return html`<button type="button" class="gantt__rowtitle" data-act="open-project"
         data-val="${p.id}" title="${p.title}">${p.title}</button>`;
   }
-  if (col.key === 'ampel') return ampelDot(p);
-  if (col.key === 'target') return html`${num(p.target)}${unitSuffix()}`;
   return col.text ? col.text(p) : '';
 }
 
@@ -250,9 +246,12 @@ function barText(b, run) {
 }
 
 /*
- * The strip under the figures is 14px tall and set at 10px. The full name
- * never earns that space, so the sub-phase number is the ceiling — and even
- * that goes where it would be cut, which is the same rule as above.
+ * The strip under the figures is 14px tall and set at 10px. The sub-phase
+ * number is the ceiling there — and even that goes where it would be cut,
+ * which is the same rule as above. The full name was tried, measured the same
+ * way at 10px, and taken out again: under a row of figures a hundred names in
+ * grey read as a second table competing with the first, and the name is one
+ * hover away in the title.
  */
 const BAND_PADDING = 8;      // --band-lab-pad on each side
 
@@ -336,9 +335,16 @@ function quarterFraction(iso, qi) {
 export function gatePlaces(p, cols) {
   const out = [];
   for (const m of data.milestonesByProject[p.id] ?? []) {
-    const qi = data.quarterIndex[m.forecast ?? m.plan];
+    /*
+     * At its plan date, which the data keeps in the closing weeks of the phase
+     * it ends. A gate drawn at its forecast stood one or two quarters into the
+     * next phase's bar, and a forecast that is still open had no place at all;
+     * the diamond marks where the phase ends, and what became of the date is
+     * one click away in the dialog.
+     */
+    const qi = data.quarterIndex[m.plan];
     if (qi === undefined) continue;
-    const at = unitAt(cols, qi + quarterFraction(m.forecastDate ?? m.planDate, qi));
+    const at = unitAt(cols, qi + quarterFraction(m.planDate, qi));
     if (at <= 0 || at >= cols.length) continue;
     out.push({ m, at });
   }
@@ -363,16 +369,21 @@ export function gatePlaces(p, cols) {
 function gates(placed, cols, p) {
   if (!placed.length) return '';
 
+  /*
+   * One mark for every gate. Late and undated gates used to be drawn red and
+   * hollow; the plan is not the place for that verdict — a hundred diamonds in
+   * three states read as a status board over the schedule — so the mark is
+   * plain and the status stays in the tooltip, the dialog and the dashboard.
+   */
   return html`${placed.map(({ m, at, shift }) => {
     const cat = data.milestoneCatalog[m.code];
-    const state = m.forecast === null ? 'is-open' : m.status === 'late' ? 'is-late' : '';
-    const label = `${m.code} ${cat ? t(cat.name) : ''} · ${data.quarters[data.quarterIndex[m.forecast ?? m.plan]].label}`;
+    const label = `${m.code} ${cat ? t(cat.name) : ''} · ${data.quarters[data.quarterIndex[m.plan]].label}`;
     return html`<button type="button" class="gantt__gate"
         style="left:${(at / cols.length) * 100}%; --gate-shift:${shift}px"
         data-act="open-milestone" data-val="${m.id}"
         title="${label} — ${t(m.statusLabel)}"
         aria-label="${p.title}: ${label} — ${t(m.statusLabel)}">
-      <span class="diamond ${state}"></span>
+      <span class="diamond"></span>
     </button>`;
   })}`;
 }

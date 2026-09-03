@@ -309,20 +309,28 @@
   ],
   "organisations": [
     {
-      "id": "org-a",
-      "label": "Team A"
+      "id": "ppe-1",
+      "label": "Programm- und Projektentwicklung I"
     },
     {
-      "id": "org-b",
-      "label": "Team B"
+      "id": "ppe-2",
+      "label": "Programm- und Projektentwicklung II"
     },
     {
-      "id": "org-c",
-      "label": "Team C"
+      "id": "bpi-1",
+      "label": "Bauprojekte Inland I"
     },
     {
-      "id": "org-d",
-      "label": "Team D"
+      "id": "bpi-2",
+      "label": "Bauprojekte Inland II"
+    },
+    {
+      "id": "bpi-3",
+      "label": "Bauprojekte Inland III"
+    },
+    {
+      "id": "bpa",
+      "label": "Bauprojekte Ausland"
     }
   ]
 }

@@ -414,7 +414,7 @@ const actions = {
   bulk: (val, el) => {
     const kind = el.dataset.kind;
     const every = {
-      phases: () => data.phases.main.map(m => m.id),
+      phases: () => data.phases.eppm.map(e => e.id),
       leads: () => [...data.people.map(p => p.id), 'none'],
       portfolios: () => data.meta.portfolios.map(p => p.id),
       organisations: () => data.meta.organisations.map(o => o.id)
@@ -606,10 +606,13 @@ const actions = {
   }),
 
   signin: () => setState({ signedIn: true }),
+  /* The print layout opens on the report that matches what is on screen: the
+     bar plan when the reader is looking at the bar plan, the figures otherwise. */
+  'print-layout': () => setState({
+    tab: 'export', menu: null, editing: null, picking: null,
+    report: state.layers.phases && !state.layers.values ? 'schedule' : 'demand'
+  }),
   export: (val) => {
-    if (val.startsWith('pdf')) {
-      return setState({ tab: 'export', report: val.slice(4) || 'demand', menu: null });
-    }
     setState({ menu: null });
     try {
       const name = val === 'csv' ? exportCsv() : exportXlsx();

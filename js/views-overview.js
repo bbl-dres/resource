@@ -11,7 +11,7 @@ import {
 
 import {
   html, raw, icons, pageHeader, pageActions, toolbar, activeFilterRow,
-  noResults, ampelLegend, ampelDot, droppedNote,
+  noResults, droppedNote,
   legendBlock, legendItem, attr,
   tokenPx, yearRule, pinCls, pinLeft, sortableHead
 } from './ui.js';
@@ -75,13 +75,7 @@ function gridLayout() {
    * none of them truncates.
    */
   parts.push(`repeat(${cols}, minmax(${quarterW}px, ${tokenPx('--grid-period-max')}px))`);
-  let minWidth = offset + quarterW * cols;
-
-  if (columnSet().trend) {
-    const w = tokenPx(column('trend').width);
-    parts.push(`${w}px`);
-    minWidth += w;
-  }
+  const minWidth = offset + quarterW * cols;
   /*
    * How wide a quarter is on screen, for the band's labels. The columns
    * stretch between their floor and ceiling, and the bar plan's label rule
@@ -160,7 +154,6 @@ function pensumGrid() {
           </button>
         </div>
         ${cols.map(period => html`<span class="pcell pcell--sum ${yearRule(period)}">${fmt(periodValue(tot.demand, period))}</span>`)}
-        ${columnSet().trend && html`<span></span>`}
       </div>
 
       ${state.footDetails && html`
@@ -180,7 +173,6 @@ function pensumGrid() {
             <span class="pcell__pct">${pct} %</span>
           </span>`;
         })}
-        ${columnSet().trend && html`<span></span>`}
       </div>`;
 
   /*
@@ -252,7 +244,6 @@ export function heatLegend() {
         : null
     },
     ...bars,
-    { label: 'Ampel', items: columnSet().ampel ? ampelLegend() : null },
     {
       label: 'Markierung',
       /* The bar legend already names «ohne Bearbeitenden». */
@@ -269,9 +260,9 @@ const sortHead = (key, label, opts = {}) => sortableHead({
 });
 
 /*
- * Most cells print the registry's plain text. These four draw something the
- * reader can act on or read as a shape, so they are named here rather than
- * hidden behind a flag on the column.
+ * Most cells print the registry's plain text. These two draw something the
+ * reader can act on, so they are named here rather than hidden behind a flag
+ * on the column.
  */
 const CELL_BODY = {
   title: p => html`<button type="button" class="prow__title"
@@ -281,31 +272,20 @@ const CELL_BODY = {
     const name = lead ? lead.name : html`<span class="lead-open">${t('nicht zugewiesen')}</span>`;
     return html`<button type="button" class="leadbtn" data-act="assign" data-val="${p.id}"
       title="${t('Bearbeitenden zuweisen')}">${name}</button>`;
-  },
-
-  ampel: p => ampelDot(p),
-
-  target: p => html`${num(p.target)}${unitSuffix()}`
+  }
 };
 
 const cellBody = (col, p, lead) =>
   (CELL_BODY[col.key] ? CELL_BODY[col.key](p, lead) : (col.text(p) || '—'));
 
-/** The two cells that also carry a state class. */
+/** The one cell that also carries a state class. */
 function cellState(col, p, lead) {
   if (col.key === 'lead') return lead ? '' : 'is-none';
-  if (col.key === 'target' && cellValue(p, 0) > p.target) return 'is-over';
   return '';
 }
 
 /** The class and offset a pinned column needs, as sortHead's options. */
 const pin = (s, k, extra = '') => ({ cls: pinCls(s, k, extra), style: pinLeft(s, k) });
-
-/** What a column is called in the grid header, where two names are shorter. */
-function headLabel(col) {
-  if (col.key === 'target') return `${t('Soll')} ${data.quarters[0].short}`;
-  return t(col.label);
-}
 
 /** The column names, repeated at the top of every group card. */
 function columnHeader(tpl, sticky, cols) {
@@ -315,12 +295,10 @@ function columnHeader(tpl, sticky, cols) {
         const extra = `${col.numeric ? 'pcell--num' : ''} ${alignCls(col)}`.trim();
         // Without a sort key the header is a label, not a control.
         if (!col.sort) {
-          return html`<span class="pcell--text ${col.key === 'ampel' ? 'pcell--ampelhead' : ''} ${pinCls(sticky, col.key, extra)}"
-              style="${pinLeft(sticky, col.key)}"
-              title="${col.key === 'ampel' ? t('Höchste Auslastung des Bearbeitenden im sichtbaren Zeitraum') : ''}"
-            >${headLabel(col)}</span>`;
+          return html`<span class="pcell--text ${pinCls(sticky, col.key, extra)}"
+              style="${pinLeft(sticky, col.key)}">${t(col.label)}</span>`;
         }
-        return sortHead(col.sort, headLabel(col), pin(sticky, col.key, extra));
+        return sortHead(col.sort, t(col.label), pin(sticky, col.key, extra));
       })}
       ${cols.map(period => sortHead(`q${period.quarters[0]}`, period.short, {
         cls: `pcell--num pcell--period ${period.isNow ? 'is-today' : ''} ${yearRule(period)}`,
@@ -328,7 +306,6 @@ function columnHeader(tpl, sticky, cols) {
           ? `${t('Heute')}, ${data.meta.todayLabel} — ${t('laufendes Quartal')}`
           : period.label
       }))}
-      ${columnSet().trend && html`<span class="pcell--text">${t('Verlauf')}</span>`}
     </div>`;
 }
 
@@ -344,7 +321,6 @@ function groupSum(g, tpl, span, cols) {
   return html`<div class="prow prow--sum prow--groupsum" style="grid-template-columns:${raw(tpl)}">
     <div style="grid-column:span ${span}" class="prow__sumlabel is-frozen">${t('Summe')} ${g.label} (${g.projects.length})</div>
     ${cols.map(period => html`<span class="pcell pcell--sum ${yearRule(period)}">${fmt(periodValue(values, period))}</span>`)}
-    ${columnSet().trend && html`<span></span>`}
   </div>`;
 }
 
@@ -352,7 +328,6 @@ function footRow(label, values, tpl, span, cols) {
   return html`<div class="prow prow--foot" style="grid-template-columns:${raw(tpl)}">
     <div style="grid-column:span ${span}" class="prow__footlabel is-frozen">${label}</div>
     ${cols.map(period => html`<span class="pcell pcell--foot ${yearRule(period)}">${fmt(periodValue(values, period))}</span>`)}
-    ${columnSet().trend && html`<span></span>`}
   </div>`;
 }
 
@@ -388,14 +363,6 @@ function projectRow(p, lay, cols, rowIdx) {
         <span class="cellv">${label}</span>
       </button>`;
     })}
-
-    ${columnSet().trend && html`<span class="pcell pcell--trend">
-      ${cols.map(period => {
-        const v = periodValue(cells, period);
-        return html`<span class="spark ${v ? '' : 'is-empty'}"
-          style="height:${v ? Math.max(8, Math.round(v / 120 * 100)) : 0}%"></span>`;
-      })}
-    </span>`}
 
     ${(L.phases || L.gates) && phaseBand(p, cols, lay, { compact: L.values, bars: L.phases, gates: L.gates })}
   </div>`;

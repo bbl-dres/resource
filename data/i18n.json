@@ -311,6 +311,26 @@
       "fr": "Projets de construction",
       "it": "Progetti di costruzione"
     },
+    "Bauprojekte Ausland": {
+      "en": "Construction projects abroad",
+      "fr": "Projets de construction à l'étranger",
+      "it": "Progetti di costruzione all'estero"
+    },
+    "Bauprojekte Inland I": {
+      "en": "Construction projects Switzerland I",
+      "fr": "Projets de construction en Suisse I",
+      "it": "Progetti di costruzione in Svizzera I"
+    },
+    "Bauprojekte Inland II": {
+      "en": "Construction projects Switzerland II",
+      "fr": "Projets de construction en Suisse II",
+      "it": "Progetti di costruzione in Svizzera II"
+    },
+    "Bauprojekte Inland III": {
+      "en": "Construction projects Switzerland III",
+      "fr": "Projets de construction en Suisse III",
+      "it": "Progetti di costruzione in Svizzera III"
+    },
     "Bauprojekten": {
       "en": "construction projects",
       "fr": "projets de construction",
@@ -605,6 +625,11 @@
       "en": "Release pending",
       "fr": "Libération en attente",
       "it": "Sblocco in sospeso"
+    },
+    "Gate am Phasenende": {
+      "en": "Gate at the end of a phase",
+      "fr": "Jalon en fin de phase",
+      "it": "Gate a fine fase"
     },
     "Gebundene Mittel nach Jahr der Realisierung": {
       "en": "Committed funds by year of construction",
@@ -1081,6 +1106,16 @@
       "fr": "Prévision",
       "it": "Previsione"
     },
+    "Programm- und Projektentwicklung I": {
+      "en": "Programme and project development I",
+      "fr": "Développement de programmes et de projets I",
+      "it": "Sviluppo di programmi e progetti I"
+    },
+    "Programm- und Projektentwicklung II": {
+      "en": "Programme and project development II",
+      "fr": "Développement de programmes et de projets II",
+      "it": "Sviluppo di programmi e progetti II"
+    },
     "Proj.": {
       "en": "Proj.",
       "fr": "Proj.",
@@ -1261,6 +1296,11 @@
       "fr": "Partager",
       "it": "Condividi"
     },
+    "Teilphase (SIA)": {
+      "en": "Sub-phase (SIA)",
+      "fr": "Phase partielle (SIA)",
+      "it": "Sottofase (SIA)"
+    },
     "Teilphase (ePPM)": {
       "en": "Sub-phase (ePPM)",
       "fr": "Sous-phase (ePPM)",
@@ -1360,6 +1400,11 @@
       "en": "Preliminary design approved",
       "fr": "Avant-projet approuvé",
       "it": "Progetto preliminare approvato"
+    },
+    "Vorstudien": {
+      "en": "Preliminary studies",
+      "fr": "Études préliminaires",
+      "it": "Studi preliminari"
     },
     "Weiter": {
       "en": "Continue",

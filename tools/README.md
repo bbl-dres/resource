@@ -111,6 +111,23 @@ durations on every call, so measuring a chain and then rebuilding it placed a
 twenty-quarter project as though it were thirty — far enough off the near edge
 that one project came out with no bars at all.
 
+### The ePPM phase
+
+A project record carries two phases. `subPhase` is the SIA 112 sub-phase the
+chain is in today — what the bars, the gates and the demand curve are built
+from. `phase` is what ePPM calls it, and ePPM's value list is BBL's own:
+
+```
+Vorstudien, 1, 22, 2, 31, 3, 32, 4, 53, 5, 61, 6
+```
+
+It mixes SIA main phases with sub-phases and adds «Vorstudien», which is not
+an SIA code at all. The list and the mapping from SIA sub-phase to ePPM value
+sit in `data/phases.json` under `eppm`, in the order ePPM lists them; a
+project that has not begun is «Vorstudien», the stage before the chain. The
+filter, the grouping and the column in the app speak the ePPM value; the
+schedule underneath stays SIA.
+
 ### What is deliberately wrong
 
 A demonstration portfolio has to show the problems the tool exists for:
@@ -127,11 +144,12 @@ full stretch runs at `PEAK_UTILISATION`.
 
 ### Dates, not quarters
 
-A gate falls on a day. `dayIn(qi)` picks one inside the quarter, weighted
-towards its closing weeks, because that is when boards sit and credits are
-released. The view draws each diamond at its date rather than at the end of the
-quarter it falls in — which at year scale had been throwing a gate up to three
-quarters forward, into the middle of a bar's name.
+A gate falls on a day. `dayNearEnd(qi)` picks one in the last three weeks of
+the quarter the phase ends in, because that is when boards sit and credits are
+released — and because the view draws each diamond at its date: picked anywhere
+in the quarter, a gate stood up to eleven weeks short of the bar it closes and
+read as a milestone inside the phase. The view draws the plan date, not the
+forecast; a late forecast is in the dialog and the dashboard, not on the bar.
 
 ### What it writes
 

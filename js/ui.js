@@ -7,7 +7,7 @@
 
 import {
   data, state, t, activeFilters, kpis, filteredProjects, canStep, notifications,
-  columnSet, ampel, coloured
+  columnSet, coloured
 } from './store.js';
 import { toggleableColumns } from './columns.js';
 import { icon } from './icons.js';
@@ -164,17 +164,6 @@ export function droppedNote(hidden) {
     ${hidden.length} ${t(hidden.length === 1 ? 'Spalte ausgeblendet' : 'Spalten ausgeblendet')},
     ${t('das Fenster ist zu schmal')}: ${hidden.map(c => t(c.label)).join(', ')}.
   </p>`;
-}
-
-/**
- * The row's traffic light. Three views draw it — the table, the bar plan and
- * the printed sheet — and a dot with no accessible name is a dot with no
- * meaning, so the name is part of the mark, not of the caller.
- */
-export function ampelDot(p, range) {
-  const a = ampel(p.leadId, range);
-  return html`<span class="ampel ampel--${a.key}" role="img"
-    aria-label="${a.title}" title="${a.title}"></span>`;
 }
 
 /** The project cell of a change row: a link when the entry names a project. */
@@ -505,12 +494,20 @@ export function pageHeader({ title, actions = [], chrome = true }) {
  * The standing page-header actions. Five views built this by hand, each free to
  * forget one of them.
  */
+/*
+ * Printing is its own button. The PDF used to be two rows at the foot of the
+ * export menu, under the spreadsheet formats, and most readers never found it
+ * there — a PDF of the plan is what most of them come for, and «Exportieren»
+ * did not say so. «Drucken» opens the print layout, where the report and the
+ * paper are chosen; «Exportieren» keeps the data formats.
+ */
 export function pageActions({ extra = '' } = {}) {
   return html`${exportMenu()}
+    <button type="button" class="btn" data-act="print-layout">${t('Drucken')}</button>
     <button type="button" class="btn" data-act="share">${icons.share(15)}${t('Teilen')}</button>${extra}`;
 }
 
-/** One row of the export menu. The group label above it says the rest. */
+/** One row of the export menu. */
 const exportItem = (val, label) => html`<button type="button" class="dd__item"
     role="menuitem" data-act="export" data-val="${val}">${label}</button>`;
 
@@ -522,9 +519,6 @@ export function exportMenu() {
     ${open && html`<div class="dd__panel dd__panel--right" role="menu" style="width:190px">
       ${exportItem('csv', t('Daten als CSV'))}
       ${exportItem('xlsx', t('Daten als Excel'))}
-      ${divider()}
-      ${exportItem('pdf-demand', t('Pensum als PDF'))}
-      ${exportItem('pdf-schedule', t('Termine als PDF'))}
     </div>`}
   </div>`;
 }
@@ -636,7 +630,7 @@ export function toolbar({ time = false, view = false, columns = false, exclude =
           <span aria-hidden="true">·</span>
           <button type="button" data-act="bulk" data-kind="phases" data-val="none">${t('Keine')}</button>
         </div>
-        ${data.phases.main.map(m => menuTick(t(m.label), state.phases.includes(m.id), 'toggle-phase', m.id))}`
+        ${data.phases.eppm.map(e => menuTick(t(e.label), state.phases.includes(e.id), 'toggle-phase', e.id))}`
     })}
 
     ${dropdown({
@@ -720,11 +714,13 @@ const columnSwitches = exclude => toggleableColumns().filter(c => !exclude.inclu
   .map(c => menuCheckbox(t(c.label), !!columnSet()[c.id], 'toggle-col', c.id));
 
 /*
- * Four subjects that used to be four controls: the view, what it is made of,
- * how the figures are set, and which columns and which time scale frame them.
- * The layer switches show only while «Individuell» is chosen — a named view
- * already says what they would say — and «Pensum einfärben» greys out while
- * there are no figures to colour.
+ * Four subjects that used to be four controls, coarse to fine: the view, the
+ * time scale that frames it, how the figures are set, and which columns stand
+ * in front of them. The two that shape the whole grid come first; the column
+ * list is longest and least often touched, so it goes last, where it pushes
+ * nothing down. The layer switches show only while «Individuell» is chosen —
+ * a named view already says what they would say — and «Pensum einfärben»
+ * greys out while there are no figures to colour.
  */
 function viewMenuBody(exclude = []) {
   const noFigures = !state.layers.values;
@@ -734,16 +730,16 @@ function viewMenuBody(exclude = []) {
       ${menuGroupLabel(t('Ebenen'))}
       ${LAYERS.map(l => menuCheckbox(t(l.label), !!state.layers[l.id], 'toggle-layer', l.id))}`}
     ${divider()}
+    ${menuGroupLabel(t('Zeitskala'))}
+    <div class="dd__segmented">${segmented(SCALES, state.scale, 'scale')}</div>
+    ${divider()}
     ${menuGroupLabel(t('Darstellung'))}
     ${unitSwitch()}
     ${menuCheckbox(t('Pensum einfärben'), coloured(), 'colour', 'toggle', null, { disabled: noFigures })}
     ${menuCheckbox(t('Nullwerte ausblenden'), state.hideZeros, 'toggle-flag', 'hideZeros', null, { disabled: noFigures })}
     ${divider()}
     ${menuGroupLabel(t('Spalten'))}
-    ${columnSwitches(exclude)}
-    ${divider()}
-    ${menuGroupLabel(t('Zeitskala'))}
-    <div class="dd__segmented">${segmented(SCALES, state.scale, 'scale')}</div>`;
+    ${columnSwitches(exclude)}`;
 }
 
 /**
@@ -897,25 +893,6 @@ export function noResults(what = 'Projekte') {
     <p class="empty__text">${t('Die aktiven Filter schliessen alle')} ${data.projects.length} ${t('Projekte aus.')}</p>
     <button type="button" class="btn" data-act="filters-reset">${t('Alle Filter zurücksetzen')}</button>
   </div>`;
-}
-
-/**
- * The Ampel's four states, drawn the way the column draws them. Shape carries
- * the meaning — the fills are 1.03:1 apart in greyscale — so a legend that
- * names them has to show the actual marks, not swatches.
- */
-export const AMPEL_STATES = [
-  { key: 'ok', label: 'im Rahmen' },
-  { key: 'tight', label: 'knapp' },
-  { key: 'over', label: 'Überlast' },
-  { key: 'none', label: 'ohne Bearbeitenden' }
-];
-
-/* «ohne Bearbeitenden» is already named by the row marking. */
-export const AMPEL_LEGEND = AMPEL_STATES.filter(a => a.key !== 'none');
-
-export function ampelLegend() {
-  return html`${AMPEL_LEGEND.map(a => legendItem(html`<span class="ampel ampel--${a.key}"></span>`, a.label))}`;
 }
 
 /**

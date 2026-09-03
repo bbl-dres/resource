@@ -29,7 +29,7 @@ export function renderDashboard() {
   const section = BI_SECTIONS.some(s => s.value === state.bi) ? state.bi : 'general';
 
   return html`
-    ${pageHeader({
+    ${pageHeader({
       actions: pageActions()
     })}
     <div class="wrap"><div class="content">
@@ -229,9 +229,9 @@ function utilisationCard() {
 
 function phaseCountCard() {
   const list = filteredProjects();
-  const rows = data.phases.main.map(m => {
-    const n = list.filter(p => p.phase[0] === m.id).length;
-    return { label: t(m.label), value: n, valueLabel: String(n) };
+  const rows = data.phases.eppm.map(e => {
+    const n = list.filter(p => p.phase === e.id).length;
+    return { label: t(e.label), value: n, valueLabel: String(n) };
   });
   return biCard('phasen', 'Anzahl Projekte nach Phase (ePPM)',
     `${list.length} ${t('Projekte im gesetzten Umfang')}`,
@@ -263,11 +263,12 @@ function creditYearCard() {
 function creditPhaseCard() {
   const list = filteredProjects();
   const total = list.reduce((a, p) => a + (p.credit ?? 0), 0);
-  const rows = data.phases.main
-    .map(m => {
-      const v = list.filter(p => p.phase[0] === m.id).reduce((a, p) => a + (p.credit ?? 0), 0);
-      return { label: t(m.label), value: v, valueLabel: fmtMio(v) };
+  const rows = data.phases.eppm
+    .map(e => {
+      const v = list.filter(p => p.phase === e.id).reduce((a, p) => a + (p.credit ?? 0), 0);
+      return { label: t(e.label), value: v, valueLabel: fmtMio(v) };
     })
+    .filter(r => r.value > 0)
     .sort((a, b) => b.value - a.value);
   return biCard('kreditphase', 'Kredit nach Phase (ePPM)',
     `${t('Gesamt')} ${fmtMio(total)} CHF · ${t('gebundene Mittel')}`,
@@ -282,7 +283,7 @@ export function renderHistory() {
   const page = pageOf(visibleChanges());
 
   return html`
-    ${pageHeader({
+    ${pageHeader({
       actions: pageActions()
     })}
     <div class="wrap"><div class="content">

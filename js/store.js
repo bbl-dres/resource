@@ -123,10 +123,8 @@ const DEFAULT_STATE = {
  * It is one click away in the Ansicht menu.
  */
 const COLUMN_DEFAULTS = {
-  overview: { title: true, phase: false, lead: true, ampel: false, credit: true,
-              portfolio: false, priority: false, nextMs: false, target: false, trend: false },
-  schedule: { title: true, phase: false, lead: false, ampel: false, credit: false,
-              portfolio: false, priority: false, nextMs: false, target: false, trend: false }
+  overview: { title: true, phase: false, lead: true, credit: true, portfolio: false, organisation: false },
+  schedule: { title: true, phase: false, lead: false, credit: false, portfolio: false, organisation: false }
 };
 
 export const state = {
@@ -543,6 +541,20 @@ export function phaseOf(subCode) {
   return data.phases.sub[subCode] ?? { label: String(subCode ?? '—'), main: null };
 }
 
+/*
+ * The phase as ePPM records it — the value on the project, and the one the
+ * filter, the grouping and the column speak. BBL's list mixes SIA main phases
+ * with sub-phases and adds «Vorstudien» of its own, so it is a list of values
+ * in phases.json rather than anything derivable from the SIA codes; the SIA
+ * chain stays what the schedule and the gates are drawn from.
+ */
+export function eppmOf(id) {
+  return data.phases.eppm.find(e => e.id === id) ?? { id: String(id ?? '—'), label: String(id ?? '—'), sub: [] };
+}
+
+/** Where an ePPM phase stands in the list, for sorting — as a fixed-width string. */
+const eppmRank = id => String(Math.max(0, data.phases.eppm.findIndex(e => e.id === id))).padStart(2, '0');
+
 /* -----------------------------------------------------------------------------
    Derived: filtering, sorting, grouping
    -------------------------------------------------------------------------- */
@@ -550,7 +562,7 @@ export function phaseOf(subCode) {
 export function filteredProjects() {
   const q = state.search.trim().toLowerCase();
   let list = data.projects.filter(p => {
-    if (state.phases.length && !state.phases.includes(p.phase[0])) return false;
+    if (state.phases.length && !state.phases.includes(p.phase)) return false;
     if (state.leads.length) {
       const key = p.leadId ?? 'none';
       if (!state.leads.includes(key)) return false;
@@ -727,12 +739,11 @@ export function canStep(dir) {
 export const SORT_KEYS = {
   id:        { label: 'ID', numeric: false, value: p => p.number },
   project:   { label: 'Projekt', numeric: false, value: p => p.title },
-  phase:     { label: 'Phase (ePPM)', numeric: false, value: p => p.phase },
+  phase:     { label: 'Phase (ePPM)', numeric: false, value: p => eppmRank(p.phase) },
   lead:      { label: 'Bearbeitender', numeric: false, value: p => (p.leadId ? data.peopleById[p.leadId].name : '\uffff') },
   portfolio: { label: 'Teilportfolio', numeric: false, value: p => data.portfoliosById[p.portfolio].label },
-  priority:  { label: 'Priorität', numeric: true, value: p => ({ hoch: 3, mittel: 2, tief: 1 })[p.priority] ?? 0 },
-  credit:    { label: 'Kredit CHF', numeric: true, value: p => p.credit ?? -1 },
-  target:    { label: 'Soll-Pensum', numeric: true, value: p => p.target }
+  organisation: { label: 'Organisation', numeric: false, value: p => data.organisationsById[p.organisation]?.label ?? '' },
+  credit:    { label: 'Kredit CHF', numeric: true, value: p => p.credit ?? -1 }
 };
 
 /** Resolve a sort key, including the per-quarter ones. */
@@ -768,7 +779,7 @@ export function groupProjects(list = filteredProjects()) {
 
   const keyOf = p => {
     if (state.group === 'lead') return p.leadId ?? 'none';
-    if (state.group === 'phase') return p.phase[0];
+    if (state.group === 'phase') return p.phase;
     if (state.group === 'organisation') return p.organisation;
     return p.portfolio;
   };
@@ -777,7 +788,7 @@ export function groupProjects(list = filteredProjects()) {
       return key === 'none' ? `(${t('nicht zugewiesen')})` : (data.peopleById[key]?.name ?? key);
     }
     if (state.group === 'phase') {
-      return t(data.phases.main.find(m => m.id === key)?.label ?? key);
+      return t(eppmOf(key).label);
     }
     if (state.group === 'organisation') {
       return t(data.organisationsById[key]?.label ?? key);
@@ -791,12 +802,12 @@ export function groupProjects(list = filteredProjects()) {
     if (!buckets.has(k)) buckets.set(k, []);
     buckets.get(k).push(p);
   }
-  // Keep people in roster order, phases in SIA order, teams and portfolios in
+  // Keep people in roster order, phases in ePPM order, teams and portfolios in
   // data order — never in the order the projects happened to arrive in.
   const order = state.group === 'lead'
     ? [...data.people.map(p => p.id), 'none']
     : state.group === 'phase'
-      ? data.phases.main.map(m => m.id)
+      ? data.phases.eppm.map(e => e.id)
       : state.group === 'organisation'
         ? data.meta.organisations.map(o => o.id)
         : data.meta.portfolios.map(p => p.id);
@@ -810,8 +821,8 @@ export function groupProjects(list = filteredProjects()) {
 export function activeFilters() {
   const chips = [];
   state.phases.forEach(id => {
-    const m = data.phases.main.find(x => x.id === id);
-    if (m) chips.push({ kind: 'phase', id, label: `Phase ${m.label}` });
+    const e = data.phases.eppm.find(x => x.id === id);
+    if (e) chips.push({ kind: 'phase', id, label: `Phase ${e.label}` });
   });
   state.leads.forEach(id => {
     const label = id === 'none' ? 'nicht zugewiesen' : data.peopleById[id]?.name;

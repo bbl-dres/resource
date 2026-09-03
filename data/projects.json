@@ -93,7 +93,8 @@
         "label": "53 Inbetriebnahme"
       }
     ],
-    "organisation": "org-a"
+    "subPhase": "32",
+    "organisation": "ppe-1"
   },
   {
     "id": "pr12",
@@ -101,7 +102,7 @@
     "title": "Beispielstadt, Place de l’Avenir 10, Unterhalt",
     "location": "Beispielstadt, Place de l’Avenir 10",
     "kind": "Unterhalt",
-    "phase": "52",
+    "phase": "5",
     "leadId": "alina",
     "portfolio": "verwaltung",
     "priority": "hoch",
@@ -165,7 +166,8 @@
         "label": "53 Inbetriebnahme"
       }
     ],
-    "organisation": "org-c"
+    "subPhase": "52",
+    "organisation": "bpi-1"
   },
   {
     "id": "pr06",
@@ -267,7 +269,8 @@
         "label": "53"
       }
     ],
-    "organisation": "org-b"
+    "subPhase": "31",
+    "organisation": "ppe-2"
   },
   {
     "id": "pr57",
@@ -275,7 +278,7 @@
     "title": "Musterlingen, Werkhof Ost, Teilsanierung",
     "location": "Musterlingen, Werkhof Ost",
     "kind": "Teilsanierung",
-    "phase": "33",
+    "phase": "3",
     "leadId": "sonja",
     "portfolio": "zoll",
     "priority": "hoch",
@@ -357,7 +360,8 @@
         "label": "53 Inbetriebnahme"
       }
     ],
-    "organisation": "org-a"
+    "subPhase": "33",
+    "organisation": "ppe-1"
   },
   {
     "id": "pr66",
@@ -365,7 +369,7 @@
     "title": "Musterlingen, Hauptstrasse 118, Instandsetzung",
     "location": "Musterlingen, Hauptstrasse 118",
     "kind": "Instandsetzung",
-    "phase": "51",
+    "phase": "5",
     "leadId": "sonja",
     "portfolio": "ausland",
     "priority": "mittel",
@@ -435,7 +439,8 @@
         "label": "53 Inbetriebnahme"
       }
     ],
-    "organisation": "org-a"
+    "subPhase": "51",
+    "organisation": "ppe-1"
   },
   {
     "id": "pr44",
@@ -443,7 +448,7 @@
     "title": "Musterbiel, Industriestrasse 22, Gesamtsanierung",
     "location": "Musterbiel, Industriestrasse 22",
     "kind": "Gesamtsanierung",
-    "phase": "41",
+    "phase": "4",
     "leadId": "tobias",
     "portfolio": "bildung",
     "priority": "hoch",
@@ -519,7 +524,8 @@
         "label": "53 Inbetriebnahme"
       }
     ],
-    "organisation": "org-d"
+    "subPhase": "41",
+    "organisation": "bpi-2"
   },
   {
     "id": "pr03",
@@ -527,7 +533,7 @@
     "title": "Beispielgrund, Via Sempione 3, Kauf",
     "location": "Beispielgrund, Via Sempione 3",
     "kind": "Kauf",
-    "phase": "21",
+    "phase": "2",
     "leadId": "alina",
     "portfolio": "ausland",
     "priority": "mittel",
@@ -633,7 +639,8 @@
         "label": "53"
       }
     ],
-    "organisation": "org-c"
+    "subPhase": "21",
+    "organisation": "bpi-1"
   },
   {
     "id": "pr10",
@@ -641,7 +648,7 @@
     "title": "Musterthal, Seestrasse 95, Badanlage",
     "location": "Musterthal, Seestrasse 95",
     "kind": "Badanlage",
-    "phase": "11",
+    "phase": "1",
     "leadId": "lars",
     "portfolio": "sport",
     "priority": "tief",
@@ -753,7 +760,8 @@
         "label": "53"
       }
     ],
-    "organisation": "org-b"
+    "subPhase": "11",
+    "organisation": "ppe-2"
   },
   {
     "id": "pr26",
@@ -761,7 +769,7 @@
     "title": "Beispielbach, Via Motta 14, Mehrzweckbau",
     "location": "Beispielbach, Via Motta 14",
     "kind": "Mehrzweckbau",
-    "phase": "11",
+    "phase": "1",
     "leadId": "tobias",
     "portfolio": "kultur",
     "priority": "mittel",
@@ -850,7 +858,8 @@
         "continues": true
       }
     ],
-    "organisation": "org-d"
+    "subPhase": "11",
+    "organisation": "bpi-2"
   },
   {
     "id": "pr39",
@@ -958,7 +967,8 @@
         "label": "53"
       }
     ],
-    "organisation": "org-a"
+    "subPhase": "22",
+    "organisation": "bpi-3"
   },
   {
     "id": "pr53",
@@ -966,7 +976,7 @@
     "title": "Musterlingen, Arealentwicklung Nord",
     "location": "Musterlingen, Arealentwicklung Nord",
     "kind": "Arealentwicklung",
-    "phase": "21",
+    "phase": "2",
     "leadId": null,
     "portfolio": "justiz",
     "priority": "mittel",
@@ -1073,7 +1083,8 @@
         "label": "53"
       }
     ],
-    "organisation": "org-c"
+    "subPhase": "21",
+    "organisation": "bpi-3"
   },
   {
     "id": "pr100",
@@ -1081,7 +1092,8 @@
     "title": "Musterbiel, Ringstrasse 17, Gesamtsanierung",
     "location": "Musterbiel, Ringstrasse 17",
     "kind": "Gesamtsanierung",
-    "phase": "21",
+    "phase": "2",
+    "subPhase": "21",
     "leadId": "oliviamusterli",
     "portfolio": "ausland",
     "priority": "mittel",
@@ -1187,7 +1199,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-a"
+    "organisation": "bpi-1"
   },
   {
     "id": "pr101",
@@ -1195,7 +1207,8 @@
     "title": "Musterried, Hauptstrasse 70, Neubau",
     "location": "Musterried, Hauptstrasse 70",
     "kind": "Neubau",
-    "phase": "51",
+    "phase": "5",
+    "subPhase": "51",
     "leadId": "hansbeispiel",
     "portfolio": "kultur",
     "priority": "hoch",
@@ -1265,7 +1278,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-d"
+    "organisation": "ppe-2"
   },
   {
     "id": "pr102",
@@ -1273,7 +1286,8 @@
     "title": "Musterthal, Via Motta 37, Unterhalt",
     "location": "Musterthal, Via Motta 37",
     "kind": "Unterhalt",
-    "phase": "11",
+    "phase": "Vorstudien",
+    "subPhase": "11",
     "leadId": "damianbeispiel",
     "portfolio": "zoll",
     "priority": "tief",
@@ -1385,7 +1399,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-b"
+    "organisation": "ppe-2"
   },
   {
     "id": "pr103",
@@ -1394,6 +1408,7 @@
     "location": "Beispielhofen, Postplatz 54",
     "kind": "Brandschutz",
     "phase": "22",
+    "subPhase": "22",
     "leadId": "evamustermann",
     "portfolio": "bildung",
     "priority": "mittel",
@@ -1493,7 +1508,7 @@
         "label": "53 Inbetriebnahme"
       }
     ],
-    "organisation": "org-c"
+    "organisation": "bpi-3"
   },
   {
     "id": "pr104",
@@ -1501,7 +1516,8 @@
     "title": "Beispielbrunn, Alte Landstrasse 35, Fassadensanierung",
     "location": "Beispielbrunn, Alte Landstrasse 35",
     "kind": "Fassadensanierung",
-    "phase": "51",
+    "phase": "5",
+    "subPhase": "51",
     "leadId": "ursinamuster",
     "portfolio": "bildung",
     "priority": "mittel",
@@ -1571,7 +1587,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-a"
+    "organisation": "ppe-1"
   },
   {
     "id": "pr105",
@@ -1579,7 +1595,8 @@
     "title": "Musterbiel, Quai du Lac 71, Energetische Sanierung",
     "location": "Musterbiel, Quai du Lac 71",
     "kind": "Energetische Sanierung",
-    "phase": "21",
+    "phase": "2",
+    "subPhase": "21",
     "leadId": "nicobeispieler",
     "portfolio": "kultur",
     "priority": "mittel",
@@ -1685,7 +1702,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-d"
+    "organisation": "bpi-2"
   },
   {
     "id": "pr106",
@@ -1693,7 +1710,8 @@
     "title": "Musteregg, Bahnhofstrasse 20, Unterhalt",
     "location": "Musteregg, Bahnhofstrasse 20",
     "kind": "Unterhalt",
-    "phase": "52",
+    "phase": "5",
+    "subPhase": "52",
     "leadId": "dariobeispielmann",
     "portfolio": "ausland",
     "priority": "mittel",
@@ -1757,7 +1775,7 @@
         "label": "53 Inbetriebnahme"
       }
     ],
-    "organisation": "org-b"
+    "organisation": "bpa"
   },
   {
     "id": "pr107",
@@ -1766,6 +1784,7 @@
     "location": "Musterried, Quai du Lac 14",
     "kind": "Gesamtsanierung",
     "phase": "32",
+    "subPhase": "32",
     "leadId": "veramustermann",
     "portfolio": "kultur",
     "priority": "tief",
@@ -1853,7 +1872,7 @@
         "label": "53 Inbetriebnahme"
       }
     ],
-    "organisation": "org-a"
+    "organisation": "bpi-3"
   },
   {
     "id": "pr108",
@@ -1862,6 +1881,7 @@
     "location": "Beispielhofen, Rue des Alpes 31",
     "kind": "Gesamtsanierung",
     "phase": "22",
+    "subPhase": "22",
     "leadId": "katjamuster",
     "portfolio": "bildung",
     "priority": "tief",
@@ -1961,7 +1981,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-c"
+    "organisation": "ppe-1"
   },
   {
     "id": "pr109",
@@ -1969,7 +1989,8 @@
     "title": "Musterbiel, Talstrasse 62, Teilsanierung",
     "location": "Musterbiel, Talstrasse 62",
     "kind": "Teilsanierung",
-    "phase": "21",
+    "phase": "2",
+    "subPhase": "21",
     "leadId": "corinamusterli",
     "portfolio": "justiz",
     "priority": "hoch",
@@ -2075,7 +2096,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-a"
+    "organisation": "bpi-1"
   },
   {
     "id": "pr110",
@@ -2083,7 +2104,8 @@
     "title": "Musteregg, Feldweg 42, Umbau",
     "location": "Musteregg, Feldweg 42",
     "kind": "Umbau",
-    "phase": "51",
+    "phase": "5",
+    "subPhase": "51",
     "leadId": "fabiobeispieler",
     "portfolio": "verwaltung",
     "priority": "mittel",
@@ -2153,7 +2175,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-b"
+    "organisation": "bpi-2"
   },
   {
     "id": "pr111",
@@ -2162,6 +2184,7 @@
     "location": "Beispielhofen, Place de l’Avenir 28+59",
     "kind": "Teilsanierung",
     "phase": "22",
+    "subPhase": "22",
     "leadId": "ginamusterli",
     "portfolio": "kultur",
     "priority": "tief",
@@ -2261,7 +2284,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-c"
+    "organisation": "bpi-1"
   },
   {
     "id": "pr112",
@@ -2269,7 +2292,8 @@
     "title": "Beispielgrund, Schulhausplatz 2, Fassadensanierung",
     "location": "Beispielgrund, Schulhausplatz 2",
     "kind": "Fassadensanierung",
-    "phase": "52",
+    "phase": "5",
+    "subPhase": "52",
     "leadId": "martamustermann",
     "portfolio": "zoll",
     "priority": "tief",
@@ -2333,7 +2357,7 @@
         "label": "53 Inbetriebnahme"
       }
     ],
-    "organisation": "org-c"
+    "organisation": "bpi-3"
   },
   {
     "id": "pr113",
@@ -2341,7 +2365,8 @@
     "title": "Musterdorf, Werkhof West 85, Mehrzweckbau",
     "location": "Musterdorf, Werkhof West 85",
     "kind": "Mehrzweckbau",
-    "phase": "11",
+    "phase": "Vorstudien",
+    "subPhase": "11",
     "leadId": "timobeispiel",
     "portfolio": "zoll",
     "priority": "hoch",
@@ -2453,7 +2478,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-d"
+    "organisation": "ppe-2"
   },
   {
     "id": "pr114",
@@ -2462,6 +2487,7 @@
     "location": "Musterbach, Place de l’Avenir 41",
     "kind": "Unterhalt",
     "phase": "53",
+    "subPhase": "53",
     "leadId": "carlamuster",
     "portfolio": "sport",
     "priority": "hoch",
@@ -2519,7 +2545,7 @@
         "label": "53 Inbetriebnahme"
       }
     ],
-    "organisation": "org-a"
+    "organisation": "ppe-1"
   },
   {
     "id": "pr115",
@@ -2528,6 +2554,7 @@
     "location": "Beispielhofen, Amtshausgasse 23",
     "kind": "Unterhalt",
     "phase": "32",
+    "subPhase": "32",
     "leadId": "janbeispiel",
     "portfolio": "zoll",
     "priority": "mittel",
@@ -2615,7 +2642,7 @@
         "label": "53 Inbetriebnahme"
       }
     ],
-    "organisation": "org-b"
+    "organisation": "ppe-2"
   },
   {
     "id": "pr116",
@@ -2623,7 +2650,8 @@
     "title": "Beispielheim, Industriestrasse 92, Gesamtsanierung",
     "location": "Beispielheim, Industriestrasse 92",
     "kind": "Gesamtsanierung",
-    "phase": "21",
+    "phase": "2",
+    "subPhase": "21",
     "leadId": "saramusterli",
     "portfolio": "ausland",
     "priority": "hoch",
@@ -2729,7 +2757,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-c"
+    "organisation": "bpi-1"
   },
   {
     "id": "pr117",
@@ -2737,7 +2765,8 @@
     "title": "Beispielbach, Postplatz 81, Ersatzneubau",
     "location": "Beispielbach, Postplatz 81",
     "kind": "Ersatzneubau",
-    "phase": "21",
+    "phase": "2",
+    "subPhase": "21",
     "leadId": "lucabeispielmann",
     "portfolio": "justiz",
     "priority": "tief",
@@ -2843,7 +2872,7 @@
         "label": "53 Inbetriebnahme"
       }
     ],
-    "organisation": "org-b"
+    "organisation": "bpa"
   },
   {
     "id": "pr118",
@@ -2852,6 +2881,7 @@
     "location": "Musterhofen, Zollstrasse 2",
     "kind": "Gesamtsanierung",
     "phase": "31",
+    "subPhase": "31",
     "leadId": "elenamustermann",
     "portfolio": "ausland",
     "priority": "mittel",
@@ -2945,7 +2975,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-a"
+    "organisation": "bpi-3"
   },
   {
     "id": "pr119",
@@ -2954,6 +2984,7 @@
     "location": "Musterberg, Feldweg 47",
     "kind": "Haustechnik",
     "phase": "32",
+    "subPhase": "32",
     "leadId": "bernhardbeispieler",
     "portfolio": "zoll",
     "priority": "hoch",
@@ -3041,7 +3072,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-d"
+    "organisation": "bpi-2"
   },
   {
     "id": "pr120",
@@ -3049,7 +3080,8 @@
     "title": "Musterhofen, Bahnhofstrasse 19, Erweiterung",
     "location": "Musterhofen, Bahnhofstrasse 19",
     "kind": "Erweiterung",
-    "phase": "52",
+    "phase": "5",
+    "subPhase": "52",
     "leadId": null,
     "portfolio": "verwaltung",
     "priority": "tief",
@@ -3113,7 +3145,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-d"
+    "organisation": "ppe-2"
   },
   {
     "id": "pr121",
@@ -3121,7 +3153,8 @@
     "title": "Beispielau, Schulhausplatz 11, Gesamtsanierung",
     "location": "Beispielau, Schulhausplatz 11",
     "kind": "Gesamtsanierung",
-    "phase": "52",
+    "phase": "5",
+    "subPhase": "52",
     "leadId": "danielbeispielmann",
     "portfolio": "zoll",
     "priority": "mittel",
@@ -3185,7 +3218,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-d"
+    "organisation": "bpa"
   },
   {
     "id": "pr122",
@@ -3193,7 +3226,8 @@
     "title": "Musterbiel, Rebbergweg 86, Ersatzneubau",
     "location": "Musterbiel, Rebbergweg 86",
     "kind": "Ersatzneubau",
-    "phase": "52",
+    "phase": "5",
+    "subPhase": "52",
     "leadId": "karinmuster",
     "portfolio": "kultur",
     "priority": "mittel",
@@ -3257,7 +3291,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-a"
+    "organisation": "ppe-1"
   },
   {
     "id": "pr123",
@@ -3266,6 +3300,7 @@
     "location": "Beispielwil, Postplatz 56",
     "kind": "Umbau",
     "phase": "22",
+    "subPhase": "22",
     "leadId": "ginamusterli",
     "portfolio": "verwaltung",
     "priority": "mittel",
@@ -3365,7 +3400,7 @@
         "label": "53 Inbetriebnahme"
       }
     ],
-    "organisation": "org-c"
+    "organisation": "bpi-1"
   },
   {
     "id": "pr124",
@@ -3373,7 +3408,8 @@
     "title": "Musterbiel, Kasernenstrasse 71, Statik / Erdbeben",
     "location": "Musterbiel, Kasernenstrasse 71",
     "kind": "Statik / Erdbeben",
-    "phase": "21",
+    "phase": "2",
+    "subPhase": "21",
     "leadId": "brunobeispiel",
     "portfolio": "zoll",
     "priority": "tief",
@@ -3479,7 +3515,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-d"
+    "organisation": "ppe-2"
   },
   {
     "id": "pr125",
@@ -3487,7 +3523,8 @@
     "title": "Beispielried, Hauptstrasse 58, Fassadensanierung",
     "location": "Beispielried, Hauptstrasse 58",
     "kind": "Fassadensanierung",
-    "phase": "21",
+    "phase": "2",
+    "subPhase": "21",
     "leadId": "danielbeispielmann",
     "portfolio": "verwaltung",
     "priority": "mittel",
@@ -3593,7 +3630,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-d"
+    "organisation": "bpa"
   },
   {
     "id": "pr126",
@@ -3601,7 +3638,8 @@
     "title": "Musterried, Mühleweg 26, Statik / Erdbeben",
     "location": "Musterried, Mühleweg 26",
     "kind": "Statik / Erdbeben",
-    "phase": "11",
+    "phase": "1",
+    "subPhase": "11",
     "leadId": null,
     "portfolio": "ausland",
     "priority": "mittel",
@@ -3708,7 +3746,7 @@
         "continues": true
       }
     ],
-    "organisation": "org-b"
+    "organisation": "ppe-2"
   },
   {
     "id": "pr127",
@@ -3716,7 +3754,8 @@
     "title": "Beispielegg, Quai du Lac 43, Umbau",
     "location": "Beispielegg, Quai du Lac 43",
     "kind": "Umbau",
-    "phase": "11",
+    "phase": "Vorstudien",
+    "subPhase": "11",
     "leadId": "heinzbeispieler",
     "portfolio": "justiz",
     "priority": "mittel",
@@ -3828,7 +3867,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-d"
+    "organisation": "bpi-2"
   },
   {
     "id": "pr128",
@@ -3836,7 +3875,8 @@
     "title": "Beispielheim, Via Sempione 53, Teilsanierung",
     "location": "Beispielheim, Via Sempione 53",
     "kind": "Teilsanierung",
-    "phase": "11",
+    "phase": "Vorstudien",
+    "subPhase": "11",
     "leadId": "andreamusterli",
     "portfolio": "justiz",
     "priority": "tief",
@@ -3937,7 +3977,7 @@
         "continues": true
       }
     ],
-    "organisation": "org-c"
+    "organisation": "bpi-1"
   },
   {
     "id": "pr129",
@@ -3946,6 +3986,7 @@
     "location": "Musterried, Industriestrasse 26",
     "kind": "Statik / Erdbeben",
     "phase": "32",
+    "subPhase": "32",
     "leadId": "petramustermann",
     "portfolio": "verwaltung",
     "priority": "mittel",
@@ -4033,7 +4074,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-a"
+    "organisation": "bpi-3"
   },
   {
     "id": "pr130",
@@ -4041,7 +4082,8 @@
     "title": "Beispielgrund, Via Motta 95, Brandschutz",
     "location": "Beispielgrund, Via Motta 95",
     "kind": "Brandschutz",
-    "phase": "52",
+    "phase": "5",
+    "subPhase": "52",
     "leadId": "simonbeispiel",
     "portfolio": "bildung",
     "priority": "mittel",
@@ -4105,7 +4147,7 @@
         "label": "53 Inbetriebnahme"
       }
     ],
-    "organisation": "org-b"
+    "organisation": "ppe-2"
   },
   {
     "id": "pr131",
@@ -4113,7 +4155,8 @@
     "title": "Musterbiel, Werkhof Ost 1, Umbau",
     "location": "Musterbiel, Werkhof Ost 1",
     "kind": "Umbau",
-    "phase": "52",
+    "phase": "5",
+    "subPhase": "52",
     "leadId": "zoebeispielmann",
     "portfolio": "verwaltung",
     "priority": "mittel",
@@ -4177,7 +4220,7 @@
         "label": "53 Inbetriebnahme"
       }
     ],
-    "organisation": "org-b"
+    "organisation": "bpa"
   },
   {
     "id": "pr132",
@@ -4185,7 +4228,8 @@
     "title": "Beispielbrunn, Ringstrasse 1, Erweiterung",
     "location": "Beispielbrunn, Ringstrasse 1",
     "kind": "Erweiterung",
-    "phase": "41",
+    "phase": "4",
+    "subPhase": "41",
     "leadId": "jonasbeispiel",
     "portfolio": "justiz",
     "priority": "tief",
@@ -4261,7 +4305,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-d"
+    "organisation": "ppe-2"
   },
   {
     "id": "pr133",
@@ -4269,7 +4313,8 @@
     "title": "Musterdorf, Kasernenstrasse 83, Gesamtsanierung",
     "location": "Musterdorf, Kasernenstrasse 83",
     "kind": "Gesamtsanierung",
-    "phase": "41",
+    "phase": "4",
+    "subPhase": "41",
     "leadId": "chiaramuster",
     "portfolio": "bildung",
     "priority": "tief",
@@ -4346,7 +4391,7 @@
         "continues": true
       }
     ],
-    "organisation": "org-c"
+    "organisation": "ppe-1"
   },
   {
     "id": "pr134",
@@ -4355,6 +4400,7 @@
     "location": "Beispielbach, Rue des Alpes 48",
     "kind": "Energetische Sanierung",
     "phase": "32",
+    "subPhase": "32",
     "leadId": "karinmuster",
     "portfolio": "kultur",
     "priority": "hoch",
@@ -4442,7 +4488,7 @@
         "label": "53 Inbetriebnahme"
       }
     ],
-    "organisation": "org-a"
+    "organisation": "ppe-1"
   },
   {
     "id": "pr135",
@@ -4450,7 +4496,8 @@
     "title": "Musterried, Sonnhalde 76, Instandsetzung",
     "location": "Musterried, Sonnhalde 76",
     "kind": "Instandsetzung",
-    "phase": "11",
+    "phase": "Vorstudien",
+    "subPhase": "11",
     "leadId": "dariobeispielmann",
     "portfolio": "zoll",
     "priority": "tief",
@@ -4562,7 +4609,7 @@
         "label": "53 Inbetriebnahme"
       }
     ],
-    "organisation": "org-b"
+    "organisation": "bpa"
   },
   {
     "id": "pr136",
@@ -4570,7 +4617,8 @@
     "title": "Beispielheim, Chemin du Parc 13+60, Barrierefreiheit",
     "location": "Beispielheim, Chemin du Parc 13+60",
     "kind": "Barrierefreiheit",
-    "phase": "52",
+    "phase": "5",
+    "subPhase": "52",
     "leadId": "annamuster",
     "portfolio": "sport",
     "priority": "hoch",
@@ -4634,7 +4682,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-c"
+    "organisation": "ppe-1"
   },
   {
     "id": "pr137",
@@ -4643,6 +4691,7 @@
     "location": "Musterbiel, Sonnhalde 62",
     "kind": "Alternativobjekt",
     "phase": "31",
+    "subPhase": "31",
     "leadId": "walterbeispieler",
     "portfolio": "verwaltung",
     "priority": "mittel",
@@ -4737,7 +4786,7 @@
         "continues": true
       }
     ],
-    "organisation": "org-b"
+    "organisation": "bpi-2"
   },
   {
     "id": "pr138",
@@ -4745,7 +4794,8 @@
     "title": "Beispielegg, Avenue de la Gare 36, Dachsanierung",
     "location": "Beispielegg, Avenue de la Gare 36",
     "kind": "Dachsanierung",
-    "phase": "52",
+    "phase": "5",
+    "subPhase": "52",
     "leadId": "damianbeispiel",
     "portfolio": "verwaltung",
     "priority": "hoch",
@@ -4809,7 +4859,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-b"
+    "organisation": "ppe-2"
   },
   {
     "id": "pr139",
@@ -4818,6 +4868,7 @@
     "location": "Musterhofen, Quai du Lac 61",
     "kind": "Aussenanlagen",
     "phase": "32",
+    "subPhase": "32",
     "leadId": "nicobeispieler",
     "portfolio": "verwaltung",
     "priority": "mittel",
@@ -4905,7 +4956,7 @@
         "label": "53 Inbetriebnahme"
       }
     ],
-    "organisation": "org-d"
+    "organisation": "bpi-2"
   },
   {
     "id": "pr140",
@@ -4913,7 +4964,8 @@
     "title": "Beispielau, Hauptstrasse 85, Instandsetzung",
     "location": "Beispielau, Hauptstrasse 85",
     "kind": "Instandsetzung",
-    "phase": "33",
+    "phase": "3",
+    "subPhase": "33",
     "leadId": "leonbeispielmann",
     "portfolio": "justiz",
     "priority": "tief",
@@ -4995,7 +5047,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-d"
+    "organisation": "bpa"
   },
   {
     "id": "pr141",
@@ -5004,6 +5056,7 @@
     "location": "Musterberg, Lindenweg 78",
     "kind": "Instandsetzung",
     "phase": "22",
+    "subPhase": "22",
     "leadId": "annamuster",
     "portfolio": "justiz",
     "priority": "mittel",
@@ -5103,7 +5156,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-c"
+    "organisation": "ppe-1"
   },
   {
     "id": "pr142",
@@ -5111,7 +5164,8 @@
     "title": "Musterlingen, Mühleweg 85, Neubau",
     "location": "Musterlingen, Mühleweg 85",
     "kind": "Neubau",
-    "phase": "33",
+    "phase": "3",
+    "subPhase": "33",
     "leadId": "ursbeispielmann",
     "portfolio": "zoll",
     "priority": "tief",
@@ -5193,7 +5247,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-d"
+    "organisation": "bpa"
   },
   {
     "id": "pr143",
@@ -5202,6 +5256,7 @@
     "location": "Beispielstadt, Rebbergweg 16",
     "kind": "Instandsetzung",
     "phase": "32",
+    "subPhase": "32",
     "leadId": "tanjamuster",
     "portfolio": "zoll",
     "priority": "mittel",
@@ -5289,7 +5344,7 @@
         "label": "53 Inbetriebnahme"
       }
     ],
-    "organisation": "org-c"
+    "organisation": "ppe-1"
   },
   {
     "id": "pr144",
@@ -5297,7 +5352,8 @@
     "title": "Musteregg, Schulhausplatz 93, Instandsetzung",
     "location": "Musteregg, Schulhausplatz 93",
     "kind": "Instandsetzung",
-    "phase": "33",
+    "phase": "3",
+    "subPhase": "33",
     "leadId": "alinemustermann",
     "portfolio": "verwaltung",
     "priority": "hoch",
@@ -5379,7 +5435,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-c"
+    "organisation": "bpi-3"
   },
   {
     "id": "pr145",
@@ -5387,7 +5443,8 @@
     "title": "Musterbach, Rue des Alpes 8, Unterhalt",
     "location": "Musterbach, Rue des Alpes 8",
     "kind": "Unterhalt",
-    "phase": "11",
+    "phase": "Vorstudien",
+    "subPhase": "11",
     "leadId": "ursbeispielmann",
     "portfolio": "zoll",
     "priority": "mittel",
@@ -5499,7 +5556,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-d"
+    "organisation": "bpa"
   },
   {
     "id": "pr146",
@@ -5508,6 +5565,7 @@
     "location": "Beispielheim, Ahornweg 52",
     "kind": "Instandsetzung",
     "phase": "31",
+    "subPhase": "31",
     "leadId": "andreamusterli",
     "portfolio": "verwaltung",
     "priority": "hoch",
@@ -5601,7 +5659,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-c"
+    "organisation": "bpi-1"
   },
   {
     "id": "pr147",
@@ -5609,7 +5667,8 @@
     "title": "Musterberg, Via Motta 24, Instandsetzung",
     "location": "Musterberg, Via Motta 24",
     "kind": "Instandsetzung",
-    "phase": "52",
+    "phase": "5",
+    "subPhase": "52",
     "leadId": "bernhardbeispieler",
     "portfolio": "bildung",
     "priority": "hoch",
@@ -5673,7 +5732,7 @@
         "label": "53 Inbetriebnahme"
       }
     ],
-    "organisation": "org-d"
+    "organisation": "bpi-2"
   },
   {
     "id": "pr148",
@@ -5682,6 +5741,7 @@
     "location": "Musterberg, Mühleweg 43",
     "kind": "Mehrzweckbau",
     "phase": "32",
+    "subPhase": "32",
     "leadId": "hansbeispiel",
     "portfolio": "sport",
     "priority": "hoch",
@@ -5769,7 +5829,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-d"
+    "organisation": "ppe-2"
   },
   {
     "id": "pr149",
@@ -5777,7 +5837,8 @@
     "title": "Musteregg, Kasernenstrasse 22+44, Instandsetzung",
     "location": "Musteregg, Kasernenstrasse 22+44",
     "kind": "Instandsetzung",
-    "phase": "51",
+    "phase": "5",
+    "subPhase": "51",
     "leadId": "heinzbeispieler",
     "portfolio": "verwaltung",
     "priority": "mittel",
@@ -5847,7 +5908,7 @@
         "label": "53 Inbetriebnahme"
       }
     ],
-    "organisation": "org-d"
+    "organisation": "bpi-2"
   },
   {
     "id": "pr150",
@@ -5856,6 +5917,7 @@
     "location": "Musterdorf, Amtshausgasse 44",
     "kind": "Arealentwicklung",
     "phase": "31",
+    "subPhase": "31",
     "leadId": "inesmusterli",
     "portfolio": "justiz",
     "priority": "mittel",
@@ -5949,7 +6011,7 @@
         "label": "53 Inbetriebnahme"
       }
     ],
-    "organisation": "org-a"
+    "organisation": "bpi-1"
   },
   {
     "id": "pr151",
@@ -5957,7 +6019,8 @@
     "title": "Musterhofen, Mühleweg 72, Teilsanierung",
     "location": "Musterhofen, Mühleweg 72",
     "kind": "Teilsanierung",
-    "phase": "51",
+    "phase": "5",
+    "subPhase": "51",
     "leadId": "brunobeispiel",
     "portfolio": "sport",
     "priority": "tief",
@@ -6027,7 +6090,7 @@
         "label": "53 Inbetriebnahme"
       }
     ],
-    "organisation": "org-d"
+    "organisation": "ppe-2"
   },
   {
     "id": "pr152",
@@ -6035,7 +6098,8 @@
     "title": "Musteregg, Via Cantonale 94, Mehrzweckbau",
     "location": "Musteregg, Via Cantonale 94",
     "kind": "Mehrzweckbau",
-    "phase": "11",
+    "phase": "Vorstudien",
+    "subPhase": "11",
     "leadId": "fabiobeispieler",
     "portfolio": "kultur",
     "priority": "mittel",
@@ -6147,7 +6211,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-b"
+    "organisation": "bpi-2"
   },
   {
     "id": "pr153",
@@ -6155,7 +6219,8 @@
     "title": "Musteregg, Ahornweg 75, Fassadensanierung",
     "location": "Musteregg, Ahornweg 75",
     "kind": "Fassadensanierung",
-    "phase": "33",
+    "phase": "3",
+    "subPhase": "33",
     "leadId": "carlamuster",
     "portfolio": "sport",
     "priority": "mittel",
@@ -6237,7 +6302,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-a"
+    "organisation": "ppe-1"
   },
   {
     "id": "pr154",
@@ -6246,6 +6311,7 @@
     "location": "Beispielgrund, Place de l’Avenir 72",
     "kind": "Gesamtsanierung",
     "phase": "22",
+    "subPhase": "22",
     "leadId": "petramustermann",
     "portfolio": "ausland",
     "priority": "mittel",
@@ -6322,7 +6388,7 @@
         "continues": true
       }
     ],
-    "organisation": "org-a"
+    "organisation": "bpi-3"
   },
   {
     "id": "pr155",
@@ -6330,7 +6396,8 @@
     "title": "Beispielau, Ahornweg 13, Gesamtsanierung",
     "location": "Beispielau, Ahornweg 13",
     "kind": "Gesamtsanierung",
-    "phase": "52",
+    "phase": "5",
+    "subPhase": "52",
     "leadId": "fabiobeispieler",
     "portfolio": "zoll",
     "priority": "mittel",
@@ -6394,7 +6461,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-b"
+    "organisation": "bpi-2"
   },
   {
     "id": "pr156",
@@ -6402,7 +6469,8 @@
     "title": "Beispielbrunn, Amtshausgasse 85, Haustechnik",
     "location": "Beispielbrunn, Amtshausgasse 85",
     "kind": "Haustechnik",
-    "phase": "21",
+    "phase": "2",
+    "subPhase": "21",
     "leadId": "carlamuster",
     "portfolio": "sport",
     "priority": "mittel",
@@ -6508,7 +6576,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-a"
+    "organisation": "ppe-1"
   },
   {
     "id": "pr157",
@@ -6516,7 +6584,8 @@
     "title": "Beispielstadt, Seestrasse 80, Umbau",
     "location": "Beispielstadt, Seestrasse 80",
     "kind": "Umbau",
-    "phase": "52",
+    "phase": "5",
+    "subPhase": "52",
     "leadId": "timobeispiel",
     "portfolio": "justiz",
     "priority": "hoch",
@@ -6580,7 +6649,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-d"
+    "organisation": "ppe-2"
   },
   {
     "id": "pr158",
@@ -6588,7 +6657,8 @@
     "title": "Beispielried, Talstrasse 21, Mehrzweckbau",
     "location": "Beispielried, Talstrasse 21",
     "kind": "Mehrzweckbau",
-    "phase": "11",
+    "phase": "1",
+    "subPhase": "11",
     "leadId": "martamustermann",
     "portfolio": "justiz",
     "priority": "mittel",
@@ -6688,7 +6758,7 @@
         "label": "51 Ausführungsprojekt"
       }
     ],
-    "organisation": "org-c"
+    "organisation": "bpi-3"
   },
   {
     "id": "pr159",
@@ -6697,6 +6767,7 @@
     "location": "Musteregg, Talstrasse 11",
     "kind": "Arealentwicklung",
     "phase": "22",
+    "subPhase": "22",
     "leadId": "paula",
     "portfolio": "bildung",
     "priority": "mittel",
@@ -6797,7 +6868,7 @@
         "continues": true
       }
     ],
-    "organisation": "org-a"
+    "organisation": "bpi-3"
   },
   {
     "id": "pr160",
@@ -6805,7 +6876,8 @@
     "title": "Beispielheim, Chemin du Parc 60, Brandschutz",
     "location": "Beispielheim, Chemin du Parc 60",
     "kind": "Brandschutz",
-    "phase": "52",
+    "phase": "5",
+    "subPhase": "52",
     "leadId": "oliviamusterli",
     "portfolio": "zoll",
     "priority": "tief",
@@ -6869,7 +6941,7 @@
         "label": "53 Inbetriebnahme"
       }
     ],
-    "organisation": "org-a"
+    "organisation": "bpi-1"
   },
   {
     "id": "pr161",
@@ -6877,7 +6949,8 @@
     "title": "Musterried, Rue des Alpes 79, Neubau",
     "location": "Musterried, Rue des Alpes 79",
     "kind": "Neubau",
-    "phase": "33",
+    "phase": "3",
+    "subPhase": "33",
     "leadId": "retobeispieler",
     "portfolio": "kultur",
     "priority": "mittel",
@@ -6959,7 +7032,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-b"
+    "organisation": "bpi-2"
   },
   {
     "id": "pr162",
@@ -6967,7 +7040,8 @@
     "title": "Musterried, Via Motta 30+42, Gesamtsanierung",
     "location": "Musterried, Via Motta 30+42",
     "kind": "Gesamtsanierung",
-    "phase": "33",
+    "phase": "3",
+    "subPhase": "33",
     "leadId": "saramusterli",
     "portfolio": "zoll",
     "priority": "mittel",
@@ -7049,7 +7123,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-c"
+    "organisation": "bpi-1"
   },
   {
     "id": "pr163",
@@ -7057,7 +7131,8 @@
     "title": "Musterbiel, Ahornweg 83, Ersatzneubau",
     "location": "Musterbiel, Ahornweg 83",
     "kind": "Ersatzneubau",
-    "phase": "52",
+    "phase": "5",
+    "subPhase": "52",
     "leadId": "lucabeispielmann",
     "portfolio": "sport",
     "priority": "hoch",
@@ -7121,7 +7196,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-b"
+    "organisation": "bpa"
   },
   {
     "id": "pr164",
@@ -7129,7 +7204,8 @@
     "title": "Musterthal, Chemin du Parc 46, Instandsetzung",
     "location": "Musterthal, Chemin du Parc 46",
     "kind": "Instandsetzung",
-    "phase": "52",
+    "phase": "5",
+    "subPhase": "52",
     "leadId": "evamustermann",
     "portfolio": "justiz",
     "priority": "tief",
@@ -7193,7 +7269,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-c"
+    "organisation": "bpi-3"
   },
   {
     "id": "pr165",
@@ -7201,7 +7277,8 @@
     "title": "Beispielwil, Ahornweg 12, Fassadensanierung",
     "location": "Beispielwil, Ahornweg 12",
     "kind": "Fassadensanierung",
-    "phase": "52",
+    "phase": "5",
+    "subPhase": "52",
     "leadId": "saramusterli",
     "portfolio": "verwaltung",
     "priority": "mittel",
@@ -7265,7 +7342,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-c"
+    "organisation": "bpi-1"
   },
   {
     "id": "pr166",
@@ -7273,7 +7350,8 @@
     "title": "Beispielhofen, Feldweg 50, Gesamtsanierung",
     "location": "Beispielhofen, Feldweg 50",
     "kind": "Gesamtsanierung",
-    "phase": "52",
+    "phase": "5",
+    "subPhase": "52",
     "leadId": "timobeispiel",
     "portfolio": "kultur",
     "priority": "mittel",
@@ -7337,7 +7415,7 @@
         "label": "53 Inbetriebnahme"
       }
     ],
-    "organisation": "org-d"
+    "organisation": "ppe-2"
   },
   {
     "id": "pr167",
@@ -7345,7 +7423,8 @@
     "title": "Beispielhofen, Rue des Alpes 95, Gesamtsanierung",
     "location": "Beispielhofen, Rue des Alpes 95",
     "kind": "Gesamtsanierung",
-    "phase": "11",
+    "phase": "Vorstudien",
+    "subPhase": "11",
     "leadId": "ursinamuster",
     "portfolio": "zoll",
     "priority": "mittel",
@@ -7457,7 +7536,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-a"
+    "organisation": "ppe-1"
   },
   {
     "id": "pr168",
@@ -7465,7 +7544,8 @@
     "title": "Beispielwil, Zollstrasse 80, Dachsanierung",
     "location": "Beispielwil, Zollstrasse 80",
     "kind": "Dachsanierung",
-    "phase": "33",
+    "phase": "3",
+    "subPhase": "33",
     "leadId": "veramustermann",
     "portfolio": "zoll",
     "priority": "tief",
@@ -7547,7 +7627,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-a"
+    "organisation": "bpi-3"
   },
   {
     "id": "pr169",
@@ -7556,6 +7636,7 @@
     "location": "Musterbach, Ringstrasse 12",
     "kind": "Umbau",
     "phase": "32",
+    "subPhase": "32",
     "leadId": "andreamusterli",
     "portfolio": "bildung",
     "priority": "mittel",
@@ -7643,7 +7724,7 @@
         "label": "53 Inbetriebnahme"
       }
     ],
-    "organisation": "org-c"
+    "organisation": "bpi-1"
   },
   {
     "id": "pr170",
@@ -7651,7 +7732,8 @@
     "title": "Beispielbrunn, Rebbergweg 93, Neubau",
     "location": "Beispielbrunn, Rebbergweg 93",
     "kind": "Neubau",
-    "phase": "11",
+    "phase": "1",
+    "subPhase": "11",
     "leadId": "leonbeispielmann",
     "portfolio": "sport",
     "priority": "mittel",
@@ -7758,7 +7840,7 @@
         "continues": true
       }
     ],
-    "organisation": "org-d"
+    "organisation": "bpa"
   },
   {
     "id": "pr171",
@@ -7766,7 +7848,8 @@
     "title": "Beispielbach, Amtshausgasse 15+46, Energetische Sanierung",
     "location": "Beispielbach, Amtshausgasse 15+46",
     "kind": "Energetische Sanierung",
-    "phase": "21",
+    "phase": "2",
+    "subPhase": "21",
     "leadId": "damianbeispiel",
     "portfolio": "verwaltung",
     "priority": "mittel",
@@ -7872,7 +7955,7 @@
         "label": "53 Inbetriebnahme"
       }
     ],
-    "organisation": "org-b"
+    "organisation": "ppe-2"
   },
   {
     "id": "pr172",
@@ -7881,6 +7964,7 @@
     "location": "Musterlingen, Lindenweg 6",
     "kind": "Gesamtsanierung",
     "phase": "53",
+    "subPhase": "53",
     "leadId": "corinamusterli",
     "portfolio": "verwaltung",
     "priority": "mittel",
@@ -7938,7 +8022,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-a"
+    "organisation": "bpi-1"
   },
   {
     "id": "pr173",
@@ -7946,7 +8030,8 @@
     "title": "Beispielwil, Quai du Lac 19, Gesamtsanierung",
     "location": "Beispielwil, Quai du Lac 19",
     "kind": "Gesamtsanierung",
-    "phase": "33",
+    "phase": "3",
+    "subPhase": "33",
     "leadId": "danielbeispielmann",
     "portfolio": "zoll",
     "priority": "tief",
@@ -8028,7 +8113,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-d"
+    "organisation": "bpa"
   },
   {
     "id": "pr174",
@@ -8036,7 +8121,8 @@
     "title": "Musterbach, Quai du Lac 57, Teilsanierung",
     "location": "Musterbach, Quai du Lac 57",
     "kind": "Teilsanierung",
-    "phase": "21",
+    "phase": "2",
+    "subPhase": "21",
     "leadId": "saramusterli",
     "portfolio": "zoll",
     "priority": "hoch",
@@ -8142,7 +8228,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-c"
+    "organisation": "bpi-1"
   },
   {
     "id": "pr175",
@@ -8150,7 +8236,8 @@
     "title": "Musterhofen, Talstrasse 92, Alternativobjekt",
     "location": "Musterhofen, Talstrasse 92",
     "kind": "Alternativobjekt",
-    "phase": "52",
+    "phase": "5",
+    "subPhase": "52",
     "leadId": "elenamustermann",
     "portfolio": "justiz",
     "priority": "hoch",
@@ -8214,7 +8301,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-a"
+    "organisation": "bpi-3"
   },
   {
     "id": "pr176",
@@ -8222,7 +8309,8 @@
     "title": "Musterthal, Avenue de la Gare 36, Arealentwicklung",
     "location": "Musterthal, Avenue de la Gare 36",
     "kind": "Arealentwicklung",
-    "phase": "33",
+    "phase": "3",
+    "subPhase": "33",
     "leadId": "walterbeispieler",
     "portfolio": "sport",
     "priority": "mittel",
@@ -8304,7 +8392,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-b"
+    "organisation": "bpi-2"
   },
   {
     "id": "pr177",
@@ -8312,7 +8400,8 @@
     "title": "Beispielwil, Werkhof West 18, Instandsetzung",
     "location": "Beispielwil, Werkhof West 18",
     "kind": "Instandsetzung",
-    "phase": "52",
+    "phase": "5",
+    "subPhase": "52",
     "leadId": "heinzbeispieler",
     "portfolio": "verwaltung",
     "priority": "mittel",
@@ -8376,7 +8465,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-d"
+    "organisation": "bpi-2"
   },
   {
     "id": "pr178",
@@ -8384,7 +8473,8 @@
     "title": "Beispielbach, Via Cantonale 84, Unterhalt",
     "location": "Beispielbach, Via Cantonale 84",
     "kind": "Unterhalt",
-    "phase": "33",
+    "phase": "3",
+    "subPhase": "33",
     "leadId": "ursinamuster",
     "portfolio": "justiz",
     "priority": "mittel",
@@ -8466,7 +8556,7 @@
         "label": "53 Inbetriebnahme"
       }
     ],
-    "organisation": "org-a"
+    "organisation": "ppe-1"
   },
   {
     "id": "pr179",
@@ -8475,6 +8565,7 @@
     "location": "Musterthal, Via Motta 19",
     "kind": "Instandsetzung",
     "phase": "31",
+    "subPhase": "31",
     "leadId": "jonasbeispiel",
     "portfolio": "bildung",
     "priority": "hoch",
@@ -8569,7 +8660,7 @@
         "continues": true
       }
     ],
-    "organisation": "org-d"
+    "organisation": "ppe-2"
   },
   {
     "id": "pr180",
@@ -8577,7 +8668,8 @@
     "title": "Musterhofen, Sonnhalde 18+42, Teilsanierung",
     "location": "Musterhofen, Sonnhalde 18+42",
     "kind": "Teilsanierung",
-    "phase": "33",
+    "phase": "3",
+    "subPhase": "33",
     "leadId": "annamuster",
     "portfolio": "kultur",
     "priority": "hoch",
@@ -8659,7 +8751,7 @@
         "label": "53 Inbetriebnahme"
       }
     ],
-    "organisation": "org-c"
+    "organisation": "ppe-1"
   },
   {
     "id": "pr181",
@@ -8667,7 +8759,8 @@
     "title": "Musterwil, Ringstrasse 30, Instandsetzung",
     "location": "Musterwil, Ringstrasse 30",
     "kind": "Instandsetzung",
-    "phase": "52",
+    "phase": "5",
+    "subPhase": "52",
     "leadId": "katjamuster",
     "portfolio": "verwaltung",
     "priority": "hoch",
@@ -8731,7 +8824,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-c"
+    "organisation": "ppe-1"
   },
   {
     "id": "pr182",
@@ -8739,7 +8832,8 @@
     "title": "Musteregg, Amtshausgasse 57, Energetische Sanierung",
     "location": "Musteregg, Amtshausgasse 57",
     "kind": "Energetische Sanierung",
-    "phase": "52",
+    "phase": "5",
+    "subPhase": "52",
     "leadId": "ursbeispielmann",
     "portfolio": "sport",
     "priority": "mittel",
@@ -8803,7 +8897,7 @@
         "label": "53 Inbetriebnahme"
       }
     ],
-    "organisation": "org-d"
+    "organisation": "bpa"
   },
   {
     "id": "pr183",
@@ -8811,7 +8905,8 @@
     "title": "Musterwil, Ahornweg 61, Dachsanierung",
     "location": "Musterwil, Ahornweg 61",
     "kind": "Dachsanierung",
-    "phase": "52",
+    "phase": "5",
+    "subPhase": "52",
     "leadId": null,
     "portfolio": "kultur",
     "priority": "mittel",
@@ -8875,7 +8970,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-c"
+    "organisation": "bpi-3"
   },
   {
     "id": "pr184",
@@ -8884,6 +8979,7 @@
     "location": "Beispielwil, Schulhausplatz 7",
     "kind": "Fassadensanierung",
     "phase": "32",
+    "subPhase": "32",
     "leadId": "lars",
     "portfolio": "zoll",
     "priority": "tief",
@@ -8971,7 +9067,7 @@
         "label": "53 Inbetriebnahme"
       }
     ],
-    "organisation": "org-b"
+    "organisation": "ppe-2"
   },
   {
     "id": "pr185",
@@ -8979,7 +9075,8 @@
     "title": "Beispielried, Bahnhofstrasse 61, Instandsetzung",
     "location": "Beispielried, Bahnhofstrasse 61",
     "kind": "Instandsetzung",
-    "phase": "11",
+    "phase": "1",
+    "subPhase": "11",
     "leadId": "alina",
     "portfolio": "zoll",
     "priority": "hoch",
@@ -9074,7 +9171,7 @@
         "continues": true
       }
     ],
-    "organisation": "org-c"
+    "organisation": "bpi-1"
   },
   {
     "id": "pr186",
@@ -9083,6 +9180,7 @@
     "location": "Musteregg, Via Motta 91",
     "kind": "Unterhalt",
     "phase": "22",
+    "subPhase": "22",
     "leadId": null,
     "portfolio": "zoll",
     "priority": "mittel",
@@ -9182,7 +9280,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-b"
+    "organisation": "ppe-2"
   },
   {
     "id": "pr187",
@@ -9190,7 +9288,8 @@
     "title": "Musterthal, Sonnhalde 81, Gesamtsanierung",
     "location": "Musterthal, Sonnhalde 81",
     "kind": "Gesamtsanierung",
-    "phase": "52",
+    "phase": "5",
+    "subPhase": "52",
     "leadId": "janbeispiel",
     "portfolio": "verwaltung",
     "priority": "hoch",
@@ -9254,7 +9353,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-b"
+    "organisation": "ppe-2"
   },
   {
     "id": "pr188",
@@ -9262,7 +9361,8 @@
     "title": "Musterbach, Zollstrasse 92, Mehrzweckbau",
     "location": "Musterbach, Zollstrasse 92",
     "kind": "Mehrzweckbau",
-    "phase": "52",
+    "phase": "5",
+    "subPhase": "52",
     "leadId": "dariobeispielmann",
     "portfolio": "ausland",
     "priority": "mittel",
@@ -9326,7 +9426,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-b"
+    "organisation": "bpa"
   },
   {
     "id": "pr189",
@@ -9334,7 +9434,8 @@
     "title": "Beispielwil, Ringstrasse 74, Umbau",
     "location": "Beispielwil, Ringstrasse 74",
     "kind": "Umbau",
-    "phase": "33",
+    "phase": "3",
+    "subPhase": "33",
     "leadId": "evamustermann",
     "portfolio": "zoll",
     "priority": "mittel",
@@ -9416,7 +9517,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-c"
+    "organisation": "bpi-3"
   },
   {
     "id": "pr190",
@@ -9424,7 +9525,8 @@
     "title": "Musterried, Bahnhofstrasse 58, Umbau",
     "location": "Musterried, Bahnhofstrasse 58",
     "kind": "Umbau",
-    "phase": "21",
+    "phase": "2",
+    "subPhase": "21",
     "leadId": "corinamusterli",
     "portfolio": "sport",
     "priority": "mittel",
@@ -9525,7 +9627,7 @@
         "continues": true
       }
     ],
-    "organisation": "org-a"
+    "organisation": "bpi-1"
   },
   {
     "id": "pr191",
@@ -9534,6 +9636,7 @@
     "location": "Musterlingen, Chemin du Parc 11",
     "kind": "Ersatzneubau",
     "phase": "32",
+    "subPhase": "32",
     "leadId": "walterbeispieler",
     "portfolio": "justiz",
     "priority": "mittel",
@@ -9621,7 +9724,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-b"
+    "organisation": "bpi-2"
   },
   {
     "id": "pr192",
@@ -9630,6 +9733,7 @@
     "location": "Musterhofen, Zollstrasse 32",
     "kind": "Energetische Sanierung",
     "phase": "22",
+    "subPhase": "22",
     "leadId": "katjamuster",
     "portfolio": "bildung",
     "priority": "hoch",
@@ -9729,7 +9833,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-c"
+    "organisation": "ppe-1"
   },
   {
     "id": "pr193",
@@ -9738,6 +9842,7 @@
     "location": "Mustersee, Werkhof West 38+52",
     "kind": "Gesamtsanierung",
     "phase": "22",
+    "subPhase": "22",
     "leadId": "ursbeispielmann",
     "portfolio": "kultur",
     "priority": "hoch",
@@ -9837,7 +9942,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-d"
+    "organisation": "bpa"
   },
   {
     "id": "pr194",
@@ -9845,7 +9950,8 @@
     "title": "Musteregg, Werkhof West 91, Gesamtsanierung",
     "location": "Musteregg, Werkhof West 91",
     "kind": "Gesamtsanierung",
-    "phase": "52",
+    "phase": "5",
+    "subPhase": "52",
     "leadId": "alinemustermann",
     "portfolio": "justiz",
     "priority": "tief",
@@ -9909,7 +10015,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-c"
+    "organisation": "bpi-3"
   },
   {
     "id": "pr195",
@@ -9918,6 +10024,7 @@
     "location": "Beispielau, Postplatz 48",
     "kind": "Gesamtsanierung",
     "phase": "31",
+    "subPhase": "31",
     "leadId": "oliviamusterli",
     "portfolio": "bildung",
     "priority": "tief",
@@ -10011,7 +10118,7 @@
         "label": "53 Inbetriebnahme"
       }
     ],
-    "organisation": "org-a"
+    "organisation": "bpi-1"
   },
   {
     "id": "pr196",
@@ -10020,6 +10127,7 @@
     "location": "Musterbiel, Via Sempione 69",
     "kind": "Brandschutz",
     "phase": "32",
+    "subPhase": "32",
     "leadId": "inesmusterli",
     "portfolio": "sport",
     "priority": "tief",
@@ -10107,7 +10215,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-a"
+    "organisation": "bpi-1"
   },
   {
     "id": "pr197",
@@ -10115,7 +10223,8 @@
     "title": "Beispielgrund, Lindenweg 90, Instandsetzung",
     "location": "Beispielgrund, Lindenweg 90",
     "kind": "Instandsetzung",
-    "phase": "52",
+    "phase": "5",
+    "subPhase": "52",
     "leadId": "leonbeispielmann",
     "portfolio": "ausland",
     "priority": "tief",
@@ -10179,7 +10288,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-d"
+    "organisation": "bpa"
   },
   {
     "id": "pr198",
@@ -10187,7 +10296,8 @@
     "title": "Beispielau, Alte Landstrasse 81, Unterhalt",
     "location": "Beispielau, Alte Landstrasse 81",
     "kind": "Unterhalt",
-    "phase": "52",
+    "phase": "5",
+    "subPhase": "52",
     "leadId": "saramusterli",
     "portfolio": "verwaltung",
     "priority": "tief",
@@ -10251,7 +10361,7 @@
         "label": "53"
       }
     ],
-    "organisation": "org-c"
+    "organisation": "bpi-1"
   },
   {
     "id": "pr199",
@@ -10259,7 +10369,8 @@
     "title": "Musterdorf, Seestrasse 48, Dachsanierung",
     "location": "Musterdorf, Seestrasse 48",
     "kind": "Dachsanierung",
-    "phase": "52",
+    "phase": "5",
+    "subPhase": "52",
     "leadId": "chiaramuster",
     "portfolio": "kultur",
     "priority": "mittel",
@@ -10323,6 +10434,6 @@
         "label": "53"
       }
     ],
-    "organisation": "org-c"
+    "organisation": "ppe-1"
   }
 ]

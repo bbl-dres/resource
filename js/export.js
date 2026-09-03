@@ -23,11 +23,9 @@ import { visibleColumns } from './columns.js';
 function columns(cols) {
   const list = visibleColumns(columnSet()).map(c => ({
     key: c.key,
-    // Two columns say something different on a spreadsheet than on screen:
-    // the credit is a bare number in millions, and the target names its quarter.
-    label: c.key === 'credit' ? `${t('Kredit')} ${t('Mio. CHF')}`
-      : c.key === 'target' ? `${t('Soll')} ${data.quarters[0].short}`
-        : t(c.label),
+    // One column says something different on a spreadsheet than on screen:
+    // the credit is a bare number in millions.
+    label: c.key === 'credit' ? `${t('Kredit')} ${t('Mio. CHF')}` : t(c.label),
     type: c.xls.type,
     width: c.xls.width
   }));
@@ -42,7 +40,6 @@ function projectCells(p, cols) {
   // Numbers must reach the workbook as numbers, not as the words the grid shows.
   row.id = p.number.replace('…', '');
   row.credit = p.credit ?? null;
-  row.target = p.target;
   cols.forEach(period => { row[period.id] = periodValue(demand, period); });
   return row;
 }
