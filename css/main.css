@@ -288,12 +288,14 @@ button, input, select, textarea { font: inherit; color: inherit; }
  * One measure for every page that carries the toolbar. The dashboard used to
  * keep the narrower one, and the toolbar — the same control row on every tab
  * — changed width on the way there, which read as a different page rather
- * than a different tab. Only the API reference stays at 1440px: it is prose,
- * where long lines cost more than they buy.
+ * than a different tab. The API reference kept 1440px for a while, as prose;
+ * but it opens from the same shell, and a page that steps in by 240px on each
+ * side read as a different site.
  */
 :root[data-tab="overview"],
 :root[data-tab="dashboard"],
 :root[data-tab="history"],
+:root[data-tab="api"],
 :root[data-tab="export"] { --layout-width: var(--layout-width-grid); }
 
 /*
@@ -1668,6 +1670,8 @@ button.pcell--val { cursor: pointer; }
    ========================================================================== */
 
 #swagger { margin-inline: calc(-1 * var(--space-10)); }
+/* Swagger caps its own wrapper at 1460px and centres it; the shell sets the measure. */
+#swagger .swagger-ui .wrapper { max-width: none; }
 #swagger .swagger-ui { font-family: var(--font-sans); }
 /*
  * Swagger's own scale put a 36px h2 above the page's 24px h1 and ran prose to
@@ -1704,6 +1708,12 @@ button.pcell--val { cursor: pointer; }
 #swagger .swagger-ui .info .description p,
 #swagger .swagger-ui .opblock-tag small p,
 #swagger .swagger-ui .opblock-description-wrapper p { margin-inline: 0 auto; }
+/*
+ * The introduction is the exception to the measure: it is the one text the
+ * reader meets before the operation list, and at 68ch beside an empty right
+ * half of the pane it read as a sidebar. It takes the pane.
+ */
+#swagger .swagger-ui .info .description p { max-width: none; }
 
 #swagger .swagger-ui .btn.authorize { color: var(--method-auth); border-color: var(--method-auth); }
 #swagger .swagger-ui .btn.authorize svg { fill: var(--method-auth); }
