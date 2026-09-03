@@ -150,7 +150,7 @@ function personSection() {
 
         <div class="pblock pblock--foot">
           <div class="prow prow--load" style="grid-template-columns:${raw(tpl)}">
-            <div style="grid-column:span 5" class="prow__sumlabel is-frozen">
+            <div style="grid-column:span ${PERSON_COLS.length}" class="prow__sumlabel is-frozen">
               ${t('Personen über 100 %')}
               <span class="prow__sumnote">${data.people.length} ${t('Personen')} · ${
                 data.people.reduce((a, p) => a + p.employment, 0)} % ${t('Anstellung')}</span>
@@ -168,9 +168,20 @@ function personSection() {
 }
 
 /** Card shell with the kebab export menu the mockup puts on every card. */
+/*
+ * What a card's menu offers, and what each row does. The labels used to come
+ * from dashboard.json and every row dispatched the card id as an export
+ * format, so «Als CSV exportieren» and «Link teilen» both produced an Excel
+ * file.
+ */
+const CARD_MENU = [
+  { label: 'Als CSV exportieren', act: 'export', val: 'csv' },
+  { label: 'Als Excel exportieren', act: 'export', val: 'xlsx' },
+  { label: 'Link teilen', act: 'share' }
+];
+
 function biCard(id, title, subtitle, body, { full = false, wide = false } = {}) {
   const open = state.menu === `card:${id}`;
-  const menu = data.dashboard.cardMenu;
   return html`<section class="bi-card ${full ? 'bi-card--full' : ''} ${wide ? 'bi-card--wide' : ''}" id="card-${id}">
     <header class="bi-card__head">
       <div>
@@ -182,8 +193,8 @@ function biCard(id, title, subtitle, body, { full = false, wide = false } = {}) 
                 aria-expanded="${open}" aria-haspopup="menu"
                 aria-label="${t('Karte exportieren oder teilen')}">${icons.kebab(15)}</button>
         ${open && html`<div class="dd__panel dd__panel--right" role="menu" style="width:212px">
-          ${menu.items.map(label => html`<button type="button" class="dd__item" role="menuitem"
-            data-act="export" data-val="${id}">${t(label)}</button>`)}
+          ${CARD_MENU.map(item => html`<button type="button" class="dd__item" role="menuitem"
+            data-act="${item.act}" ${attr(item.val, `data-val="${item.val}"`)}>${t(item.label)}</button>`)}
         </div>`}
       </div>
     </header>
@@ -318,7 +329,7 @@ function logFoot({ page, pages, from, rows, total }) {
     <div class="log__pager">
       ${dropdown({
         id: 'pagesize', label: `${state.pageSize} ${t('pro Seite')}`, width: 170, align: 'right',
-        body: html`${['25', '50', '100'].map(n =>
+        body: () => html`${['25', '50', '100'].map(n =>
           menuRadio(`${n} ${t('pro Seite')}`, state.pageSize === n, 'page-size', n))}`
       })}
       <button type="button" class="btn btn--square" data-act="page" data-val="-1"

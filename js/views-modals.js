@@ -1,16 +1,17 @@
 /* =============================================================================
-   views-modals.js — the four dialogs: a project's detail sheet, giving a
-   project a lead, moving a pensum to somebody else, and sharing the view.
+   views-modals.js — the dialogs: a project's detail sheet, a phase, a gate,
+   moving a pensum to somebody else, sharing the view, and the account.
 
    They share one shell (scrim, role="dialog", one close button) and differ
    only in their body, so they live together and away from the grid.
    ============================================================================= */
 
 import {
-  data, state, t, num, fmt, unitSuffix, cellValue, projectDemand, heatStep, personUtilisation, phaseOf, eppmOf
+  data, state, t, num, fmt, unitSuffix, cellValue, projectDemand, heatStep, personUtilisation, phaseOf, eppmOf,
+  nowIndex
 } from './store.js';
 
-import { html, icons, attr } from './ui.js';
+import { html, icons, attr, personOption, personSearch } from './ui.js';
 
 /**
  * One dialog head for all four: the same close button was written out four
@@ -112,6 +113,9 @@ export function renderModal() {
   const build = MODALS[state.modal.type];
   if (!build) return '';
   const body = build(state.modal);
+  /* A builder that found nothing to show returns nothing; an empty dialog
+     with a label pointing nowhere is not a fallback. */
+  if (!body) return '';
   return html`<div class="scrim" data-act="close-modal">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" data-stop>${body}</div>
   </div>`;
@@ -238,13 +242,14 @@ function projectModal({ projectId }) {
   const p = data.projectsById[projectId];
   const lead = p.leadId ? data.peopleById[p.leadId] : null;
   const cells = projectDemand(p);
-  const q0 = data.quarters[0];
+  const now = nowIndex();
+  const q0 = data.quarters[now];
   const nextMs = data.milestones.items
     .filter(m => m.projectId === p.id)
     .sort((a, b) => a.planDate.localeCompare(b.planDate))[0];
   const nextName = nextMs && data.milestoneCatalog[nextMs.code]?.name;
   const log = data.changes.filter(c => c.projectId === p.id);
-  const util = lead ? personUtilisation(lead.id, 0) : null;
+  const util = lead ? personUtilisation(lead.id, now) : null;
 
   // The wireframe is explicit: five facts, always the same, in this order.
   const facts = [
@@ -261,9 +266,9 @@ function projectModal({ projectId }) {
     },
     {
       term: `${t('Pensum')} ${q0.label}`,
-      value: fmt(cells[0]),
-      sub: `${t('Soll')} ${fmt(p.target)} · ${cells[0] > p.target ? t('über Soll') : t('im Soll')}`,
-      tone: cells[0] > p.target ? 'danger' : null
+      value: fmt(cells[now]),
+      sub: `${t('Soll')} ${fmt(p.target)} · ${cells[now] > p.target ? t('über Soll') : t('im Soll')}`,
+      tone: cells[now] > p.target ? 'danger' : null
     },
     {
       term: 'Kredit CHF',
@@ -273,7 +278,7 @@ function projectModal({ projectId }) {
     {
       term: 'Nächster Meilenstein',
       value: nextMs ? `${nextMs.code} · ${deDate(nextMs.planDate)}` : '—',
-      sub: nextMs ? `${nextName} · ${nextMs.statusLabel.replace('▲ ', '')}` : t('kein Gate im Zeitraum'),
+      sub: nextMs ? `${t(nextName ?? nextMs.code)} · ${t(nextMs.statusLabel).replace('▲ ', '')}` : t('kein Gate im Zeitraum'),
       tone: nextMs && nextMs.status !== 'ok' ? 'danger' : null
     }
   ];
@@ -358,18 +363,13 @@ function rebookModal({ projectId, q, amount, targetId, quarters = 2, search = ''
 
     <div class="rebook__to">
       <span class="rebook__label">${t('An')}</span>
-      <label class="dd__searchfield">
-        ${icons.search(15)}
-        <input type="search" role="combobox" aria-expanded="true" aria-controls="rebook-list"
-               data-act="rebook-search" data-fk="rebook-search" value="${search}"
-               placeholder="${t('Person suchen — Name oder Kürzel')}" aria-label="${t('Person suchen')}" autocomplete="off">
-      </label>
+      ${personSearch({ act: 'rebook-search', fk: 'rebook-search', value: search, listId: 'rebook-list',
+        placeholder: 'Person suchen — Name oder Kürzel' })}
+      ${candidates.length ? '' : html`<p class="rebook__empty">${t('Keine Person gefunden.')}</p>`}
       <ul class="rebook__list" id="rebook-list" role="listbox" aria-label="${t('Person wählen')}">
-        ${candidates.length ? candidates.map(c => html`<li role="option" tabindex="-1"
-            aria-selected="${c.id === targetId}" class="${c.id === targetId ? 'is-on' : ''}"
-            data-act="rebook-target" data-val="${c.id}">
-          <span>${c.name}</span><span class="rebook__role">${c.role}</span>
-        </li>`) : html`<li class="rebook__empty">${t('Keine Person gefunden.')}</li>`}
+        ${candidates.map(c => personOption({
+          id: c.id, name: c.name, meta: t(c.role), act: 'rebook-target', selected: c.id === targetId
+        }))}
       </ul>
     </div>
 

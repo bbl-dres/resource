@@ -200,16 +200,42 @@ export function subscribe(fn) {
  * Pass { silent: true } as second argument to skip the URL write
  * (used by the popstate handler so we don't fight the browser).
  */
+/*
+ * Every change of state, counted. Derived lists are memoised against it, so
+ * a list is computed once per change however many views ask for it in one
+ * render — filteredProjects() was filtered and sorted five times per render.
+ * Anything that changes what a derived list would say without going through
+ * setState — the search field written per keystroke, a project's lead moved
+ * by the picker — calls touch().
+ */
+let version = 0;
+export function touch() { version++; }
+
+function memo(fn) {
+  let at = -1;
+  let value;
+  return () => {
+    if (at !== version) { value = fn(); at = version; }
+    return value;
+  };
+}
+
 export function setState(patch, opts = {}) {
+  const tab = state.tab;
   Object.assign(state, typeof patch === 'function' ? patch(state) : patch);
-  if (!opts.silent) writeUrl();
+  version++;
+  if (!opts.silent) writeUrl({ push: state.tab !== tab });
   listeners.forEach(fn => fn(state));
 }
 
+/* Every transient layer closed at once — spread into any patch that opens a
+   new one, so a dialog cannot open over a live popover. */
+export const OVERLAYS_CLOSED = { menu: null, modal: null, editing: null, picking: null };
+
 /** Close every transient overlay. Used by Escape and by outside-clicks. */
 export function closeOverlays() {
-  if (state.menu === null && state.modal === null && state.editing === null && state.picking === null) return false;
-  setState({ menu: null, modal: null, editing: null, picking: null });
+  if (Object.keys(OVERLAYS_CLOSED).every(k => state[k] === null)) return false;
+  setState({ ...OVERLAYS_CLOSED });
   return true;
 }
 
@@ -219,55 +245,85 @@ export function closeOverlays() {
    -------------------------------------------------------------------------- */
 
 
-/** A sort key is a column name or a quarter, addressed as q0…q7. */
-const isSortKey = v => v in SORT_KEYS || /^q\d+$/.test(v);
+/*
+ * A sort key is a column name or a span of quarters — q3 for one, q4-7 for a
+ * period that averages several. Own keys only: `in` walked the prototype, so
+ * #?sort=toString passed and the first render threw.
+ */
+const isSortKey = v => typeof v === 'string'
+  && (Object.hasOwn(SORT_KEYS, v) || /^q\d+(?:-\d+)?$/.test(v));
 
+/* The filter lists, validated against the data. An id the data does not know
+   filtered the grid to nothing while the chip row said «keine». */
+const KNOWN = {
+  phase: () => new Set(data.phases.eppm.map(e => e.id)),
+  lead: () => new Set([...data.people.map(x => x.id), 'none']),
+  portfolio: () => new Set(Object.keys(data.portfoliosById)),
+  org: () => new Set(Object.keys(data.organisationsById))
+};
+
+/**
+ * The state the hash describes: every URL-carried key, with its default where
+ * the hash is silent. A key that was simply absent used to be left alone, so
+ * a hash without `phase=` — Back after a filter, a hand-edited address — kept
+ * the old filter while the address bar said otherwise.
+ *
+ * The language is not read: a shared link opens in the reader's own.
+ */
 export function readUrl() {
   const raw = location.hash.replace(/^#\/?\??/, '');
   const p = new URLSearchParams(raw);
-  const list = k => (p.get(k) || '').split(',').filter(Boolean);
+  const list = k => (p.get(k) || '').split(',').filter(id => KNOWN[k]().has(id));
   const patch = {};
 
-  // An unknown value is dropped rather than passed on: the default it falls
-  // back to is always renderable.
+  // An unknown value falls back to the default, which is always renderable.
   for (const [key, allowed] of Object.entries(VOCAB)) {
+    if (key === 'lang') continue;
     const v = p.get(key === 'sortDir' ? 'dir' : key);
-    if (v && allowed.includes(v)) patch[key] = v;
+    patch[key] = allowed.includes(v) ? v : DEFAULT_STATE[key];
   }
   /* The old bar plan's address still opens the bar plan. */
-  if (p.get('tab') === 'schedule') { patch.tab = 'overview'; patch.view ??= 'termine'; }
+  if (p.get('tab') === 'schedule') { patch.tab = 'overview'; if (!p.has('view')) patch.view = 'termine'; }
   /*
-   * A named view brings its layers; «custom» reads them off the hash and takes
-   * the default set for anything it does not name. A view named without its
-   * layers, or layers without a view, resolve to what the layers say.
+   * A named view brings its layers; «custom» reads them off the hash, and a
+   * layer the hash does not name is off. Layers without a view resolve to
+   * whatever set they are.
    */
   if (patch.view === 'custom' || p.has('layers')) {
-    const on = list('layers');
-    patch.layers = Object.fromEntries(LAYER_KEYS.map(k => [k, on.includes(k)]));
+    const on = new Set((p.get('layers') || '').split(','));
+    patch.layers = Object.fromEntries(LAYER_KEYS.map(k => [k, on.has(k)]));
     patch.view = viewOf(patch.layers);
-  } else if (patch.view) {
+  } else {
     patch.layers = { ...VIEW_PRESETS[patch.view] };
   }
-  if (isSortKey(p.get('sort'))) patch.sort = p.get('sort');
-  if (p.get('from')) patch.periodOffset = Math.max(0, Number(p.get('from')) || 0);
-  if (p.get('page')) patch.page = Math.max(1, Number(p.get('page')) || 1);
-  if (p.has('q')) patch.search = p.get('q');
-  if (p.has('phase')) patch.phases = list('phase');
-  if (p.has('lead')) patch.leads = list('lead');
-  if (p.has('portfolio')) patch.portfolios = list('portfolio');
-  if (p.has('org')) patch.organisations = list('org');
+  patch.sort = isSortKey(p.get('sort')) ? p.get('sort') : DEFAULT_STATE.sort;
+  /* Clamped where it is read: an offset past the end left «Zurück» enabled
+     with a first click that only found the edge. */
+  const last = Math.max(0, allPeriods(patch.scale).length - windowColumns(patch.scale));
+  patch.periodOffset = Math.min(last, Math.max(0, Math.trunc(Number(p.get('from')) || 0)));
+  patch.page = Math.max(1, Math.trunc(Number(p.get('page')) || 1));
+  patch.search = p.get('q') ?? '';
+  patch.searchOpen = patch.search !== '';   // a link with a query opens the field
+  patch.phases = list('phase');
+  patch.leads = list('lead');
+  patch.portfolios = list('portfolio');
+  patch.organisations = list('org');
   return patch;
 }
 
-let suppressUrl = false;
-
-export function writeUrl() {
-  if (suppressUrl) return;
+/**
+ * The hash for the current state. A change of tab is a navigation step and
+ * earns a history entry; anything else — a filter, a sort, a step of the
+ * window — replaces the current one, so Back walks tabs rather than every
+ * keystroke. The push used to happen in a listener after the replace, which
+ * overwrote the previous tab's address and left Back on an identical hash.
+ */
+export function writeUrl({ push = false } = {}) {
   const p = new URLSearchParams();
   p.set('tab', state.tab);
   if (state.tab === 'export') p.set('sheet', state.sheet);
   if (state.tab === 'export' && state.paper !== 'a4') p.set('paper', state.paper);
-  if (state.lang !== 'de') p.set('lang', state.lang);
+  if (state.tab === 'export' && state.zoom !== 'fit') p.set('zoom', state.zoom);
   if (state.unit !== 'pct') p.set('unit', state.unit);
   if (state.view !== 'pensum') p.set('view', state.view);
   if (state.view === 'custom') p.set('layers', LAYER_KEYS.filter(k => state.layers[k]).join(','));
@@ -286,14 +342,14 @@ export function writeUrl() {
   if (state.portfolios.length) p.set('portfolio', state.portfolios.join(','));
   if (state.organisations.length) p.set('org', state.organisations.join(','));
   const next = '#?' + p.toString();
-  if (next !== location.hash) history.replaceState(null, '', next);
+  if (next === location.hash) return;
+  if (push) history.pushState(null, '', next);
+  else history.replaceState(null, '', next);
 }
 
 /** Apply the URL to state without writing it back. */
 export function syncFromUrl() {
-  suppressUrl = true;
   setState(readUrl(), { silent: true });
-  suppressUrl = false;
 }
 
 /* -----------------------------------------------------------------------------
@@ -320,10 +376,21 @@ export async function load() {
 
   // Grouped once here rather than scanned per row in four different views.
   data.milestonesByProject = groupBy(data.milestones.items, m => m.projectId);
-  data.projectsByLead = groupBy(data.projects, p => p.leadId ?? 'none');
   data.milestoneCatalog = Object.fromEntries(data.milestones.catalog.map(c => [c.code, c]));
   return data;
 }
+
+/*
+ * The projects a person leads. Derived per change of state rather than
+ * indexed once at load: the picker and the rebooking move a lead, and an
+ * index built at boot went on attributing that project's edits to the person
+ * who used to have it.
+ */
+const leadIndex = memo(() => groupBy(data.projects, p => p.leadId ?? 'none'));
+export const projectsOf = personId => leadIndex()[personId] ?? [];
+
+/** The quarter that is «now» — the horizon happens to start there, but no view should count on it. */
+export const nowIndex = () => data.quarterIndex[data.meta.todayQuarter] ?? 0;
 
 /** Bucket a list by a key, preserving the order within each bucket. */
 function groupBy(list, keyOf) {
@@ -419,7 +486,7 @@ export function isEdited(project, q) {
 export function loadDelta(personId, q) {
   if (!data.peopleById[personId]) return 0;
   let delta = 0;
-  for (const p of data.projectsByLead[personId] ?? []) {
+  for (const p of projectsOf(personId)) {
     const o = state.overrides[`${p.id}:${q}`];
     if (o !== undefined) delta += o - p.demand[q];
   }
@@ -433,11 +500,15 @@ export function personLoad(personId, q) {
   return Math.round(person.baseLoad[q] + loadDelta(personId, q));
 }
 
-/** The same load against their own contract. The one place the unit changes. */
-export function personUtilisation(personId, q) {
+/**
+ * The same load against their own contract. The one place the unit changes.
+ * `delta` is an edit not yet applied — the editor asks what the person would
+ * be at — so that conversion happens here too and nowhere else.
+ */
+export function personUtilisation(personId, q, delta = 0) {
   const person = data.peopleById[personId];
   if (!person) return null;
-  return Math.round(personLoad(personId, q) / person.employment * 100);
+  return Math.round((personLoad(personId, q) + delta) / person.employment * 100);
 }
 
 /* -----------------------------------------------------------------------------
@@ -461,7 +532,8 @@ export function totals(projects = filteredProjects()) {
   const sum = (list, q) => list.reduce((a, p) => a + cellValue(p, q), 0);
 
   const demand = qs.map(q => sum(projects, q));
-  const preCredit = qs.map(q => sum(projects.filter(p => p.preCredit), q));
+  const pending = projects.filter(p => p.preCredit);
+  const preCredit = qs.map(q => sum(pending, q));
 
   const external = data.capacity.external;
   const net = qs.map(netCapacity);
@@ -556,9 +628,10 @@ const eppmRank = id => String(Math.max(0, data.phases.eppm.findIndex(e => e.id =
    Derived: filtering, sorting, grouping
    -------------------------------------------------------------------------- */
 
-export function filteredProjects() {
+/** The projects in scope, filtered and sorted — once per change of state. */
+export const filteredProjects = memo(() => {
   const q = state.search.trim().toLowerCase();
-  let list = data.projects.filter(p => {
+  const list = data.projects.filter(p => {
     if (state.phases.length && !state.phases.includes(p.phase)) return false;
     if (state.leads.length) {
       const key = p.leadId ?? 'none';
@@ -567,7 +640,7 @@ export function filteredProjects() {
     if (state.portfolios.length && !state.portfolios.includes(p.portfolio)) return false;
     if (state.organisations.length && !state.organisations.includes(p.organisation)) return false;
     if (q) {
-      const lead = p.leadId ? data.peopleById[p.leadId].name : 'nicht zugewiesen';
+      const lead = data.peopleById[p.leadId]?.name ?? 'nicht zugewiesen';
       const hay = `${p.title} ${p.number} ${lead} ${p.kind}`.toLowerCase();
       if (!hay.includes(q)) return false;
     }
@@ -575,7 +648,7 @@ export function filteredProjects() {
   });
 
   return sortProjects(list);
-}
+});
 
 const MONTHS_DE = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
 
@@ -591,9 +664,7 @@ const MONTHS_DE = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep
  * quarter and each covers a third of it, which `quarters` alone cannot say —
  * and without it the today marker cannot be placed.
  */
-export function periods() {
-  return markYears(buildPeriods());
-}
+export const periods = memo(() => markYears(buildPeriods()));
 
 /**
  * A year starts wherever a column's year differs from the one before it. Both
@@ -626,8 +697,19 @@ function markYears(cols) {
 const WINDOW_COLUMNS = { year: 12, quarter: 16, month: 24 };
 export const windowColumns = (scale = state.scale) => WINDOW_COLUMNS[scale] ?? 12;
 
-/** Every column of the horizon at a scale, before the window is cut. */
+/**
+ * Every column of the horizon at a scale, before the window is cut. The
+ * horizon does not change after load, so each scale is built once: it used
+ * to be rebuilt on every periods(), maxOffset() and windowEdges() call — at
+ * least four times a render, and once more per group card.
+ */
+const horizon = new Map();
 function allPeriods(scale = state.scale) {
+  if (!horizon.has(scale)) horizon.set(scale, buildHorizon(scale));
+  return horizon.get(scale);
+}
+
+function buildHorizon(scale) {
   const qs = data.quarters;
 
   if (scale === 'year') {
@@ -644,6 +726,7 @@ function allPeriods(scale = state.scale) {
 
   if (scale === 'month') {
     const out = [];
+    const thisMonth = new Date(data.meta.today + 'T00:00:00').getMonth();
     for (let n = 0; n < qs.length * 3; n++) {
       const qi = Math.floor(n / 3);
       const q = qs[qi];
@@ -654,7 +737,7 @@ function allPeriods(scale = state.scale) {
         label: `${MONTHS_DE[month]} ${q.year}`,
         short: `${MONTHS_DE[month]} ${String(q.year).slice(2)}`,
         quarters: [qi],
-        isNow: qi === 0 && month === new Date(data.meta.today + 'T00:00:00').getMonth(),
+        isNow: qi === 0 && month === thisMonth,
         from: qi + slice / 3, to: qi + (slice + 1) / 3
       });
     }
@@ -737,20 +820,29 @@ export const SORT_KEYS = {
   id:        { label: 'ID', numeric: false, value: p => p.number },
   project:   { label: 'Projekt', numeric: false, value: p => p.title },
   phase:     { label: 'Phase (ePPM)', numeric: false, value: p => eppmRank(p.phase) },
-  lead:      { label: 'Bearbeitender', numeric: false, value: p => (p.leadId ? data.peopleById[p.leadId].name : '\uffff') },
-  portfolio: { label: 'Teilportfolio', numeric: false, value: p => data.portfoliosById[p.portfolio].label },
+  lead:      { label: 'Bearbeitender', numeric: false, value: p => data.peopleById[p.leadId]?.name ?? '\uffff' },
+  portfolio: { label: 'Teilportfolio', numeric: false, value: p => data.portfoliosById[p.portfolio]?.label ?? '' },
   organisation: { label: 'Organisation', numeric: false, value: p => data.organisationsById[p.organisation]?.label ?? '' },
   credit:    { label: 'Kredit CHF', numeric: true, value: p => p.credit ?? -1 }
 };
 
-/** Resolve a sort key, including the per-quarter ones. */
+/**
+ * Resolve a sort key, including the per-period ones. A period column sorts by
+ * the figure it shows — the average of its quarters — not by its first
+ * quarter alone, which is what a year column used to do.
+ */
 export function sortKey(key = state.sort) {
-  const q = /^q(\d+)$/.exec(key);
+  const q = /^q(\d+)(?:-(\d+))?$/.exec(key);
   if (q) {
-    const i = Number(q[1]);
-    return { label: data.quarters[i]?.label ?? key, numeric: true, value: p => cellValue(p, i) };
+    const from = Number(q[1]);
+    const to = q[2] === undefined ? from : Number(q[2]);
+    const span = { quarters: Array.from({ length: to - from + 1 }, (_, i) => from + i) };
+    return {
+      label: data.quarters[from]?.label ?? key, numeric: true,
+      value: p => periodValue(projectDemand(p), span)
+    };
   }
-  return SORT_KEYS[key] ?? SORT_KEYS.project;
+  return Object.hasOwn(SORT_KEYS, key) ? SORT_KEYS[key] : SORT_KEYS.project;
 }
 
 /** Numbers read high-to-low by default, names A–Z. */
@@ -758,6 +850,7 @@ export const defaultDir = key => (sortKey(key).numeric ? 'desc' : 'asc');
 
 /** One collator for the whole app: localeCompare builds a fresh one per call. */
 const collator = new Intl.Collator('de');
+export const compareDe = (a, b) => collator.compare(String(a), String(b));
 
 export function sortProjects(list) {
   const { numeric, value } = sortKey();
@@ -976,16 +1069,6 @@ export function pageOf(rows) {
   return { rows: rows.slice(from, from + size), page, pages, from, total: rows.length };
 }
 
-export function milestoneStats() {
-  const all = data.milestones.items;
-  return {
-    total: all.length,
-    onTime: all.filter(m => m.status === 'ok').length,
-    late: all.filter(m => m.status === 'late').length,
-    open: all.filter(m => m.forecast === null).length
-  };
-}
-
 /* -----------------------------------------------------------------------------
    Derived: the KPI strip, shared by every tab
    -------------------------------------------------------------------------- */
@@ -1004,7 +1087,7 @@ export function personRows() {
     const load = data.quarters.map((_, q) => personLoad(person.id, q));
     const values = cols.map(col =>
       Math.round(periodValue(load, col) / person.employment * 100));
-    const leads = data.projectsByLead[person.id]?.length ?? 0;
+    const leads = projectsOf(person.id).length;
     return {
       person, values, leads,
       peak: leads ? Math.max(...values) : null,
@@ -1024,7 +1107,8 @@ export const P_SORTS = {
 
 export function sortPersonRows(rows) {
   const q = /^q(\d+)$/.exec(state.pSort);
-  const value = q ? (r => r.values[Number(q[1])] ?? -1) : (P_SORTS[state.pSort] ?? P_SORTS.peak);
+  const value = q ? (r => r.values[Number(q[1])] ?? -1)
+    : (Object.hasOwn(P_SORTS, state.pSort) ? P_SORTS[state.pSort] : P_SORTS.peak);
   const dir = state.pDir === 'asc' ? 1 : -1;
   return [...rows].sort((a, b) => {
     const x = value(a), y = value(b);
@@ -1035,10 +1119,13 @@ export function sortPersonRows(rows) {
 export function kpis() {
   const list = filteredProjects();
   const tot = totals(list);
+  const now = nowIndex();
   const credit = list.reduce((a, p) => a + (p.credit ?? 0), 0);
   const peak = data.dashboard.creditByYear.rows.reduce((a, r) => (r.value > a.value ? r : a));
-  const over = data.people.filter(p => personLoad(p.id, 0) > 100)
-    .sort((a, b) => personUtilisation(b.id, 0) - personUtilisation(a.id, 0));
+  /* Over their own contract, as the Ampel and the bell count it — by
+     utilisation, not by pensum points, which agree only for full-time leads. */
+  const over = data.people.filter(p => personUtilisation(p.id, now) > 100)
+    .sort((a, b) => personUtilisation(b.id, now) - personUtilisation(a.id, now));
   const overQuarters = tot.utilisation.filter(v => v > 100).length;
   const lastOver = tot.utilisation.reduce((last, v, i) => (v > 100 ? i : last), -1);
   const unassigned = list.filter(p => !p.leadId);
@@ -1056,18 +1143,18 @@ export function kpis() {
     },
     utilisation: {
       label: 'Auslastung',
-      value: `${tot.utilisation[0]} %`,
-      note: `${tot.portfolio[0]} % Bedarf auf ${tot.net[0]} % netto · ` + (lastOver >= 0
+      value: `${tot.utilisation[now]} %`,
+      note: `${tot.portfolio[now]} % Bedarf auf ${tot.net[now]} % netto · ` + (lastOver >= 0
         ? `Überlast bis ${data.quarters[lastOver].label}`
         : 'keine Überlast im Zeitraum'),
-      alert: tot.utilisation[0] > 100
+      alert: tot.utilisation[now] > 100
     },
     people: {
       label: 'Personen über 100 %',
       value: `${over.length} von ${data.people.length}`,
       // Three names give the note a face; a list of twenty is a wall.
       note: over.length
-        ? '▲ ' + over.slice(0, 3).map(p => `${p.shortName} ${personLoad(p.id, 0)}`).join(' · ')
+        ? '▲ ' + over.slice(0, 3).map(p => `${p.shortName} ${personUtilisation(p.id, now)}`).join(' · ')
         : 'alle innerhalb der Anstellung',
       /* A number, not an instruction. This used to name a DOM id and an
          action — #card-people, which nothing has rendered since the person

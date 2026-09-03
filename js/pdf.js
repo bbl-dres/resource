@@ -86,6 +86,7 @@ const ASCII_BOLD = [
 const ACCENT_BASE = {
   0xE4: 'a', 0xF6: 'o', 0xFC: 'u', 0xE9: 'e', 0xE8: 'e', 0xE0: 'a', 0xE7: 'c',
   0xC4: 'A', 0xD6: 'O', 0xDC: 'U', 0xC9: 'E', 0xDF: 's',
+  0xC0: 'A', 0xE2: 'a', 0xEA: 'e', 0xEB: 'e', 0xEC: 'i', 0xEE: 'i', 0xEF: 'i', 0xF4: 'o', 0xF2: 'o', 0xF9: 'u', 0xFB: 'u',
   0xAB: 'w', 0xBB: 'w', 0xB7: '.', 0x96: '-', 0x97: 'm', 0x85: 'm', 0x92: "'"
 };
 
@@ -132,7 +133,7 @@ export function createPdf() {
       const kids = [];
       for (const page of pages) {
         const content = add(`<< /Length ${page.stream.length} >>\nstream\n${page.stream}\nendstream`);
-        kids.push(add(`<< /Type /Page /Parent ${pagesId + 1} 0 R `
+        kids.push(add(`<< /Type /Page /Parent ${pagesId} 0 R `
           + `/MediaBox [0 0 ${round(page.w)} ${round(page.h)}] `
           + `/Resources ${resources} /Contents ${content} 0 R >>`));
       }

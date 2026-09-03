@@ -46,30 +46,51 @@ export function todayFraction(cols) {
   return (i + (at - col.from) / (col.to - col.from)) / cols.length;
 }
 
-/** The legend items for what a bar and a gate can say. Both grids draw them. */
-export const barLegendGroups = () => [
-  {
-    label: 'Balken',
-    items: html`${legendItem(html`<span class="legend__swatch is-delay"></span>`, 'Verzug')}
-      ${legendItem(html`<span class="legend__swatch is-nolead"></span>`, 'ohne Bearbeitenden')}`
-  },
-  {
-    label: 'Meilenstein',
-    items: legendItem(html`<span class="diamond"></span>`, 'Gate am Phasenende')
-  }
-];
-
 /**
- * The bar plan spends colour only on exceptions, so the legend only has to
- * name those — plus the utilisation bands, which lost their words when the
- * capacity band was reduced to figures.
+ * One legend for the plan wherever it is drawn — the grid, the pensum sheet,
+ * the bar-plan sheet. It says whatever the layers say: the ramp only while
+ * the figures are coloured, the bars and the gates only while they are drawn,
+ * the utilisation bands only while the totals are. Three views used to build
+ * the same four groups by hand, and filtered the bar groups by their German
+ * label.
  */
-export function ganttLegend(cls = '') {
-  const l = data.print.legend;
+export function planLegend({ layers, coloured: on, legend, cls = '' }) {
   return legendBlock([
-    ...barLegendGroups(),
-    { label: 'Auslastung', items: html`${t(l.thresholds).replace(/^Auslastung:\s*/, '')}` }
+    {
+      label: 'Pensum',
+      items: on
+        ? legend.steps.map(s => legendItem(html`<span class="legend__swatch heat-${s.step}"></span>`, s.label))
+        : null
+    },
+    {
+      label: 'Balken',
+      items: layers.phases
+        ? html`${legendItem(html`<span class="legend__swatch is-delay"></span>`, 'Verzug')}
+          ${legendItem(html`<span class="legend__swatch is-nolead"></span>`, 'ohne Bearbeitenden')}`
+        : null
+    },
+    {
+      label: 'Meilenstein',
+      items: layers.gates ? legendItem(html`<span class="diamond"></span>`, 'Gate am Phasenende') : null
+    },
+    {
+      label: 'Markierung',
+      /* The bar legend already names «ohne Bearbeitenden». */
+      items: layers.phases ? null : legendItem(html`<span class="legend__swatch is-nolead"></span>`, legend.noLead)
+    },
+    {
+      label: 'Auslastung',
+      items: layers.values ? html`${t(legend.thresholds).replace(/^Auslastung:\s*/, '')}` : null
+    }
   ], cls);
+}
+
+/** The bar plan's own legend: bars, gates and the utilisation bands. */
+export function ganttLegend(cls = '') {
+  return planLegend({
+    layers: { values: true, phases: true, gates: true }, coloured: false,
+    legend: data.print.legend, cls
+  });
 }
 
 /**
@@ -105,6 +126,9 @@ export function ganttRow(p, cols, lay) {
   const bars = p.bars ?? [];
   const delayed = bars.some(b => b.delay);
   const rail = p.unassigned ? 'is-unassigned' : delayed ? 'is-delayed' : '';
+  const marks = gatePlaces(p, cols);
+  const placed = placeBars(bars, cols);
+  const open = bars.find(b => b.openEnd);
 
   return html`<div class="gantt__row ${rail}" style="grid-template-columns:${raw(lay.tpl)}">
     ${lay.shown.map(col => html`<div
@@ -113,13 +137,9 @@ export function ganttRow(p, cols, lay) {
     <div class="gantt__track">
       ${cols.map((col, n) => html`<span class="gantt__gridline ${yearRule(col)}"
         style="grid-column:${n + 1}"></span>`)}
-      ${(() => {
-        const marks = gatePlaces(p, cols);
-        const placed = placeBars(bars, cols);
-        return html`${placed.map((at) => ganttBar(at, placed, cols, p, lay, marks))}
-          ${gates(marks, cols, p)}`;
-      })()}
-      ${bars.some(b => b.openEnd) && openEndRail(bars.find(b => b.openEnd), cols)}
+      ${placed.map(at => ganttBar(at, placed, cols, p, lay, marks))}
+      ${gates(marks, cols, p)}
+      ${open && openEndRail(open, cols)}
     </div>
   </div>`;
 }
@@ -290,18 +310,24 @@ function ganttBar(at, placed, cols, p, lay, gates, compact = false) {
     ? Math.max(0, run.from - at.from * (lay.colWidth || 0))
     : 0;
   const full = t(phaseOf(b.phase).label);
+  const pos = `left:${left}%;width:${width}%;padding-left:${inset}px`;
   /*
    * Under the figures the bar is scenery: the cell above it is the control,
    * and a bar that answered the pointer would take the bottom 14px of every
-   * cell away from the editor. It keeps its name in the title, so a bar that
-   * had to fall back to «31» can still be asked what 31 is.
+   * cell away from the editor. So it is not a button there — a button that
+   * cannot be reached by pointer or by keyboard was still announced as one,
+   * five hundred times a grid — and not announced at all.
    */
-  return html`<button type="button" class="${cls}"
-      style="left:${left}%;width:${width}%;padding-left:${inset}px"
-      data-act="open-phase" data-val="${p.id}:${b.from}" ${compact ? raw('tabindex="-1"') : ''}
-      title="${t(b.milestone) || full}" aria-label="${p.title}: ${full}">
-    <span class="gantt__barlabel">${compact ? bandText(b, run) : barText(b, run)}</span>
-    ${b.continues && !compact && html`<span class="gantt__more" aria-hidden="true">${icons.chevronRight(13)}</span>`}
+  if (compact) {
+    return html`<span class="${cls}" style="${pos}" aria-hidden="true">
+      <span class="gantt__barlabel">${bandText(b, run)}</span>
+    </span>`;
+  }
+  return html`<button type="button" class="${cls}" style="${pos}"
+      data-act="open-phase" data-val="${p.id}:${b.from}"
+      title="${full}" aria-label="${p.title}: ${full}">
+    <span class="gantt__barlabel">${barText(b, run)}</span>
+    ${b.continues && html`<span class="gantt__more" aria-hidden="true">${icons.chevronRight(13)}</span>`}
   </button>`;
 }
 

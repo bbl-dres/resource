@@ -113,7 +113,11 @@ export function safeHref(href) {
 const pxCache = new Map();
 export function tokenPx(name) {
   if (!pxCache.has(name)) {
-    pxCache.set(name, parseInt(getComputedStyle(document.documentElement).getPropertyValue(name), 10));
+    const px = parseInt(getComputedStyle(document.documentElement).getPropertyValue(name), 10);
+    /* A misspelled token used to cache NaN for the life of the page and hand
+       it to a grid template, where it is silently invalid. */
+    if (Number.isNaN(px)) throw new Error(`Unknown design token ${name}`);
+    pxCache.set(name, px);
   }
   return pxCache.get(name);
 }
@@ -186,10 +190,12 @@ export const pinLeft = (s, k) => (s[k] === undefined ? '' : `left:${s[k]}px`);
  */
 export function sortableHead({ key, label, act, active, ascending, cls = '', style = '', title = '' }) {
   const name = typeof label === 'string' ? label : key;
+  /* The direction is a glyph the reader sees; the name says it for everyone else. */
+  const dir = active ? `, ${t(ascending ? 'aufsteigend' : 'absteigend')}` : '';
   return html`<span class="pcell--text ${cls} ${active ? 'is-sorted' : ''}" style="${style}">
     <button type="button" class="sorthead" data-act="${act}" data-val="${key}"
             title="${title || `${t('Sortieren nach')} ${name}`}"
-            aria-label="${t('Sortieren nach')} ${name}">
+            aria-label="${t('Sortieren nach')} ${name}${dir}"
       <span class="sorthead__label">${label}</span>
       <span class="sorthead__dir" aria-hidden="true">${active ? (ascending ? '↑' : '↓') : ''}</span>
     </button>
@@ -218,6 +224,11 @@ export function badge(n) {
  * A dropdown trigger + panel. `body` is the panel content.
  * `id` doubles as the state.menu key.
  */
+/*
+ * `body` is a function: the panel is only built while the menu is open. Given
+ * as markup, every closed menu was rendered and thrown away on every render —
+ * the lead menu alone filtered and drew forty rows per keystroke in the search.
+ */
 export function dropdown({ id, label, lead, count, width = 244, align = 'left', body, cls = '', title = '' }) {
   const open = state.menu === id;
   return html`<div class="dd ${cls}" data-menu="${id}">
@@ -225,7 +236,7 @@ export function dropdown({ id, label, lead, count, width = 244, align = 'left', 
             aria-expanded="${open}" aria-haspopup="menu" ${title && raw(`title="${esc(title)}"`)}>
       ${lead ?? ''}${label}${count ? badge(count) : ''}${icons.chevronDown()}
     </button>
-    ${open && menuPanel({ align, width, body })}
+    ${open && menuPanel({ align, width, body: typeof body === 'function' ? body() : body })}
   </div>`;
 }
 
@@ -279,8 +290,8 @@ export function menuTick(label, on, act, val, meta) {
   </button>`;
 }
 
-export function segmented(options, value, act) {
-  return html`<div class="segmented" role="group">
+export function segmented(options, value, act, label = '') {
+  return html`<div class="segmented" role="group" ${label && raw(`aria-label="${esc(t(label))}"`)}>
     ${options.map(o => html`<button type="button" class="${o.value === value ? 'is-on' : ''}"
       aria-pressed="${o.value === value}" data-act="${act}" data-val="${o.value}">${t(o.label)}</button>`)}
   </div>`;
@@ -288,6 +299,52 @@ export function segmented(options, value, act) {
 
 
 export function divider() { return html`<div class="dd__divider"></div>`; }
+
+/* -----------------------------------------------------------------------------
+   Popovers and person lists — shared by the pensum editor, the Bearbeitender
+   picker and the rebooking dialog, which used to spell each of these out.
+   -------------------------------------------------------------------------- */
+
+const POP_GAP = 6;     // clear of the cell; mirrors --space-3
+const POP_EDGE = 8;    // how close a popover may come to the window edge
+
+/**
+ * Where a popover of this size goes: under its anchor, flipped above it when
+ * there is no room below, and kept inside the window sideways. `x` is the
+ * horizontal edge it lines up with — the cell's right edge less its own width
+ * for the editor, the cell's left edge for the picker. Returned as the style
+ * fragment the element carries, in viewport space, so no scroll container can
+ * clip it.
+ */
+export function popoverPosition(anchor, { width, height, x }) {
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const left = Math.min(Math.max(POP_EDGE, x), vw - width - POP_EDGE);
+  const below = anchor.bottom + POP_GAP;
+  const flip = below + height > vh - POP_EDGE && anchor.top - height - POP_GAP > POP_EDGE;
+  const top = flip ? anchor.top - height - POP_GAP : Math.min(below, Math.max(POP_EDGE, vh - height - POP_EDGE));
+  return `left:${Math.round(left)}px; top:${Math.round(top)}px`;
+}
+
+/** A person in a list to choose from: a mark, the name, and what they carry. */
+export function personOption({ id, name, meta = '', mark = '', selected = false, act, cls = '' }) {
+  return html`<li role="option" tabindex="-1" class="${cls} ${selected ? 'is-on' : ''}"
+      aria-selected="${selected}" data-act="${act}" data-val="${id}">
+    ${mark && html`<span class="ampel ampel--${mark}" aria-hidden="true"></span>`}
+    <span class="person__name">${name}</span>
+    ${meta && html`<span class="rebook__role">${meta}</span>`}
+  </li>`;
+}
+
+/** The search field over such a list, wired to it as a combobox. */
+export function personSearch({ act, fk, value, listId, placeholder = 'Person suchen' }) {
+  return html`<label class="dd__searchfield">
+    ${icons.search(15)}
+    <input type="search" role="combobox" aria-expanded="true" aria-controls="${listId}"
+           data-act="${act}" data-fk="${fk}" value="${value}"
+           placeholder="${t(placeholder)}" aria-label="${t(placeholder)}" autocomplete="off">
+  </label>`;
+}
 
 /* -----------------------------------------------------------------------------
    Application shell
@@ -603,7 +660,7 @@ export function toolbar({ time = false, view = false, print = false, exclude = [
          the value is the part a reader has to see. */
       label: html`<span class="btn__prefix">${t('Gruppieren nach')}:</span><span>${t(groupLabel)}</span>`,
       title: `${t('Gruppieren nach')}: ${t(groupLabel)}`,
-      body: html`${menuGroupLabel(t('Gruppieren nach'))}
+      body: () => html`${menuGroupLabel(t('Gruppieren nach'))}
         ${GROUPS.map(g => menuRadio(t(g.label), state.group === g.id, 'group', g.id))}`
     })}
 
@@ -612,7 +669,7 @@ export function toolbar({ time = false, view = false, print = false, exclude = [
     ${dropdown({
       id: 'portfolio', lead: icons.filter(), label: t('Teilportfolio'),
       count: state.portfolios.length, width: 276,
-      body: html`${menuGroupLabel(t('Mehrfachauswahl'))}
+      body: () => html`${menuGroupLabel(t('Mehrfachauswahl'))}
         <div class="dd__bulk">
           <button type="button" data-act="bulk" data-kind="portfolios" data-val="all">${t('Alle')}</button>
           <span aria-hidden="true">·</span>
@@ -624,7 +681,7 @@ export function toolbar({ time = false, view = false, print = false, exclude = [
     ${dropdown({
       id: 'phase', lead: icons.filter(), label: t('Phase (ePPM)'),
       count: state.phases.length, width: 284,
-      body: html`${menuGroupLabel(t('Phase (ePPM) · Mehrfachauswahl'))}
+      body: () => html`${menuGroupLabel(t('Phase (ePPM) · Mehrfachauswahl'))}
         <div class="dd__bulk">
           <button type="button" data-act="bulk" data-kind="phases" data-val="all">${t('Alle')}</button>
           <span aria-hidden="true">·</span>
@@ -636,7 +693,7 @@ export function toolbar({ time = false, view = false, print = false, exclude = [
     ${dropdown({
       id: 'organisation', lead: icons.filter(), label: t('Organisation'),
       count: state.organisations.length, width: 244,
-      body: html`${menuGroupLabel(t('Mehrfachauswahl'))}
+      body: () => html`${menuGroupLabel(t('Mehrfachauswahl'))}
         <div class="dd__bulk">
           <button type="button" data-act="bulk" data-kind="organisations" data-val="all">${t('Alle')}</button>
           <span aria-hidden="true">·</span>
@@ -650,7 +707,7 @@ export function toolbar({ time = false, view = false, print = false, exclude = [
     ${dropdown({
       id: 'lead', lead: icons.filter(), label: t('Bearbeitender'),
       count: state.leads.length, width: 312,
-      body: leadMenuBody()
+      body: leadMenuBody
     })}
 
     ${mine ? html`<label class="toolbar__check">
@@ -670,7 +727,7 @@ export function toolbar({ time = false, view = false, print = false, exclude = [
       <span class="toolbar__sep" aria-hidden="true"></span>`}
 
     ${view && dropdown({
-      id: 'view', label: t('Ansicht'), width: 296, align: 'right', body: viewMenuBody({ exclude, print })
+      id: 'view', label: t('Ansicht'), width: 296, align: 'right', body: () => viewMenuBody({ exclude, print })
     })}
   </div>`;
 }

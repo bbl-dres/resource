@@ -7,7 +7,7 @@
    ============================================================================= */
 
 import {
-  data, state, t, num, unitSuffix, cellValue, projectDemand, ampel, printPeriods, columnSet, coloured,
+  data, state, t, num, cellValue, projectDemand, printPeriods, columnSet, coloured,
   periodValue,
   totals, loadStatus, heatStep, filteredProjects, activeFilters,
   groupProjects
@@ -16,10 +16,10 @@ import {
 import {
   html, raw, attr, icons, pageHeader, toolbar, activeFilterRow, noResults,
   dropdown, menuRadio,
-  scopeLine, legendBlock, legendItem, yearRule
+  scopeLine, yearRule
 } from './ui.js';
 import { visibleColumns, leadLayout } from './columns.js';
-import { ganttRow, ganttLegend, phaseBand, barLegendGroups } from './views-schedule.js';
+import { ganttRow, ganttLegend, phaseBand, planLegend } from './views-schedule.js';
 
 /* =============================================================================
    API documentation
@@ -233,11 +233,11 @@ export function renderExport() {
         <div class="sheetbar__paper">
           ${dropdown({
             id: 'zoom', label: `${t('Zoom')}: ${zoomLabel()}`, width: 180,
-            body: html`${ZOOMS.map(z => menuRadio(t(z.label), state.zoom === z.id, 'zoom', z.id))}`
+            body: () => html`${ZOOMS.map(z => menuRadio(t(z.label), state.zoom === z.id, 'zoom', z.id))}`
           })}
           ${dropdown({
             id: 'paper', label: `${t('Format')}: ${state.paper.toUpperCase()}`, width: 180,
-            body: html`${PAPERS.map(p => menuRadio(p.label, state.paper === p.id, 'paper', p.id))}`
+            body: () => html`${PAPERS.map(p => menuRadio(p.label, state.paper === p.id, 'paper', p.id))}`
           })}
           <div class="segmented">
             ${ORIENTATIONS.map(o => html`<button type="button" class="${o.id === state.sheet ? 'is-on' : ''}"
@@ -495,7 +495,7 @@ function scheduleTable(rows, block, tot, last, sheet) {
       }
       return ganttRow(row.p, cols, lay);
     })}
-    ${last ? capacityRow(cols, tot) : continuation(0)}
+    ${last ? capacityRow(cols, tot, lay) : continuation(0)}
   </div>`;
 }
 
@@ -509,11 +509,13 @@ const ganttAxisHead = (cols, lay) => html`<header class="gantt__axis"
 </header>`;
 
 /** The plan closes on the same figure the screen shows beneath it. */
-const capacityRow = (cols, tot) => html`<div class="gantt__row gantt__row--load">
-  <div class="gantt__rowlabel" style="grid-column: span 2">${t('Auslastung')}</div>
+const capacityRow = (cols, tot, lay) => html`<div class="gantt__row gantt__row--load"
+    style="grid-template-columns:${raw(lay.tpl)}">
+  <div class="gantt__rowlabel" style="grid-column: span ${lay.shown.length}">${t('Auslastung')}</div>
   <div class="gantt__track gantt__track--load">
     ${cols.map((col, n) => {
-      const pct = tot.utilisation[col.quarters[0]];
+      /* The period's average, as the pensum sheet prints it — not its first quarter. */
+      const pct = periodValue(tot.utilisation, col);
       return html`<span class="capband__cell is-${loadStatus(pct).key} ${yearRule(col)}"
         style="grid-column:${n + 1}">${pct} %</span>`;
     })}
@@ -521,21 +523,10 @@ const capacityRow = (cols, tot) => html`<div class="gantt__row gantt__row--load"
 </div>`;
 
 /** What the numbers on the pensum sheet mean. */
-const demandLegend = (cfg, band = false) => legendBlock([
-  {
-    label: 'Pensum',
-    items: coloured()
-      ? cfg.legend.steps.map(s => legendItem(html`<span class="legend__swatch heat-${s.step}"></span>`, s.label))
-      : null
-  },
-  ...(band ? barLegendGroups().filter(g => (g.label === 'Balken' ? state.layers.phases : state.layers.gates)) : []),
-  {
-    label: 'Markierung',
-    items: band && state.layers.phases ? null
-      : legendItem(html`<span class="legend__swatch is-nolead"></span>`, cfg.legend.noLead)
-  },
-  { label: 'Auslastung', items: html`${t(cfg.legend.thresholds).replace(/^Auslastung:\s*/, '')}` }
-], 'legend--sheet');
+const demandLegend = (cfg, band = false) => planLegend({
+  layers: band ? state.layers : { values: true, phases: false, gates: false },
+  coloured: coloured(), legend: cfg.legend, cls: 'legend--sheet'
+});
 
 /** The column header, repeated wherever the reader needs it again. */
 /** True where a quarter opens a year, the way markYears() does it on screen. */
@@ -587,7 +578,7 @@ function printSheet(sheet, report, { rows, all, block, page, total, last, tot, c
       <div class="sheet__meta">
         <span>${t('Umfang')}: ${scopeLine(all.length)}</span>
         <span>${t('Filter')}: ${chips.length ? chips.map(c => t(c.label)).join(', ') : t('keine')}
-          · ${t('Einheit')}: ${state.unit === 'fte' ? 'FTE' : 'Pensum in %'}</span>
+          · ${t('Einheit')}: ${state.unit === 'fte' ? 'FTE' : t('Pensum in %')}</span>
         <span>${t(cfg.classification)}</span>
       </div>
     </header>
@@ -623,9 +614,7 @@ function printSheet(sheet, report, { rows, all, block, page, total, last, tot, c
         return html`<div class="sheet__row ${band ? 'sheet__row--band' : ''} ${p.leadId ? '' : 'is-unassigned'}"
             style="--band-col:${span + 1}">
           ${lead.map(c => html`<span class="${c.key === 'title' ? 'sheet__project' : `sheet__lead ${c.cls ?? ''}`}"
-            >${sheetCell(c, p, {
-              from: block[0].quarters[0], to: block.at(-1).quarters.at(-1)
-            })}</span>`)}
+            >${sheetCell(c, p)}</span>`)}
           ${block.map((col) => {
             const q = col.quarters[0];
             const v = periodValue(cells, col);
@@ -654,7 +643,7 @@ function printSheet(sheet, report, { rows, all, block, page, total, last, tot, c
           const pct = periodValue(tot.utilisation, col);
           return html`<span class="sheet__num sheet__period is-${loadStatus(pct).key} ${yearRule(col)}">${pct} %</span>`;
         })}
-      </div>` : continuation(block.length + 5)}`}
+      </div>` : continuation(block.length + span)}`}
     </div>
 
     ${schedule ? ganttLegend('legend--sheet') : demandLegend(cfg, band)}

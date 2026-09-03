@@ -10,7 +10,7 @@
    ============================================================================= */
 
 import {
-  data, state, load, subscribe, setState, syncFromUrl, closeOverlays,
+  data, state, load, subscribe, setState, syncFromUrl, closeOverlays, touch, OVERLAYS_CLOSED,
   cellValue, toggleIn, removeFilter, resetFilters, defaultDir, t, columnSetKey, writeUrl,
   offsetForScale, maxOffset, windowStep, pageCount, viewPatch, layerPatch
 } from './store.js';
@@ -72,10 +72,36 @@ function restoreScroll(saved) {
   if (toolbar && saved.toolbar) toolbar.scrollLeft = saved.toolbar;
 }
 
+/*
+ * A popover is anchored to the cell it was opened on, in viewport space, and
+ * the anchor was taken at the click. A render that moves the cell — a resize,
+ * a column switched on, a filter — left the popover where the cell used to
+ * be. So the anchor is read again off the cell that is about to be replaced.
+ */
+function refreshAnchors() {
+  if (state.editing) {
+    const { projectId, q } = state.editing;
+    const cell = root.querySelector(`[data-fk="${CSS.escape(`cell:${projectId}:${q}`)}"]`);
+    if (cell) {
+      const r = cell.getBoundingClientRect();
+      state.editing.anchor = { top: r.top, bottom: r.bottom, right: r.right };
+    }
+  }
+  if (state.picking) {
+    const btn = root.querySelector(`[data-act="assign"][data-val="${CSS.escape(state.picking.projectId)}"]`);
+    const cell = btn?.closest('.pcell') ?? btn;
+    if (cell) {
+      const r = cell.getBoundingClientRect();
+      state.picking.anchor = { left: r.left, top: r.top, bottom: r.bottom };
+    }
+  }
+}
+
 function render() {
   const focus = captureFocus();
   const scroll = captureScroll();
   const scrollY = window.scrollY;
+  refreshAnchors();
 
   const view = VIEWS[state.tab] ?? renderOverview;
 
@@ -323,10 +349,15 @@ function logChange(project, field, change, value) {
   });
 }
 
+/*
+ * A toast, and optionally the state change it reports, in one render. Both
+ * timers are tracked: the exit timer used to be anonymous, so a toast arriving
+ * during the previous one's fade was wiped by that fade's `toast: null`.
+ */
 let toastTimer;
-function flash(message) {
+function flash(message, patch = {}) {
   clearTimeout(toastTimer);
-  setState({ toast: message });
+  setState({ ...patch, toast: message });
   // It arrives over 160ms; it should leave the same way rather than blink out.
   toastTimer = setTimeout(() => {
     const el = root.querySelector('.toast');
@@ -334,7 +365,9 @@ function flash(message) {
       return setState({ toast: null });
     }
     el.classList.add('is-leaving');
-    setTimeout(() => setState({ toast: null }), 160);
+    toastTimer = setTimeout(() => {
+      if (state.toast === message) setState({ toast: null });
+    }, 160);
   }, 2600);
 }
 
@@ -345,10 +378,10 @@ function flash(message) {
 const actions = {
   noop: () => flash(t('Im Prototyp nicht hinterlegt.')),
 
-  tab: (val) => setState({ tab: val, menu: null, editing: null, picking: null, modal: null }),
+  tab: (val) => setState({ tab: val, ...OVERLAYS_CLOSED }),
   // The brand is a way back to a clean slate, not just to another route.
   home: () => setState({
-    tab: 'overview', menu: null, editing: null, picking: null, modal: null,
+    tab: 'overview', ...OVERLAYS_CLOSED,
     phases: [], leads: [], portfolios: [], organisations: [], search: '',
     searchOpen: false
   }),
@@ -389,10 +422,12 @@ const actions = {
   group: (val) => setState({ group: val, menu: null }),
   unit: (val) => setState({ unit: val }),
   scale: (val) => setState({ scale: val, periodOffset: offsetForScale(val) }),
+  /* Stepped from where the window actually is — an offset that ran past the
+     end would otherwise spend the first click getting back to it. */
   period: (val) => setState(s => ({
     periodOffset: val === 'today'
       ? 0
-      : Math.max(0, Math.min(maxOffset(), s.periodOffset + Number(val) * windowStep()))
+      : Math.max(0, Math.min(maxOffset(), Math.min(s.periodOffset, maxOffset()) + Number(val) * windowStep()))
   })),
 
   'my-projects': () => {
@@ -525,8 +560,9 @@ const actions = {
       value: `${amount} % ${t('ab')} ${data.quarters[q].label}, ${quarters} ${t('Quartale')}`
     });
 
-    setState({ modal: null });
-    flash(`${amount} % ${t('umgebucht auf')} ${target.name} — ${project.location}, ${t('ab')} ${data.quarters[q].label}`);
+    touch();
+    flash(`${amount} % ${t('umgebucht auf')} ${target.name} — ${project.location}, ${t('ab')} ${data.quarters[q].label}`,
+      { modal: null });
   },
 
   /*
@@ -540,51 +576,58 @@ const actions = {
       editing: null, menu: null
     });
   },
-  /* The pick is the commit. An empty value clears the assignment. */
+  /* The pick is the commit. An empty value clears the assignment. One render:
+     the data is changed first and the toast carries the closing patch. */
   pick: (val) => {
     const project = data.projectsById[state.picking.projectId];
     const from = project.leadId ? data.peopleById[project.leadId] : null;
     const to = val ? data.peopleById[val] : null;
-    setState({ picking: null });
-    if ((to ? to.id : null) === (from ? from.id : null)) return;
+    if ((to ? to.id : null) === (from ? from.id : null)) return setState({ picking: null });
     project.leadId = to ? to.id : null;
     project.unassigned = !to;
+    touch();
     if (to) {
       logChange(project, 'Bearbeitender',
         from ? `${from.name} → ${to.name}` : `${t('Zugewiesen an')} ${to.name}`, to.name);
-      flash(`${project.location} — ${t('Bearbeitender')}: ${to.name}`);
+      flash(`${project.location} — ${t('Bearbeitender')}: ${to.name}`, { picking: null });
     } else {
       logChange(project, 'Bearbeitender',
         from ? `${from.name} → ${t('nicht zugewiesen')}` : t('Zuweisung aufgehoben'), t('nicht zugewiesen'));
-      flash(`${project.location} — ${t('Zuweisung aufgehoben')}`);
+      flash(`${project.location} — ${t('Zuweisung aufgehoben')}`, { picking: null });
     }
   },
 
   'open-phase': (val) => {
     const [projectId, from] = val.split(':');
-    setState({ modal: { type: 'phase', projectId, from: Number(from) }, menu: null, editing: null });
+    setState({ ...OVERLAYS_CLOSED, modal: { type: 'phase', projectId, from: Number(from) } });
   },
 
-  'open-milestone': (val) => setState({ modal: { type: 'milestone', milestoneId: val }, menu: null, editing: null }),
+  'open-milestone': (val) => setState({ ...OVERLAYS_CLOSED, modal: { type: 'milestone', milestoneId: val } }),
 
-  'open-project': (val) => setState({ modal: { type: 'project', projectId: val }, menu: null, editing: null }),
+  'open-project': (val) => setState({ ...OVERLAYS_CLOSED, modal: { type: 'project', projectId: val } }),
   /* The bar plan is a view of the Planung tab now, not a tab of its own. */
   'open-schedule': (val) => setState({
-    tab: 'overview', modal: null, search: data.projectsById[val].location, ...viewPatch('termine')
+    tab: 'overview', ...OVERLAYS_CLOSED, search: data.projectsById[val].location, ...viewPatch('termine')
   }),
 
-  share: () => setState({ modal: { type: 'share', copied: false }, menu: null }),
+  share: () => setState({ ...OVERLAYS_CLOSED, modal: { type: 'share', copied: false } }),
   'share-select': (val, el) => el.select(),
+  /* «Kopiert» only when it was: a denied clipboard leaves the link selected
+     for the reader to copy by hand, and says nothing it cannot vouch for. */
   'share-copy': async () => {
-    try { await navigator.clipboard.writeText(location.href); }
-    catch { root.querySelector('[data-fk="share-url"]')?.select(); }
+    try {
+      await navigator.clipboard.writeText(location.href);
+    } catch {
+      root.querySelector('[data-fk="share-url"]')?.select();
+      return;
+    }
     setState(s => ({ modal: { ...s.modal, copied: true } }));
     setTimeout(() => { if (state.modal?.type === 'share') setState(s => ({ modal: { ...s.modal, copied: false } })); }, 2000);
   },
 
   'close-modal': () => setState({ modal: null }),
 
-  settings: () => setState({ menu: null, modal: { type: 'settings' } }),
+  settings: () => setState({ ...OVERLAYS_CLOSED, modal: { type: 'settings' } }),
 
   /* Derived from state, not read back off the checkbox — the same way
      «Mir zugewiesen» does it, and independent of event ordering. */
@@ -601,14 +644,12 @@ const actions = {
    * session rather than waiting behind a login for somebody else — and the
    * signed-out screen says that they did.
    */
-  signout: () => setState({
-    signedIn: false, menu: null, modal: null, editing: null, reason: '', overrides: {}
-  }),
+  signout: () => setState({ signedIn: false, ...OVERLAYS_CLOSED, reason: '', overrides: {} }),
 
   signin: () => setState({ signedIn: true }),
   /* The print layout prints what is on screen: the bar plan when the reader is
      looking at the bar plan, the figures otherwise — it reads the same view. */
-  'print-layout': () => setState({ tab: 'export', menu: null, editing: null, picking: null }),
+  'print-layout': () => setState({ tab: 'export', ...OVERLAYS_CLOSED }),
   export: (val) => {
     setState({ menu: null });
     try {
@@ -677,6 +718,11 @@ const actions = {
       // Revoked on the next turn of the loop; Safari needs the URL to still be
       // there when the click is handled.
       setTimeout(() => URL.revokeObjectURL(url), 0);
+    } catch (error) {
+      /* A failed import or a writer error is said, as the spreadsheet export
+         says it — not left as an unhandled rejection behind a stuck button. */
+      console.error(error);
+      flash(t('Export fehlgeschlagen.'));
     } finally {
       setState({ exporting: false });
     }
@@ -700,7 +746,7 @@ root.addEventListener('click', (event) => {
   event.preventDefault();
   // Remember the opener, but only while nothing is open — so the key belongs to
   // whatever is about to open, not to a click inside an open dialog.
-  if (!state.modal && !state.editing) modalReturn = focusKey(el);
+  if (!state.modal && !state.editing && !state.picking) modalReturn = focusKey(el);
   fn(el.dataset.val, el);
 });
 
@@ -729,6 +775,7 @@ root.addEventListener('input', (event) => {
 
   if (act === 'search') {
     state.search = el.value;                 // written directly: no re-render per keystroke
+    touch();                                 // but the memoised lists must know
     clearTimeout(searchTimer);
     searchTimer = setTimeout(() => setState({}), 180);
   } else if (act === 'menu-search') {
@@ -753,9 +800,12 @@ root.addEventListener('input', (event) => {
  */
 function roam(items, step, from = items.indexOf(document.activeElement)) {
   if (!items.length) return null;
+  /* From outside the list, ArrowDown enters at the top and ArrowUp at the
+     bottom; the modulo alone sent ArrowUp to the second-to-last item. */
   const next = step === 'first' ? 0
     : step === 'last' ? items.length - 1
-      : (from + step + items.length) % items.length;
+      : from < 0 ? (step > 0 ? 0 : items.length - 1)
+        : (from + step + items.length) % items.length;
   items[next]?.focus();
   return items[next] ?? null;
 }
@@ -764,7 +814,9 @@ function moveOption(step) {
   const list = root.querySelector('[role="listbox"]');
   if (!list) return null;
   const options = [...list.querySelectorAll('[role="option"]')];
-  const from = options.findIndex(o => o === document.activeElement || o.classList.contains('is-on'));
+  /* Where focus is, first; the selected row is only the entry point. */
+  let from = options.indexOf(document.activeElement);
+  if (from < 0) from = options.findIndex(o => o.classList.contains('is-on'));
   return roam(options, step, from);
 }
 
@@ -774,7 +826,8 @@ function moveOption(step) {
    leaves rather than walking into a tree that is about to be re-rendered.
    -------------------------------------------------------------------------- */
 
-const MENU_ITEMS = '[role="menuitem"], [role="menuitemradio"], [role="menuitemcheckbox"]';
+/* Live items only: a greyed switch cannot take focus, so roaming onto it stalled. */
+const MENU_ITEMS = '[role="menuitem"]:not(:disabled), [role="menuitemradio"]:not(:disabled), [role="menuitemcheckbox"]:not(:disabled)';
 
 function menuElements() {
   const panel = root.querySelector('.dd__panel');
@@ -958,13 +1011,6 @@ document.addEventListener('scroll', (event) => {
 
 window.addEventListener('hashchange', () => {
   syncFromUrl();
-});
-
-/** Moving between tabs is a navigation step, so it earns a history entry. */
-let lastTab = null;
-subscribe(() => {
-  if (lastTab !== null && lastTab !== state.tab) history.pushState(null, '', location.hash);
-  lastTab = state.tab;
 });
 
 /* -----------------------------------------------------------------------------

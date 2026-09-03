@@ -131,7 +131,28 @@ all, and every control needs clicking twice.
 
 `state` is one object in `store.js`, mirrored into the URL hash so a view can be
 shared and reloaded. The hash carries the view (`view=`), the layers only for
-Individuell (`layers=`), and the colouring only when it is off (`colour=none`). Every value read back from the hash is validated against
+Individuell (`layers=`), and the colouring only when it is off (`colour=none`).
+The language is not in it: a shared link opens in the reader's own.
+
+`readUrl` returns a value for **every** URL-carried key — the hash's, or the
+default — so a hash that has lost a key (Back, a hand-edited address) resets
+that key rather than leaving the old value in place. Filter ids are checked
+against the data, enumerated values against `VOCAB`, the window offset against
+the horizon.
+
+A change of tab pushes a history entry; every other change replaces the
+current one. `setState` decides, by comparing the tab before and after, so no
+action has to remember. Back and Forward arrive through `hashchange` and are
+applied silently.
+
+### Derived lists
+
+`setState` counts every change of state. `filteredProjects()`, `periods()` and
+the per-person project index are memoised against that counter, so a list is
+computed once per change however many views ask for it in one render. Anything
+that changes what a derived list would say **without** going through
+`setState` — the search field, written per keystroke; a project's lead moved
+by the picker — calls `touch()`. Every value read back from the hash is validated against
 `VOCAB`, a closed vocabulary — an unknown value falls back to the default rather
 than reaching a view.
 
@@ -195,7 +216,7 @@ not passed through `t()` will be German in every language.
 ## Tokens
 
 Two layers in `css/tokens.css`: primitives (`--blue-200`, `--steel-550`) feed
-semantic roles (`--color-notice-bg`, `--color-bar-border`), and components use
+semantic roles (`--color-danger-bg`, `--color-bar-border`), and components use
 the semantic layer. A component reaching a primitive directly is a smell; a new
 meaning gets a new role.
 

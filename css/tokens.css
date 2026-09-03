@@ -4,7 +4,9 @@
    Derived by frequency analysis from the visual mockup
    docs/wireframes/260825_Portfolio Resource Management/
      Ressourcenplanung Bereichsleitung.dc.html
-   Every primitive value below occurs literally in that file.
+   Every primitive value below occurs literally in that file, except the
+   pensum heat ramp and the bar ground, which were re-measured in CIE Lab
+   when the two came to share a row (see section 12).
 
    Layer 1 = primitives (raw values), Layer 2 = semantic roles (var over them).
    Only ever reference the semantic layer from main.css.
@@ -41,7 +43,6 @@
   --blue-50:  #eff6ff;
   --blue-100: #dbeafe;
   --blue-200: #c7d2fe;
-  --blue-300: #93c5fd;
   --blue-600: #2563eb;
   --blue-700: #1d4ed8;
   --blue-800: #1e40af;
@@ -53,14 +54,8 @@
      ========================================================================== */
   --steel-25:  #fafbfd;
   --steel-50:  #f5f7fb;
-  --steel-75:  #f4f7fc;
   --steel-100: #f0f4fa;
   --steel-125: #eef1f6;
-  --steel-150: #edf1f7;
-  --steel-200: #e7eef8;
-  --steel-300: #d6e3f3;
-  --steel-400: #c4d0e0;
-  --steel-450: #c2d5ec;
   --steel-500: #9cb8de;
   --steel-550: #76879f;
 
@@ -85,7 +80,6 @@
   --green-50:  #f0fdf4;
   --green-100: #dcfbe7;  /* greyscale 244 */
   --green-200: #bbf7d0;
-  --green-400: #4ade80;
   --green-600: #16a34a;
   --green-800: #166534;
 
@@ -161,8 +155,6 @@
    * page, so the edge holds on both sides. blue-300 was the obvious choice and
    * measured 1.21:1 against the band — a border nobody would see.
    */
-  --color-notice-bg:       var(--blue-200);
-  --color-notice-border:   var(--blue-600);
   --color-surface-frame:    var(--steel-50);   /* app frame + table header   */
   --color-scrim:            var(--alpha-ink-28);
 
@@ -205,8 +197,6 @@
   --color-danger-fg-strong:     var(--red-700);
   --color-danger-border:        var(--red-300);
   --color-danger-solid:         var(--red-600);
-  --color-danger-bg-subtle:     var(--red-50);
-  --color-danger-border-subtle: var(--red-200);
 
   --color-warn-bg:        var(--amber-100);
   --color-warn-fg:        var(--amber-900);
@@ -217,9 +207,7 @@
 
   --color-ok-bg:        var(--green-100);
   --color-ok-fg:        var(--green-800);
-  --color-ok-border:    var(--green-200);
   --color-ok-solid:     var(--green-600);
-  --color-ok-bg-subtle: var(--green-50);
 
 
   --color-neutral-bg:     var(--grey-50);   /* greyscale 251 — the lightest */
@@ -276,8 +264,6 @@
    */
   --color-bar-border: var(--steel-550);
 
-  --spark-bar:       var(--steel-500);
-  --spark-bar-empty: var(--grey-200);
 
   /* Hatched fills: a delayed bar, and a bar with no project lead */
   --pattern-delay:   repeating-linear-gradient(135deg, #fca5a5 0 5px, #fef2f2 5px 10px);
@@ -366,7 +352,6 @@
   --dur:       .16s;   /* something enters or leaves: toast, search, banner  */
   --dur-spin:  .7s;    /* the boot spinner, the only continuous motion       */
   --ease:      ease;
-  --ease-out:  ease-out;
   --ease-in:   ease-in;
 
   /* The WCAG 2.2 minimum for a pointer target. Named because it is a rule the
@@ -382,7 +367,6 @@
                     0 8px 10px -6px rgba(0, 0, 0, 0.1);
   /* Content cards sit on the page ground with a soft lift instead of a border. */
   /* A card that lifts on hover needs somewhere to lift to. */
-  --shadow-raised-hover: 0 2px 4px rgba(16, 24, 40, .06), 0 8px 20px rgba(16, 24, 40, .10);
   --shadow-raised: 0 1px 2px rgba(16, 24, 40, 0.04), 0 4px 12px rgba(16, 24, 40, 0.06);
   /*
    * The edge of a scrolling card. A gradient rather than a box-shadow, because

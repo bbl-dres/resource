@@ -1496,10 +1496,20 @@
       "fr": "dès 120 %",
       "it": "dal 120 %"
     },
+    "absteigend": {
+      "en": "descending",
+      "fr": "décroissant",
+      "it": "decrescente"
+    },
     "anzeigen": {
       "en": "show",
       "fr": "afficher",
       "it": "mostra"
+    },
+    "aufsteigend": {
+      "en": "ascending",
+      "fr": "croissant",
+      "it": "crescente"
     },
     "bis 39 %": {
       "en": "up to 39 %",

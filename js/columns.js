@@ -24,7 +24,7 @@
 import { data, t, eppmOf } from './store.js';
 
 /** The project lead's name, or the words that stand in for an empty one. */
-const leadName = p => (p.leadId ? data.peopleById[p.leadId].name : t('nicht zugewiesen'));
+const leadName = p => data.peopleById[p.leadId]?.name ?? t('nicht zugewiesen');
 
 /*
  * Six columns, not eleven. Ampel, Priorität, Nächster Meilenstein, Soll-Pensum
@@ -61,7 +61,7 @@ export const COLUMNS = [
     key: 'portfolio', label: 'Teilportfolio', flag: 'portfolio', sort: 'portfolio',
     width: '--grid-col-portfolio', cls: 'pcell--text', sheet: { w: [76, 96], cls: 'sheet__muted' },
     xls: { type: 'text', width: 18 },
-    text: p => t(data.portfoliosById[p.portfolio].label)
+    text: p => t(data.portfoliosById[p.portfolio]?.label ?? p.portfolio)
   },
   {
     key: 'organisation', label: 'Organisation', flag: 'organisation', sort: 'organisation',
@@ -178,7 +178,7 @@ export const columnOn = (set, col) => !col.flag || !!set[col.flag];
 
 /** The columns currently on, in grid order. */
 export const visibleColumns = set =>
-  COLUMNS.filter(c => !c.afterQuarters && columnOn(set, c));
+  COLUMNS.filter(c => columnOn(set, c));
 
 /** The Attribute menu: every column that has a switch. */
 export const toggleableColumns = () =>

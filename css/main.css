@@ -66,7 +66,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .icon { flex: 0 0 auto; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; }
 
 /* Numbers are tabular everywhere — a system rule, not an option. */
-.kpi__value, .pcell, .capband__value, .barlist__value, .colchart__val,
+.kpi__value, .pcell, .barlist__value, .colchart__val,
 .log__date, .log__value, .sorthead__label, .capband__cell,
 .minigrid__v { font-variant-numeric: tabular-nums; }
 
@@ -279,8 +279,6 @@ button, input, select, textarea { font: inherit; color: inherit; }
 [data-scroll] { scrollbar-width: none; }
 [data-scroll]::-webkit-scrollbar { width: 0; height: 0; }
 
-.gantt__scroll { overflow-x: auto; }
-.gantt__card.scrollbox { overflow: hidden; }
 
 .wrap { max-width: var(--layout-width); margin: 0 auto; padding-inline: var(--shell-pad-x); }
 /*
@@ -445,7 +443,7 @@ h1, h2, h3,
  */
 
 .btn--square { width: var(--control-height); height: var(--control-height); padding: 0; justify-content: center; }
-.toolbar .btn, .timebar .btn, .sheetbar .btn { height: var(--control-height-lg); }
+.toolbar .btn, .sheetbar .btn { height: var(--control-height-lg); }
 .toolbar .btn--square { width: var(--control-height-lg); height: var(--control-height-lg); }
 
 /*
@@ -477,7 +475,7 @@ h1, h2, h3,
   background: var(--color-accent-pressed); border-color: var(--color-accent-pressed);
   color: var(--color-accent-fg);
 }
-:is(.btn--toggle.is-on, .segmented button.is-on, .sheetbar button.is-on):active:active {
+:is(.segmented button.is-on, .sheetbar button.is-on):active:active {
   background: var(--color-toggle-on-pressed); border-color: var(--color-toggle-on-pressed);
   color: var(--color-toggle-on-fg);
   /* The hover brightness applies while the pointer is down too, so it is turned
@@ -491,23 +489,13 @@ h1, h2, h3,
 }
 
 /* A chosen control still answers the pointer; without this it read as dead. */
-.btn--toggle.is-on:hover, .segmented button.is-on:hover { filter: brightness(1.12); }
 
-.btn--toggle.is-on {
-  background: var(--color-toggle-on); border-color: var(--color-toggle-on);
-  color: var(--color-toggle-on-fg);
-}
 /*
  * The only action in the app with no way back looks like it — and its edge is
  * visible. At --color-danger-border it measured 1.77:1 in the modal footer.
  * The token itself is left alone: the overload chart bar uses it as a *fill*
  * against a red-600 border, and repointing it would collapse that pair.
  */
-.btn--danger { border-color: var(--color-danger-solid); color: var(--color-danger-fg); }
-.btn--danger:hover {
-  background: var(--color-danger-bg); border-color: var(--color-danger-fg-strong);
-}
-.modal__foot-left { margin-right: auto; }
 .iconbtn {
   display: inline-flex; align-items: center; justify-content: center;
   width: 28px; height: 28px; padding: 0;
@@ -587,6 +575,8 @@ h1, h2, h3,
 }
 .segmented button:first-child { border-left: 0; }
 .segmented button:hover { background: var(--color-surface); }
+/* A chosen segment still answers the pointer; without this it read as dead. */
+.segmented button.is-on:hover { filter: brightness(1.12); }
 .segmented button.is-on {
   background: var(--color-toggle-on); color: var(--color-toggle-on-fg); font-weight: var(--font-semibold);
 }
@@ -817,26 +807,25 @@ h1, h2, h3,
  * where the axis continues past the card. One strip per card, not one per
  * cell — drawn per cell it broke at every row separator.
  */
-.pblock, .gantt__card { position: relative; }
-.pblock::before, .gantt__card::before,
-.pblock::after, .gantt__card::after {
+.pblock { position: relative; }
+.pblock::before,
+.pblock::after {
   content: ''; position: absolute; top: 0; bottom: 0;
   width: var(--scroll-edge-w);
   pointer-events: none; opacity: 0;
   z-index: var(--z-overlay);
 }
 /* Left: anchored to the right edge of the frozen pane. */
-.pblock::after, .gantt__card::after {
+.pblock::after {
   left: var(--frozen-w);
   background: linear-gradient(to right, var(--scroll-edge), transparent);
 }
 /* Right: anchored to the card's own edge. */
-.pblock::before, .gantt__card::before {
+.pblock::before {
   right: 0;
   background: linear-gradient(to left, var(--scroll-edge), transparent);
 }
 .pblock { --frozen-w: var(--sticky-w); }
-.gantt__card { --frozen-w: var(--gantt-lead); }
 
 .has-less::after { opacity: 1; }
 .has-more::before { opacity: 1; }
@@ -971,7 +960,7 @@ h1, h2, h3,
    dashboard draws the same cell and is read-only. */
 .pgrid--editable .pcell--val:hover { filter: brightness(.93); }
 
-.pcell--val.is-editing { box-shadow: var(--ring-cell-edit); position: relative; z-index: var(--z-raised); }
+.pcell--val.is-editing { position: relative; z-index: var(--z-raised); }
 .pcell--val.is-edited { box-shadow: inset 0 -3px 0 var(--color-accent); }
 
 button.pcell--val { cursor: pointer; }
@@ -1315,12 +1304,7 @@ button.pcell--val { cursor: pointer; }
      Attribute menu has switched on, and the overlay and the min-width follow it. */
   display: flex; flex-direction: column; gap: var(--space-13);
 }
-.gantt__group { display: flex; flex-direction: column; }
 
-.gantt__card {
-  border-radius: var(--radius-lg); background: var(--color-surface);
-  box-shadow: var(--shadow-raised);
-}
 /*
  * Only scroll when the quarters genuinely no longer fit — and put the minimum
  * on what the scroller contains, not on the scroller itself. On the scroller it
@@ -1332,7 +1316,6 @@ button.pcell--val { cursor: pointer; }
  * whichever way you are looking at it — and the bar plan scrolls in the same
  * situations the pensum grid does.
  */
-.gantt__scroll > * { min-width: calc(var(--gantt-lead) + var(--gantt-cols, 8) * var(--grid-period)); }
 
 /*
  * The same two lead columns the pensum grid uses, at the same widths, so a
@@ -1394,39 +1377,15 @@ button.pcell--val { cursor: pointer; }
   background: none; font-weight: inherit; box-shadow: none;
 }
 
-.gantt__body { position: relative; }
 /*
  * The today marker belongs to the time axis, so it is clipped to it. Left in
  * the row it scrolled underneath the frozen column and showed through the
  * hairline between rows.
  */
-.gantt__overlay {
-  position: absolute; top: 0; bottom: 0;
-  left: var(--gantt-lead); right: 0;
-  /* Sideways only. The badge is centred on the axis boundary and has to keep
-     reaching above this box, so overflow:hidden would cut it in half. */
-  clip-path: inset(-40px 0 0 0);
-  /* clip-path makes this a stacking context, so the marker inside it can no
-     longer out-rank the bars on its own — the whole overlay has to. */
-  z-index: var(--z-overlay);
-  pointer-events: none;
-}
-.gantt__today {
-  position: absolute; top: 0; bottom: 0; width: 2px;
-  /* "Now" is a position, not a problem — red belongs to over-capacity alone. */
-  background: var(--color-brand); z-index: var(--z-sticky);
-}
 /*
  * Centred on the axis/body boundary rather than sitting below it, so the marker
  * costs no vertical space of its own.
  */
-.gantt__todaybadge {
-  position: absolute; top: 0; transform: translate(-50%, -50%); z-index: var(--z-label);
-  padding: 1px var(--space-3); border-radius: var(--radius-pill);
-  background: var(--color-brand); color: var(--color-text-inverse);
-  font-size: var(--text-2xs); font-weight: var(--font-bold);
-  letter-spacing: var(--tracking-caption); white-space: nowrap;
-}
 
 .gantt__row { align-items: center; min-height: var(--row-height); }
 /*
@@ -1464,8 +1423,8 @@ button.pcell--val { cursor: pointer; }
 .gantt__row .gantt__col--phase,
 .gantt__row .gantt__col--lead,
 .gantt__row .gantt__col--portfolio,
-.gantt__row .gantt__col--priority,
-.gantt__row .gantt__col--nextMs {
+.gantt__row .gantt__col--organisation,
+.gantt__row .gantt__col--credit {
   font-size: var(--text-base); color: var(--color-text-secondary);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;
   line-height: var(--row-height);
@@ -1917,7 +1876,6 @@ button.pcell--val { cursor: pointer; }
  */
 /* Only the title wraps; the rest clip, so no column can spill into the next. */
 .sheet__lead { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.sheet__mark { display: flex; align-items: center; justify-content: center; overflow: visible; }
 
 .sheet__project {
   padding-right: var(--space-3);
@@ -2141,13 +2099,10 @@ button.pcell--val { cursor: pointer; }
 @page { size: A4 portrait; margin: 0; }
 
 @media print {
-  /* .crumbbar, not .crumbs: hiding the nav left its container's 1px bottom rule
-     standing, which pushed the stack down by a pixel and spilled an empty
-     twelfth page out of an eleven-sheet report. */
   .shell-header, .tabs, .toolbar, .filterbar, .toast, .shell-footer,
   .page-header__actions, .sheetbar { display: none !important; }
   body { background: var(--color-paper); }
-  .grid-card, .table-card, .bi-card, .gantt__card { break-inside: avoid; }
+  .grid-card, .table-card, .bi-card { break-inside: avoid; }
 
   /* The paper mount is screen scaffolding; on paper the sheet is the page. */
   .mount { display: block; padding: 0; border: 0; background: none; overflow: visible; }
@@ -2426,9 +2381,9 @@ button.pcell--val { cursor: pointer; }
 .pop--assign .dd__searchfield { margin: var(--space-6) 0 var(--space-5); }
 .assign__list { max-height: 232px; }
 .assign__list li { gap: var(--space-4); }
-.assign__name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.person__name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .assign__list .ampel { flex: 0 0 auto; }
-.assign__list li.is-current { background: var(--color-surface-selected); font-weight: var(--font-semibold); }
+.assign__list li.is-on { background: var(--color-surface-selected); font-weight: var(--font-semibold); }
 .assign__list li:focus-visible { outline: var(--focus-ring); outline-offset: -2px; }
 .assign__none { color: var(--color-text-muted); font-style: italic; }
 

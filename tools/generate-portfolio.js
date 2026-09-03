@@ -148,26 +148,12 @@ const QUARTERS = 40;
 const LAST_START = 2;
 const FIRST_QUARTER = { year: 2026, q: 3 };
 
-/**
- * A project is a walk along the SIA chain. Where it stands today decides both
- * its phase label and its demand curve — the two can never drift apart.
- */
 /*
- * Where a project stands today, as an index into SEQ. A project recorded in
- * phase 6 has been handed over — the building is being run, which is not
- * project work — so it is placed at the last phase the project itself has.
- */
-const stageOf = (phase) => {
-  const at = SEQ.indexOf(phase);
-  return at >= 0 ? at : SEQ.length - 1;
-};
-
-/*
- * A whole project: Strategische Planung through to the handover, every phase in
+ * A whole project: Vorstudien through to Bewirtschaftung, every phase in
  * between, at this project's own pace. Every project has all of them — what
  * differs is how long each takes and when the first one began.
  *
- * `startQuarter` is where phase 11 starts, counted from today. Negative for a
+ * `startQuarter` is where the first phase starts, counted from today. Negative for a
  * project already under way, positive for one still to begin. Phases before the
  * window are dropped when the bars are written.
  */
@@ -356,6 +342,9 @@ function makeTeam(rosterTarget) {
    Milestones
    -------------------------------------------------------------------------- */
 
+/* The odds that a gate has no forecast at all, by gate — see makeMilestones. */
+const OPEN = { MS1: 0.30, MS2: 0.20, MS3: 0.12, MS4: 0.34, MS5: 0.10, MS6: 0.06, MS7: 0.06 };
+
 /* The gate at the end of each phase that has one. */
 const GATE = { '1': 'MS1', '2': 'MS2', '31': 'MS3', '32': 'MS4', '4': 'MS5',
   '53': 'MS6', '5': 'MS7' };
@@ -367,20 +356,6 @@ const QUARTER_CAL = Array.from({ length: QUARTERS }, (_, i) => {
   return { year: FIRST_QUARTER.year + Math.floor(n / 4), q: (n % 4) + 1 };
 });
 const QUARTER_IDS = QUARTER_CAL.map(c => `${c.year}Q${c.q}`);
-/*
- * A gate falls on a day, not on a quarter. Board meetings, credit releases and
- * handovers cluster in the closing weeks of a quarter but are not all on the
- * thirty-first, and the plan draws them where they are — so a date is picked
- * inside the quarter rather than pinned to its last page.
- */
-function dayIn(qi) {
-  const c = QUARTER_CAL[qi];
-  const month = (c.q - 1) * 3 + weighted([[0, 15], [1, 30], [2, 55]]);
-  const days = [31, [28, 29][+(c.year % 4 === 0)], 31, 30, 31, 30,
-    31, 31, 30, 31, 30, 31][month];
-  return `${c.year}-${String(month + 1).padStart(2, '0')}-${String(between(1, days)).padStart(2, '0')}`;
-}
-
 /*
  * A gate closes a phase, so its day lies in the phase's closing weeks: the
  * last three weeks of the quarter the phase ends in, never its middle. Drawn
@@ -394,9 +369,6 @@ function dayNearEnd(qi) {
     31, 31, 30, 31, 30, 31][month];
   return `${c.year}-${String(month + 1).padStart(2, '0')}-${String(between(days - 20, days - 1)).padStart(2, '0')}`;
 }
-
-const QUARTER_END = QUARTER_CAL.map(c =>
-  `${c.year}-${String(c.q * 3).padStart(2, '0')}-${[31, 30, 30, 31][c.q - 1]}`);
 
 const REASONS = [
   'Verzug durch Einsprache', 'Verzug durch Statikprüfung', 'Vergabe verschoben',
@@ -429,7 +401,6 @@ function makeMilestones(projects) {
        * office's to make, on the Bedürfnis and on the Baukredit, and it is rare
        * close to today, where a date has usually been pinned down.
        */
-      const OPEN = { MS1: 0.30, MS2: 0.20, MS3: 0.12, MS4: 0.34, MS5: 0.10, MS6: 0.06, MS7: 0.06 };
       const pending = rnd() < (OPEN[code] ?? 0.10) * (near ? 0.35 : 1);
 
       items.push({
@@ -625,6 +596,11 @@ milestones.items = makeMilestones(projects).map(m => {
     ...(s.impact ? { impact: s.impact } : {})
   };
 });
+/* A seed gate whose generated counterpart lies outside the window is lost with
+   its story; say so rather than drop it in silence. */
+for (const id of seeded.keys()) {
+  if (!milestones.items.some(m => m.id === id)) console.warn(`seed milestone ${id} has no generated gate in the window`);
+}
 
 /*
  * A change log for a portfolio this size. The nine hand-written entries stay at
@@ -658,12 +634,16 @@ const WORDS = {
 
 function changeLog() {
   const out = [];
-  const today = new Date(META.today + 'T00:00:00');
+  /* UTC throughout. The weekday was tested on the local date and the stamp
+     written from the UTC one, so east of Greenwich every entry landed a day
+     early — thirty-six of them on a Sunday — and the file depended on the
+     time zone of the machine that ran this. */
+  const today = new Date(META.today + 'T00:00:00Z');
   const stamp = (back) => {
     const d = new Date(today.getTime() - back * 86400000);
     // The federal administration does not book changes at the weekend.
-    if (d.getDay() === 0) d.setDate(d.getDate() - 2);
-    if (d.getDay() === 6) d.setDate(d.getDate() - 1);
+    if (d.getUTCDay() === 0) d.setUTCDate(d.getUTCDate() - 2);
+    if (d.getUTCDay() === 6) d.setUTCDate(d.getUTCDate() - 1);
     const iso = d.toISOString().slice(0, 10);
     const [y, m, dd] = iso.split('-');
     return { date: iso, dateLabel: `${dd}.${m}.${y}` };
@@ -721,7 +701,7 @@ const buckets = { later: [0, 0] };
 for (const y of BUCKET_YEARS) buckets[y] = [0, 0];
 for (const p of projects) {
   if (p.credit === null) continue;
-  const build = p.bars.find(b => b.phase === '52') ?? p.bars.find(b => b.phase === '51');
+  const build = p.bars.find(b => b.phase === '5');   // Realisierung, in ePPM's own id
   const key = !build ? 'later' : (YEAR_OF[Math.min(QUARTERS - 1, Math.max(0, build.from))] ?? 'later');
   const bucket = buckets[key] ?? buckets.later;
   bucket[0] += p.credit;
