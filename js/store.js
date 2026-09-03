@@ -31,7 +31,7 @@ export const VOCAB = {
   lang:    ['de', 'en', 'fr', 'it'],
   scale:   ['year', 'quarter', 'month'],
   unit:    ['pct', 'fte'],
-  view:    ['pensum', 'both', 'termine', 'custom'],
+  view:    ['pensum', 'pensum-termine', 'termine', 'custom'],   // «both» in old links
   colour:  ['pensum', 'none'],
   sortDir: ['asc', 'desc'],
   group:   ['portfolio', 'lead', 'phase', 'organisation', 'none'],
@@ -71,7 +71,7 @@ const DEFAULT_STATE = {
   exporting: false,        // a PDF is being written; transient, never in the URL
   // column / attribute toggles, one set per grid — see columnSet()
   cols: null,              // filled from COLUMN_DEFAULTS below
-  hideZeros: false,
+  hideZeros: false,        // in the URL as zeros=hide
   // editing
   editing: null,           // { projectId, q }
   picking: null,           // { projectId, anchor, search } — the Bearbeitender picker
@@ -101,11 +101,11 @@ const DEFAULT_STATE = {
   zoom: 'fit',             // print preview, see VOCAB.zoom
   page: 1,                 // change log, 1-based
   pageSize: '25',          // see VOCAB.pageSize
-  pSort: 'peak',           // person table: name | role | employment | projects | peak | q0…q7
+  pSort: 'peak',           // person table: name | organisation | employment | projects | peak | q0…q7
   pDir: 'desc',
   searchOpen: false,
   collapsedGroups: {},
-  cardSort: {},            // dashboard card id -> 'value'; absent means the card's own order
+  cardSort: {},            // dashboard card id -> { by: 'label'|'value', dir: 'asc'|'desc' }
   toast: null
 };
 
@@ -145,7 +145,7 @@ export const LAYER_KEYS = ['values', 'phases', 'gates', 'today'];
  */
 export const VIEW_PRESETS = {
   pensum:  { values: true,  phases: false, gates: false, today: false },
-  both:    { values: true,  phases: true,  gates: true,  today: false },
+  'pensum-termine': { values: true, phases: true, gates: true, today: false },
   termine: { values: false, phases: true,  gates: true,  today: true }
 };
 
@@ -163,7 +163,7 @@ export function viewPatch(view) {
 }
 
 /**
- * The state patch that flips one layer. The view stays «Individuell»: the
+ * The state patch that flips one layer. The view stays «Benutzerdefiniert»: the
  * switches are only reachable there, and a combination that happened to equal
  * a named view used to snap the tick to that view and take the switches away
  * with it — mid-adjustment, the control the reader was using vanished.
@@ -264,8 +264,54 @@ const KNOWN = {
   phase: () => new Set(data.phases.eppm.map(e => e.id)),
   lead: () => new Set([...data.people.map(x => x.id), 'none']),
   portfolio: () => new Set(Object.keys(data.portfoliosById)),
-  org: () => new Set(Object.keys(data.organisationsById))
+  org: () => new Set(Object.keys(data.organisationsById)),
+  cols: () => new Set(Object.keys(COLUMN_DEFAULTS.overview)),
+  barcols: () => new Set(Object.keys(COLUMN_DEFAULTS.schedule))
 };
+
+/*
+ * The column sets in the hash: the flags that are on, as a list, and only
+ * when the set is not the default. `cols` is the pensum grid, `barcols` the
+ * bar plan on paper. A hash that names a set names all of it — a column it
+ * leaves out is off.
+ */
+const COLUMN_PARAMS = { overview: 'cols', schedule: 'barcols' };
+
+function readColumns(p, list) {
+  return Object.fromEntries(Object.entries(COLUMN_PARAMS).map(([set, key]) => {
+    if (!p.has(key)) return [set, { ...COLUMN_DEFAULTS[set] }];
+    const on = new Set(list(key));
+    return [set, Object.fromEntries(Object.keys(COLUMN_DEFAULTS[set]).map(c => [c, on.has(c)]))];
+  }));
+}
+
+const columnsDiffer = (set) =>
+  Object.keys(COLUMN_DEFAULTS[set]).some(c => !!state.cols[set][c] !== COLUMN_DEFAULTS[set][c]);
+
+/*
+ * The dashboard's own settings: the person table's sort and each card's
+ * order. `csort` lists only the cards that left their default, as
+ * «card:by:dir».
+ */
+const isPersonSort = v => /^q\d+$/.test(v) || Object.hasOwn(P_SORTS, v);
+
+function readCardSort(p) {
+  const out = {};
+  for (const entry of (p.get('csort') || '').split(',')) {
+    const [id, by, dir] = entry.split(':');
+    if (!/^[a-z-]+$/.test(id ?? '')) continue;
+    const sort = {};
+    if (by === 'label' || by === 'value') sort.by = by;
+    if (dir === 'asc' || dir === 'desc') sort.dir = dir;
+    if (Object.keys(sort).length) out[id] = sort;
+  }
+  return out;
+}
+
+const cardSortParam = () => Object.entries(state.cardSort)
+  .map(([id, { by = 'label', dir = 'asc' }]) => (by === 'label' && dir === 'asc' ? null : `${id}:${by}:${dir}`))
+  .filter(Boolean)
+  .join(',');
 
 /**
  * The state the hash describes: every URL-carried key, with its default where
@@ -287,8 +333,10 @@ export function readUrl() {
     const v = p.get(key === 'sortDir' ? 'dir' : key);
     patch[key] = allowed.includes(v) ? v : DEFAULT_STATE[key];
   }
-  /* The old bar plan's address still opens the bar plan. */
+  /* The old bar plan's address still opens the bar plan, and the old name of
+     the combined view still opens the combined view. */
   if (p.get('tab') === 'schedule') { patch.tab = 'overview'; if (!p.has('view')) patch.view = 'termine'; }
+  if (p.get('view') === 'both') patch.view = 'pensum-termine';
   /*
    * A named view brings its layers; «custom» reads them off the hash, and a
    * layer the hash does not name is off. Layers without a view resolve to
@@ -310,6 +358,11 @@ export function readUrl() {
   patch.page = Math.max(1, Math.trunc(Number(p.get('page')) || 1));
   patch.search = p.get('q') ?? '';
   patch.searchOpen = patch.search !== '';   // a link with a query opens the field
+  patch.cols = readColumns(p, list);
+  patch.hideZeros = p.get('zeros') === 'hide';
+  patch.pSort = isPersonSort(p.get('psort') ?? '') ? p.get('psort') : DEFAULT_STATE.pSort;
+  patch.pDir = p.get('pdir') === 'asc' ? 'asc' : DEFAULT_STATE.pDir;
+  patch.cardSort = readCardSort(p);
   patch.phases = list('phase');
   patch.leads = list('lead');
   patch.portfolios = list('portfolio');
@@ -334,12 +387,19 @@ export function writeUrl({ push = false } = {}) {
   if (state.view !== 'pensum') p.set('view', state.view);
   if (state.view === 'custom') p.set('layers', LAYER_KEYS.filter(k => state.layers[k]).join(','));
   if (state.colour !== 'pensum') p.set('colour', state.colour);
+  for (const [set, key] of Object.entries(COLUMN_PARAMS)) {
+    if (columnsDiffer(set)) p.set(key, Object.keys(state.cols[set]).filter(c => state.cols[set][c]).join(','));
+  }
+  if (state.hideZeros) p.set('zeros', 'hide');
   if (state.scale !== 'quarter') p.set('scale', state.scale);
   if (state.periodOffset) p.set('from', String(state.periodOffset));
   if (state.sort !== 'project') p.set('sort', state.sort);
   if (state.sortDir !== 'asc') p.set('dir', state.sortDir);
   if (state.group !== DEFAULT_STATE.group) p.set('group', state.group);
   if (state.tab === 'dashboard' && state.bi !== 'general') p.set('bi', state.bi);
+  if (state.tab === 'dashboard' && state.pSort !== DEFAULT_STATE.pSort) p.set('psort', state.pSort);
+  if (state.tab === 'dashboard' && state.pDir !== DEFAULT_STATE.pDir) p.set('pdir', state.pDir);
+  if (state.tab === 'dashboard' && cardSortParam()) p.set('csort', cardSortParam());
   if (state.tab === 'history' && state.page > 1) p.set('page', String(state.page));
   if (state.tab === 'history' && state.pageSize !== '25') p.set('pageSize', state.pageSize);
   if (state.search) p.set('q', state.search);

@@ -71,7 +71,7 @@ categories tells the reader nothing they were looking for. Tried again as a
 **The bar plan is a view of the Planung grid, not a tab.** The bars and gates
 are a band inside the pensum row, drawn by the same code as the printed Gantt
 row. A view is a name for a set of layers (`VIEW_PRESETS`); the four switches
-stay for everyone else, and touching one turns the view into «Individuell» by
+stay for everyone else, and touching one turns the view into «Benutzerdefiniert» by
 itself. `state.view` and `state.layers` are written together, never apart.
 
 **The band derives its geometry from two numbers.** `--band-h` and
@@ -149,7 +149,7 @@ A4 pages, the answer is a larger sheet — hence A0 — not a shorter report.
 
 **Every view prints, through the same Ansicht menu.** The print layout reads
 the view the screen was set to: the figures, the bars, or the figures with the
-band under them, with «Individuell» free to mix. Only «Heute» has no place on
+band under them, with «Benutzerdefiniert» free to mix. Only «Heute» has no place on
 paper, because a sheet carries its date in the letterhead. The report is
 derived from the layers (`reportOf` in `views-docs.js`); there is no separate
 report state to drift from the view.

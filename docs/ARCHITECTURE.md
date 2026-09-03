@@ -98,7 +98,7 @@ by the same `unitAt` arithmetic as the printed Gantt row — and what the row
 shows is a set of four **layers**: `values`, `phases`, `gates`, `today`.
 
 A **view** is a name for a set of layers (`VIEW_PRESETS` in `store.js`):
-Pensum, Pensum + Termine, Termine, and Individuell for any other combination.
+Pensum, Pensum + Termine, Termine, and Benutzerdefiniert for any other combination.
 `state.view` and `state.layers` are always written together, through
 `viewPatch()` and `layerPatch()`; flipping a layer renames the view from what
 the layers now say, so the menu never claims a view it is not showing.
@@ -130,9 +130,26 @@ all, and every control needs clicking twice.
 ## State and the URL
 
 `state` is one object in `store.js`, mirrored into the URL hash so a view can be
-shared and reloaded. The hash carries the view (`view=`), the layers only for
-Individuell (`layers=`), and the colouring only when it is off (`colour=none`).
-The language is not in it: a shared link opens in the reader's own.
+shared and reloaded — the Teilen dialog simply offers the address. A key is
+written only when it differs from its default, so a plain `#?tab=overview` is
+the untouched Planung tab. The language is not in it: a shared link opens in
+the reader's own.
+
+| Key | Carries | Values |
+| --- | --- | --- |
+| `tab` | the page | `overview`, `dashboard`, `history`, `api`, `export` |
+| `view` | the Ansicht preset | `pensum`, `pensum-termine`, `termine`, `custom` (`both` in old links still opens the combined view) |
+| `layers` | the layers of Benutzerdefiniert, only with `view=custom` | any of `values,phases,gates,today` |
+| `colour` | the heat ramp | `none` when off |
+| `cols`, `barcols` | the columns of the pensum grid and of the bar plan on paper, when not the default | e.g. `title,lead,credit,organisation` |
+| `zeros` | Nullwerte ausblenden | `hide` |
+| `scale`, `from`, `unit` | the time scale, the window offset, the unit | `year`/`quarter`/`month`, a count, `pct`/`fte` |
+| `sort`, `dir` | the grid sort | a column key or `q3`, `asc`/`desc` |
+| `group` | Gruppieren nach | `portfolio`, `lead`, `phase`, `organisation`, `none` |
+| `q`, `phase`, `lead`, `portfolio`, `org` | the search and the filters | ids, comma-separated |
+| `bi`, `psort`, `pdir`, `csort` | the dashboard section, the person table's sort, the cards' order | `people`; a column or `q3`; `asc`/`desc`; `card:by:dir` per card |
+| `page`, `pageSize` | the change log | numbers |
+| `sheet`, `paper`, `zoom` | the print preview | `portrait`/`landscape`, `a4`…`a0`, `fit`/`50`… |
 
 `readUrl` returns a value for **every** URL-carried key — the hash's, or the
 default — so a hash that has lost a key (Back, a hand-edited address) resets

@@ -381,6 +381,11 @@
       "fr": "Notifications",
       "it": "Notifiche"
     },
+    "Benutzerdefiniert": {
+      "en": "Custom",
+      "fr": "Personnalisé",
+      "it": "Personalizzato"
+    },
     "Berechtigungen, Kennwort und Zwei-Faktor-Anmeldung werden über eIAM verwaltet.": {
       "en": "Permissions, password and two-factor sign-in are managed via eIAM.",
       "fr": "Les autorisations, le mot de passe et l'authentification à deux facteurs sont gérés via eIAM.",
@@ -711,11 +716,6 @@
       "fr": "Ouvrir dans Échéances",
       "it": "Apri in Scadenze"
     },
-    "Individuell": {
-      "en": "Custom",
-      "fr": "Personnalisé",
-      "it": "Personalizzato"
-    },
     "Jahr": {
       "en": "Year",
       "fr": "Année",
@@ -750,6 +750,11 @@
       "en": "Sort, export or share the card",
       "fr": "Trier, exporter ou partager la carte",
       "it": "Ordinare, esportare o condividere la scheda"
+    },
+    "Kategorie": {
+      "en": "Category",
+      "fr": "Catégorie",
+      "it": "Categoria"
     },
     "Kein Bearbeitender zugewiesen — das Pensum kann noch auf keine Person gebucht werden.": {
       "en": "No assignee — the workload cannot yet be booked to anyone.",
@@ -1235,11 +1240,6 @@
       "en": "Source code",
       "fr": "Code source",
       "it": "Codice sorgente"
-    },
-    "Reihenfolge": {
-      "en": "As listed",
-      "fr": "Ordre de la liste",
-      "it": "Ordine della lista"
     },
     "Ressourcenplanung": {
       "en": "Resource planning",

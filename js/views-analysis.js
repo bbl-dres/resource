@@ -6,7 +6,7 @@
 import {
   data, state, t, fmtMio, totals, loadStatus, cellValue,
   filteredProjects, visibleChanges,
-  periods, periodValue, personRows, sortPersonRows, groupPeople, pageOf, chartTone, nowIndex
+  periods, periodValue, personRows, sortPersonRows, groupPeople, pageOf, chartTone, nowIndex, compareDe
 } from './store.js';
 import { card } from './views-overview.js';
 
@@ -218,18 +218,27 @@ const CARD_MENU = [
 ];
 
 /*
- * Every bar chart starts in its own order — the phase chain, the years, the
- * units and portfolios as the filters list them — and the menu offers the
- * ranking by value as the alternative. The order is the neutral reading; the
- * ranking is a question the reader asks on purpose.
+ * How a card's bars are ordered: by category or by value, up or down. The
+ * category is the label, compared the German way — except where the category
+ * has an order of its own and a row says so with a `key`: the phase chain,
+ * which the alphabet would open with «22» and close with «Vorstudien».
  */
-const ordered = (id, rows) => (state.cardSort[id] === 'value'
-  ? [...rows].sort((a, b) => b.value - a.value)
-  : rows);
+const ordered = (id, rows) => {
+  const { by = 'label', dir = 'asc' } = state.cardSort[id] ?? {};
+  const cmp = by === 'value'
+    ? (a, b) => a.value - b.value
+    : (a, b) => (a.key !== undefined && b.key !== undefined ? a.key - b.key : compareDe(a.label, b.label));
+  const sign = dir === 'asc' ? 1 : -1;
+  /* «(nicht zugewiesen)» is not a category: sorted by category it closes the
+     list whichever way the list runs. Sorted by value it takes its place. */
+  const tail = by === 'label' ? rows.filter(r => r.tail) : [];
+  const body = by === 'label' ? rows.filter(r => !r.tail) : rows;
+  return body.sort((a, b) => cmp(a, b) * sign).concat(tail);
+};
 
 function biCard(id, title, subtitle, body, { full = false, sort = true } = {}) {
   const open = state.menu === `card:${id}`;
-  const byValue = state.cardSort[id] === 'value';
+  const { by = 'label', dir = 'asc' } = state.cardSort[id] ?? {};
   return html`<section class="bi-card ${full ? 'bi-card--full' : ''}" id="card-${id}">
     <header class="bi-card__head">
       <div>
@@ -241,9 +250,12 @@ function biCard(id, title, subtitle, body, { full = false, sort = true } = {}) {
                 aria-expanded="${open}" aria-haspopup="menu"
                 aria-label="${t('Karte sortieren, exportieren oder teilen')}">${icons.kebab(15)}</button>
         ${open && html`<div class="dd__panel dd__panel--right" role="menu" style="width:212px">
-          ${sort && html`${menuGroupLabel(t('Sortierung'))}
-            ${menuRadio(t('Reihenfolge'), !byValue, 'card-sort', `${id}:order`)}
-            ${menuRadio(t('Wert'), byValue, 'card-sort', `${id}:value`)}
+          ${sort && html`${menuGroupLabel(t('Sortieren nach'))}
+            ${menuRadio(t('Kategorie'), by === 'label', 'card-sort', `${id}:by:label`)}
+            ${menuRadio(t('Wert'), by === 'value', 'card-sort', `${id}:by:value`)}
+            ${divider()}
+            ${menuRadio(t('Aufsteigend'), dir === 'asc', 'card-sort', `${id}:dir:asc`)}
+            ${menuRadio(t('Absteigend'), dir === 'desc', 'card-sort', `${id}:dir:desc`)}
             ${divider()}`}
           ${CARD_MENU.map(item => html`<button type="button" class="dd__item" role="menuitem"
             data-act="${item.act}" ${attr(item.val, `data-val="${item.val}"`)}>${t(item.label)}</button>`)}
@@ -294,9 +306,9 @@ function utilisationCard() {
 
 function phaseCountCard() {
   const list = filteredProjects();
-  const rows = data.phases.eppm.map(e => {
+  const rows = data.phases.eppm.map((e, key) => {
     const n = list.filter(p => p.phase === e.id).length;
-    return { label: t(e.label), value: n, valueLabel: String(n) };
+    return { key, label: t(e.label), value: n, valueLabel: String(n) };
   });
   return biCard('phasen', 'Anzahl Projekte nach Phase (ePPM)',
     `${list.length} ${t('Projekte im gesetzten Umfang')}`,
@@ -312,7 +324,7 @@ function organisationCountCard() {
   /* A project without an assignee belongs to no unit; the bars still have to
      add up to the number in the subtitle. */
   const open = list.filter(p => !p.organisation).length;
-  if (open) rows.push({ label: `(${t('nicht zugewiesen')})`, value: open, valueLabel: String(open) });
+  if (open) rows.push({ label: `(${t('nicht zugewiesen')})`, value: open, valueLabel: String(open), tail: true });
   return biCard('organisationen', 'Anzahl Projekte nach Organisation',
     `${list.length} ${t('Projekte im gesetzten Umfang')}`,
     barList(ordered('organisationen', rows), { max: Math.max(1, ...rows.map(r => r.value)) }));
@@ -342,7 +354,7 @@ function organisationFteCard() {
   const pensumOf = pick => list.filter(pick).reduce((a, p) => a + cellValue(p, now), 0);
   const rows = data.meta.organisations
     .map(o => ({ label: t(o.label), value: pensumOf(p => p.organisation === o.id) }))
-    .concat({ label: `(${t('nicht zugewiesen')})`, value: pensumOf(p => !p.organisation) })
+    .concat({ label: `(${t('nicht zugewiesen')})`, value: pensumOf(p => !p.organisation), tail: true })
     .filter(r => r.value > 0)
     .map(r => ({ ...r, valueLabel: `${fte(r.value)} FTE` }));
   return biCard('organisation-fte', 'FTE nach Organisation',
@@ -362,9 +374,9 @@ function creditPhaseCard() {
   const list = filteredProjects();
   const total = list.reduce((a, p) => a + (p.credit ?? 0), 0);
   const rows = data.phases.eppm
-    .map(e => {
+    .map((e, key) => {
       const v = list.filter(p => p.phase === e.id).reduce((a, p) => a + (p.credit ?? 0), 0);
-      return { label: t(e.label), value: v, valueLabel: fmtMio(v) };
+      return { key, label: t(e.label), value: v, valueLabel: fmtMio(v) };
     })
     /* In the order of the chain, like the count card above it: the reader
        follows the money through the phases, not down a ranking. */

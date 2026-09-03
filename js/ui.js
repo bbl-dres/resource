@@ -744,9 +744,9 @@ export function toolbar({ time = false, view = false, print = false, exclude = [
 
 const VIEWS = [
   { id: 'pensum', label: 'Pensum' },
-  { id: 'both', label: 'Pensum + Termine' },
+  { id: 'pensum-termine', label: 'Pensum + Termine' },
   { id: 'termine', label: 'Termine' },
-  { id: 'custom', label: 'Individuell' }
+  { id: 'custom', label: 'Benutzerdefiniert' }
 ];
 const LAYERS = [
   { id: 'values', label: 'Pensumwerte' },
@@ -772,7 +772,7 @@ const columnSwitches = exclude => toggleableColumns().filter(c => !exclude.inclu
  * time scale that frames it, how the figures are set, and which columns stand
  * in front of them. The two that shape the whole grid come first; the column
  * list is longest and least often touched, so it goes last, where it pushes
- * nothing down. The layer switches show only while «Individuell» is chosen —
+ * nothing down. The layer switches show only while «Benutzerdefiniert» is chosen —
  * a named view already says what they would say — and «Pensum einfärben»
  * greys out while there are no figures to colour.
  *

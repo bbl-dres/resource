@@ -420,10 +420,11 @@ const actions = {
       : { sort: val, sortDir: defaultDir(val) }
   )),
   group: (val) => setState({ group: val, menu: null }),
-  /* «card:mode» — the card's bars in their own order, or ranked by value. */
+  /* «card:by:value», «card:dir:desc» — one half of a card's sort at a time.
+     The menu stays open: the other half is usually the next click. */
   'card-sort': (val) => {
-    const [id, mode] = val.split(':');
-    setState(s => ({ cardSort: { ...s.cardSort, [id]: mode }, menu: null }));
+    const [id, part, choice] = val.split(':');
+    setState(s => ({ cardSort: { ...s.cardSort, [id]: { ...s.cardSort[id], [part]: choice } } }));
   },
   unit: (val) => setState({ unit: val }),
   scale: (val) => setState({ scale: val, periodOffset: offsetForScale(val) }),
