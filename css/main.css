@@ -1573,9 +1573,23 @@ button.pcell--val { cursor: pointer; }
 }
 .colchart__plot { position: relative; height: var(--chart-h, 150px); }
 .colchart__ref { position: absolute; left: 0; right: 0; border-top: 1px dashed var(--color-neutral-solid); }
+/*
+ * The label of the reference line sits at the right edge of what is on
+ * screen, not of the track: the track is twice the card, and a label at its
+ * end was seen only by whoever scrolled to 2036. A row as wide as the track
+ * holds the line's height; inside it the label is sticky to the scroller's
+ * right edge, so it stays put while the columns pass under it.
+ */
+.colchart__refrow {
+  position: absolute; left: 0; right: 0;
+  display: flex; justify-content: flex-end;
+  pointer-events: none;
+}
 .colchart__reflabel {
-  position: absolute; right: 0; padding: 0 var(--space-2);
-  background: var(--color-surface); font-size: var(--text-xs); color: var(--color-text-muted);
+  position: sticky; right: 0;
+  padding: 0 var(--space-2);
+  background: var(--color-surface);
+  font-size: var(--text-xs); color: var(--color-text-muted); white-space: nowrap;
 }
 .colchart__grid { display: grid; grid-auto-columns: minmax(var(--chart-col), 1fr); grid-auto-flow: column; gap: var(--space-4); height: 100%; align-items: end; }
 .colchart__col { display: flex; flex-direction: column; justify-content: flex-end; gap: var(--space-2); height: 100%; }
@@ -1613,8 +1627,6 @@ button.pcell--val { cursor: pointer; }
 .barlist__track { height: 10px; border-radius: var(--radius-sm); background: var(--color-surface-sunken); overflow: hidden; }
 .barlist__fill { display: block; height: 100%; background: var(--color-accent); }
 .barlist__fill.is-danger { background: var(--color-danger-solid); }
-.barlist__note { font-size: var(--text-xs); color: var(--color-text-muted); }
-.barlist__note.is-danger { color: var(--color-danger-fg-strong); font-weight: var(--font-semibold); }
 
 /* ==========================================================================
    12 · Change log

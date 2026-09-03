@@ -420,6 +420,11 @@ const actions = {
       : { sort: val, sortDir: defaultDir(val) }
   )),
   group: (val) => setState({ group: val, menu: null }),
+  /* «card:mode» — the card's bars in their own order, or ranked by value. */
+  'card-sort': (val) => {
+    const [id, mode] = val.split(':');
+    setState(s => ({ cardSort: { ...s.cardSort, [id]: mode }, menu: null }));
+  },
   unit: (val) => setState({ unit: val }),
   scale: (val) => setState({ scale: val, periodOffset: offsetForScale(val) }),
   /* Stepped from where the window actually is — an offset that ran past the

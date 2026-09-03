@@ -746,10 +746,10 @@
       "fr": "Capacité nette, après absences",
       "it": "Capacità netta, dopo le assenze"
     },
-    "Karte exportieren oder teilen": {
-      "en": "Export or share card",
-      "fr": "Exporter ou partager la carte",
-      "it": "Esporta o condividi la scheda"
+    "Karte sortieren, exportieren oder teilen": {
+      "en": "Sort, export or share the card",
+      "fr": "Trier, exporter ou partager la carte",
+      "it": "Ordinare, esportare o condividere la scheda"
     },
     "Kein Bearbeitender zugewiesen — das Pensum kann noch auf keine Person gebucht werden.": {
       "en": "No assignee — the workload cannot yet be booked to anyone.",
@@ -1235,6 +1235,11 @@
       "en": "Source code",
       "fr": "Code source",
       "it": "Codice sorgente"
+    },
+    "Reihenfolge": {
+      "en": "As listed",
+      "fr": "Ordre de la liste",
+      "it": "Ordine della lista"
     },
     "Ressourcenplanung": {
       "en": "Resource planning",

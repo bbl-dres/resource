@@ -914,7 +914,9 @@ export function columnCharts(panels, { col } = {}) {
         </div>`}
         <div class="colchart__plot" style="--chart-h:${height}px">
           ${refAt ? html`<div class="colchart__ref" style="bottom:${refPct.toFixed(1)}%"></div>
-                         <div class="colchart__reflabel" style="bottom:${(refPct + 1.2).toFixed(1)}%">${refLabel}</div>` : ''}
+                         <div class="colchart__refrow" style="bottom:${(refPct + 1.2).toFixed(1)}%">
+                           <span class="colchart__reflabel">${refLabel}</span>
+                         </div>` : ''}
           <div class="colchart__grid">
             ${r.map(x => html`<div class="colchart__col is-${x.tone}">
               <span class="colchart__val">${x.label}</span>
@@ -945,7 +947,6 @@ export function barList(rows, { max, gap = 12 } = {}) {
       <div class="barlist__track">
         <span class="barlist__fill ${r.tone ? 'is-' + r.tone : ''}" style="width:${((r.value / top) * 100).toFixed(1)}%"></span>
       </div>
-      ${r.note && html`<div class="barlist__note ${r.noteTone ? 'is-' + r.noteTone : ''}">${r.note}</div>`}
     </div>`)}
   </div>`;
 }

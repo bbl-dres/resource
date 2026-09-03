@@ -13,7 +13,7 @@ import { card } from './views-overview.js';
 import {
   html, raw, icons, pageHeader, pageActions, toolbar, activeFilterRow,
   columnCharts, barList, kpiStrip, segmented,
-  tokenPx, yearRule, pinCls, pinLeft, sortableHead, attr, dropdown, menuRadio, changeProject
+  tokenPx, yearRule, pinCls, pinLeft, sortableHead, attr, dropdown, menuRadio, menuGroupLabel, divider, changeProject
 } from './ui.js';
 
 /* =============================================================================
@@ -217,8 +217,19 @@ const CARD_MENU = [
   { label: 'Link teilen', act: 'share' }
 ];
 
-function biCard(id, title, subtitle, body, { full = false } = {}) {
+/*
+ * Every bar chart starts in its own order — the phase chain, the years, the
+ * units and portfolios as the filters list them — and the menu offers the
+ * ranking by value as the alternative. The order is the neutral reading; the
+ * ranking is a question the reader asks on purpose.
+ */
+const ordered = (id, rows) => (state.cardSort[id] === 'value'
+  ? [...rows].sort((a, b) => b.value - a.value)
+  : rows);
+
+function biCard(id, title, subtitle, body, { full = false, sort = true } = {}) {
   const open = state.menu === `card:${id}`;
+  const byValue = state.cardSort[id] === 'value';
   return html`<section class="bi-card ${full ? 'bi-card--full' : ''}" id="card-${id}">
     <header class="bi-card__head">
       <div>
@@ -228,8 +239,12 @@ function biCard(id, title, subtitle, body, { full = false } = {}) {
       <div class="dd bi-card__tools">
         <button type="button" class="iconbtn ${open ? 'is-open' : ''}" data-act="menu" data-val="card:${id}"
                 aria-expanded="${open}" aria-haspopup="menu"
-                aria-label="${t('Karte exportieren oder teilen')}">${icons.kebab(15)}</button>
+                aria-label="${t('Karte sortieren, exportieren oder teilen')}">${icons.kebab(15)}</button>
         ${open && html`<div class="dd__panel dd__panel--right" role="menu" style="width:212px">
+          ${sort && html`${menuGroupLabel(t('Sortierung'))}
+            ${menuRadio(t('Reihenfolge'), !byValue, 'card-sort', `${id}:order`)}
+            ${menuRadio(t('Wert'), byValue, 'card-sort', `${id}:value`)}
+            ${divider()}`}
           ${CARD_MENU.map(item => html`<button type="button" class="dd__item" role="menuitem"
             data-act="${item.act}" ${attr(item.val, `data-val="${item.val}"`)}>${t(item.label)}</button>`)}
         </div>`}
@@ -274,7 +289,7 @@ function utilisationCard() {
       { rows: free, height: 120, max: maxFree, refAt: 0,
         title: 'Freie Kapazität nach Quartal', sub: 'Kapazität netto minus gebuchtem Pensum' }
     ]),
-    { full: true });
+    { full: true, sort: false });
 }
 
 function phaseCountCard() {
@@ -285,7 +300,7 @@ function phaseCountCard() {
   });
   return biCard('phasen', 'Anzahl Projekte nach Phase (ePPM)',
     `${list.length} ${t('Projekte im gesetzten Umfang')}`,
-    barList(rows, { max: Math.max(1, ...rows.map(r => r.value)) }));
+    barList(ordered('phasen', rows), { max: Math.max(1, ...rows.map(r => r.value)) }));
 }
 
 function organisationCountCard() {
@@ -300,7 +315,7 @@ function organisationCountCard() {
   if (open) rows.push({ label: `(${t('nicht zugewiesen')})`, value: open, valueLabel: String(open) });
   return biCard('organisationen', 'Anzahl Projekte nach Organisation',
     `${list.length} ${t('Projekte im gesetzten Umfang')}`,
-    barList(rows, { max: Math.max(1, ...rows.map(r => r.value)) }));
+    barList(ordered('organisationen', rows), { max: Math.max(1, ...rows.map(r => r.value)) }));
 }
 
 /** A pensum in FTE, the Swiss way round: 1,25. */
@@ -314,11 +329,10 @@ function portfolioCard() {
       const v = list.filter(p => p.portfolio === pf.id).reduce((a, p) => a + cellValue(p, now), 0);
       return { label: t(pf.label), value: v, valueLabel: `${fte(v)} FTE` };
     })
-    .filter(r => r.value > 0)
-    .sort((a, b) => b.value - a.value);
+    .filter(r => r.value > 0);
   return biCard('portfolio', 'FTE nach Teilportfolio',
     `${data.quarters[now].label} · ${t('Pensum in FTE')}`,
-    barList(rows));
+    barList(ordered('portfolio', rows)));
 }
 
 /** The same pensum, cut by who carries it rather than by whom it is for. */
@@ -330,19 +344,18 @@ function organisationFteCard() {
     .map(o => ({ label: t(o.label), value: pensumOf(p => p.organisation === o.id) }))
     .concat({ label: `(${t('nicht zugewiesen')})`, value: pensumOf(p => !p.organisation) })
     .filter(r => r.value > 0)
-    .map(r => ({ ...r, valueLabel: `${fte(r.value)} FTE` }))
-    .sort((a, b) => b.value - a.value);
+    .map(r => ({ ...r, valueLabel: `${fte(r.value)} FTE` }));
   return biCard('organisation-fte', 'FTE nach Organisation',
     `${data.quarters[now].label} · ${t('Pensum in FTE')}`,
-    barList(rows));
+    barList(ordered('organisation-fte', rows)));
 }
 
 function creditYearCard() {
   const cfg = data.dashboard.creditByYear;
   const rows = cfg.rows.map(r => ({
-    label: r.label, value: r.value, valueLabel: r.valueLabel, note: t(r.note)
+    label: r.label, value: r.value, valueLabel: r.valueLabel
   }));
-  return biCard('kreditjahr', cfg.title, t(cfg.subtitle), barList(rows));
+  return biCard('kreditjahr', cfg.title, t(cfg.subtitle), barList(ordered('kreditjahr', rows)));
 }
 
 function creditPhaseCard() {
@@ -353,11 +366,12 @@ function creditPhaseCard() {
       const v = list.filter(p => p.phase === e.id).reduce((a, p) => a + (p.credit ?? 0), 0);
       return { label: t(e.label), value: v, valueLabel: fmtMio(v) };
     })
-    .filter(r => r.value > 0)
-    .sort((a, b) => b.value - a.value);
+    /* In the order of the chain, like the count card above it: the reader
+       follows the money through the phases, not down a ranking. */
+    .filter(r => r.value > 0);
   return biCard('kreditphase', 'Kredit nach Phase (ePPM)',
     `${t('Gesamt')} ${fmtMio(total)} CHF · ${t('gebundene Mittel')}`,
-    barList(rows));
+    barList(ordered('kreditphase', rows)));
 }
 
 /* =============================================================================

@@ -105,6 +105,7 @@ const DEFAULT_STATE = {
   pDir: 'desc',
   searchOpen: false,
   collapsedGroups: {},
+  cardSort: {},            // dashboard card id -> 'value'; absent means the card's own order
   toast: null
 };
 
