@@ -245,8 +245,17 @@ button, input, select, textarea { font: inherit; color: inherit; }
  * 134px and 250px about three times a second while typing. Animations here have
  * to be driven by a class that outlives the render, the way .is-leaving is.
  */
+/*
+ * Open, the field gives way before the labelled triggers do. At a fixed 250px
+ * it was the one thing in the row that could not shrink, and the 216px it adds
+ * over the closed icon were never in the row's budget — section 19 measured
+ * the row with the search closed — so on a wide screen the group trigger
+ * cropped to «Gruppieren ... Ke...». The floor is sized for the placeholder
+ * «Projekt, ID oder Person» at 14px with the icon and the close button, about
+ * 210px; an estimate, not yet measured on the rendered field.
+ */
 .xsearch.is-open {
-  width: 250px; padding-inline: var(--space-4); gap: var(--space-3); cursor: text;
+  flex: 0 1 250px; min-width: 210px; padding-inline: var(--space-4); gap: var(--space-3); cursor: text;
   background: var(--color-surface);
   border-color: var(--color-border-accent);
 }
@@ -738,6 +747,15 @@ h1, h2, h3,
 .filterbar__label { flex: 0 0 auto; }
 .filterbar__none { color: var(--color-text-muted); }
 .filterbar__count { font-size: var(--text-sm); color: var(--color-text-muted); }
+
+/* What the search matched, in the cells that carry the searched text. The
+   ground is widened by a pixel with a shadow rather than with padding, so the
+   mark takes no room of its own in a cell that truncates. */
+.hit {
+  background: var(--color-mark-bg); color: var(--color-mark-fg);
+  font-weight: var(--font-semibold);
+  border-radius: var(--radius-xs); box-shadow: 0 0 0 1px var(--color-mark-bg);
+}
 
 /* Says what the window could not hold. A statement of fact, not a warning. */
 .dropped-note {
@@ -2468,6 +2486,19 @@ button.pcell--val { cursor: pointer; }
   .toolbar__spacer + .btn { margin-left: auto; }
 }
 
+/* With the search open the row is longer by what the field keeps once it has
+   shrunk to its floor — some 175px over the closed icon — so it may break
+   that much sooner. 1300 is a first estimate from the figures above, not a
+   measurement of the rendered row, and the French labels run wider than the
+   German ones the row was sized against. Bounded below at 701px: the phone
+   rule in section 16 wants one scrolling row, and a later wrap rule of equal
+   specificity would override it. */
+@media (min-width: 701px) and (max-width: 1300px) {
+  .toolbar:has(.xsearch.is-open) { flex-wrap: wrap; }
+  .toolbar:has(.xsearch.is-open) .toolbar__spacer { flex-basis: 100%; }
+  .toolbar:has(.xsearch.is-open) .toolbar__spacer + .btn { margin-left: auto; }
+}
+
 /* «Gruppieren nach:» is read, not seen, once the row cannot hold it. The full
    toolbar measures 1310px and a 1366 window offers 1293, so the prefix yields
    from 1400px down. Below that the button says only «Teilportfolio» beside a
@@ -2477,6 +2508,13 @@ button.pcell--val { cursor: pointer; }
     position: absolute; width: 1px; height: 1px; margin: -1px;
     padding: 0; border: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
   }
+}
+
+/* And at any width once the search is open: the open field costs the row more
+   than the prefix does, and the prefix is the first thing the row gives up. */
+.toolbar:has(.xsearch.is-open) .btn__prefix {
+  position: absolute; width: 1px; height: 1px; margin: -1px;
+  padding: 0; border: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
 }
 
 /* The mockup is designed at 1440px and the first breakpoint above was 1100px.

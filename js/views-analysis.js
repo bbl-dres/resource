@@ -13,7 +13,8 @@ import { card } from './views-overview.js';
 import {
   html, raw, icons, pageHeader, pageActions, toolbar, activeFilterRow,
   columnCharts, barList, kpiStrip, segmented,
-  tokenPx, yearRule, pinCls, pinLeft, sortableHead, attr, dropdown, menuRadio, menuGroupLabel, divider, changeProject
+  tokenPx, yearRule, pinCls, pinLeft, sortableHead, attr, dropdown, menuRadio, menuGroupLabel, divider, changeProject,
+  highlight
 } from './ui.js';
 
 /* =============================================================================
@@ -408,11 +409,11 @@ export function renderHistory() {
         </div>
         ${page.rows.length ? page.rows.map((c, i) => html`<div class="log log--history ${i % 2 === 1 ? 'is-zebra' : ''}">
           <span class="log__date">${c.dateLabel}</span>
-          <span>${c.actor}</span>
+          <span>${highlight(c.actor)}</span>
           <span class="log__project">${changeProject(c)}</span>
-          <span><span class="fieldtag">${t(c.field)}</span></span>
-          <span class="log__change">${t(c.change)}</span>
-          <span class="log__value">${t(c.value)}</span>
+          <span><span class="fieldtag">${highlight(t(c.field))}</span></span>
+          <span class="log__change">${highlight(t(c.change))}</span>
+          <span class="log__value">${highlight(t(c.value))}</span>
         </div>`) : html`<div class="log log--history log--empty">${t('Keine Einträge im gesetzten Umfang.')}</div>`}
         ${logFoot(page)}
       </section>

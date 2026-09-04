@@ -13,7 +13,7 @@ import {
   html, raw, icons, pageHeader, pageActions, toolbar, activeFilterRow,
   noResults, droppedNote, attr,
   tokenPx, yearRule, pinCls, pinLeft, sortableHead,
-  popoverPosition, personOption, personSearch
+  popoverPosition, personOption, personSearch, highlight
 } from './ui.js';
 
 import { leadLayout, titleWidth, alignCls } from './columns.js';
@@ -260,16 +260,22 @@ const sortHead = (key, label, opts = {}) => sortableHead({
 });
 
 /*
- * Most cells print the registry's plain text. These two draw something the
- * reader can act on, so they are named here rather than hidden behind a flag
- * on the column.
+ * Most cells print the registry's plain text. These three are the cells the
+ * search reads — the fields filteredProjects() matches on, with the kind as
+ * the tail of the title, and no other, or a mark would claim a hit the
+ * filter never saw — so they draw its hits; two of them are also something
+ * the reader can act on. Named here rather than hidden behind a flag on the
+ * column.
  */
 const CELL_BODY = {
+  id: p => highlight(p.number),
+
   title: p => html`<button type="button" class="prow__title"
-      data-act="open-project" data-val="${p.id}" title="${p.title}">${p.title}</button>`,
+      data-act="open-project" data-val="${p.id}" title="${p.title}">${highlight(p.title)}</button>`,
 
   lead: (p, lead) => {
-    const name = lead ? lead.name : html`<span class="lead-open">${t('nicht zugewiesen')}</span>`;
+    const name = lead ? highlight(lead.name)
+      : html`<span class="lead-open">${highlight(t('nicht zugewiesen'))}</span>`;
     return html`<button type="button" class="leadbtn" data-act="assign" data-val="${p.id}"
       title="${t('Bearbeitenden zuweisen')}">${name}</button>`;
   }

@@ -186,6 +186,18 @@
   --color-accent-pressed: var(--blue-800);
   --color-accent-hover:  var(--blue-700);
 
+  /*
+   * A search hit. The reader's own query, not a state of the data — every
+   * other hue on the palette already says something about a row: blue the
+   * size of a pensum, red overload, amber a missing lead — so it wears the
+   * accent tint the reader's own actions already wear, and the strong text
+   * at a heavier weight, so it is not colour alone. It only lands in the
+   * white text columns and the log, never on the blue value cells. grey-900
+   * on blue-100 measures 14.5:1.
+   */
+  --color-mark-bg: var(--blue-100);
+  --color-mark-fg: var(--color-text-strong);
+
   --color-toggle-on:      var(--grey-900);
   --color-toggle-on-fg:   var(--white);
   /* Same defect, worse: brightness(1.12) also applies while the pointer is down,

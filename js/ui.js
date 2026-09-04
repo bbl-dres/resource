@@ -7,7 +7,7 @@
 
 import {
   data, state, t, activeFilters, kpis, filteredProjects, canStep, notifications,
-  columnSet, coloured
+  columnSet, coloured, searchMatcher
 } from './store.js';
 import { toggleableColumns } from './columns.js';
 import { icon } from './icons.js';
@@ -172,10 +172,32 @@ export function droppedNote(hidden) {
   </p>`;
 }
 
+/**
+ * A string with the search hits marked. The segments go through the template
+ * and are escaped there — nothing typed reaches raw() — and the ranges come
+ * from the matcher the filter uses, so a row cannot match with nothing
+ * marked. Without a query, or without a hit, the string comes back as it was.
+ */
+export function highlight(text) {
+  const s = String(text ?? '');
+  const match = searchMatcher();
+  const ranges = match ? match.ranges(s) : [];
+  if (!ranges.length) return s;
+  const parts = [];
+  let at = 0;
+  for (const [from, to] of ranges) {
+    if (from > at) parts.push(s.slice(at, from));
+    parts.push(html`<mark class="hit">${s.slice(from, to)}</mark>`);
+    at = to;
+  }
+  if (at < s.length) parts.push(s.slice(at));
+  return html`${parts}`;
+}
+
 /** The project cell of a change row: a link when the entry names a project. */
 export const changeProject = (c) => (c.projectId
-  ? html`<button type="button" class="linkbtn" data-act="open-project" data-val="${c.projectId}">${c.projectLabel}</button>`
-  : c.projectLabel);
+  ? html`<button type="button" class="linkbtn" data-act="open-project" data-val="${c.projectId}">${highlight(c.projectLabel)}</button>`
+  : highlight(c.projectLabel));
 
 /*
  * Only the time axis scrolls; the master data stays where it is. A pinned
@@ -231,12 +253,19 @@ export function badge(n) {
  * as markup, every closed menu was rendered and thrown away on every render —
  * the lead menu alone filtered and drew forty rows per keystroke in the search.
  */
+/*
+ * The label sits in a span of its own. A plain string lands in the button as
+ * a bare text node, and the anonymous flex item that makes cannot shrink
+ * below its text: squeezed in the toolbar, the filter triggers kept their
+ * label whole and pushed the chevron out over the border, while the group
+ * trigger, whose label is already an element, cropped as intended.
+ */
 export function dropdown({ id, label, lead, count, width = 244, align = 'left', body, cls = '', title = '' }) {
   const open = state.menu === id;
   return html`<div class="dd ${cls}" data-menu="${id}">
     <button type="button" class="btn ${open ? 'is-open' : ''}" data-act="menu" data-val="${id}"
             aria-expanded="${open}" aria-haspopup="menu" ${title && raw(`title="${esc(title)}"`)}>
-      ${lead ?? ''}${label}${count ? badge(count) : ''}${icons.chevronDown()}
+      ${lead ?? ''}<span>${label}</span>${count ? badge(count) : ''}${icons.chevronDown()}
     </button>
     ${open && menuPanel({ align, width, body: typeof body === 'function' ? body() : body })}
   </div>`;
@@ -672,8 +701,9 @@ export function toolbar({ time = false, view = false, print = false, exclude = [
     ${dropdown({
       id: 'group', lead: icons.grid(), width: 288,
       /* The prefix yields on a small laptop and stays in the accessible name;
-         the value is the part a reader has to see. */
-      label: html`<span class="btn__prefix">${t('Gruppieren nach')}:</span><span>${t(groupLabel)}</span>`,
+         the value is the part a reader has to see. The two share one flex
+         item, so the space between them is a real one. */
+      label: html`<span class="btn__prefix">${t('Gruppieren nach')}:</span> <span>${t(groupLabel)}</span>`,
       title: `${t('Gruppieren nach')}: ${t(groupLabel)}`,
       body: () => html`${menuGroupLabel(t('Gruppieren nach'))}
         ${options.map(g => menuRadio(t(g.label), current.id === g.id, 'group', g.id))}`

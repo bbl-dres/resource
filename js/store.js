@@ -714,9 +714,30 @@ const eppmRank = id => String(Math.max(0, data.phases.eppm.findIndex(e => e.id =
    Derived: filtering, sorting, grouping
    -------------------------------------------------------------------------- */
 
+/*
+ * The search as one matcher, shared by the filter and by the marks the cells
+ * draw. Two would drift — each folding case its own way — and a row would
+ * match with nothing marked. It returns facts about a string, never markup;
+ * ui.js turns the ranges into marks. The query is a plain substring, so its
+ * regex characters are escaped, and the field's own trimming applies: a query
+ * of spaces is no query.
+ */
+export const searchMatcher = memo(() => {
+  const q = state.search.trim();
+  if (!q) return null;
+  const src = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const one = new RegExp(src, 'i');
+  const all = new RegExp(src, 'gi');
+  return {
+    test: text => one.test(String(text)),
+    /** Every hit in a string, as [from, to) offsets in order. */
+    ranges: text => [...String(text).matchAll(all)].map(m => [m.index, m.index + m[0].length])
+  };
+});
+
 /** The projects in scope, filtered and sorted — once per change of state. */
 export const filteredProjects = memo(() => {
-  const q = state.search.trim().toLowerCase();
+  const match = searchMatcher();
   const list = data.projects.filter(p => {
     if (state.phases.length && !state.phases.includes(p.phase)) return false;
     if (state.leads.length) {
@@ -725,10 +746,12 @@ export const filteredProjects = memo(() => {
     }
     if (state.portfolios.length && !state.portfolios.includes(p.portfolio)) return false;
     if (state.organisations.length && !state.organisations.includes(p.organisation)) return false;
-    if (q) {
-      const lead = data.peopleById[p.leadId]?.name ?? 'nicht zugewiesen';
-      const hay = `${p.title} ${p.number} ${lead} ${p.kind}`.toLowerCase();
-      if (!hay.includes(q)) return false;
+    if (match) {
+      /* The words the cells show, translated: in English «unassigned» has to
+         find the rows without a lead, and the mark has to land on what matched. */
+      const lead = data.peopleById[p.leadId]?.name ?? t('nicht zugewiesen');
+      const hay = `${p.title} ${p.number} ${lead} ${p.kind}`;
+      if (!match.test(hay)) return false;
     }
     return true;
   });
@@ -1134,12 +1157,13 @@ export function milestones() {
  */
 export function visibleChanges() {
   const ids = new Set(filteredProjects().map(p => p.id));
-  const q = state.search.trim().toLowerCase();
+  const match = searchMatcher();
   return data.changes.filter(c => {
     if (c.projectId && !ids.has(c.projectId)) return false;
-    if (!q) return true;
-    const hay = `${c.projectLabel} ${c.actor} ${c.field} ${c.change} ${c.value}`.toLowerCase();
-    return hay.includes(q);
+    if (!match) return true;
+    /* The translated words, as the rows print them. */
+    const hay = `${c.projectLabel} ${c.actor} ${t(c.field)} ${t(c.change)} ${t(c.value)}`;
+    return match.test(hay);
   });
 }
 

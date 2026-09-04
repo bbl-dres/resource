@@ -86,6 +86,17 @@ other. The list is ordered by free capacity, because capacity is why one name
 is right and another is wrong. The rebooking dialog, which moves an amount
 over a period, keeps its form and its button.
 
+**The search has one matcher, and the cells mark what it matched.** The
+filter and the highlight read the same `searchMatcher()` in `store.js`, which
+returns facts — does this string match, and where — and never markup; a
+second case-folding would drift, and a row would match with nothing marked.
+Only the cells the filter reads draw a mark: ID, project and lead on Planung,
+the five text cells on Verlauf. The haystack is the translated text the cells
+show, so a query finds the same words in every language. A hit is the
+reader's own query, not a state of the data, so it wears the accent tint and
+a heavier weight, never a status hue. Paper carries no query and draws no
+mark.
+
 **The chrome above the grid is measured on a 1366×768 laptop.** One toolbar
 row, no breadcrumb bar, no page title, gaps of 20 / 8 / 24px above the first
 group heading (16 / 6 / 16 below 1440px). The figures behind each rule are in
