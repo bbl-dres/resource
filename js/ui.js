@@ -405,7 +405,6 @@ export function appHeader() {
   return html`<header class="shell-header">
     <div class="wrap shell-header__inner">
       <a class="brand" href="#?tab=overview" data-act="home">
-        <img src="assets/swiss-logo-flag.svg" alt="" width="22" height="24">
         <span class="brand__text">${m.org.name}<span class="brand__sub">${t(m.org.app)}</span></span>
       </a>
 
