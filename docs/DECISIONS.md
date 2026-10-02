@@ -150,15 +150,17 @@ whose credit is still open is neither yet and stands under «(Kredit offen)»:
 counted as small it would inflate the one number the grouping is there to
 give. The threshold is a setting, `meta.settings.smallProjectMio`.
 
-**The office's rules are a page behind the gear, not the account dialog.** The
-project share per organisation and the small-project line hold for everyone,
-so they sit in the header beside the bell and not in the reader's own menu.
-Nobody expects them to change — moving a project share means moving contracts
-— so the page is simple on purpose: no «gültig ab», no history of values. A
-saved change re-rates every person and every quarter at once, is saved for all
-fields together behind one button, and lands in the Verlauf as an entry with
-no project, so no filter hides it. Like every edit in the prototype it lasts
-until the page is reloaded.
+**The office's rules are a dialog behind the gear, not part of the account
+dialog.** The project share per organisation and the small-project line hold
+for everyone, so they sit in the header beside the bell and not in the
+reader's own menu — but they open the way the account does, as a dialog over
+the page. A page of their own was tried first and read as a destination for
+two fields nobody expects to change. It is simple on purpose: no «gültig ab»,
+no history of values. A saved change re-rates every person and every quarter
+at once, is saved for all fields together behind one button, and lands in the
+Verlauf as an entry with no project, so no filter hides it; closing the
+dialog any other way leaves the rules as they were. Like every edit in the
+prototype it lasts until the page is reloaded.
 
 **Bedarf follows the filter; Auslastung does not.** A demand row describes the
 projects in scope. Utilisation is always the whole department against its own net

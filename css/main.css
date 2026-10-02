@@ -173,8 +173,6 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .hdr-btn:hover { background: var(--color-brand-control-bg-strong); }
 .hdr-btn--icon { width: var(--control-height-lg); padding: 0; justify-content: center; color: var(--color-brand-fg-muted); }
 .hdr-btn--icon:hover { color: var(--color-brand-fg); }
-/* The gear while its page is open: the outline at full strength says «you are here». */
-.hdr-btn[aria-current="page"] { border-color: var(--color-brand-fg); color: var(--color-brand-fg); }
 
 /* .dd already supplies the positioning context the badge anchors to. */
 .hdr-notify { flex: 0 0 auto; }
@@ -321,8 +319,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 :root[data-tab="dashboard"],
 :root[data-tab="history"],
 :root[data-tab="api"],
-:root[data-tab="export"],
-:root[data-tab="settings"] { --layout-width: var(--layout-width-grid); }
+:root[data-tab="export"] { --layout-width: var(--layout-width-grid); }
 
 /*
  * Ground rules: navy chrome, one white strip that answers "where am I", then a
@@ -2579,19 +2576,16 @@ button.pcell--val { cursor: pointer; }
 }
 
 /* ==========================================================================
-   20 · Einstellungen — the office's rules, behind the gear in the header
+   20 · Einstellungen — the office's rules, in the dialog behind the gear
    ========================================================================== */
-
-/* A form, not a view of the plan: it keeps a reading measure on a wide screen
-   rather than stretching six rows across 1900px. */
-.setpage { max-width: 920px; }
-.setpage__lead { max-width: 72ch; font-size: var(--text-base); color: var(--color-text-secondary); }
 
 .settable { display: flex; flex-direction: column; }
 .settable__row {
-  display: grid; grid-template-columns: minmax(0, 1fr) 80px 130px 190px;
-  align-items: center; gap: var(--space-8);
-  min-height: var(--row-height-list);
+  /* The dialog is 712px inside its padding; the name keeps what the figures leave. */
+  display: grid; grid-template-columns: minmax(0, 1fr) 70px 110px 150px;
+  align-items: center; gap: var(--space-6);
+  /* Just clear of the 34px field: six of these should not make the dialog longer than it must be. */
+  min-height: 40px;
   border-top: var(--border-hairline) solid var(--color-border-subtle);
   font-size: var(--text-base); color: var(--color-text);
 }
@@ -2599,14 +2593,21 @@ button.pcell--val { cursor: pointer; }
   min-height: 0; padding-bottom: var(--space-4); border-top: 0;
   font-size: var(--text-sm); font-weight: var(--font-semibold); color: var(--color-text-muted);
 }
-/* One setting on its own: the name, the field, and what the value does. */
-.settable__row--single { grid-template-columns: minmax(0, 1fr) 190px minmax(0, 340px); border-top: 0; }
 .settable__name { min-width: 0; color: var(--color-text-strong); }
-.settable__short { margin-left: var(--space-4); font-size: var(--text-sm); color: var(--color-text-muted); }
+/* The house's short form, in brackets behind the name: the space before it is the word space. */
+.settable__short { font-size: var(--text-sm); color: var(--color-text-muted); }
 .settable__num { text-align: right; font-variant-numeric: tabular-nums; }
 .settable__extra { color: var(--color-text-secondary); }
 
 .setfield { display: inline-flex; align-items: center; gap: var(--space-3); color: var(--color-text-secondary); }
+/*
+ * The unit sits in a slot one «%» wide, whatever it says. Sized to its text,
+ * «Mio. CHF» pushed its field well to the left of the «%» fields above it; in a fixed
+ * slot every field ends on the same line and the longer unit runs on into the
+ * empty column beside it.
+ */
+/* min-width, or a flex item refuses to be narrower than its own text. */
+.setfield > span { flex: 0 0 14px; min-width: 0; text-align: left; white-space: nowrap; }
 .setfield input {
   width: 64px; height: var(--control-height-lg); padding: 0 var(--space-4);
   border: var(--border-hairline) solid var(--color-border-strong); border-radius: var(--radius);
@@ -2618,13 +2619,15 @@ button.pcell--val { cursor: pointer; }
 .setfield.is-changed input { border: var(--border-emphasis) solid var(--color-accent); }
 .setfield.is-invalid input { border: var(--border-emphasis) solid var(--color-danger-solid); }
 
-/* What is left to do, beside the buttons that do it. */
-.setnote { font-size: var(--text-sm); color: var(--color-text-muted); white-space: nowrap; }
+/* What is left to do, at the far end of the foot from the buttons that do it. */
+.setnote { margin-right: auto; font-size: var(--text-sm); color: var(--color-text-muted); }
 .setnote.is-invalid { color: var(--color-danger-fg); font-weight: var(--font-semibold); }
 
 @media (max-width: 700px) {
   /* The derived column is a courtesy; on a phone the field is what matters. */
   .settable__extra { display: none; }
-  .settable__row { grid-template-columns: minmax(0, 1fr) 56px 110px; gap: var(--space-5); }
-  .settable__row--single { grid-template-columns: minmax(0, 1fr) 170px; }
+  .settable__row { grid-template-columns: minmax(0, 1fr) 56px 124px; gap: var(--space-5); }
+  /* No empty column to run into here: a unit takes its own width again, and
+     «Mio. CHF» stands a little left of the «%» fields rather than being cut off. */
+  .setfield > span { flex-basis: auto; min-width: auto; }
 }

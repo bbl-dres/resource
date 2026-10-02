@@ -21,7 +21,6 @@ import { renderOverview, editPopover, assignPicker } from './views-overview.js';
 import { renderModal } from './views-modals.js';
 import { renderPeople, renderDashboard, renderHistory } from './views-analysis.js';
 import { renderApi, renderExport, mountSwagger } from './views-docs.js';
-import { renderSettings } from './views-settings.js';
 import { exportCsv, exportXlsx } from './export.js';
 
 const root = document.getElementById('app');
@@ -36,8 +35,7 @@ const VIEWS = {
   dashboard: renderDashboard,
   history: renderHistory,
   api: renderApi,
-  export: renderExport,
-  settings: renderSettings
+  export: renderExport
 };
 
 /*
@@ -688,14 +686,19 @@ const actions = {
 
   'close-modal': () => setState({ modal: null }),
 
-  /* The account dialog — the reader's own mail and language. The office's
-     rules are the Einstellungen page behind the gear, `tab: 'settings'`. */
+  /* The account dialog — the reader's own mail and language. */
   settings: () => setState({ ...OVERLAYS_CLOSED, modal: { type: 'settings' } }),
 
   /*
-   * The Einstellungen page saves all its fields at once. The data is changed
-   * first and the toast carries the patch that clears the draft, so it is one
-   * render — and every figure that render draws is already the new one.
+   * The office's settings, behind the gear. The dialog opens on what is saved:
+   * a draft left by closing it is dropped, so closing is the way to cancel.
+   */
+  rules: () => setState({ ...OVERLAYS_CLOSED, modal: { type: 'rules' }, settingsDraft: null }),
+
+  /*
+   * It saves all its fields at once. The data is changed first and the toast
+   * carries the patch that closes the dialog, so it is one render — and every
+   * figure that render draws is already the new one.
    */
   'settings-save': () => {
     const changes = settingChanges();
@@ -712,9 +715,8 @@ const actions = {
       }
     }
     touch();
-    flash(t('Einstellungen gespeichert'), { settingsDraft: null });
+    flash(t('Einstellungen gespeichert'), { settingsDraft: null, modal: null });
   },
-  'settings-discard': () => setState({ settingsDraft: null }),
 
   /* Derived from state, not read back off the checkbox — the same way
      «Mir zugewiesen» does it, and independent of event ordering. */

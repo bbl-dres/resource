@@ -439,8 +439,7 @@ export function appHeader() {
         ${notifyBell()}
 
         <!-- The office's rules, not the reader's own: those stay in the account menu. -->
-        <button type="button" class="hdr-btn hdr-btn--icon" data-act="tab" data-val="settings"
-                ${attr(state.tab === 'settings', 'aria-current="page"')}
+        <button type="button" class="hdr-btn hdr-btn--icon" data-act="rules" aria-haspopup="dialog"
                 title="${t('Einstellungen')}" aria-label="${t('Einstellungen')}">${icons.settings()}</button>
 
         ${accountMenu()}

@@ -27,7 +27,7 @@ export const data = {};
 export const VOCAB = {
   /* «schedule» is gone from the set but not from the world: readUrl() maps an
      old link to the Planung tab in its Termine view. */
-  tab:     ['overview', 'people', 'dashboard', 'history', 'api', 'export', 'settings'],
+  tab:     ['overview', 'people', 'dashboard', 'history', 'api', 'export'],
   lang:    ['de', 'en', 'fr', 'it'],
   scale:   ['year', 'quarter', 'month'],
   unit:    ['pct', 'fte'],
@@ -77,7 +77,7 @@ const DEFAULT_STATE = {
   draft: 0,
   reason: '',
   overrides: {},           // 'projectId:q' -> value
-  settingsDraft: null,     // setting key -> text typed on the Einstellungen page, not yet saved
+  settingsDraft: null,     // setting key -> text typed in the Einstellungen dialog, not yet saved
   /*
    * The session. Access itself is eIAM's business — this only models what the
    * application does on either side of it, which is the part a reader of the
@@ -619,7 +619,7 @@ export function personUtilisation(personId, q, delta = 0) {
 /*
  * A setting is addressed by a key: «share:<organisation>» for a unit's project
  * share, «small» for the line between a small project and a large one. The
- * Einstellungen page keeps what is typed in state.settingsDraft, as text,
+ * Einstellungen dialog keeps what is typed in state.settingsDraft, as text,
  * until it is saved: a rule that re-rates every person at once is not applied
  * per keystroke, and a half-typed «8» is not a value yet.
  */
@@ -1064,11 +1064,10 @@ export function sortProjects(list) {
  * neither yet; counted as small it would inflate the one number the grouping
  * is there to give, so it says «Kredit offen» instead.
  *
- * The line is a setting (meta.settings.smallProjectMio). `line` is for the
- * Einstellungen page, which asks what a value still being typed would do.
+ * The line is a setting, meta.settings.smallProjectMio.
  */
-export const sizeOf = (p, line = data.meta.settings.smallProjectMio) =>
-  (p.credit == null ? 'open' : p.credit <= line ? 'small' : 'large');
+const sizeOf = p =>
+  (p.credit == null ? 'open' : p.credit <= data.meta.settings.smallProjectMio ? 'small' : 'large');
 
 /** Group the filtered projects for the grid and the gantt. */
 export function groupProjects(list = filteredProjects()) {

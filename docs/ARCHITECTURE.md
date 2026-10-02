@@ -16,7 +16,7 @@ will do.
 index.html
 css/tokens.css      design tokens, two layers
 css/main.css        everything else
-js/                 thirteen modules, see below
+js/                 twelve modules, see below
 data/               eleven JSON files, seven of them generated
 tools/              the portfolio generator; see tools/README.md
 ```
@@ -34,7 +34,7 @@ that way is the point.
 | 1 | `columns.js` | The column registry |
 | 2 | `ui.js` | The `html` template layer, and every shared control |
 | 3 | `views-schedule.js` | The bar plan's row: bars and gates on a time track, and the band the grid draws under its figures |
-| 3 | `views-overview.js`, `views-analysis.js`, `views-modals.js`, `views-settings.js`, `export.js` | One view each; the Planung grid imports the band from the row module |
+| 3 | `views-overview.js`, `views-analysis.js`, `views-modals.js`, `export.js` | One view each; the Planung grid imports the band from the row module |
 | 4 | `views-docs.js` | The printed sheets; reuses the Gantt row |
 | 5 | `app.js` | Boot, render loop, event dispatch |
 
@@ -137,7 +137,7 @@ the reader's own.
 
 | Key | Carries | Values |
 | --- | --- | --- |
-| `tab` | the page | `overview`, `people`, `dashboard`, `history`, `api`, `export`, `settings` (`dashboard` with `bi=people` in old links still opens Personen) |
+| `tab` | the page | `overview`, `people`, `dashboard`, `history`, `api`, `export` (`dashboard` with `bi=people` in old links still opens Personen) |
 | `view` | the Ansicht preset | `pensum`, `pensum-termine`, `termine`, `custom` (`both` in old links still opens the combined view) |
 | `layers` | the layers of Benutzerdefiniert, only with `view=custom` | any of `values,phases,gates,today` |
 | `colour` | the heat ramp | `none` when off |
@@ -226,7 +226,7 @@ Two things to know before touching it:
 
 ## i18n
 
-`data/i18n.json` holds 389 terms in four languages, looked up through `t()` with
+`data/i18n.json` holds 388 terms in four languages, looked up through `t()` with
 the German string as the key and as the fallback. A user-visible string that is
 not passed through `t()` will be German in every language.
 

@@ -1,6 +1,7 @@
 /* =============================================================================
-   views-modals.js — the dialogs: a project's detail sheet, a phase, a gate,
-   moving a pensum to somebody else, sharing the view, and the account.
+   views-modals.js — the dialogs: a project's detail sheet, a person's, a
+   phase, a gate, moving a pensum to somebody else, sharing the view, the
+   account, and the office's settings.
 
    They share one shell (scrim, role="dialog", one close button) and differ
    only in their body, so they live together and away from the grid.
@@ -8,7 +9,8 @@
 
 import {
   data, state, t, num, fmt, unitSuffix, cellValue, projectDemand, heatStep, personUtilisation, phaseOf, eppmOf,
-  nowIndex, deDate, projectsOf, projectShare, projectCapacity, personHeatStep, personDraft
+  nowIndex, deDate, projectsOf, projectShare, projectCapacity, personHeatStep, personDraft,
+  settingText, settingTyped, settingValue, settingChanges
 } from './store.js';
 
 import { html, icons, attr, personOption, personSearch } from './ui.js';
@@ -84,6 +86,105 @@ function settingsModal() {
     </footer>`;
 }
 
+/* -----------------------------------------------------------------------------
+   The office's settings — the dialog behind the gear in the header
+   -------------------------------------------------------------------------- */
+
+/*
+ * Not the account dialog above. That one is the reader's own — their mail,
+ * their language. These are the office's: how much of a contract a unit may
+ * spend on projects, and where a small project ends. Nobody expects them to
+ * change — moving a project share means moving contracts — so the dialog is a
+ * place to look the rule up first, and a form second. It saves all its fields
+ * at once, and closing it any other way leaves the rules as they were.
+ */
+
+/** A pensum in FTE, the Swiss way round: 1,25. */
+const fte = v => (v / 100).toFixed(2).replace('.', ',');
+
+/*
+ * One field. Text with a numeric keyboard rather than type="number": the
+ * dialog re-renders as it is typed in, and a number input refuses the caret
+ * position the render loop hands back to it.
+ */
+function settingField(key, { label, unit }) {
+  const typed = settingTyped(key);
+  const invalid = typed === null;
+  const changed = !invalid && typed !== settingValue(key);
+  return html`<span class="setfield ${invalid ? 'is-invalid' : ''} ${changed ? 'is-changed' : ''}">
+    <input type="text" inputmode="decimal" autocomplete="off" value="${settingText(key)}"
+           data-act="setting-input" data-val="${key}" data-fk="setting:${key}"
+           aria-label="${label}" aria-invalid="${invalid}">
+    <span>${unit}</span>
+  </span>`;
+}
+
+function rulesModal() {
+  const changes = settingChanges();
+  const invalid = changes === null;
+  const pending = !invalid && changes.length > 0;
+
+  return html`
+    ${modalHead(t(data.meta.org.app), t('Einstellungen'),
+      t('Diese Regeln gelten für alle. Eine Änderung bewertet die Auslastung aller Personen und Quartale neu und wird im Verlauf festgehalten.'))}
+
+    <section class="modal__section">
+      <h3>${t('Projektanteil je Organisation')}</h3>
+      <p class="settings__note settings__note--lead">${t('Anteil der Anstellung, der für Projekte eingesetzt werden darf')}.
+        ${t('Der Rest ist Linien- und Administrationsarbeit.')}</p>
+      <div class="settable">
+        <div class="settable__row settable__row--head">
+          <span>${t('Organisation')}</span>
+          <span class="settable__num">${t('Personen')}</span>
+          <span class="settable__num">${t('Projektanteil')}</span>
+          <span class="settable__num settable__extra">${t('Für Projekte verfügbar')}</span>
+        </div>
+        ${data.meta.organisations.map(o => {
+          const people = data.people.filter(p => p.organisation === o.id);
+          const share = settingTyped(`share:${o.id}`);
+          /* What the unit could then carry, as the field is typed. A person with
+             a share of their own keeps it, whatever the unit's becomes. */
+          const available = share === null ? null
+            : people.reduce((a, p) => a + p.employment * (p.projectShare ?? share) / 100, 0);
+          return html`<div class="settable__row">
+            <span class="settable__name">${t(o.label)} <span class="settable__short">(${t(o.short)})</span></span>
+            <span class="settable__num">${people.length}</span>
+            <span class="settable__num">${settingField(`share:${o.id}`, { label: `${t('Projektanteil')} ${t(o.label)}`, unit: '%' })}</span>
+            <span class="settable__num settable__extra">${available === null ? '—' : `${fte(available)} FTE`}</span>
+          </div>`;
+        })}
+      </div>
+    </section>
+
+    <section class="modal__section">
+      <h3>${t('Projektgrösse')}</h3>
+      <p class="settings__note settings__note--lead">${t('Darüber gilt ein Projekt als Grossprojekt.')}</p>
+      <div class="settable">
+        <!-- The same table as above — a head and a row, in the same columns, with
+             the count's left empty — so this field stands under theirs. -->
+        <div class="settable__row settable__row--head">
+          <span>${t('Kategorie')}</span>
+          <span></span>
+          <span class="settable__num">${t('Kredit')} ${t('bis')}</span>
+        </div>
+        <div class="settable__row">
+          <span class="settable__name">${t('Kleinprojekte')}</span>
+          <span></span>
+          <span class="settable__num">${settingField('small', { label: `${t('Kleinprojekte')}: ${t('Kredit')} ${t('bis')}`, unit: t('Mio. CHF') })}</span>
+        </div>
+      </div>
+    </section>
+
+    <footer class="modal__foot">
+      <span class="setnote ${invalid ? 'is-invalid' : ''}" role="status">${invalid
+        ? t('Ungültiger Wert: Projektanteil 1 – 100 %, Schwelle grösser als 0.')
+        : pending ? `${changes.length} ${t(changes.length === 1 ? 'ungespeicherte Änderung' : 'ungespeicherte Änderungen')}` : ''}</span>
+      <button type="button" class="btn" data-act="close-modal">${t('Abbrechen')}</button>
+      <button type="button" class="btn btn--primary" data-act="settings-save"
+              ${attr(!pending, 'disabled')}>${t('Speichern')}</button>
+    </footer>`;
+}
+
 function modalHead(kicker, title, meta = '') {
   return html`<header class="modal__head">
     <div>
@@ -100,7 +201,8 @@ function modalHead(kicker, title, meta = '') {
    Assigning a person is not one of them any more: it is a popover on the cell,
    like the pensum editor — see assignPicker() in views-overview.js. */
 const MODALS = {
-  settings: settingsModal,
+  settings: settingsModal,     // the account: the reader's own mail and language
+  rules: rulesModal,           // the office's settings, behind the gear
   phase: phaseModal,
   milestone: milestoneModal,
   project: projectModal,
