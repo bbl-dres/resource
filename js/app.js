@@ -12,14 +12,16 @@
 import {
   data, state, load, subscribe, setState, syncFromUrl, closeOverlays, touch, OVERLAYS_CLOSED,
   cellValue, toggleIn, removeFilter, resetFilters, defaultDir, t, columnSetKey, writeUrl,
-  offsetForScale, maxOffset, windowStep, pageCount, viewPatch, layerPatch
+  offsetForScale, maxOffset, windowStep, pageCount, viewPatch, layerPatch, settingChanges,
+  personDraft, projectShare
 } from './store.js';
 import { loadIcons } from './icons.js';
 import { html, appHeader, appFooter, toast, forgetTokens, signedOutView } from './ui.js';
 import { renderOverview, editPopover, assignPicker } from './views-overview.js';
 import { renderModal } from './views-modals.js';
-import { renderDashboard, renderHistory } from './views-analysis.js';
+import { renderPeople, renderDashboard, renderHistory } from './views-analysis.js';
 import { renderApi, renderExport, mountSwagger } from './views-docs.js';
+import { renderSettings } from './views-settings.js';
 import { exportCsv, exportXlsx } from './export.js';
 
 const root = document.getElementById('app');
@@ -30,10 +32,12 @@ const root = document.getElementById('app');
 
 const VIEWS = {
   overview: renderOverview,
+  people: renderPeople,
   dashboard: renderDashboard,
   history: renderHistory,
   api: renderApi,
-  export: renderExport
+  export: renderExport,
+  settings: renderSettings
 };
 
 /*
@@ -350,6 +354,20 @@ function logChange(project, field, change, value) {
 }
 
 /*
+ * A changed rule is logged too, with no project: the entry then stays in the
+ * log under every filter, which is right for a change that moved figures on
+ * projects nobody touched.
+ */
+function logSetting(field, change, value, area = t('Einstellungen')) {
+  data.changes.unshift({
+    id: `c-setting-${data.changes.length}`,
+    date: data.meta.today, dateLabel: data.meta.todayLabel,
+    actor: data.meta.user.name, projectId: null, projectLabel: area,
+    field, change, value
+  });
+}
+
+/*
  * A toast, and optionally the state change it reports, in one render. Both
  * timers are tracked: the exit timer used to be anonymous, so a toast arriving
  * during the previous one's fade was wiped by that fade's `toast: null`.
@@ -478,7 +496,8 @@ const actions = {
 
   'filter-remove': (val, el) => removeFilter(el.dataset.kind, val),
   'filters-reset': () => resetFilters(),
-  'filter-lead': (val) => setState({ tab: 'overview', leads: [val], menu: null }),
+  /* Also the way out of the person dialog, so it closes whatever is open. */
+  'filter-lead': (val) => setState({ tab: 'overview', ...OVERLAYS_CLOSED, leads: [val] }),
 
   'foot-details': () => setState(s => ({ footDetails: !s.footDetails })),
   'toggle-group': (val) => setState(s => ({
@@ -611,6 +630,42 @@ const actions = {
   'open-milestone': (val) => setState({ ...OVERLAYS_CLOSED, modal: { type: 'milestone', milestoneId: val } }),
 
   'open-project': (val) => setState({ ...OVERLAYS_CLOSED, modal: { type: 'project', projectId: val } }),
+
+  /* The dialog opens with the person's two figures in its fields, as text —
+     an empty share means «as the unit has it». */
+  'open-person': (val) => {
+    const person = data.peopleById[val];
+    if (!person) return;
+    setState({
+      ...OVERLAYS_CLOSED,
+      modal: {
+        type: 'person', personId: val,
+        employment: String(person.employment),
+        share: person.projectShare == null ? '' : String(person.projectShare)
+      }
+    });
+  },
+  'person-save': () => {
+    const person = data.peopleById[state.modal.personId];
+    const draft = personDraft(state.modal);
+    if (!person || !draft) return;
+    if (draft.employment !== person.employment) {
+      /* Gross capacity is the sum of the contracts, so it moves with this one —
+         or the office's utilisation would go on counting the old contract. */
+      const delta = draft.employment - person.employment;
+      data.capacity.gross = data.capacity.gross.map(v => v + delta);
+      logSetting('Anstellung', person.name, `${person.employment} % → ${draft.employment} %`, t('Personen'));
+      person.employment = draft.employment;
+    }
+    if (draft.share !== person.projectShare) {
+      const before = projectShare(person);
+      if (draft.share === undefined) delete person.projectShare;
+      else person.projectShare = draft.share;
+      logSetting('Projektanteil', person.name, `${before} % → ${projectShare(person)} %`, t('Personen'));
+    }
+    touch();
+    flash(`${person.name} — ${t('Angaben gespeichert')}`, { modal: null });
+  },
   /* The bar plan is a view of the Planung tab now, not a tab of its own. */
   'open-schedule': (val) => setState({
     tab: 'overview', ...OVERLAYS_CLOSED, search: data.projectsById[val].location, ...viewPatch('termine')
@@ -633,7 +688,33 @@ const actions = {
 
   'close-modal': () => setState({ modal: null }),
 
+  /* The account dialog — the reader's own mail and language. The office's
+     rules are the Einstellungen page behind the gear, `tab: 'settings'`. */
   settings: () => setState({ ...OVERLAYS_CLOSED, modal: { type: 'settings' } }),
+
+  /*
+   * The Einstellungen page saves all its fields at once. The data is changed
+   * first and the toast carries the patch that clears the draft, so it is one
+   * render — and every figure that render draws is already the new one.
+   */
+  'settings-save': () => {
+    const changes = settingChanges();
+    if (!changes || !changes.length) return;
+    const mio = v => `${String(v).replace('.', ',')} Mio.`;
+    for (const { key, from, to } of changes) {
+      if (key === 'small') {
+        data.meta.settings.smallProjectMio = to;
+        logSetting('Projektgrösse', `${t('Kleinprojekte')} ${t('bis')}`, `${mio(from)} → ${mio(to)}`);
+      } else {
+        const org = data.organisationsById[key.slice('share:'.length)];
+        org.projectShare = to;
+        logSetting('Projektanteil', org.label, `${from} % → ${to} %`);
+      }
+    }
+    touch();
+    flash(t('Einstellungen gespeichert'), { settingsDraft: null });
+  },
+  'settings-discard': () => setState({ settingsDraft: null }),
 
   /* Derived from state, not read back off the checkbox — the same way
      «Mir zugewiesen» does it, and independent of event ordering. */
@@ -650,7 +731,7 @@ const actions = {
    * session rather than waiting behind a login for somebody else — and the
    * signed-out screen says that they did.
    */
-  signout: () => setState({ signedIn: false, ...OVERLAYS_CLOSED, reason: '', overrides: {} }),
+  signout: () => setState({ signedIn: false, ...OVERLAYS_CLOSED, reason: '', overrides: {}, settingsDraft: null }),
 
   signin: () => setState({ signedIn: true }),
   /* The print layout prints what is on screen: the bar plan when the reader is
@@ -666,9 +747,6 @@ const actions = {
       flash(t('Export fehlgeschlagen.'));
     }
   },
-  /* The strip names a few; the card below carries the rest. */
-  bi: (val) => setState({ bi: val }),
-
   /* Clicking the sorted column flips it; a new column starts on its own default. */
   'sort-person': (val) => setState(s => (s.pSort === val
     ? { pDir: s.pDir === 'asc' ? 'desc' : 'asc' }
@@ -764,7 +842,10 @@ const MODAL_FIELDS = {
   'rebook-search':   { field: 'search' },
   'rebook-reason':   { field: 'reason' },
   'rebook-amount':   { field: 'amount', parse: v => Math.max(0, Number(v) || 0) },
-  'rebook-quarters': { field: 'quarters', parse: v => Math.max(1, Number(v) || 1) }
+  'rebook-quarters': { field: 'quarters', parse: v => Math.max(1, Number(v) || 1) },
+  /* Kept as typed: personDraft() says whether they are values yet. */
+  'person-employment': { field: 'employment' },
+  'person-share':      { field: 'share' }
 };
 
 let searchTimer;
@@ -784,6 +865,9 @@ root.addEventListener('input', (event) => {
     touch();                                 // but the memoised lists must know
     clearTimeout(searchTimer);
     searchTimer = setTimeout(() => setState({}), 180);
+  } else if (act === 'setting-input') {
+    /* Kept as typed until «Speichern» — see settingsDraft in store.js. */
+    setState(s => ({ settingsDraft: { ...s.settingsDraft, [el.dataset.val]: el.value } }));
   } else if (act === 'menu-search') {
     setState({ menuSearch: el.value });
   } else if (act === 'pick-search') {

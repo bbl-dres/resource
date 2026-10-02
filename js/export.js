@@ -54,7 +54,7 @@ export function buildTable() {
   const filters = activeFilters();
 
   return {
-    name: t('Ressourcenplanung'),
+    name: t('Personalplanung'),
     subtitle: [
       `${data.meta.org.name} · ${data.meta.org.unit}`,
       `${t('Datenstand ePPM')}: ${data.meta.asOf}`,
@@ -81,7 +81,7 @@ export function buildTable() {
 function fileName(ext) {
   const stamp = data.meta.today.replace(/-/g, '');
   const scope = state.scale;
-  return `ressourcenplanung_${scope}_${stamp}.${ext}`;
+  return `personalplanung_${scope}_${stamp}.${ext}`;
 }
 
 function download(blob, name) {

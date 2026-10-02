@@ -734,13 +734,21 @@ dashboard.creditByYear.rows = [
  * development teams, three domestic construction teams, one for abroad. The
  * ids are stable slugs so a shared link survives a renaming.
  */
+/*
+ * `projectShare` is how much of a contract a team may spend on projects, in
+ * per cent; the rest is line and administrative work. Project management
+ * keeps 20 % back. The 85 for the development teams is a placeholder — the
+ * users named a flat 15 % for administration and said it is not the same for
+ * every team, without saying whose it is. A constant, not a draw: the app
+ * reads it from meta.json and the generator's own sizing does not use it yet.
+ */
 const TEAMS = [
-  { id: 'ppe-1', label: 'Programm- und Projektentwicklung I', short: 'PPE I' },
-  { id: 'ppe-2', label: 'Programm- und Projektentwicklung II', short: 'PPE II' },
-  { id: 'bpi-1', label: 'Bauprojekte Inland I', short: 'PM Inland I' },
-  { id: 'bpi-2', label: 'Bauprojekte Inland II', short: 'PM Inland II' },
-  { id: 'bpi-3', label: 'Bauprojekte Inland III', short: 'PM Inland III' },
-  { id: 'bpa', label: 'Bauprojekte Ausland', short: 'PM Ausland' }
+  { id: 'ppe-1', label: 'Programm- und Projektentwicklung I', short: 'PPE I', projectShare: 85 },
+  { id: 'ppe-2', label: 'Programm- und Projektentwicklung II', short: 'PPE II', projectShare: 85 },
+  { id: 'bpi-1', label: 'Bauprojekte Inland I', short: 'PM Inland I', projectShare: 80 },
+  { id: 'bpi-2', label: 'Bauprojekte Inland II', short: 'PM Inland II', projectShare: 80 },
+  { id: 'bpi-3', label: 'Bauprojekte Inland III', short: 'PM Inland III', projectShare: 80 },
+  { id: 'bpa', label: 'Bauprojekte Ausland', short: 'PM Ausland', projectShare: 80 }
 ];
 const teamOfPerson = new Map(people.map((person, i) => [person.id, TEAMS[i % TEAMS.length].id]));
 /*
@@ -751,7 +759,7 @@ const teamOfPerson = new Map(people.map((person, i) => [person.id, TEAMS[i % TEA
 people.forEach(person => { person.organisation = teamOfPerson.get(person.id); });
 /* The short form is the house's own — «PPE» and «PM» — and is what a
    grid column has room for; the filter and the group headings say the name. */
-META.organisations = TEAMS.map(({ id, label, short }) => ({ id, label, short }));
+META.organisations = TEAMS.map(({ id, label, short, projectShare }) => ({ id, label, short, projectShare }));
 
 /* The window has one definition; the app reads it from here. */
 META.quarters = QUARTER_CAL.map((c, i) => ({
@@ -772,7 +780,9 @@ write('dashboard', dashboard);
 const utilisation = demandTotal.map((d, q) =>
   Math.round((d - capacity.external[q]) / (capacity.gross[q] - capacity.absence[q]) * 100));
 const unassigned = projects.filter(p => !p.leadId).length;
-const over = people.filter(p => p.baseLoad[0] / p.employment * 100 > 100).length;
+/* Against the project capacity, as the app counts it — not the whole contract. */
+const shareOf = Object.fromEntries(TEAMS.map(team => [team.id, team.projectShare]));
+const over = people.filter(p => p.baseLoad[0] / (p.employment * shareOf[p.organisation] / 100) * 100 > 100).length;
 
 console.log('projects   ', projects.length, '(' + existing.length + ' kept, 100 generated)');
 console.log('people     ', people.length, '· roster', people.reduce((a, p) => a + p.employment, 0), '%');

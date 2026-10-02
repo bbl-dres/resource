@@ -4,7 +4,7 @@
    ============================================================================= */
 
 import {
-  data, state, t, num, fmt, unitSuffix, cellValue, projectDemand, isEdited, personUtilisation,
+  data, state, t, num, fmt, fmtMio, unitSuffix, cellValue, projectDemand, isEdited, personUtilisation,
   totals, loadStatus, heatStep, filteredProjects, groupProjects,
   periods, periodValue, windowEdges, columnSet, coloured, compareDe, phaseOf
 } from './store.js';
@@ -160,19 +160,17 @@ function pensumGrid() {
     return html`<section class="pgroup">${head}
       ${card(html`${columnHeader(tpl, sticky, cols)}
         <div class="pgrid__rows">${rows}${todayMarker(todayLeft)}</div>
-        ${L.values && groupSum(g, tpl, span, cols)}`,
+        ${L.values && groupSum(g, tpl, sticky, cols)}`,
         { minWidth, sticky })}
     </section>`;
   });
 
   /* The totals are sums of the figures, so they go when the figures go. */
   const foot = L.values && html`<div class="prow prow--sum" style="grid-template-columns:${raw(tpl)}">
-        <div style="grid-column:span ${span}" class="prow__sumlabel is-frozen">
-          ${t('Summe Total')}${tot.scoped ? html`<span class="prow__sumnote">${t('Auswahl')}</span>` : ''}
+        ${sumLead(html`${t('Summe Total')}${tot.scoped ? html`<span class="prow__sumnote">${t('Auswahl')}</span>` : ''}
           <button type="button" class="linkbtn" data-act="foot-details">
             ${state.footDetails ? t('Details ausblenden') : t('Details anzeigen')}
-          </button>
-        </div>
+          </button>`, list, sticky)}
         ${cols.map(period => html`<span class="pcell pcell--sum ${yearRule(period)}">${fmt(periodValue(tot.demand, period))}</span>`)}
       </div>
 
@@ -329,13 +327,40 @@ function columnHeader(tpl, sticky, cols) {
  * is the one at the very bottom, which answers a question about the whole
  * selection when the reader is looking at one person or one portfolio.
  */
-function groupSum(g, tpl, span, cols) {
+function groupSum(g, tpl, sticky, cols) {
   if (!g.label) return '';
   const values = data.quarters.map((_, q) => g.projects.reduce((a, p) => a + cellValue(p, q), 0));
   return html`<div class="prow prow--sum prow--groupsum" style="grid-template-columns:${raw(tpl)}">
-    <div style="grid-column:span ${span}" class="prow__sumlabel is-frozen">${t('Summe')} ${g.label} (${g.projects.length})</div>
+    ${sumLead(`${t('Summe')} ${g.label} (${g.projects.length})`, g.projects, sticky)}
     ${cols.map(period => html`<span class="pcell pcell--sum ${yearRule(period)}">${fmt(periodValue(values, period))}</span>`)}
   </div>`;
+}
+
+/**
+ * The frozen part of a sum row: its label and, where the credit column is on,
+ * the credits of the same projects under that column. The pensum was the only
+ * thing a sum row added up; the users asked what a group is worth as well, and
+ * the figure belongs under the column that lists it.
+ *
+ * A project whose credit is still open adds nothing, and the hint says how
+ * many of those the sum leaves out.
+ */
+function sumLead(label, projects, sticky) {
+  const shown = sticky.shown;
+  const at = shown.findIndex(c => c.key === 'credit');
+  if (at < 0) {
+    return html`<div style="grid-column:span ${shown.length}" class="prow__sumlabel is-frozen">${label}</div>`;
+  }
+  const col = shown[at];
+  const funded = projects.filter(p => p.credit != null);
+  const open = projects.length - funded.length;
+  const total = funded.reduce((a, p) => a + p.credit, 0);
+  const after = shown.length - at - 1;
+  return html`<div style="grid-column:span ${at}" class="prow__sumlabel is-frozen">${label}</div>
+    <span class="pcell ${col.cls} ${alignCls(col)} ${pinCls(sticky, col.key)}" style="${pinLeft(sticky, col.key)}"
+      title="${t('Summe')} ${t(col.label)} · ${funded.length} ${t('Projekte mit Kredit')}${open ? ` · ${open} ${t('offen')}` : ''}"
+      >${funded.length ? fmtMio(total, 2) : '—'}</span>
+    ${after > 0 && html`<span class="is-frozen" style="grid-column:span ${after}; ${pinLeft(sticky, shown[at + 1].key)}"></span>`}`;
 }
 
 function footRow(label, values, tpl, span, cols) {

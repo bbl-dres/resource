@@ -40,13 +40,14 @@ Three rules hold the model together:
 
 | Field | Meaning |
 | --- | --- |
-| `org` | `name`, `app`, `unit`: the letterhead |
+| `org` | `name`, `division`, `app`, `unit`: the letterhead — the header prints office, division and application on three lines |
 | `user` | the signed-in person: `personId`, `name`, `initials`, `role`, `signedIn` |
 | `today`, `todayLabel`, `todayQuarter` | the fixed «now» of the fixtures, ISO date, display date, quarter id |
 | `asOf`, `lastVisit`, `version` | the data stamp in the footer, the last visit for the notification badge, the version line |
 | `quarters[]` | the window: `{ id, label, short, year }`, e.g. `2026Q3`, `Q3/2026`, `Q3`, `2026` |
 | `portfolios[]` | the Teilportfolios: `{ id, label }` |
-| `organisations[]` | the six units: `{ id, label, short }` — `PPE I`, `PM Inland II` are the short forms the grid columns use |
+| `organisations[]` | the six units: `{ id, label, short, projectShare }` — `PPE I`, `PM Inland II` are the short forms the grid columns use; `projectShare` is the per cent of a contract the unit's people may spend on projects |
+| `settings` | the office's rules that are not a unit's: `smallProjectMio`, the credit in Mio. CHF up to which a project counts as small |
 | `footerLinks[]`, `prototypeNotice` | chrome |
 
 Only `quarters` is generated; the rest is the generator's own constant table,
@@ -69,11 +70,18 @@ is the order of the chain; `eppmRank()` in `store.js` sorts by it.
 | `role` | `Projektleitung` or `Bauleitung` |
 | `employment` | the contract, in % of a full position |
 | `organisation` | id in `meta.organisations` |
+| `projectShare` | optional: the person's own project share in %, where it differs from the unit's. No fixture carries one yet |
 | `baseLoad[]` | booked pensum per quarter, in % of a full position: the sum of the demand of the projects the person carries |
 
 `baseLoad` is the generator's roll-up; the app reads it through
 `personLoad()`, which adds the delta of any unsaved edit, and turns it into a
-share of the contract through `personUtilisation()`.
+share of the person's project capacity through `personUtilisation()`.
+
+Nobody has their whole contract free for projects. `projectShare(person)`
+reads the person's own share or, failing that, the unit's, and
+`projectCapacity(person)` is `employment × projectShare / 100` — an 80 %
+contract in a unit that keeps 20 % back carries 64 pensum points of projects.
+That is the ceiling a person's load is measured against.
 
 ### `capacity.json` — the office as a whole
 
@@ -81,7 +89,9 @@ share of the contract through `personUtilisation()`.
 position for the whole unit; `net = gross − absence` is computed. `labels`
 names the rows of the totals block under the planning grid. Capacity is
 modelled at the level of the office, not per person: a person's ceiling is
-their `employment`, and absences are not per person in this prototype.
+their project capacity (see `people.json`), and absences are not per person in
+this prototype. `gross` is still the sum of the contracts, without the project
+share taken off — see the open questions in `DECISIONS.md`.
 `quarters` in this file is a leftover of the earlier eight-quarter window and
 is not read; the arrays are indexed by `meta.quarters`.
 
@@ -164,7 +174,8 @@ in a file.
 | `peopleById`, `projectsById`, `portfoliosById`, `organisationsById`, `quarterIndex` | the lists above |
 | `project.organisation` | `peopleById[leadId].organisation`, as a getter |
 | `cellValue(p, q)`, `projectDemand(p)` | `demand[]` with the session's overrides (`'projectId:q' → value`) applied |
-| `personLoad(id, q)`, `personUtilisation(id, q)` | `baseLoad[]` plus the overrides' delta; divided by `employment` |
+| `projectShare(person)`, `projectCapacity(person)` | the person's share or the unit's; `employment × share / 100` |
+| `personLoad(id, q)`, `personUtilisation(id, q)` | `baseLoad[]` plus the overrides' delta; divided by `projectCapacity` |
 | `totals(list)` | per quarter: `demand`, `preCredit`, `external`, `net`, `utilisation = demand / net`, `free = net − demand` |
 | `filteredProjects()`, `groupProjects()`, `groupPeople()` | the state's search, filters and grouping |
 | `periods()` | the visible columns: quarters, or years and months folded from them, at the current offset |

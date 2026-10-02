@@ -91,6 +91,7 @@ export const icons = {
   download: (s = 15) => ico('download', s),
   printer: (s = 15) => ico('printer', s),
   eye: (s = 15) => ico('eye', s),
+  settings: (s = 15) => ico('settings', s),
   externalLink: (s = 13) => ico('external-link', s)
 };
 
@@ -394,6 +395,7 @@ export function personSearch({ act, fk, value, listId, placeholder = 'Person suc
  */
 const TABS = [
   { id: 'overview', label: 'Planung' },
+  { id: 'people', label: 'Personen' },
   { id: 'dashboard', label: 'Dashboard' },
   { id: 'history', label: 'Verlauf' }
 ];
@@ -405,7 +407,11 @@ export function appHeader() {
   return html`<header class="shell-header">
     <div class="wrap shell-header__inner">
       <a class="brand" href="#?tab=overview" data-act="home">
-        <span class="brand__text">${m.org.name}<span class="brand__sub">${t(m.org.app)}</span></span>
+        <!-- The federal order: the office, its division, then the application. -->
+        <span class="brand__text">${t(m.org.name)}
+          <span class="brand__sub brand__sub--division">${t(m.org.division)}</span>
+          <span class="brand__sub">${t(m.org.app)}</span>
+        </span>
       </a>
 
       <p class="proto-pill">${t(m.prototypeNotice)}</p>
@@ -431,6 +437,11 @@ export function appHeader() {
         </div>
 
         ${notifyBell()}
+
+        <!-- The office's rules, not the reader's own: those stay in the account menu. -->
+        <button type="button" class="hdr-btn hdr-btn--icon" data-act="tab" data-val="settings"
+                ${attr(state.tab === 'settings', 'aria-current="page"')}
+                title="${t('Einstellungen')}" aria-label="${t('Einstellungen')}">${icons.settings()}</button>
 
         ${accountMenu()}
       </div>` : ''}
@@ -485,7 +496,7 @@ export function signedOutView() {
   return html`<div class="signout">
     <div class="signout__card">
       <h1 class="signout__title">${t('Sie sind abgemeldet')}</h1>
-      <p class="signout__lead">${t('Die Ressourcenplanung zeigt Personendaten und Kredite; ohne Anmeldung wird nichts davon geladen.')}</p>
+      <p class="signout__lead">${t('Die Personalplanung zeigt Personendaten und Kredite; ohne Anmeldung wird nichts davon geladen.')}</p>
       <p class="signout__note">${t('Der Zugang wird über eIAM gesteuert. Berechtigungen, Kennwort und Zwei-Faktor-Anmeldung werden dort verwaltet, nicht in dieser Anwendung.')}</p>
       <button type="button" class="btn btn--primary btn--lg" data-act="signin">
         ${t('Mit eIAM anmelden')}
@@ -645,6 +656,7 @@ export function kpiStrip() {
 
 const GROUPS = [
   { id: 'none', label: 'Keine' },
+  { id: 'size', label: 'Projektgrösse' },   // small or large by credit, see sizeOf() in store.js
   { id: 'lead', label: 'Bearbeitender' },
   { id: 'organisation', label: 'Organisation' },
   { id: 'phase', label: 'Phase (ePPM)' },   // the current Teilphase, as the column and the filter say

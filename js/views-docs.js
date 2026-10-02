@@ -7,7 +7,7 @@
    ============================================================================= */
 
 import {
-  data, state, t, num, cellValue, projectDemand, printPeriods, columnSet, coloured,
+  data, state, t, num, fmtMio, cellValue, projectDemand, printPeriods, columnSet, coloured,
   periodValue,
   totals, loadStatus, heatStep, filteredProjects, activeFilters,
   groupProjects
@@ -134,7 +134,7 @@ const zoomLabel = () => (ZOOMS.find(z => z.id === state.zoom) ?? ZOOMS[0]).label
 
 /** What the downloaded file is called: the report, the paper, the way round. */
 const fileName = (report, sheet) => (
-  `Ressourcenplanung-${t(report.label)}-${sheet.paper.toUpperCase()}`
+  `Personalplanung-${t(report.label)}-${sheet.paper.toUpperCase()}`
   + `-${t(sheet.orientation === 'landscape' ? 'Quer' : 'Hoch')}`
 ).replace(/[^\p{L}\p{N}.-]+/gu, '-') + '.pdf';   // \w drops the Umlaut
 
@@ -379,7 +379,7 @@ const METHOD = [
   ['Auslastung',
    'Pensum des Gesamtportfolios abzüglich extern beauftragter Leistung, geteilt durch Kapazität netto. Die Zahl beschreibt immer die ganze Abteilung — auch wenn ein Filter gesetzt ist, denn Kapazität lässt sich nicht filtern.'],
   ['Ampel',
-   'Höchste Auslastung des Bearbeitenden gegen die eigene Anstellung im dargestellten Zeitraum. Die Form trägt die Aussage, damit sie auch auf einer Fotokopie lesbar bleibt.'],
+   'Höchste Auslastung des Bearbeitenden gegen die eigene Projektkapazität im dargestellten Zeitraum. Die Form trägt die Aussage, damit sie auch auf einer Fotokopie lesbar bleibt.'],
   ['Blaustufen',
    'Sie kodieren die Grösse eines Pensums, nicht seinen Status. Rot kennzeichnet Überlast.']
 ];
@@ -455,6 +455,22 @@ function sheetColumns(sheet) {
 /** One project's value for a lead column: the registry's plain text. */
 function sheetCell(col, p) {
   return (col.short ?? col.text)(p) || '—';
+}
+
+/**
+ * The lead part of a sum row on paper: the label and, where the credit column
+ * is printed, the credits of the same projects under it — as the grid's sum
+ * rows carry them (sumLead in views-overview.js).
+ */
+function sheetSumLead(label, projects, lead) {
+  const at = lead.findIndex(c => c.key === 'credit');
+  if (at < 0) return html`<span style="grid-column:span ${lead.length}">${label}</span>`;
+  const funded = projects.filter(p => p.credit != null);
+  const total = funded.reduce((a, p) => a + p.credit, 0);
+  const after = lead.length - at - 1;
+  return html`<span style="grid-column:span ${at}">${label}</span>
+    <span class="sheet__num">${funded.length ? fmtMio(total, 2) : '—'}</span>
+    ${after > 0 && html`<span style="grid-column:span ${after}"></span>`}`;
 }
 
 /** Said at the foot of every sheet whose table carries on. */
@@ -571,7 +587,7 @@ function printSheet(sheet, report, { rows, all, block, page, total, last, tot, c
         <div>${cfg.sender.map((line, i) => html`<span class="${i === 2 ? 'is-muted' : ''}">${t(line)}</span>`)}</div>
       </div>
       <div class="sheet__titles">
-        <div class="sheet__title">${t('Ressourcenplanung')} — ${t(report.label)}</div>
+        <div class="sheet__title">${t('Personalplanung')} — ${t(report.label)}</div>
         <div class="sheet__sub">${t(report.sub)}${schedule ? '' : ` · ${state.unit === 'fte' ? t('Pensum in FTE') : t('Pensum in %')}`}
           · ${block[0].label} – ${block[block.length - 1].label}</div>
       </div>
@@ -604,7 +620,7 @@ function printSheet(sheet, report, { rows, all, block, page, total, last, tot, c
           const values = data.quarters.map((_, q) =>
             row.projects.reduce((a, p) => a + cellValue(p, q), 0));
           return html`<div class="sheet__row sheet__row--groupsum">
-            <span style="grid-column:span ${span}">${t('Summe')} ${t(row.label)}</span>
+            ${sheetSumLead(`${t('Summe')} ${t(row.label)}`, row.projects, lead)}
             ${block.map(col => html`<span class="sheet__num sheet__period ${yearRule(col)}">${num(periodValue(values, col))}</span>`)}
           </div>`;
         }
@@ -626,7 +642,7 @@ function printSheet(sheet, report, { rows, all, block, page, total, last, tot, c
       })}
 
       ${last ? html`<div class="sheet__row sheet__row--sum">
-        <span style="grid-column:span ${span}">${t('Summe Total')}</span>${numbers(tot.demand)}
+        ${sheetSumLead(t('Summe Total'), all, lead)}${numbers(tot.demand)}
       </div>
       <div class="sheet__row sheet__row--foot">
         <span style="grid-column:span ${span}">${t('davon vor Baukredit-Freigabe')}</span>${numbers(tot.preCredit)}

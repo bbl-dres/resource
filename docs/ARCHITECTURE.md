@@ -16,7 +16,7 @@ will do.
 index.html
 css/tokens.css      design tokens, two layers
 css/main.css        everything else
-js/                 twelve modules, see below
+js/                 thirteen modules, see below
 data/               eleven JSON files, seven of them generated
 tools/              the portfolio generator; see tools/README.md
 ```
@@ -34,7 +34,7 @@ that way is the point.
 | 1 | `columns.js` | The column registry |
 | 2 | `ui.js` | The `html` template layer, and every shared control |
 | 3 | `views-schedule.js` | The bar plan's row: bars and gates on a time track, and the band the grid draws under its figures |
-| 3 | `views-overview.js`, `views-analysis.js`, `views-modals.js`, `export.js` | One view each; the Planung grid imports the band from the row module |
+| 3 | `views-overview.js`, `views-analysis.js`, `views-modals.js`, `views-settings.js`, `export.js` | One view each; the Planung grid imports the band from the row module |
 | 4 | `views-docs.js` | The printed sheets; reuses the Gantt row |
 | 5 | `app.js` | Boot, render loop, event dispatch |
 
@@ -137,7 +137,7 @@ the reader's own.
 
 | Key | Carries | Values |
 | --- | --- | --- |
-| `tab` | the page | `overview`, `dashboard`, `history`, `api`, `export` |
+| `tab` | the page | `overview`, `people`, `dashboard`, `history`, `api`, `export`, `settings` (`dashboard` with `bi=people` in old links still opens Personen) |
 | `view` | the Ansicht preset | `pensum`, `pensum-termine`, `termine`, `custom` (`both` in old links still opens the combined view) |
 | `layers` | the layers of Benutzerdefiniert, only with `view=custom` | any of `values,phases,gates,today` |
 | `colour` | the heat ramp | `none` when off |
@@ -145,9 +145,9 @@ the reader's own.
 | `zeros` | Nullwerte ausblenden | `hide` |
 | `scale`, `from`, `unit` | the time scale, the window offset, the unit | `year`/`quarter`/`month`, a count, `pct`/`fte` |
 | `sort`, `dir` | the grid sort | a column key or `q3`, `asc`/`desc` |
-| `group` | Gruppieren nach | `portfolio`, `lead`, `phase`, `organisation`, `none` |
+| `group` | Gruppieren nach | `portfolio`, `lead`, `phase`, `organisation`, `size`, `none` |
 | `q`, `phase`, `lead`, `portfolio`, `org` | the search and the filters | ids, comma-separated |
-| `bi`, `psort`, `pdir`, `csort` | the dashboard section, the person table's sort, the cards' order | `people`; a column or `q3`; `asc`/`desc`; `card:by:dir` per card |
+| `psort`, `pdir`, `csort` | the person table's sort, the dashboard cards' order | a column or `q3`; `asc`/`desc`; `card:by:dir` per card |
 | `page`, `pageSize` | the change log | numbers |
 | `sheet`, `paper`, `zoom` | the print preview | `portrait`/`landscape`, `a4`…`a0`, `fit`/`50`… |
 
@@ -226,7 +226,7 @@ Two things to know before touching it:
 
 ## i18n
 
-`data/i18n.json` holds 359 terms in four languages, looked up through `t()` with
+`data/i18n.json` holds 389 terms in four languages, looked up through `t()` with
 the German string as the key and as the fallback. A user-visible string that is
 not passed through `t()` will be German in every language.
 

@@ -1,18 +1,20 @@
 /* =============================================================================
-   views-analysis.js — Tab «Dashboard» (explorative BI grid) and
-   Tab «Verlauf» (the immutable change log).
+   views-analysis.js — Tab «Personen» (the load each person carries), Tab
+   «Dashboard» (explorative BI grid) and Tab «Verlauf» (the immutable change
+   log).
    ============================================================================= */
 
 import {
   data, state, t, fmtMio, totals, loadStatus, cellValue,
   filteredProjects, visibleChanges,
-  periods, periodValue, personRows, sortPersonRows, groupPeople, pageOf, chartTone, nowIndex, compareDe
+  periods, periodValue, personRows, sortPersonRows, groupPeople, pageOf, chartTone, nowIndex, compareDe,
+  projectShare, projectCapacity, personHeatStep
 } from './store.js';
 import { card } from './views-overview.js';
 
 import {
   html, raw, icons, pageHeader, pageActions, toolbar, activeFilterRow,
-  columnCharts, barList, kpiStrip, segmented,
+  columnCharts, barList, kpiStrip,
   tokenPx, yearRule, pinCls, pinLeft, sortableHead, attr, dropdown, menuRadio, menuGroupLabel, divider, changeProject,
   highlight
 } from './ui.js';
@@ -21,25 +23,16 @@ import {
    Dashboard
    ========================================================================== */
 
-/* The KPI strip and the filters hold for both sections, so they stay above them. */
-const BI_SECTIONS = [
-  { value: 'general', label: 'Allgemein' },
-  { value: 'people', label: 'Personen' }
-];
-
 export function renderDashboard() {
-  const section = BI_SECTIONS.some(s => s.value === state.bi) ? state.bi : 'general';
-
   return html`
     ${pageHeader({
       actions: pageActions()
     })}
     <div class="wrap"><div class="content">
-      ${toolbar(section === 'people' ? { time: true, groups: PEOPLE_GROUPS } : {})}
+      ${toolbar()}
       ${activeFilterRow()}
       ${kpiStrip()}
-      <div class="bibar">${segmented(BI_SECTIONS, section, 'bi')}</div>
-      ${section === 'people' ? personSection() : html`<div class="bi-grid">
+      <div class="bi-grid">
         ${utilisationCard()}
         ${phaseCountCard()}
         ${organisationCountCard()}
@@ -47,20 +40,31 @@ export function renderDashboard() {
         ${organisationFteCard()}
         ${creditPhaseCard()}
         ${creditYearCard()}
-      </div>`}
+      </div>
     </div></div>`;
 }
 
 /* =============================================================================
-   «Personen» — the same grid the Übersicht uses, with people as the rows
+   «Personen» — the same grid the Planung tab uses, with people as the rows
    ========================================================================== */
 
-/**
- * Person utilisation runs to 245 %, where the project ramp tops out at 120 —
- * reused unchanged it put 64 % of the table into its two darkest steps and
- * flattened 120 % and 245 % into one blue. Same five tokens, own thresholds.
+/*
+ * A tab of its own, beside Planung. It was the second section of the
+ * dashboard, behind a switch under the KPI strip, which suited a table one
+ * only reads. It is where a person's pensum is to be set, and a page one
+ * works in is a tab, not a section of a report.
  */
-const personHeat = v => (v === 0 ? 0 : v <= 80 ? 1 : v <= 100 ? 2 : v <= 150 ? 3 : 4);
+export function renderPeople() {
+  return html`
+    ${pageHeader({
+      actions: pageActions()
+    })}
+    <div class="wrap"><div class="content">
+      ${toolbar({ time: true, groups: PEOPLE_GROUPS })}
+      ${activeFilterRow()}
+      ${personSection()}
+    </div></div>`;
+}
 
 /*
  * The alignment classes are the same ones columns.js hands the two planning
@@ -80,6 +84,9 @@ const PERSON_COLS = [
   /* The same short form and width as the planning grid's column. */
   { key: 'organisation', token: '--grid-col-organisation' },
   { key: 'employment', token: '--person-col-employment' },
+  /* How much of that contract may go to projects — the ceiling the figures
+     to the right are measured against. */
+  { key: 'share', token: '--person-col-share' },
   { key: 'projects', token: '--person-col-projects' },
   { key: 'peak', token: '--person-col-peak' }
 ];
@@ -133,6 +140,8 @@ function personSection() {
     ${personHead('name', t('Person'), sticky)}
     ${personHead('organisation', t('Organisation'), sticky)}
     ${personHead('employment', t('Anstellung'), sticky, 'pcell--num align-end')}
+    ${personHead('share', t('Projektanteil'), sticky, 'pcell--num align-end',
+      t('Anteil der Anstellung, der für Projekte eingesetzt werden darf'))}
     ${personHead('projects', t('Projekte'), sticky, 'pcell--num align-end')}
     ${personHead('peak', t('Spitze'), sticky, 'pcell--num align-end', t('Höchste Auslastung im sichtbaren Zeitraum'))}
     ${cols.map((col, i) => personHead(`q${i}`, col.short,
@@ -143,21 +152,26 @@ function personSection() {
 
   const personRow = r => {
     const org = data.organisationsById[r.person.organisation];
+    const share = projectShare(r.person);
+    /* The ceiling in pensum points, which is what a sum of pensa is held against. */
+    const capacity = String(Math.round(projectCapacity(r.person) * 10) / 10).replace('.', ',');
     return html`<div class="prow" style="grid-template-columns:${raw(tpl)}">
       ${leadCell('name', 'pcell--title', html`<button type="button" class="prow__title"
-          data-act="filter-lead" data-val="${r.person.id}"
-          title="${t('Übersicht auf diese Person filtern')}">${r.person.name}</button>`)}
+          data-act="open-person" data-val="${r.person.id}"
+          title="${t('Angaben zur Person öffnen')}">${r.person.name}</button>`)}
       ${leadCell('organisation', 'pcell--phase', org ? t(org.short) : '—', org ? t(org.label) : '')}
       ${leadCell('employment', 'pcell--target align-end', `${r.person.employment} %`)}
+      ${leadCell('share', 'pcell--target align-end', `${share} %`,
+        `${t('Für Projekte verfügbar')}: ${capacity} % (${share} % ${t('von')} ${r.person.employment} % ${t('Anstellung')})`)}
       ${leadCell('projects', 'pcell--target align-end', r.leads || '—')}
       ${leadCell('peak', `pcell--target align-end ${r.peak > 100 ? 'is-over' : ''}`,
         r.peak === null ? '—' : `${r.peak} %`)}
       ${cols.map((col, i) => {
         const v = r.values[i];
         const label = r.leads ? `${v} %` : '—';
-        return html`<span class="pcell pcell--val ${r.leads ? `heat-${personHeat(v)}` : ''}
+        return html`<span class="pcell pcell--val ${r.leads ? `heat-${personHeatStep(v)}` : ''}
             ${r.leads && v > 100 ? 'is-warn' : ''} ${yearRule(col)}"
-            title="${r.person.name}, ${col.label}: ${label} ${t('der Anstellung')}">${label}</span>`;
+            title="${r.person.name}, ${col.label}: ${label} ${t('der Projektkapazität')}">${label}</span>`;
       })}
     </div>`;
   };

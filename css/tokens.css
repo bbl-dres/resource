@@ -469,6 +469,7 @@
   /* The person table has its own five lead columns. */
   --person-col-name:       150px;
   --person-col-employment: 96px;   /* «Anstellung» in full, with its sort arrow */
+  --person-col-share:      112px;  /* «Projektanteil», likewise */
   --person-col-projects:   84px;   /* «Projekte», likewise */
   --person-col-peak:       76px;
 

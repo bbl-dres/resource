@@ -191,11 +191,6 @@
       "fr": "Afficher toutes les modifications",
       "it": "Mostra tutte le modifiche"
     },
-    "Allgemein": {
-      "en": "General",
-      "fr": "Général",
-      "it": "Generale"
-    },
     "Als CSV exportieren": {
       "en": "Export as CSV",
       "fr": "Exporter en CSV",
@@ -220,6 +215,16 @@
       "en": "Reallocate to another person",
       "fr": "Réaffecter à une autre personne",
       "it": "Riassegnare a un'altra persona"
+    },
+    "Angaben gespeichert": {
+      "en": "details saved",
+      "fr": "données enregistrées",
+      "it": "dati salvati"
+    },
+    "Angaben zur Person öffnen": {
+      "en": "Open the person’s details",
+      "fr": "Ouvrir les données de la personne",
+      "it": "Apri i dati della persona"
     },
     "Angemeldet": {
       "en": "Signed in",
@@ -246,6 +251,16 @@
       "fr": "taux d'activité",
       "it": "grado di occupazione"
     },
+    "Anstellung anpassen": {
+      "en": "Change the contract",
+      "fr": "Modifier le taux d’activité",
+      "it": "Modifica il grado di occupazione"
+    },
+    "Anteil der Anstellung, der für Projekte eingesetzt werden darf": {
+      "en": "Share of the contract that may be used for projects",
+      "fr": "Part du taux d'activité pouvant être consacrée aux projets",
+      "it": "Quota del grado di occupazione utilizzabile per i progetti"
+    },
     "Anzahl Projekte nach Organisation": {
       "en": "Projects by organisation",
       "fr": "Nombre de projets par organisation",
@@ -270,6 +285,11 @@
       "en": "Utilisation",
       "fr": "Taux de charge",
       "it": "Grado di utilizzo"
+    },
+    "Auslastung je Quartal": {
+      "en": "Utilisation per quarter",
+      "fr": "Charge par trimestre",
+      "it": "Carico per trimestre"
     },
     "Auslastung nach Quartal": {
       "en": "Utilisation by quarter",
@@ -411,6 +431,11 @@
       "fr": "Feuille",
       "it": "Foglio"
     },
+    "Bundesamt für Bauten und Logistik": {
+      "en": "Federal Office for Buildings and Logistics",
+      "fr": "Office fédéral des constructions et de la logistique",
+      "it": "Ufficio federale delle costruzioni e della logistica"
+    },
     "Bundesamt für Bauten und Logistik BBL": {
       "en": "Federal Office for Buildings and Logistics FOBL",
       "fr": "Office fédéral des constructions et de la logistique OFCL",
@@ -420,6 +445,11 @@
       "en": "Presentation, functionality and content serve demonstration purposes only; the data used is fictitious or publicly available.",
       "fr": "La présentation, les fonctionnalités et les contenus servent uniquement à la démonstration; les données utilisées sont fictives ou publiquement accessibles.",
       "it": "Presentazione, funzionalità e contenuti servono unicamente a scopo dimostrativo; i dati utilizzati sono fittizi o pubblicamente accessibili."
+    },
+    "Darüber gilt ein Projekt als Grossprojekt.": {
+      "en": "Above that, a project counts as large.",
+      "fr": "Au-delà, un projet est considéré comme grand.",
+      "it": "Oltre, un progetto è considerato grande."
     },
     "Dashboard": {
       "en": "Dashboard",
@@ -456,6 +486,11 @@
       "fr": "Déficit",
       "it": "Deficit"
     },
+    "Der Rest ist Linien- und Administrationsarbeit.": {
+      "en": "The rest is line and administrative work.",
+      "fr": "Le reste est du travail de ligne et d'administration.",
+      "it": "Il resto è lavoro di linea e amministrativo."
+    },
     "Der Zugang wird über eIAM gesteuert. Berechtigungen, Kennwort und Zwei-Faktor-Anmeldung werden dort verwaltet, nicht in dieser Anwendung.": {
       "en": "Access is governed by eIAM. Permissions, password and two-factor sign-in are managed there, not in this application.",
       "fr": "L'accès est géré par eIAM. Les autorisations, le mot de passe et l'authentification à deux facteurs y sont gérés, pas dans cette application.",
@@ -476,10 +511,10 @@
       "fr": "La documentation de l'API n'a pas pu être chargée.",
       "it": "Non è stato possibile caricare la documentazione dell'API."
     },
-    "Die Ressourcenplanung zeigt Personendaten und Kredite; ohne Anmeldung wird nichts davon geladen.": {
-      "en": "Resource planning shows personal data and credits; none of it is loaded without a sign-in.",
-      "fr": "La planification des ressources affiche des données personnelles et des crédits ; rien n'est chargé sans connexion.",
-      "it": "La pianificazione delle risorse mostra dati personali e crediti; senza accesso nulla viene caricato."
+    "Die Personalplanung zeigt Personendaten und Kredite; ohne Anmeldung wird nichts davon geladen.": {
+      "en": "Staff planning shows personal data and credits; none of it is loaded without a sign-in.",
+      "fr": "La planification du personnel affiche des données personnelles et des crédits ; rien n'est chargé sans connexion.",
+      "it": "La pianificazione del personale mostra dati personali e crediti; senza accesso nulla viene caricato."
     },
     "Die aktiven Filter schliessen alle": {
       "en": "The active filters exclude all",
@@ -490,6 +525,11 @@
       "en": "Share this view",
       "fr": "Partager cette vue",
       "it": "Condividi questa vista"
+    },
+    "Diese Regeln gelten für alle. Eine Änderung bewertet die Auslastung aller Personen und Quartale neu und wird im Verlauf festgehalten.": {
+      "en": "These rules apply to everyone. A change re-rates the utilisation of every person and quarter and is recorded in the history.",
+      "fr": "Ces règles s'appliquent à tous. Une modification réévalue la charge de toutes les personnes et de tous les trimestres et est consignée dans l'historique.",
+      "it": "Queste regole valgono per tutti. Una modifica ricalcola il carico di tutte le persone e di tutti i trimestri e viene registrata nella cronologia."
     },
     "Drucken": {
       "en": "Print",
@@ -511,6 +551,16 @@
       "fr": "Couches",
       "it": "Livelli"
     },
+    "Eigener Projektanteil": {
+      "en": "Own project share",
+      "fr": "Part projets propre",
+      "it": "Quota progetti propria"
+    },
+    "Eigener Projektanteil leer: es gilt die Vorgabe der Organisation.": {
+      "en": "Own project share empty: the organisation’s default applies.",
+      "fr": "Part projets propre vide : la valeur de l’organisation s’applique.",
+      "it": "Quota progetti propria vuota: vale il valore dell’organizzazione."
+    },
     "Ein Vorgang statt zwei Transaktionen: von, an, Betrag und Zeitraum ergeben einen Verlaufseintrag mit beiden Seiten.": {
       "en": "One operation instead of two transactions: from, to, amount and period make a single log entry carrying both sides.",
       "fr": "Une opération au lieu de deux transactions : de, à, montant et période forment une seule entrée d'historique portant les deux côtés.",
@@ -525,6 +575,11 @@
       "en": "Settings",
       "fr": "Paramètres",
       "it": "Impostazioni"
+    },
+    "Einstellungen gespeichert": {
+      "en": "Settings saved",
+      "fr": "Paramètres enregistrés",
+      "it": "Impostazioni salvate"
     },
     "Einstieg": {
       "en": "Start",
@@ -621,6 +676,11 @@
       "fr": "Libération en attente",
       "it": "Sblocco in sospeso"
     },
+    "Für Projekte verfügbar": {
+      "en": "Available for projects",
+      "fr": "Disponible pour les projets",
+      "it": "Disponibile per i progetti"
+    },
     "Gate am Ende von": {
       "en": "Gate at the end of",
       "fr": "Jalon à la fin de",
@@ -661,6 +721,11 @@
       "fr": "S'applique à cette application et aux e-mails.",
       "it": "Vale per questa applicazione e per le e-mail."
     },
+    "Grossprojekte": {
+      "en": "Large projects",
+      "fr": "Grands projets",
+      "it": "Progetti grandi"
+    },
     "Gruppieren nach": {
       "en": "Group by",
       "fr": "Grouper par",
@@ -676,10 +741,10 @@
       "fr": "Aujourd'hui",
       "it": "Oggi"
     },
-    "Höchste Auslastung des Bearbeitenden gegen die eigene Anstellung im dargestellten Zeitraum. Die Form trägt die Aussage, damit sie auch auf einer Fotokopie lesbar bleibt.": {
-      "en": "Highest workload of the assignee against their own contract over the period shown. The shape carries the message so it stays legible on a photocopy.",
-      "fr": "Charge maximale de la personne en charge par rapport à son propre taux d'engagement sur la période affichée. La forme porte le message afin qu'il reste lisible sur une photocopie.",
-      "it": "Carico massimo dell'incaricato rispetto al proprio grado di occupazione nel periodo rappresentato. La forma veicola il messaggio, così resta leggibile anche su una fotocopia."
+    "Höchste Auslastung des Bearbeitenden gegen die eigene Projektkapazität im dargestellten Zeitraum. Die Form trägt die Aussage, damit sie auch auf einer Fotokopie lesbar bleibt.": {
+      "en": "Highest workload of the assignee against their own project capacity over the period shown. The shape carries the message so it stays legible on a photocopy.",
+      "fr": "Charge maximale de la personne en charge par rapport à sa propre capacité de projet sur la période affichée. La forme porte le message afin qu'il reste lisible sur une photocopie.",
+      "it": "Carico massimo dell'incaricato rispetto alla propria capacità di progetto nel periodo rappresentato. La forma veicola il messaggio, così resta leggibile anche su una fotocopia."
     },
     "Höchste Auslastung des Bearbeitenden im sichtbaren Zeitraum": {
       "en": "Highest workload of the assignee in the visible period",
@@ -771,10 +836,20 @@
       "fr": "Aucune personne trouvée.",
       "it": "Nessuna persona trovata."
     },
+    "Keine Projekte zugewiesen.": {
+      "en": "No projects assigned.",
+      "fr": "Aucun projet attribué.",
+      "it": "Nessun progetto assegnato."
+    },
     "Klassifizierung: intern": {
       "en": "Classification: internal",
       "fr": "Classification : interne",
       "it": "Classificazione: interno"
+    },
+    "Kleinprojekte": {
+      "en": "Small projects",
+      "fr": "Petits projets",
+      "it": "Progetti piccoli"
     },
     "Kontakt": {
       "en": "Contact",
@@ -815,6 +890,11 @@
       "en": "Credit by phase (ePPM)",
       "fr": "Crédit par phase (ePPM)",
       "it": "Credito per fase (ePPM)"
+    },
+    "Kredit offen": {
+      "en": "Credit open",
+      "fr": "Crédit ouvert",
+      "it": "Credito aperto"
     },
     "Kredite CHF": {
       "en": "Credits CHF",
@@ -1111,6 +1191,16 @@
       "fr": "Personne occupée à plus de 100 %, surcharge",
       "it": "Persona impegnata oltre il 100 %, sovraccarico"
     },
+    "Personalplanung": {
+      "en": "Staff planning",
+      "fr": "Planification du personnel",
+      "it": "Pianificazione del personale"
+    },
+    "Personalplanung — Übersicht": {
+      "en": "Staff planning — overview",
+      "fr": "Planification du personnel — vue d'ensemble",
+      "it": "Pianificazione del personale — panoramica"
+    },
     "Personen": {
       "en": "People",
       "fr": "Personnes",
@@ -1186,6 +1276,16 @@
       "fr": "Ouvrir le projet",
       "it": "Apri progetto"
     },
+    "Projektanteil": {
+      "en": "Project share",
+      "fr": "Part projets",
+      "it": "Quota progetti"
+    },
+    "Projektanteil je Organisation": {
+      "en": "Project share per organisation",
+      "fr": "Part projets par organisation",
+      "it": "Quota progetti per organizzazione"
+    },
     "Projekte": {
       "en": "Projects",
       "fr": "Projets",
@@ -1201,10 +1301,20 @@
       "fr": "projets dans le périmètre défini",
       "it": "progetti nell'ambito definito"
     },
+    "Projekte in der Planung anzeigen": {
+      "en": "Show projects in the plan",
+      "fr": "Afficher les projets dans la planification",
+      "it": "Mostra i progetti nella pianificazione"
+    },
     "Projekte mit Kredit": {
       "en": "projects with a credit",
       "fr": "projets avec crédit",
       "it": "progetti con credito"
+    },
+    "Projektgrösse": {
+      "en": "Project size",
+      "fr": "Taille du projet",
+      "it": "Dimensione del progetto"
     },
     "Projektleitung": {
       "en": "Project lead",
@@ -1241,15 +1351,10 @@
       "fr": "Code source",
       "it": "Codice sorgente"
     },
-    "Ressourcenplanung": {
-      "en": "Resource planning",
-      "fr": "Planification des ressources",
-      "it": "Pianificazione delle risorse"
-    },
-    "Ressourcenplanung — Übersicht": {
-      "en": "Resource planning — overview",
-      "fr": "Planification des ressources — vue d'ensemble",
-      "it": "Pianificazione delle risorse — panoramica"
+    "Rechtliches": {
+      "en": "Terms and conditions",
+      "fr": "Informations juridiques",
+      "it": "Basi legali"
     },
     "Rolle": {
       "en": "Role",
@@ -1315,6 +1420,11 @@
       "en": "columns hidden",
       "fr": "colonnes masquées",
       "it": "colonne nascoste"
+    },
+    "Speichern": {
+      "en": "Save",
+      "fr": "Enregistrer",
+      "it": "Salva"
     },
     "Spitze": {
       "en": "Peak",
@@ -1426,6 +1536,16 @@
       "fr": "Réaffecté",
       "it": "Riassegnato"
     },
+    "Ungültiger Wert: Anstellung 10 – 100 %, Projektanteil 1 – 100 % oder leer.": {
+      "en": "Invalid value: contract 10 – 100 %, project share 1 – 100 % or empty.",
+      "fr": "Valeur non valide : taux d’activité 10 – 100 %, part projets 1 – 100 % ou vide.",
+      "it": "Valore non valido: grado di occupazione 10 – 100 %, quota progetti 1 – 100 % o vuoto."
+    },
+    "Ungültiger Wert: Projektanteil 1 – 100 %, Schwelle grösser als 0.": {
+      "en": "Invalid value: project share 1 – 100 %, threshold greater than 0.",
+      "fr": "Valeur non valide : part projets 1 – 100 %, seuil supérieur à 0.",
+      "it": "Valore non valido: quota progetti 1 – 100 %, soglia maggiore di 0."
+    },
     "Vergabe erfolgt": {
       "en": "Contract awarded",
       "fr": "Adjudication effectuée",
@@ -1455,6 +1575,11 @@
       "en": "From",
       "fr": "De",
       "it": "Da"
+    },
+    "Vorgabe der Organisation": {
+      "en": "organisation default",
+      "fr": "valeur de l’organisation",
+      "it": "valore dell’organizzazione"
     },
     "Vorherige Seite": {
       "en": "Previous page",
@@ -1571,6 +1696,11 @@
       "fr": "croissant",
       "it": "crescente"
     },
+    "bis": {
+      "en": "up to",
+      "fr": "jusqu'à",
+      "it": "fino a"
+    },
     "bis 39 %": {
       "en": "up to 39 %",
       "fr": "jusqu'à 39 %",
@@ -1591,15 +1721,20 @@
       "fr": "dont avant libération du crédit de construction",
       "it": "di cui prima dello sblocco del credito di costruzione"
     },
-    "der Anstellung": {
-      "en": "of contract",
-      "fr": "du taux d'activité",
-      "it": "del grado di occupazione"
+    "der Projektkapazität": {
+      "en": "of project capacity",
+      "fr": "de la capacité de projet",
+      "it": "della capacità di progetto"
     },
     "durch": {
       "en": "by",
       "fr": "par",
       "it": "da"
+    },
+    "eigener Wert": {
+      "en": "own value",
+      "fr": "valeur propre",
+      "it": "valore proprio"
     },
     "frei": {
       "en": "free",
@@ -1736,6 +1871,16 @@
       "fr": "réaffecté à",
       "it": "riassegnato a"
     },
+    "ungespeicherte Änderung": {
+      "en": "unsaved change",
+      "fr": "modification non enregistrée",
+      "it": "modifica non salvata"
+    },
+    "ungespeicherte Änderungen": {
+      "en": "unsaved changes",
+      "fr": "modifications non enregistrées",
+      "it": "modifiche non salvate"
+    },
     "verschoben": {
       "en": "postponed",
       "fr": "reporté",
@@ -1760,6 +1905,11 @@
       "en": "Changes by others",
       "fr": "Modifications par des tiers",
       "it": "Modifiche di altri"
+    },
+    "Änderungen verwerfen": {
+      "en": "Discard changes",
+      "fr": "Annuler les modifications",
+      "it": "Annulla le modifiche"
     },
     "Übergabe Bewirtschaftung": {
       "en": "Handover to operations",
@@ -1791,10 +1941,10 @@
       "fr": "Vue d'ensemble en PDF",
       "it": "Panoramica in PDF"
     },
-    "Übersicht auf diese Person filtern": {
-      "en": "Filter the overview to this person",
-      "fr": "Filtrer la vue d'ensemble sur cette personne",
-      "it": "Filtra la panoramica su questa persona"
+    "über": {
+      "en": "over",
+      "fr": "plus de",
+      "it": "oltre"
     },
     "über Soll": {
       "en": "above target",

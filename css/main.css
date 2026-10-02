@@ -137,6 +137,11 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .brand__sub {
   display: block; font-weight: var(--font-regular); color: var(--color-brand-fg-muted);
 }
+/*
+ * Three lines at 13px/1.3 are 51px in a 60px bar. The division is part of the
+ * sender, so it keeps the office's colour; the application is the muted line.
+ */
+.brand__sub--division { color: inherit; }
 
 /*
  * Centred on the bar, not between its neighbours: as a flex child it drifted
@@ -168,6 +173,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .hdr-btn:hover { background: var(--color-brand-control-bg-strong); }
 .hdr-btn--icon { width: var(--control-height-lg); padding: 0; justify-content: center; color: var(--color-brand-fg-muted); }
 .hdr-btn--icon:hover { color: var(--color-brand-fg); }
+/* The gear while its page is open: the outline at full strength says «you are here». */
+.hdr-btn[aria-current="page"] { border-color: var(--color-brand-fg); color: var(--color-brand-fg); }
 
 /* .dd already supplies the positioning context the badge anchors to. */
 .hdr-notify { flex: 0 0 auto; }
@@ -310,10 +317,12 @@ button, input, select, textarea { font: inherit; color: inherit; }
  * side read as a different site.
  */
 :root[data-tab="overview"],
+:root[data-tab="people"],
 :root[data-tab="dashboard"],
 :root[data-tab="history"],
 :root[data-tab="api"],
-:root[data-tab="export"] { --layout-width: var(--layout-width-grid); }
+:root[data-tab="export"],
+:root[data-tab="settings"] { --layout-width: var(--layout-width-grid); }
 
 /*
  * Ground rules: navy chrome, one white strip that answers "where am I", then a
@@ -964,6 +973,8 @@ h1, h2, h3,
   padding-right: var(--space-4);
   color: var(--color-text-secondary);
 }
+/* The credits a sum row adds up, under their column: the row's ink, not the column's. */
+.prow--sum .pcell--credit { color: inherit; }
 /* The person table's figures — Anst., Proj., Spitze — the same way: they had
    no padding at all, and ran to the column edge 8px past their headings. */
 .pcell--target { padding-right: var(--space-4); }
@@ -1254,6 +1265,20 @@ button.pcell--val { cursor: pointer; }
   font-size: var(--text-sm); color: var(--color-text-secondary);
 }
 .modal__log li:first-child { border-top: 0; }
+/* The person dialog lists projects in the same rows: number, name, phase, pensum. */
+.modal__log--projects li { grid-template-columns: 44px minmax(0, 1fr) 150px 64px; align-items: center; }
+.modal__log--projects li > :last-child { text-align: right; font-variant-numeric: tabular-nums; }
+.modal__log--projects .linkbtn { font-size: var(--text-sm); font-weight: var(--font-regular); text-align: left; }
+
+/* The person's own two figures: the contract and, where it differs, a project share. */
+.personedit {
+  display: grid; grid-template-columns: max-content max-content auto;
+  /* Both fields are a label over an input, so the button lines up with the inputs. */
+  align-items: end; justify-content: start; gap: var(--space-11);
+}
+.personedit .btn { height: var(--control-height-xl); }
+.personedit__note { margin-top: var(--space-4); font-size: var(--text-sm); color: var(--color-text-muted); }
+.personedit__error { margin-top: var(--space-5); font-size: var(--text-sm); font-weight: var(--font-semibold); color: var(--color-danger-fg); }
 
 .modal__foot {
   display: flex; align-items: center; justify-content: flex-end; gap: var(--space-4);
@@ -1590,9 +1615,6 @@ button.pcell--val { cursor: pointer; }
 .bi-card__tools { margin-left: auto; }
 .bi-card__section { padding-top: var(--space-8); border-top: var(--border-hairline) solid var(--color-border-subtle); }
 .bi-card__subtitle { font-size: var(--text-base); font-weight: var(--font-semibold); color: var(--color-text-strong); }
-/* The two dashboard sections: a control row of its own, under the KPI strip. */
-.bibar { display: flex; align-items: center; gap: var(--space-6); }
-
 /* The person table's summary label carries a second line of context. */
 /*
  * The note says which population the row counts. Set apart rather than merely
@@ -2173,6 +2195,8 @@ button.pcell--val { cursor: pointer; }
  */
 @media (max-height: 460px) and (orientation: landscape) {
   :root { --header-height: 48px; --tabbar-height: 34px; }
+  /* Three brand lines are 51px; the 48px bar holds the office and the application. */
+  .brand__sub--division { display: none; }
   .page-header { padding-block: var(--space-4) 0; }
   .page-header__row { margin-top: var(--space-3); }
 }
@@ -2552,4 +2576,55 @@ button.pcell--val { cursor: pointer; }
   .content { padding-top: var(--space-8); gap: var(--space-6); }
   .toolbar + .filterbar { margin-top: calc(var(--space-3) - var(--space-6)); }
   .filterbar + .grid-card { margin-top: var(--space-2); }
+}
+
+/* ==========================================================================
+   20 · Einstellungen — the office's rules, behind the gear in the header
+   ========================================================================== */
+
+/* A form, not a view of the plan: it keeps a reading measure on a wide screen
+   rather than stretching six rows across 1900px. */
+.setpage { max-width: 920px; }
+.setpage__lead { max-width: 72ch; font-size: var(--text-base); color: var(--color-text-secondary); }
+
+.settable { display: flex; flex-direction: column; }
+.settable__row {
+  display: grid; grid-template-columns: minmax(0, 1fr) 80px 130px 190px;
+  align-items: center; gap: var(--space-8);
+  min-height: var(--row-height-list);
+  border-top: var(--border-hairline) solid var(--color-border-subtle);
+  font-size: var(--text-base); color: var(--color-text);
+}
+.settable__row--head {
+  min-height: 0; padding-bottom: var(--space-4); border-top: 0;
+  font-size: var(--text-sm); font-weight: var(--font-semibold); color: var(--color-text-muted);
+}
+/* One setting on its own: the name, the field, and what the value does. */
+.settable__row--single { grid-template-columns: minmax(0, 1fr) 190px minmax(0, 340px); border-top: 0; }
+.settable__name { min-width: 0; color: var(--color-text-strong); }
+.settable__short { margin-left: var(--space-4); font-size: var(--text-sm); color: var(--color-text-muted); }
+.settable__num { text-align: right; font-variant-numeric: tabular-nums; }
+.settable__extra { color: var(--color-text-secondary); }
+
+.setfield { display: inline-flex; align-items: center; gap: var(--space-3); color: var(--color-text-secondary); }
+.setfield input {
+  width: 64px; height: var(--control-height-lg); padding: 0 var(--space-4);
+  border: var(--border-hairline) solid var(--color-border-strong); border-radius: var(--radius);
+  background: var(--color-surface); color: var(--color-text-strong);
+  font: inherit; font-variant-numeric: tabular-nums; text-align: right;
+}
+/* A value that differs from the saved one, and one that is not a value: the
+   edge carries both, at the weight the pensum editor gives its own field. */
+.setfield.is-changed input { border: var(--border-emphasis) solid var(--color-accent); }
+.setfield.is-invalid input { border: var(--border-emphasis) solid var(--color-danger-solid); }
+
+/* What is left to do, beside the buttons that do it. */
+.setnote { font-size: var(--text-sm); color: var(--color-text-muted); white-space: nowrap; }
+.setnote.is-invalid { color: var(--color-danger-fg); font-weight: var(--font-semibold); }
+
+@media (max-width: 700px) {
+  /* The derived column is a courtesy; on a phone the field is what matters. */
+  .settable__extra { display: none; }
+  .settable__row { grid-template-columns: minmax(0, 1fr) 56px 110px; gap: var(--space-5); }
+  .settable__row--single { grid-template-columns: minmax(0, 1fr) 170px; }
 }

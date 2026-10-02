@@ -8,7 +8,7 @@
 
 import {
   data, state, t, num, fmt, unitSuffix, cellValue, projectDemand, heatStep, personUtilisation, phaseOf, eppmOf,
-  nowIndex, deDate
+  nowIndex, deDate, projectsOf, projectShare, projectCapacity, personHeatStep, personDraft
 } from './store.js';
 
 import { html, icons, attr, personOption, personSearch } from './ui.js';
@@ -104,6 +104,7 @@ const MODALS = {
   phase: phaseModal,
   milestone: milestoneModal,
   project: projectModal,
+  person: personModal,
   share: shareModal,
   rebook: rebookModal
 };
@@ -313,6 +314,119 @@ function projectModal({ projectId }) {
     <footer class="modal__foot">
       <button type="button" class="btn" data-act="open-schedule" data-val="${p.id}">${t('Termine anzeigen')}</button>
       <button type="button" class="btn btn--primary" data-act="noop">${t('Im ePPM öffnen')}</button>
+    </footer>`;
+}
+
+/**
+ * A person, the way the project dialog shows a project: what they are
+ * contracted for, how much of that may go to projects, what they carry, and
+ * how that sits against the ceiling quarter by quarter.
+ *
+ * It is also where the two figures of the person themselves are set — the
+ * contract, and a project share of their own where it differs from the
+ * unit's. Both are rare, so they are two plain fields behind one button, and
+ * the facts above them show what is saved, not what is being typed.
+ */
+function personModal(modal) {
+  const person = data.peopleById[modal.personId];
+  if (!person) return '';
+  const org = data.organisationsById[person.organisation];
+  const now = nowIndex();
+  const share = projectShare(person);
+  const capacity = String(Math.round(projectCapacity(person) * 10) / 10).replace('.', ',');
+  const projects = projectsOf(person.id);
+  const carries = projects.length > 0;
+  const util = data.quarters.map((_, q) => personUtilisation(person.id, q));
+  const peak = util.indexOf(Math.max(...util));
+  const own = person.projectShare != null;
+
+  const facts = [
+    { term: 'Organisation', value: org ? t(org.label) : '—', sub: org ? t(org.short) : '' },
+    { term: 'Anstellung', value: `${person.employment} %` },
+    {
+      term: 'Projektanteil',
+      value: `${share} %`,
+      sub: `${t('Für Projekte verfügbar')}: ${capacity} % · ${t(own ? 'eigener Wert' : 'Vorgabe der Organisation')}`
+    },
+    /* Somebody who leads nothing has work this table does not model, so their
+       figure is not a utilisation — the person table prints a dash for them too. */
+    carries ? {
+      term: `${t('Auslastung')} ${data.quarters[now].label}`,
+      value: `${util[now] > 100 ? '▲ ' : ''}${util[now]} %`,
+      sub: `${t('Spitze')} ${util[peak]} % · ${data.quarters[peak].label}`,
+      tone: util[now] > 100 ? 'danger' : null
+    } : {
+      term: `${t('Auslastung')} ${data.quarters[now].label}`,
+      value: '—', sub: t('Keine Projekte zugewiesen.')
+    }
+  ];
+
+  const draft = personDraft(modal);
+  const changed = draft && (draft.employment !== person.employment || draft.share !== person.projectShare);
+
+  return html`
+    ${modalHead(t(person.role), person.name)}
+
+    <dl class="facts">
+      ${facts.map(f => html`<div class="facts__row">
+        <dt>${t(f.term)}</dt>
+        <dd class="${f.tone ? 'is-' + f.tone : ''}">${f.value}<span class="facts__sub">${f.sub}</span></dd>
+      </div>`)}
+    </dl>
+
+    <!-- Under the facts, with its own button: at the foot of the dialog the two
+         fields sat below forty quarters, a screen and a half down a small laptop. -->
+    <section class="modal__section">
+      <h3>${t('Anstellung anpassen')}</h3>
+      <div class="personedit">
+        <div class="rebook__field">
+          <label class="rebook__label" for="person-employment">${t('Anstellung')}</label>
+          <span class="rebook__amount">
+            <input id="person-employment" type="text" inputmode="numeric" autocomplete="off"
+                   value="${modal.employment}" data-act="person-employment" data-fk="person-employment">
+            <span>%</span>
+          </span>
+        </div>
+        <div class="rebook__field">
+          <label class="rebook__label" for="person-share">${t('Eigener Projektanteil')}</label>
+          <span class="rebook__amount">
+            <input id="person-share" type="text" inputmode="numeric" autocomplete="off"
+                   value="${modal.share}" data-act="person-share" data-fk="person-share">
+            <span>%</span>
+          </span>
+        </div>
+        <button type="button" class="btn btn--primary" data-act="person-save" ${attr(!changed, 'disabled')}>${t('Speichern')}</button>
+      </div>
+      <p class="personedit__note">${t('Eigener Projektanteil leer: es gilt die Vorgabe der Organisation.')}</p>
+      ${draft ? '' : html`<p class="personedit__error" role="status">${
+        t('Ungültiger Wert: Anstellung 10 – 100 %, Projektanteil 1 – 100 % oder leer.')}</p>`}
+    </section>
+
+    <section class="modal__section">
+      <h3>${t('Projekte')} (${projects.length})</h3>
+      ${carries ? html`<ul class="modal__log modal__log--projects">
+        ${projects.map(p => html`<li>
+          <span>${p.number}</span>
+          <button type="button" class="linkbtn" data-act="open-project" data-val="${p.id}">${p.title}</button>
+          <span>${t(eppmOf(p.phase).label)}</span>
+          <span>${fmt(cellValue(p, now))}</span>
+        </li>`)}
+      </ul>` : html`<p class="settings__note">${t('Keine Projekte zugewiesen.')}</p>`}
+    </section>
+
+    ${carries && html`<section class="modal__section">
+      <h3>${t('Auslastung je Quartal')}</h3>
+      <div class="minigrid">
+        ${data.quarters.map((q, i) => html`<div class="minigrid__col">
+          <span class="minigrid__q">${q.short}<span>/${String(q.year).slice(2)}</span></span>
+          <span class="minigrid__v heat-${personHeatStep(util[i])}"
+                title="${q.label}: ${util[i]} % ${t('der Projektkapazität')}">${util[i]}</span>
+        </div>`)}
+      </div>
+    </section>`}
+
+    <footer class="modal__foot">
+      <button type="button" class="btn" data-act="filter-lead" data-val="${person.id}">${t('Projekte in der Planung anzeigen')}</button>
     </footer>`;
 }
 

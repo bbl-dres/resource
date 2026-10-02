@@ -74,6 +74,21 @@ row. A view is a name for a set of layers (`VIEW_PRESETS`); the four switches
 stay for everyone else, and touching one turns the view into «Benutzerdefiniert» by
 itself. `state.view` and `state.layers` are written together, never apart.
 
+**Personen is a tab, not a section of the dashboard.** The person table sat
+behind a switch under the dashboard's KPI strip, which suited a table one only
+reads. It is where a person's pensum is to be defined, and a page one works in
+stands beside Planung in the tab line. `tab=dashboard&bi=people` in an old
+link resolves to it.
+
+**A person opens like a project.** A name on the Personen tab opens a dialog
+with the same shape as the project's: the facts, the projects carried, the
+utilisation per quarter. It is also where the person's own two figures are
+set — the contract, and a project share of their own where it differs from
+the unit's (empty means the unit's applies). A saved contract moves the
+office's gross capacity by the same amount, since gross is the sum of the
+contracts, and both changes are logged under «Personen». The way to the
+person's rows on Planung, which the name used to be, is the dialog's button.
+
 **The band derives its geometry from two numbers.** `--band-h` and
 `--values-h`, on `.grid-card`, switched by the classes the view sets. Every
 arrangement — figures over a strip, the strip alone at the bar plan's height,
@@ -127,11 +142,39 @@ the charts that show where and when.
 hint. The filter, the group heading and the export keep the name; a grid
 column of «Programm- und Projektentwicklung II» truncated in every row.
 
+**Project size has two buckets, cut at 3 Mio. CHF of credit.** «Gruppieren
+nach: Projektgrösse» sorts a project into Kleinprojekte (up to 3 Mio.) or
+Grossprojekte (above), and the group heading carries the count — the users
+asked how many small projects there are, not for a ladder of sizes. A project
+whose credit is still open is neither yet and stands under «(Kredit offen)»:
+counted as small it would inflate the one number the grouping is there to
+give. The threshold is a setting, `meta.settings.smallProjectMio`.
+
+**The office's rules are a page behind the gear, not the account dialog.** The
+project share per organisation and the small-project line hold for everyone,
+so they sit in the header beside the bell and not in the reader's own menu.
+Nobody expects them to change — moving a project share means moving contracts
+— so the page is simple on purpose: no «gültig ab», no history of values. A
+saved change re-rates every person and every quarter at once, is saved for all
+fields together behind one button, and lands in the Verlauf as an entry with
+no project, so no filter hides it. Like every edit in the prototype it lasts
+until the page is reloaded.
+
 **Bedarf follows the filter; Auslastung does not.** A demand row describes the
 projects in scope. Utilisation is always the whole department against its own net
 capacity, because a filtered subset has no meaningful denominator. `totals()`
 returns `scoped: true` when the two rows describe different populations, and the
 view says so.
+
+**A person's ceiling is their project capacity, not their contract.** Nobody
+has the whole contract free for projects: project management keeps about a
+fifth back for line and administrative work, and other units far more. The
+share is a figure of the unit (`projectShare` on the organisation), with room
+for a person's own where it differs, and `personUtilisation` divides by
+`employment × share`. So 100 % means «everything this person may spend on
+projects», and the overload warning, the editor's mandatory reason and the
+Personen tab all fire at that line. It is a warning with a reason, as before,
+not a block.
 
 **A quantity has one owning function and one unit.** Pensum points in,
 utilisation points out of `personUtilisation` and nowhere else. Four call sites
@@ -216,6 +259,14 @@ Carried over from `docs/archive/GAP-ANALYSIS.md`; neither is decided.
   exceeds 100 in the *current* quarter. Whether it should mean “in any quarter of
   the window” changes the number materially on a forty-quarter horizon, and the
   wireframe does not say.
+- **Whether the office's capacity takes the project share off as well.**
+  `capacity.json` still counts the contracts in full, so the Auslastung row
+  and the dashboard chart are measured against more than the people on the
+  Personen tab can give. Taking it off moves the peak from 112 % to roughly
+  140 % unless the generator sizes the team against it, which rewrites every
+  fixture. The share values themselves are provisional too: 80 % for project
+  management is the users' figure, 85 % for the development teams is a
+  placeholder, and the portfolio managers' 20 % has no unit in the fixtures.
 - **Whether the person table follows the active filters.** It currently does not:
   all 44 people render under a scope of zero projects. That is an accident of the
   code rather than a decision.

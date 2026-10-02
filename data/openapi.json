@@ -1,10 +1,10 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Ressourcenplanung API",
+    "title": "Personalplanung API",
     "version": "2.0.0",
     "summary": "Kapazitäts- und Pensumplanung für Bauprojekte des BBL.",
-    "description": "Die API hinter der Ressourcenplanung der Abteilung Projektmanagement. Sie beantwortet drei Fragen: welche Bauprojekte laufen, wer sie mit welchem Pensum bearbeitet und wie das Pensum zur Kapazität der Abteilung steht.\n\n**Zwei Quellen, eine Sicht.** SAP ePPM führt die Stammdaten der Bauprojekte, ihre Phasen, Kredite und Termine. Die API hält davon eine lokale Projektion, mit der sich planen lässt. Alles, was ePPM nicht kennt, führt sie selbst und verbindlich: Pensen je Person und Quartal, Soll-Werte, Abwesenheiten, Begründungen und Freigaben.\n\n**Schreiben.** Planungsdaten schreibt die API sofort. Eine Änderung an einem gespiegelten Feld wird lokal geführt und als Rückschreibauftrag an ePPM eingereiht; `sync_state` sagt, wo der Datensatz dabei steht: `synced`, `local_ahead`, `queued` oder `conflict`.\n\n**Gleichzeitiges Arbeiten.** Jede Einzelressource liefert ein `ETag`. Wer sie ändert, schickt es als `If-Match` mit. Fehlt der Kopf, antwortet die API mit 428; ist die Version überholt, mit 412. `POST` nimmt einen `Idempotency-Key` an, damit ein wiederholter Aufruf nichts doppelt anlegt.\n\n**Fehler.** Jede Fehlerantwort ist ein Problem-Objekt nach RFC 9457 (`application/problem+json`) mit `type`, `title`, `status` und `detail`; bei 422 nennt `errors` die betroffenen Felder.\n\n**Einheiten.** Pensen sind Prozent einer Vollzeitstelle, 100 entspricht einer Stelle. Quartale haben die Form `2026Q3`. Alle Inhalte der Beispiele sind fiktiv.",
+    "description": "Die API hinter der Personalplanung der Abteilung Projektmanagement. Sie beantwortet drei Fragen: welche Bauprojekte laufen, wer sie mit welchem Pensum bearbeitet und wie das Pensum zur Kapazität der Abteilung steht.\n\n**Zwei Quellen, eine Sicht.** SAP ePPM führt die Stammdaten der Bauprojekte, ihre Phasen, Kredite und Termine. Die API hält davon eine lokale Projektion, mit der sich planen lässt. Alles, was ePPM nicht kennt, führt sie selbst und verbindlich: Pensen je Person und Quartal, Soll-Werte, Abwesenheiten, Begründungen und Freigaben.\n\n**Schreiben.** Planungsdaten schreibt die API sofort. Eine Änderung an einem gespiegelten Feld wird lokal geführt und als Rückschreibauftrag an ePPM eingereiht; `sync_state` sagt, wo der Datensatz dabei steht: `synced`, `local_ahead`, `queued` oder `conflict`.\n\n**Gleichzeitiges Arbeiten.** Jede Einzelressource liefert ein `ETag`. Wer sie ändert, schickt es als `If-Match` mit. Fehlt der Kopf, antwortet die API mit 428; ist die Version überholt, mit 412. `POST` nimmt einen `Idempotency-Key` an, damit ein wiederholter Aufruf nichts doppelt anlegt.\n\n**Fehler.** Jede Fehlerantwort ist ein Problem-Objekt nach RFC 9457 (`application/problem+json`) mit `type`, `title`, `status` und `detail`; bei 422 nennt `errors` die betroffenen Felder.\n\n**Einheiten.** Pensen sind Prozent einer Vollzeitstelle, 100 entspricht einer Stelle. Quartale haben die Form `2026Q3`. Alle Inhalte der Beispiele sind fiktiv.",
     "contact": {
       "name": "Bundesamt für Bauten und Logistik BBL"
     },
@@ -3373,6 +3373,12 @@
             "type": "integer",
             "description": "Anstellungsgrad."
           },
+          "project_share_pct": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Projektanteil: Anteil des Anstellungsgrads in Prozent, der für Projekte eingesetzt werden darf. Der Rest ist Linien- und Administrationsarbeit. Massgebend ist der Wert der Organisationseinheit, sofern die Person keinen eigenen führt."
+          },
           "load_pct": {
             "type": "array",
             "items": {
@@ -3719,6 +3725,12 @@
             "maximum": 100,
             "description": "Anstellungsgrad."
           },
+          "project_share_pct": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Projektanteil: Anteil des Anstellungsgrads in Prozent, der für Projekte eingesetzt werden darf. Der Rest ist Linien- und Administrationsarbeit. Massgebend ist der Wert der Organisationseinheit, sofern die Person keinen eigenen führt."
+          },
           "active": {
             "type": "boolean",
             "default": true
@@ -3760,6 +3772,12 @@
             "minimum": 10,
             "maximum": 100
           },
+          "project_share_pct": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Projektanteil der Person, wenn er vom Wert der Organisationseinheit abweicht."
+          },
           "active": {
             "type": "boolean"
           }
@@ -3792,6 +3810,12 @@
             "type": "integer",
             "minimum": 10,
             "maximum": 100
+          },
+          "project_share_pct": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Projektanteil der Person, wenn er vom Wert der Organisationseinheit abweicht."
           },
           "active": {
             "type": "boolean"

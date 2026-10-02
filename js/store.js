@@ -27,15 +27,14 @@ export const data = {};
 export const VOCAB = {
   /* «schedule» is gone from the set but not from the world: readUrl() maps an
      old link to the Planung tab in its Termine view. */
-  tab:     ['overview', 'dashboard', 'history', 'api', 'export'],
+  tab:     ['overview', 'people', 'dashboard', 'history', 'api', 'export', 'settings'],
   lang:    ['de', 'en', 'fr', 'it'],
   scale:   ['year', 'quarter', 'month'],
   unit:    ['pct', 'fte'],
   view:    ['pensum', 'pensum-termine', 'termine', 'custom'],   // «both» in old links
   colour:  ['pensum', 'none'],
   sortDir: ['asc', 'desc'],
-  group:   ['portfolio', 'lead', 'phase', 'organisation', 'none'],
-  bi:      ['general', 'people'],
+  group:   ['portfolio', 'lead', 'phase', 'organisation', 'size', 'none'],
   paper:   ['a4', 'a3', 'a2', 'a1', 'a0'],
   zoom:    ['fit', '50', '100', '200', '400'],
   sheet:   ['portrait', 'landscape'],
@@ -62,7 +61,7 @@ const DEFAULT_STATE = {
   colour: 'pensum',        // see VOCAB.colour
   sort: 'project',         // any key in SORT_KEYS, or q0…q7 for one quarter
   sortDir: 'asc',          // asc | desc
-  group: 'none',           // portfolio | lead | phase | organisation | none
+  group: 'none',           // portfolio | lead | phase | organisation | size | none
   search: '',
   phases: [],              // selected main phase ids, e.g. ['3','5']
   leads: [],               // selected person ids
@@ -78,6 +77,7 @@ const DEFAULT_STATE = {
   draft: 0,
   reason: '',
   overrides: {},           // 'projectId:q' -> value
+  settingsDraft: null,     // setting key -> text typed on the Einstellungen page, not yet saved
   /*
    * The session. Access itself is eIAM's business — this only models what the
    * application does on either side of it, which is the part a reader of the
@@ -97,11 +97,10 @@ const DEFAULT_STATE = {
   menuSearch: '',          // filter inside the open dropdown
   modal: null,             // { type: 'project'|'rebook', ... }
   footDetails: false,
-  bi: 'general',           // dashboard section, see VOCAB.bi
   zoom: 'fit',             // print preview, see VOCAB.zoom
   page: 1,                 // change log, 1-based
   pageSize: '25',          // see VOCAB.pageSize
-  pSort: 'peak',           // person table: name | organisation | employment | projects | peak | q0…q7
+  pSort: 'peak',           // person table: name | organisation | employment | share | projects | peak | q0…q7
   pDir: 'desc',
   searchOpen: false,
   collapsedGroups: {},
@@ -289,9 +288,8 @@ const columnsDiffer = (set) =>
   Object.keys(COLUMN_DEFAULTS[set]).some(c => !!state.cols[set][c] !== COLUMN_DEFAULTS[set][c]);
 
 /*
- * The dashboard's own settings: the person table's sort and each card's
- * order. `csort` lists only the cards that left their default, as
- * «card:by:dir».
+ * The person table's sort, and the order of each dashboard card. `csort`
+ * lists only the cards that left their default, as «card:by:dir».
  */
 const isPersonSort = v => /^q\d+$/.test(v) || Object.hasOwn(P_SORTS, v);
 
@@ -337,6 +335,8 @@ export function readUrl() {
      the combined view still opens the combined view. */
   if (p.get('tab') === 'schedule') { patch.tab = 'overview'; if (!p.has('view')) patch.view = 'termine'; }
   if (p.get('view') === 'both') patch.view = 'pensum-termine';
+  /* «Personen» was a section of the dashboard before it was a tab. */
+  if (p.get('tab') === 'dashboard' && p.get('bi') === 'people') patch.tab = 'people';
   /*
    * A named view brings its layers; «custom» reads them off the hash, and a
    * layer the hash does not name is off. Layers without a view resolve to
@@ -396,9 +396,8 @@ export function writeUrl({ push = false } = {}) {
   if (state.sort !== 'project') p.set('sort', state.sort);
   if (state.sortDir !== 'asc') p.set('dir', state.sortDir);
   if (state.group !== DEFAULT_STATE.group) p.set('group', state.group);
-  if (state.tab === 'dashboard' && state.bi !== 'general') p.set('bi', state.bi);
-  if (state.tab === 'dashboard' && state.pSort !== DEFAULT_STATE.pSort) p.set('psort', state.pSort);
-  if (state.tab === 'dashboard' && state.pDir !== DEFAULT_STATE.pDir) p.set('pdir', state.pDir);
+  if (state.tab === 'people' && state.pSort !== DEFAULT_STATE.pSort) p.set('psort', state.pSort);
+  if (state.tab === 'people' && state.pDir !== DEFAULT_STATE.pDir) p.set('pdir', state.pDir);
   if (state.tab === 'dashboard' && cardSortParam()) p.set('csort', cardSortParam());
   if (state.tab === 'history' && state.page > 1) p.set('page', String(state.page));
   if (state.tab === 'history' && state.pageSize !== '25') p.set('pageSize', state.pageSize);
@@ -535,8 +534,9 @@ export function deDate(iso) {
   return `${d}.${m}.${y}`;
 }
 
-export function fmtMio(v) {
-  return v == null ? '—' : v.toFixed(1).replace('.', ',') + ' Mio.';
+/** A credit in Mio. CHF. One decimal for a headline; two under the credit column, as its cells print. */
+export function fmtMio(v, digits = 1) {
+  return v == null ? '—' : v.toFixed(digits).replace('.', ',') + ' Mio.';
 }
 
 /* -----------------------------------------------------------------------------
@@ -587,14 +587,77 @@ export function personLoad(personId, q) {
 }
 
 /**
- * The same load against their own contract. The one place the unit changes.
- * `delta` is an edit not yet applied — the editor asks what the person would
- * be at — so that conversion happens here too and nowhere else.
+ * The share of a person's contract that may go to projects, in per cent. The
+ * rest is line and administrative work, and how much that is differs by unit
+ * — a project-management team keeps 20 % back, a portfolio manager may spend
+ * no more than 20 % on projects at all. So the figure sits on the
+ * organisation, and a person carries one only where theirs differs.
+ */
+export function projectShare(person) {
+  return person.projectShare ?? data.organisationsById[person.organisation]?.projectShare ?? 100;
+}
+
+/** What a person can carry in projects: the contract times that share. Pensum points. */
+export const projectCapacity = person => person.employment * projectShare(person) / 100;
+
+/**
+ * The same load against what the person can carry in projects — not against
+ * the whole contract, which nobody has free for projects. The one place the
+ * unit changes. `delta` is an edit not yet applied — the editor asks what the
+ * person would be at — so that conversion happens here too and nowhere else.
  */
 export function personUtilisation(personId, q, delta = 0) {
   const person = data.peopleById[personId];
   if (!person) return null;
-  return Math.round((personLoad(personId, q) + delta) / person.employment * 100);
+  return Math.round((personLoad(personId, q) + delta) / projectCapacity(person) * 100);
+}
+
+/* -----------------------------------------------------------------------------
+   Global settings — the few rules of the plan that hold for everyone
+   -------------------------------------------------------------------------- */
+
+/*
+ * A setting is addressed by a key: «share:<organisation>» for a unit's project
+ * share, «small» for the line between a small project and a large one. The
+ * Einstellungen page keeps what is typed in state.settingsDraft, as text,
+ * until it is saved: a rule that re-rates every person at once is not applied
+ * per keystroke, and a half-typed «8» is not a value yet.
+ */
+export const settingKeys = () => [...data.meta.organisations.map(o => `share:${o.id}`), 'small'];
+
+/** The saved value of a setting. */
+export function settingValue(key) {
+  if (key === 'small') return data.meta.settings.smallProjectMio;
+  return data.organisationsById[key.slice('share:'.length)]?.projectShare ?? 100;
+}
+
+/** What its field shows: the text typed and not yet saved, or the saved value. */
+export const settingText = key =>
+  state.settingsDraft?.[key] ?? String(settingValue(key)).replace('.', ',');
+
+/**
+ * The typed text as a value, or null where it is not one the setting can take:
+ * a share is a whole per cent from 1 to 100 — at 0 nobody in the unit could
+ * carry a project and every load would divide by nothing — and the line is an
+ * amount above zero.
+ */
+export function settingTyped(key) {
+  const raw = settingText(key).trim().replace(',', '.');
+  if (!/^\d+(\.\d+)?$/.test(raw)) return null;
+  const n = Number(raw);
+  if (key === 'small') return n > 0 ? n : null;
+  return Number.isInteger(n) && n >= 1 && n <= 100 ? n : null;
+}
+
+/** The settings whose typed value differs from the saved one — or null while any field is not a value. */
+export function settingChanges() {
+  const out = [];
+  for (const key of settingKeys()) {
+    const to = settingTyped(key);
+    if (to === null) return null;
+    if (to !== settingValue(key)) out.push({ key, from: settingValue(key), to });
+  }
+  return out;
 }
 
 /* -----------------------------------------------------------------------------
@@ -666,6 +729,28 @@ export function heatStep(v) {
 }
 
 /**
+ * Heat step for a person's utilisation. It runs to 245 % and beyond, where the
+ * project ramp tops out at 120 — reused unchanged it put 64 % of the person
+ * table into its two darkest steps and flattened 120 % and 245 % into one
+ * blue. Same five tokens, own thresholds.
+ */
+export const personHeatStep = v => (v === 0 ? 0 : v <= 80 ? 1 : v <= 100 ? 2 : v <= 150 ? 3 : 4);
+
+/**
+ * What the person dialog's two fields say, as values: the contract in whole
+ * per cent, and the person's own project share — `undefined` where the field
+ * is empty, which means «as the unit has it». Null while either is not a
+ * value yet.
+ */
+export function personDraft({ employment, share }) {
+  const whole = (text, min) => (/^\d+$/.test(text.trim()) && Number(text) >= min && Number(text) <= 100
+    ? Number(text) : null);
+  const contract = whole(employment, 10);
+  const own = share.trim() === '' ? undefined : whole(share, 1);
+  return contract === null || own === null ? null : { employment: contract, share: own };
+}
+
+/**
  * Traffic light for the row's project lead: their worst quarter in the period
  * the table is showing.
  *
@@ -685,7 +770,7 @@ export function ampel(personId, range = windowQuarters()) {
   const pct = personUtilisation(personId, peak);
   const key = pct > 100 ? 'over' : pct >= 95 ? 'tight' : 'ok';
   const word = key === 'over' ? 'Überlast' : key === 'tight' ? 'knapp' : 'im Rahmen';
-  return { key, pct, peak, word, title: `${person.name}: ${pct} % der Anstellung in ${data.quarters[peak].label} — ${word}` };
+  return { key, pct, peak, word, title: `${person.name}: ${pct} % der Projektkapazität in ${data.quarters[peak].label} — ${word}` };
 }
 
 /**
@@ -972,6 +1057,19 @@ export function sortProjects(list) {
   });
 }
 
+/*
+ * Where a small project ends and a large one begins: its credit, in Mio. CHF.
+ * Two buckets and no ladder between them — the question the office asks is how
+ * many of its projects are small. A project whose credit is still open is
+ * neither yet; counted as small it would inflate the one number the grouping
+ * is there to give, so it says «Kredit offen» instead.
+ *
+ * The line is a setting (meta.settings.smallProjectMio). `line` is for the
+ * Einstellungen page, which asks what a value still being typed would do.
+ */
+export const sizeOf = (p, line = data.meta.settings.smallProjectMio) =>
+  (p.credit == null ? 'open' : p.credit <= line ? 'small' : 'large');
+
 /** Group the filtered projects for the grid and the gantt. */
 export function groupProjects(list = filteredProjects()) {
   if (state.group === 'none') return [{ key: 'all', label: null, projects: list }];
@@ -980,9 +1078,16 @@ export function groupProjects(list = filteredProjects()) {
     if (state.group === 'lead') return p.leadId ?? 'none';
     if (state.group === 'phase') return p.phase;
     if (state.group === 'organisation') return p.organisation ?? 'none';
+    if (state.group === 'size') return sizeOf(p);
     return p.portfolio;
   };
   const labelOf = key => {
+    if (state.group === 'size') {
+      if (key === 'open') return `(${t('Kredit offen')})`;
+      const small = key === 'small';
+      const line = String(data.meta.settings.smallProjectMio).replace('.', ',');
+      return `${t(small ? 'Kleinprojekte' : 'Grossprojekte')} ${t(small ? 'bis' : 'über')} ${line} ${t('Mio. CHF')}`;
+    }
     if (state.group === 'lead') {
       return key === 'none' ? `(${t('nicht zugewiesen')})` : (data.peopleById[key]?.name ?? key);
     }
@@ -1009,7 +1114,9 @@ export function groupProjects(list = filteredProjects()) {
       ? data.phases.eppm.map(e => e.id)
       : state.group === 'organisation'
         ? [...data.meta.organisations.map(o => o.id), 'none']
-        : data.meta.portfolios.map(p => p.id);
+        : state.group === 'size'
+          ? ['small', 'large', 'open']
+          : data.meta.portfolios.map(p => p.id);
 
   return order
     .filter(k => buckets.has(k))
@@ -1087,7 +1194,7 @@ export function notifications() {
     out.push({
       key: 'load', mark: 'over',
       title: 'Ihre Auslastung',
-      text: `${load[firstOver]} % ${t('der Anstellung')} · ${t('Überlast in')} `
+      text: `${load[firstOver]} % ${t('der Projektkapazität')} · ${t('Überlast in')} `
         + `${load.filter(v => v > 100).length} ${t('Quartalen')}`,
       meta: data.quarters[firstOver].label,
       act: 'filter-lead', val: me
@@ -1185,8 +1292,8 @@ export function pageOf(rows) {
 
 /**
  * Everything the person table shows, in one place: the load a person carries in
- * each period against their own contract, plus the peak — which is the answer a
- * single quarter cannot give.
+ * each period against their own project capacity, plus the peak — which is the
+ * answer a single quarter cannot give.
  */
 export function personRows() {
   const cols = periods();
@@ -1196,7 +1303,7 @@ export function personRows() {
        220 % for the same person in the same session. */
     const load = data.quarters.map((_, q) => personLoad(person.id, q));
     const values = cols.map(col =>
-      Math.round(periodValue(load, col) / person.employment * 100));
+      Math.round(periodValue(load, col) / projectCapacity(person) * 100));
     const leads = projectsOf(person.id).length;
     return {
       person, values, load, leads,
@@ -1228,6 +1335,7 @@ export const P_SORTS = {
   name: r => r.person.name,
   organisation: r => data.organisationsById[r.person.organisation]?.label ?? '',
   employment: r => r.person.employment,
+  share: r => projectShare(r.person),
   projects: r => r.leads,
   peak: r => r.peak ?? -1
 };
