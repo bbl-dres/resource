@@ -5,10 +5,10 @@
    ============================================================================= */
 
 import {
-  data, state, t, fmtMio, totals, loadStatus, cellValue,
+  data, state, t, num, unitSuffix, fmtMio, totals, loadStatus, cellValue, heatStep,
   filteredProjects, visibleChanges,
   periods, periodValue, personRows, sortPersonRows, groupPeople, pageOf, chartTone, nowIndex, compareDe,
-  projectShare, projectCapacity, personHeatStep
+  projectShare, projectCapacity, personHeatStep, rolesOf, roleOf, segAt, holdSpan
 } from './store.js';
 import { card } from './views-overview.js';
 
@@ -87,7 +87,9 @@ const PERSON_COLS = [
   /* How much of that contract may go to projects — the ceiling the figures
      to the right are measured against. */
   { key: 'share', token: '--person-col-share' },
-  { key: 'projects', token: '--person-col-projects' },
+  /* «Projekte» became «Rollen»: the rows a person folds open to are one per
+     role, and a person can hold two on one project. Same width. */
+  { key: 'roles', token: '--person-col-projects' },
   { key: 'peak', token: '--person-col-peak' }
 ];
 
@@ -142,7 +144,7 @@ function personSection() {
     ${personHead('employment', t('Anstellung'), sticky, 'pcell--num align-end')}
     ${personHead('share', t('Projektanteil'), sticky, 'pcell--num align-end',
       t('Anteil der Anstellung, der für Projekte eingesetzt werden darf'))}
-    ${personHead('projects', t('Projekte'), sticky, 'pcell--num align-end')}
+    ${personHead('roles', t('Rollen'), sticky, 'pcell--num align-end')}
     ${personHead('peak', t('Spitze'), sticky, 'pcell--num align-end', t('Höchste Auslastung im sichtbaren Zeitraum'))}
     ${cols.map((col, i) => personHead(`q${i}`, col.short,
       sticky, `pcell--num pcell--period align-center ${col.isNow ? 'is-today' : ''} ${yearRule(col)}`,
@@ -150,30 +152,68 @@ function personSection() {
       col.isNow ? `${t('Heute')}, ${data.meta.todayLabel} — ${t('laufendes Quartal')}` : col.label))}
   </div>`;
 
+  /*
+   * A person's row folds open to the roles they hold, one lane per role and
+   * project, with the role's pensum in the quarters the person carries it and
+   * a blank where somebody else does — the same shape as a project row on
+   * Planung, read from the other side. The whole row is the switch; the name
+   * opens the dialog.
+   */
+  const personLanes = r => rolesOf(r.person.id).map(({ project: p, role: ro }) => {
+    const label = t(roleOf(ro.role).label);
+    const when = holdSpan(ro, r.person.id);
+    return html`<div class="prow prow--lane" style="grid-template-columns:${raw(tpl)}">
+      <div style="grid-column:span ${span}" class="lane__label is-frozen"
+           title="${label} · ${p.title}${when ? ` · ${when}` : ''}">
+        <span class="lane__role">${label}</span>
+        <span class="lane__num">${p.number}</span>
+        <button type="button" class="linkbtn lane__project" data-act="open-project" data-val="${p.id}">${p.title}</button>
+        ${when && html`<span class="lane__note">${when}</span>`}
+      </div>
+      ${cols.map(col => {
+        const s = segAt(ro, col.quarters[0]);
+        if (!s || s.p !== r.person.id) {
+          return html`<span class="pcell pcell--lanev is-empty ${yearRule(col)}"
+            title="${t('Rolle in diesem Quartal nicht bei dieser Person')}"></span>`;
+        }
+        const v = periodValue(ro.demand, col);
+        return html`<span class="pcell pcell--val pcell--lanev heat-${heatStep(v)} ${yearRule(col)}"
+          title="${label} · ${p.title}, ${col.label}: ${num(v)}${unitSuffix()}">${num(v)}</span>`;
+      })}
+    </div>`;
+  });
+
   const personRow = r => {
     const org = data.organisationsById[r.person.organisation];
     const share = projectShare(r.person);
+    const open = !!state.openPeople[r.person.id];
     /* The ceiling in pensum points, which is what a sum of pensa is held against. */
     const capacity = String(Math.round(projectCapacity(r.person) * 10) / 10).replace('.', ',');
-    return html`<div class="prow" style="grid-template-columns:${raw(tpl)}">
-      ${leadCell('name', 'pcell--title', html`<button type="button" class="prow__title"
+    const row = html`<div class="prow prow--project ${open ? 'is-open' : ''}" style="grid-template-columns:${raw(tpl)}"
+        data-act="toggle-person" data-val="${r.person.id}">
+      ${leadCell('name', 'pcell--title', html`<button type="button" class="rowcaret"
+          data-act="toggle-person" data-val="${r.person.id}" aria-expanded="${open}"
+          aria-label="${t('Rollen ein-/ausklappen')}: ${r.person.name}">
+          <span class="caret ${open ? '' : 'is-collapsed'}" aria-hidden="true">${icons.chevronDown()}</span>
+        </button><button type="button" class="prow__title"
           data-act="open-person" data-val="${r.person.id}"
           title="${t('Angaben zur Person öffnen')}">${r.person.name}</button>`)}
       ${leadCell('organisation', 'pcell--phase', org ? t(org.short) : '—', org ? t(org.label) : '')}
       ${leadCell('employment', 'pcell--target align-end', `${r.person.employment} %`)}
       ${leadCell('share', 'pcell--target align-end', `${share} %`,
         `${t('Für Projekte verfügbar')}: ${capacity} % (${share} % ${t('von')} ${r.person.employment} % ${t('Anstellung')})`)}
-      ${leadCell('projects', 'pcell--target align-end', r.leads || '—')}
+      ${leadCell('roles', 'pcell--target align-end', r.roles || '—')}
       ${leadCell('peak', `pcell--target align-end ${r.peak > 100 ? 'is-over' : ''}`,
         r.peak === null ? '—' : `${r.peak} %`)}
       ${cols.map((col, i) => {
         const v = r.values[i];
-        const label = r.leads ? `${v} %` : '—';
-        return html`<span class="pcell pcell--val ${r.leads ? `heat-${personHeatStep(v)}` : ''}
-            ${r.leads && v > 100 ? 'is-warn' : ''} ${yearRule(col)}"
+        const label = r.roles ? `${v} %` : '—';
+        return html`<span class="pcell pcell--val ${r.roles ? `heat-${personHeatStep(v)}` : ''}
+            ${r.roles && v > 100 ? 'is-warn' : ''} ${yearRule(col)}"
             title="${r.person.name}, ${col.label}: ${label} ${t('der Projektkapazität')}">${label}</span>`;
       })}
     </div>`;
+    return open ? html`${row}${personLanes(r)}` : row;
   };
 
   const sumRow = (label, note, list, cls = '') => html`<div class="prow prow--sum ${cls}"

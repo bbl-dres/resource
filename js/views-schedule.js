@@ -54,12 +54,20 @@ export function todayFraction(cols) {
  * the same four groups by hand, and filtered the bar groups by their German
  * label.
  */
-export function planLegend({ layers, coloured: on, legend, cls = '' }) {
+export function planLegend({ layers, coloured: on, legend, staffing = false, cls = '' }) {
   return legendBlock([
     {
       label: 'Pensum',
       items: on
         ? legend.steps.map(s => legendItem(html`<span class="legend__swatch heat-${s.step}"></span>`, s.label))
+        : null
+    },
+    {
+      /* The chips of a folded-open row. On screen only: paper has no rows to fold. */
+      label: 'Besetzung',
+      items: staffing
+        ? html`${legendItem(html`<span class="legend__swatch is-open-role"></span>`, 'Rolle offen')}
+          ${legendItem('', 'Chip = Person · Pensum in Punkten')}`
         : null
     },
     {

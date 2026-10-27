@@ -95,11 +95,35 @@ arrangement — figures over a strip, the strip alone at the bar plan's height,
 no strip at all — is arithmetic on the pair. An earlier draft wrote each one
 out as its own rule, and every new switch multiplied the ones already there.
 
-**Assigning a person is a popover on the cell, and the pick is the commit.** A
-single-select list has nothing to confirm; the change is logged like any
-other. The list is ordered by free capacity, because capacity is why one name
-is right and another is wrong. The rebooking dialog, which moves an amount
-over a period, keeps its form and its button.
+**A project carries roles, and the Bearbeitender is a reading of them.** Up
+to four — Bearbeitender, Stv. Bearbeitender, Bauleitung, Fachplanung, the
+catalogue in `data/roles.json` — each with a pensum per quarter and the
+person holding it, who may change at a quarter boundary while the pensum
+stays with the role. The project's demand is the sum over its roles; the
+Bearbeitender column, the organisation and every per-person load are derived
+from the segments (`leadId` is a getter, `personLoad()` an index) and are
+never written as fields, so a handover cannot leave a stale assignee behind.
+Asked for by the users in the September wireframe
+(`docs/wireframes/260910_Planung-kombiniert.html`, screens 3a/3b); the
+fixed-lane variant 3b is what is built, because it maps one role to one row
+and the eye finds Bauleitung in the same place under every project.
+
+**The lanes are the same four under every project, in the catalogue's order.**
+A role ePPM does not foresee for the project is an empty, greyed lane, not a
+missing one: a slot in it is how the role is added. The project row stays
+what it was — the sum, the heat colour, the band — and is the switch that
+folds the lanes open; the chips read as the split of that sum.
+
+**Staffing a role is a popover on its chip, for the quarter the chip stands
+in.** It sets the person from that quarter on and the pensum of that quarter,
+in one apply, logged as one entry per half. A different name on a planned
+role is a handover and asks for a reason, as an overload does; planning a
+role afresh asks for none. The list is ordered by free capacity, because
+capacity is why one name is right and another is wrong, with the current
+holder first and «Rolle offen lassen» last. The rebooking dialog is gone:
+moving work to somebody else is a handover on the chip of the quarter it
+takes effect from, and the pensum travels with the role rather than being
+carved off it.
 
 **The search has one matcher, and the cells mark what it matched.** The
 filter and the highlight read the same `searchMatcher()` in `store.js`, which
@@ -254,9 +278,11 @@ this” never goes into the URL.
 
 Carried over from `docs/archive/GAP-ANALYSIS.md`; neither is decided.
 
-- **Split allocations.** Rebooking moves the lead of a whole project. A real
-  implementation would split the allocation into two person-level rows for the
-  overlapping quarters. The prototype does the simple thing and says so.
+- **Split allocations.** Settled by the roles: a project's work is split into
+  roles with a person each, and a handover splits a role's run at a quarter
+  boundary. What is still open is whether one role can be shared by two
+  people in the same quarter — the model holds one holder per role and
+  quarter, and the wireframe does not ask for more.
 - **What “Personen über 100 %” counts.** Currently: anyone whose utilisation
   exceeds 100 in the *current* quarter. Whether it should mean “in any quarter of
   the window” changes the number materially on a forty-quarter horizon, and the

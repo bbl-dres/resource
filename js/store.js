@@ -8,7 +8,7 @@
    ============================================================================= */
 
 const DATA_FILES = [
-  'meta', 'phases', 'people', 'capacity', 'projects',
+  'meta', 'phases', 'roles', 'people', 'capacity', 'projects',
   'milestones', 'changes', 'dashboard', 'i18n', 'print'
 ];
 
@@ -71,12 +71,21 @@ const DEFAULT_STATE = {
   // column / attribute toggles, one set per grid — see columnSet()
   cols: null,              // filled from COLUMN_DEFAULTS below
   hideZeros: false,        // in the URL as zeros=hide
-  // editing
-  editing: null,           // { projectId, q }
-  picking: null,           // { projectId, anchor, search } — the Bearbeitender picker
+  /*
+   * Editing. A role is staffed on its chip: the popover carries the project,
+   * the role and the quarter it was opened on, the person chosen and the
+   * search typed into the list; the pensum being stepped and the reason sit
+   * beside it, as they did for the cell editor before it. An edit is written
+   * into the data the moment it is applied — the prototype has nothing to
+   * save to — and `edited` remembers which chips were touched this session,
+   * so the grid can mark them.
+   */
+  staffing: null,          // { projectId, role, q, anchor, search, target }
   draft: 0,
   reason: '',
-  overrides: {},           // 'projectId:q' -> value
+  edited: {},              // 'projectId:role:q' -> true
+  openRoles: {},           // projectId -> true, a project row folded open to its roles
+  openPeople: {},          // personId -> true, a person row folded open to their roles
   settingsDraft: null,     // setting key -> text typed in the Einstellungen dialog, not yet saved
   /*
    * The session. Access itself is eIAM's business — this only models what the
@@ -100,7 +109,7 @@ const DEFAULT_STATE = {
   zoom: 'fit',             // print preview, see VOCAB.zoom
   page: 1,                 // change log, 1-based
   pageSize: '25',          // see VOCAB.pageSize
-  pSort: 'peak',           // person table: name | organisation | employment | share | projects | peak | q0…q7
+  pSort: 'peak',           // person table: name | organisation | employment | share | roles | peak | q0…q7
   pDir: 'desc',
   searchOpen: false,
   collapsedGroups: {},
@@ -121,8 +130,8 @@ const DEFAULT_STATE = {
  * It is one click away in the Ansicht menu.
  */
 const COLUMN_DEFAULTS = {
-  overview: { title: true, phase: false, lead: true, credit: true, portfolio: false, organisation: false },
-  schedule: { title: true, phase: false, lead: false, credit: false, portfolio: false, organisation: false }
+  overview: { title: true, phase: false, lead: true, roles: true, credit: true, portfolio: false, organisation: false },
+  schedule: { title: true, phase: false, lead: false, roles: false, credit: false, portfolio: false, organisation: false }
 };
 
 export const state = {
@@ -234,7 +243,7 @@ export function setState(patch, opts = {}) {
 
 /* Every transient layer closed at once — spread into any patch that opens a
    new one, so a dialog cannot open over a live popover. */
-export const OVERLAYS_CLOSED = { menu: null, modal: null, editing: null, picking: null };
+export const OVERLAYS_CLOSED = { menu: null, modal: null, staffing: null };
 
 /** Close every transient overlay. Used by Escape and by outside-clicks. */
 export function closeOverlays() {
@@ -360,7 +369,10 @@ export function readUrl() {
   patch.searchOpen = patch.search !== '';   // a link with a query opens the field
   patch.cols = readColumns(p, list);
   patch.hideZeros = p.get('zeros') === 'hide';
-  patch.pSort = isPersonSort(p.get('psort') ?? '') ? p.get('psort') : DEFAULT_STATE.pSort;
+  /* «Projekte» became «Rollen» when a person came to hold several on one
+     project; a link sorted by the old column sorts by the new one. */
+  const psort = p.get('psort') === 'projects' ? 'roles' : (p.get('psort') ?? '');
+  patch.pSort = isPersonSort(psort) ? psort : DEFAULT_STATE.pSort;
   patch.pDir = p.get('pdir') === 'asc' ? 'asc' : DEFAULT_STATE.pDir;
   patch.cardSort = readCardSort(p);
   patch.phases = list('phase');
@@ -433,24 +445,38 @@ export async function load() {
 
   // Index lookups used all over the views.
   data.peopleById = Object.fromEntries(data.people.map(p => [p.id, p]));
+  data.rolesById = Object.fromEntries(data.roles.roles.map(r => [r.id, r]));
+  data.quarters = data.meta.quarters;
+  data.quarterIndex = Object.fromEntries(data.quarters.map((q, i) => [q.id, i]));
   /*
-   * A project's organisation is its assignee's: people belong to a unit, and
-   * a project follows the person who carries it. The join is a getter so that
-   * every reader of `p.organisation` — column, filter, grouping, the cards,
-   * the export — sees the same answer, and a re-assignment moves the project
-   * without anyone writing the field. Unassigned means no organisation.
+   * Three readings of a project's roles, as getters, so every consumer sees
+   * the same answer and a staffing change moves them without anyone writing
+   * a field. The Bearbeitender is whoever holds that role in the current
+   * quarter; a project is unassigned while nobody does; and its organisation
+   * is that person's — people belong to a unit, and a project follows the
+   * person who carries it, so a project with no lead has no unit. The demand
+   * is the sum over the roles, kept as a plain array because the sorts, the
+   * totals and the export read it some thousand times a render.
    */
   for (const p of data.projects) {
+    p.roles ??= [];
+    recomputeDemand(p);
+    Object.defineProperty(p, 'leadId', {
+      enumerable: false, configurable: true,
+      get() { return holderAt(this, 'pl', nowIndex()); }
+    });
+    Object.defineProperty(p, 'unassigned', {
+      enumerable: false, configurable: true,
+      get() { return !this.leadId; }
+    });
     Object.defineProperty(p, 'organisation', {
-      enumerable: true,
+      enumerable: true, configurable: true,
       get() { return data.peopleById[this.leadId]?.organisation ?? null; }
     });
   }
   data.projectsById = Object.fromEntries(data.projects.map(p => [p.id, p]));
   data.portfoliosById = Object.fromEntries(data.meta.portfolios.map(p => [p.id, p]));
   data.organisationsById = Object.fromEntries(data.meta.organisations.map(o => [o.id, o]));
-  data.quarters = data.meta.quarters;
-  data.quarterIndex = Object.fromEntries(data.quarters.map((q, i) => [q.id, i]));
 
   // Grouped once here rather than scanned per row in four different views.
   data.milestonesByProject = groupBy(data.milestones.items, m => m.projectId);
@@ -458,17 +484,153 @@ export async function load() {
   return data;
 }
 
-/*
- * The projects a person leads. Derived per change of state rather than
- * indexed once at load: the picker and the rebooking move a lead, and an
- * index built at boot went on attributing that project's edits to the person
- * who used to have it.
- */
-const leadIndex = memo(() => groupBy(data.projects, p => p.leadId ?? 'none'));
-export const projectsOf = personId => leadIndex()[personId] ?? [];
-
 /** The quarter that is «now» — the horizon happens to start there, but no view should count on it. */
 export const nowIndex = () => data.quarterIndex[data.meta.todayQuarter] ?? 0;
+
+/* -----------------------------------------------------------------------------
+   Roles — who carries what on a project, quarter by quarter
+
+   A project carries up to four roles, the ones data/roles.json names. Each is
+   { role, demand[], segs[] }: a pensum per quarter, and the segments of
+   quarters [from, to) with the person who holds the role then — null for a
+   role that is planned and open. A person may change at a quarter boundary;
+   the pensum stays with the role. Everything the app used to read off a
+   single assignee is a reading of these.
+   -------------------------------------------------------------------------- */
+
+/** The role catalogue, in the order the lanes are drawn. */
+export const roleCatalog = () => data.roles.roles;
+
+/** A role by id. An unknown id returns a stand-in rather than undefined, like eppmOf. */
+export const roleOf = id => data.rolesById[id] ?? { id: String(id), label: String(id), short: String(id) };
+
+/** The project's entry for a role, or null where ePPM does not foresee it. */
+export const roleOn = (p, roleId) => p.roles.find(r => r.role === roleId) ?? null;
+
+/** The segment of a role that covers a quarter, or null between runs. */
+export const segAt = (r, q) => r.segs.find(s => s.from <= q && q < s.to) ?? null;
+
+/** Who holds a role on a project in a quarter: a person id, or null for open and for none. */
+export function holderAt(p, roleId, q) {
+  const r = roleOn(p, roleId);
+  const s = r && segAt(r, q);
+  return s ? s.p : null;
+}
+
+/** Does the person hold any role on the project, at any time in the window? */
+export const holdsRole = (p, personId) => p.roles.some(r => r.segs.some(s => s.p === personId));
+
+/** Is a role on the project open in a quarter — planned, with nobody to carry it? */
+export const openRoleAt = (p, q) => p.roles.some(r => { const s = segAt(r, q); return !!s && !s.p; });
+
+/** The people on the project in a quarter, as a set of ids. */
+export function holdersAt(p, q) {
+  const out = new Set();
+  for (const r of p.roles) {
+    const s = segAt(r, q);
+    if (s && s.p) out.add(s.p);
+  }
+  return out;
+}
+
+/** The project's demand is the sum over its roles. Called after every role edit. */
+export function recomputeDemand(p) {
+  p.demand = data.quarters.map((_, q) => p.roles.reduce((a, r) => a + (r.demand[q] || 0), 0));
+}
+
+/** A role the project did not have yet, in catalogue order, with nothing planned. */
+export function addRole(p, roleId) {
+  const r = { role: roleId, demand: data.quarters.map(() => 0), segs: [] };
+  const order = roleCatalog().map(x => x.id);
+  p.roles.push(r);
+  p.roles.sort((a, b) => order.indexOf(a.role) - order.indexOf(b.role));
+  return r;
+}
+
+/**
+ * Hand a role to somebody — or to nobody — from a quarter on. The pensum stays
+ * with the role: the segment that covers the quarter ends the quarter before,
+ * and the new holder carries the rest of it. Where no segment covers the
+ * quarter the role is being planned afresh, and the new segment runs to the
+ * next planned one or to the end of the window. Neighbouring segments held by
+ * the same person are joined, so a pick that changes nothing leaves no seam.
+ */
+export function setHolder(r, q, personId) {
+  const cur = segAt(r, q);
+  const next = r.segs.filter(s => s.from > q).sort((a, b) => a.from - b.from)[0];
+  const to = cur ? cur.to : (next ? next.from : data.quarters.length);
+  const kept = r.segs.filter(s => s !== cur).map(s => ({ ...s }));
+  if (cur && cur.from < q) kept.push({ ...cur, to: q });
+  kept.push({ p: personId, from: q, to });
+  kept.sort((a, b) => a.from - b.from);
+  const merged = [];
+  for (const s of kept) {
+    const last = merged.at(-1);
+    if (last && last.to === s.from && last.p === s.p) last.to = s.to;
+    else merged.push(s);
+  }
+  r.segs = merged;
+}
+
+/*
+ * Who holds what, indexed per person and recomputed per change of state: a
+ * staffing change moves a role, and an index built at boot went on
+ * attributing that role's load to the person who used to have it.
+ */
+const assignmentIndex = memo(() => {
+  const out = {};
+  for (const p of data.projects) {
+    for (const r of p.roles) {
+      const seen = new Set();
+      for (const s of r.segs) {
+        if (!s.p || seen.has(s.p)) continue;
+        seen.add(s.p);
+        (out[s.p] ??= []).push({ project: p, role: r });
+      }
+    }
+  }
+  return out;
+});
+
+/** The roles a person holds at any time in the window, as { project, role } pairs. */
+export const rolesOf = personId => assignmentIndex()[personId] ?? [];
+
+/** The projects a person is on, in any role. */
+export const projectsOf = personId => [...new Set(rolesOf(personId).map(a => a.project))];
+
+/**
+ * When a person holds a role, as the quarters of their segments: «ab
+ * Q3/2027», «bis Q1/2027», a span of both, or nothing at all when they hold
+ * it for the whole window — the common case, which needs no note.
+ */
+export function holdSpan(r, personId) {
+  const mine = r.segs.filter(s => s.p === personId);
+  if (!mine.length) return '';
+  const from = Math.min(...mine.map(s => s.from));
+  const to = Math.max(...mine.map(s => s.to));
+  const label = i => data.quarters[i].label;
+  if (from === 0 && to === data.quarters.length) return '';
+  if (to === data.quarters.length) return `${t('ab')} ${label(from)}`;
+  if (from === 0) return `${t('bis')} ${label(to - 1)}`;
+  return `${label(from)} – ${label(to - 1)}`;
+}
+
+/**
+ * The people to choose from for a role in a quarter: the one holding it now
+ * first, then the rest by how much room they have in that quarter — capacity
+ * is why one name is right and another is wrong. `free` is in pensum points
+ * and goes negative for somebody already over their ceiling.
+ */
+export function staffCandidates(q, currentId = null) {
+  const list = data.people.map(person => ({
+    person, free: Math.round(projectCapacity(person) - personLoad(person.id, q))
+  }));
+  return list.sort((a, b) => {
+    if (a.person.id === currentId) return -1;
+    if (b.person.id === currentId) return 1;
+    return b.free - a.free || compareDe(a.person.name, b.person.name);
+  });
+}
 
 /** Bucket a list by a key, preserving the order within each bucket. */
 function groupBy(list, keyOf) {
@@ -540,50 +702,52 @@ export function fmtMio(v, digits = 1) {
 }
 
 /* -----------------------------------------------------------------------------
-   Derived: pensum values with pending edits applied
+   Derived: pensum values, and the marks of this session's edits
    -------------------------------------------------------------------------- */
 
-export function cellValue(project, q) {
-  const o = state.overrides[`${project.id}:${q}`];
-  return o === undefined ? project.demand[q] : o;
-}
+/*
+ * An edit is written into the roles the moment it is applied, and the
+ * project's demand is recomputed from them, so a cell's value is simply the
+ * demand. The two accessors stay, because forty call sites read through them
+ * and the name says what is being read.
+ */
+export const cellValue = (project, q) => project.demand[q];
+export const projectDemand = project => project.demand;
 
-export function projectDemand(project) {
-  return project.demand.map((_, q) => cellValue(project, q));
-}
+/** Was this chip touched in the session? The grid underlines it. */
+export const roleEdited = (project, roleId, q) => !!state.edited[`${project.id}:${roleId}:${q}`];
 
-export function isEdited(project, q) {
-  return state.overrides[`${project.id}:${q}`] !== undefined;
-}
+/** Was any role of the project touched in the quarter? The folded row carries the mark. */
+export const isEdited = (project, q) => project.roles.some(r => roleEdited(project, r.role, q));
 
 /*
- * How loaded a person is, in three steps, and the unit changes exactly once.
+ * How loaded a person is, in two steps, and the unit changes exactly once.
  *
- * A pensum point is a point of one project's demand. person.baseLoad is the sum
- * of those over the projects they lead, so loadDelta must be in the same unit —
- * it converted to utilisation points first, and personUtilisation then divided
- * by the contract a second time. For the nine part-time leads every edited
- * figure came out wrong: an 80 % lead taking on 20 more points read 138 %
- * instead of 131 %, which armed the over-capacity gate on a cell that was not
- * over capacity.
+ * A pensum point is a point of one role's demand. A person's load in a quarter
+ * is the sum of those over the roles they hold then — derived from the
+ * projects per change of state, never carried on the person, so a staffing
+ * change or a stepped pensum moves it without a second figure to keep in
+ * step. Indexed once per change for everyone: asked per person and quarter
+ * it walked the whole portfolio two thousand times a render.
  */
-
-/** A person's unsaved edits, summed. In pensum points, like baseLoad. */
-export function loadDelta(personId, q) {
-  if (!data.peopleById[personId]) return 0;
-  let delta = 0;
-  for (const p of projectsOf(personId)) {
-    const o = state.overrides[`${p.id}:${q}`];
-    if (o !== undefined) delta += o - p.demand[q];
+const loadIndex = memo(() => {
+  const out = {};
+  for (const p of data.projects) {
+    for (const r of p.roles) {
+      for (const s of r.segs) {
+        if (!s.p) continue;
+        const row = (out[s.p] ??= data.quarters.map(() => 0));
+        for (let q = s.from; q < s.to; q++) row[q] += r.demand[q] || 0;
+      }
+    }
   }
-  return delta;
-}
+  return out;
+});
 
-/** A person's booked pensum in a quarter, including unsaved edits. Pensum points. */
+/** A person's booked pensum in a quarter. Pensum points. */
 export function personLoad(personId, q) {
-  const person = data.peopleById[personId];
-  if (!person) return null;
-  return Math.round(person.baseLoad[q] + loadDelta(personId, q));
+  if (!data.peopleById[personId]) return null;
+  return Math.round(loadIndex()[personId]?.[q] ?? 0);
 }
 
 /**
@@ -823,19 +987,29 @@ export const searchMatcher = memo(() => {
 /** The projects in scope, filtered and sorted — once per change of state. */
 export const filteredProjects = memo(() => {
   const match = searchMatcher();
+  const now = nowIndex();
   const list = data.projects.filter(p => {
     if (state.phases.length && !state.phases.includes(p.phase)) return false;
+    /*
+     * A person is on a project in any role, at any time in the window: the
+     * filter answers «where is this person planned», which the lead column
+     * alone no longer does. «nicht zugewiesen» is a role that is open now.
+     */
     if (state.leads.length) {
-      const key = p.leadId ?? 'none';
-      if (!state.leads.includes(key)) return false;
+      const hit = state.leads.some(id => (id === 'none' ? openRoleAt(p, now) : holdsRole(p, id)));
+      if (!hit) return false;
     }
     if (state.portfolios.length && !state.portfolios.includes(p.portfolio)) return false;
     if (state.organisations.length && !state.organisations.includes(p.organisation)) return false;
     if (match) {
       /* The words the cells show, translated: in English «unassigned» has to
-         find the rows without a lead, and the mark has to land on what matched. */
-      const lead = data.peopleById[p.leadId]?.name ?? t('nicht zugewiesen');
-      const hay = `${p.title} ${p.number} ${lead} ${p.kind}`;
+         find the rows with an open role, and the mark has to land on what
+         matched. Every name on the project counts, not only the lead's — the
+         chips show them all. */
+      const names = [...new Set(p.roles.flatMap(r => r.segs.map(s => s.p)).filter(Boolean))]
+        .map(id => data.peopleById[id]?.name ?? '').join(' ');
+      const open = openRoleAt(p, now) ? t('nicht zugewiesen') : '';
+      const hay = `${p.title} ${p.number} ${names} ${open} ${p.kind}`;
       if (!match.test(hay)) return false;
     }
     return true;
@@ -1015,6 +1189,7 @@ export const SORT_KEYS = {
   project:   { label: 'Projekt', numeric: false, value: p => p.title },
   phase:     { label: 'Phase (ePPM)', numeric: false, value: p => eppmRank(p.phase) },
   lead:      { label: 'Bearbeitender', numeric: false, value: p => data.peopleById[p.leadId]?.name ?? '\uffff' },
+  roles:     { label: 'Rollen', numeric: true, value: p => p.roles.length },
   portfolio: { label: 'Teilportfolio', numeric: false, value: p => data.portfoliosById[p.portfolio]?.label ?? '' },
   organisation: { label: 'Organisation', numeric: false, value: p => data.organisationsById[p.organisation]?.label ?? '' },
   credit:    { label: 'Kredit CHF', numeric: true, value: p => p.credit ?? -1 }
@@ -1183,7 +1358,8 @@ export function toggleIn(key, id) {
  */
 export function notifications() {
   const me = data.meta.user.personId;
-  const mine = data.projects.filter(p => p.leadId === me);
+  /* Every project the reader has a role on, not only the ones they lead. */
+  const mine = data.projects.filter(p => holdsRole(p, me));
   const mineIds = new Set(mine.map(p => p.id));
   const out = [];
 
@@ -1303,10 +1479,13 @@ export function personRows() {
     const load = data.quarters.map((_, q) => personLoad(person.id, q));
     const values = cols.map(col =>
       Math.round(periodValue(load, col) / projectCapacity(person) * 100));
-    const leads = projectsOf(person.id).length;
+    /* How many roles, not how many projects: a person can be Bearbeitender
+       on one project and Bauleitung on three, and the rows under theirs
+       are one per role. */
+    const roles = rolesOf(person.id).length;
     return {
-      person, values, load, leads,
-      peak: leads ? Math.max(...values) : null,
+      person, values, load, roles,
+      peak: roles ? Math.max(...values) : null,
       now: values[0]
     };
   });
@@ -1335,7 +1514,7 @@ export const P_SORTS = {
   organisation: r => data.organisationsById[r.person.organisation]?.label ?? '',
   employment: r => r.person.employment,
   share: r => projectShare(r.person),
-  projects: r => r.leads,
+  roles: r => r.roles,
   peak: r => r.peak ?? -1
 };
 
@@ -1368,7 +1547,8 @@ export function kpis() {
   const credit = list.reduce((a, p) => a + (p.credit ?? 0), 0);
   const funded = list.filter(p => p.credit !== null).length;
   const ids = new Set(list.map(p => p.id));
-  const assigned = new Set(list.map(p => p.leadId).filter(Boolean)).size;
+  /* Everyone with a role on a project in scope this quarter, counted once. */
+  const assigned = new Set(list.flatMap(p => [...holdersAt(p, now)])).size;
   return [
     {
       label: 'Bauprojekte',

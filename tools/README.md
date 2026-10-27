@@ -140,18 +140,41 @@ in the quarter, a gate stood up to eleven weeks short of the bar it closes and
 read as a milestone inside the phase. The view draws the plan date, not the
 forecast; a late forecast is in the dialog and the dashboard, not on the bar.
 
+### Roles
+
+Every project's demand is split into roles last of all, after everything
+else has been drawn, so the portfolio, the team, the gates, the leads and the
+change log come out exactly as they did before roles existed — the draws the
+old per-person occupancy figures took are still taken and thrown away, for
+the same reason.
+
+`ROLE_SHARE` says what share of a project's demand each role carries in each
+Teilphase; the Bearbeitender takes the remainder, in steps of five, so the
+roles add up to the project's demand to the point. `ROLE_ODDS` decides
+whether a project has a Stellvertretung, a Bauleitung or a Fachplanung at
+all. A role holds a run of quarters with demand, one segment per run; the
+Bearbeitender keeps the project's assignee, the other roles go to whoever of
+the roster would carry them most lightly, peak against contract. Then some
+runs change hands at a quarter boundary — never in the current one — and
+some stay open, because a plan that shows no handover and no vacancy shows
+nothing the tool is for.
+
 ### What it writes
 
 `data/meta.json` (the quarter list only), `projects.json`, `people.json`,
 `capacity.json`, `milestones.json`, `dashboard.json`, `changes.json`. A person
-carries their organisation; a project does not — the app joins it on the
-assignee (see `docs/DATAMODEL.md`). The organisations in `meta.json` come from
-the generator's `TEAMS` table, each with its `projectShare`; the generator
-writes that figure out but still sizes and balances the team against whole
+carries their organisation and no load; a project carries its roles and no
+assignee and no demand curve — the app derives all three (see
+`docs/DATAMODEL.md`). The organisations in `meta.json` come from the
+generator's `TEAMS` table, each with its `projectShare`; the generator writes
+that figure out but still sizes and balances the team against whole
 contracts.
 
+Files are written with LF line endings, like everything else in the
+repository.
+
 Everything else in `data/` is hand-written and untouched: `i18n.json`,
-`phases.json`, `print.json`, `openapi.json`.
+`phases.json`, `roles.json`, `print.json`, `openapi.json`.
 
 ### After a run
 

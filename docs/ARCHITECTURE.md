@@ -17,7 +17,7 @@ index.html
 css/tokens.css      design tokens, two layers
 css/main.css        everything else
 js/                 twelve modules, see below
-data/               eleven JSON files, seven of them generated
+data/               twelve JSON files, seven of them generated
 tools/              the portfolio generator; see tools/README.md
 ```
 
@@ -112,6 +112,22 @@ arrangement rule; change one of the two numbers.
 Colouring by pensum (`state.colour`) is a switch of its own and means nothing
 while the figures are hidden — `coloured()` is the one place that says so.
 
+### Roles
+
+A project carries up to four roles (`data/roles.json`), each with a pensum per
+quarter and the person holding it, who may change at a quarter boundary. The
+project row shows the sum and is the switch: folded open (`state.openRoles`),
+it grows one lane per role in the catalogue's order — `laneRows()` in
+`views-overview.js` — and every quarter of a lane is a chip with the person
+and the pensum. A chip opens the staffing popover (`staffPopover()`,
+`state.staffing`), which sets the person from that quarter on and the pensum
+of that quarter; the apply action in `app.js` writes into the roles and logs
+both halves. The Bearbeitender column, the organisation and the per-person
+load are readings of the roles — `leadId` is a getter, `personLoad()` an index
+built per change of state — so nothing is written twice. The Personen tab
+folds a person open the same way (`state.openPeople`), to one lane per role
+they hold. `docs/ROLES.md` maps the September wireframe to what is built.
+
 The chrome above the grid is measured for a 1366×768 laptop: one toolbar row
 carries the filters, the time steps and the «Ansicht» menu; the tabs share a
 line with the page actions; there is no breadcrumb bar and no page title.
@@ -168,8 +184,8 @@ applied silently.
 the per-person project index are memoised against that counter, so a list is
 computed once per change however many views ask for it in one render. Anything
 that changes what a derived list would say **without** going through
-`setState` — the search field, written per keystroke; a project's lead moved
-by the picker — calls `touch()`. Every value read back from the hash is validated against
+`setState` — the search field, written per keystroke; a role staffed by the
+popover — calls `touch()`. Every value read back from the hash is validated against
 `VOCAB`, a closed vocabulary — an unknown value falls back to the default rather
 than reaching a view.
 
@@ -242,13 +258,15 @@ carries meaning (WCAG 1.4.11), 24 px minimum target height.
 
 ## Data
 
-Seven of the eleven files in `data/` are generated — see `tools/README.md`.
-`i18n.json`, `phases.json`, `print.json` and `openapi.json` are hand-written.
+Seven of the twelve files in `data/` are generated — see `tools/README.md`.
+`i18n.json`, `phases.json`, `roles.json`, `print.json` and `openapi.json` are
+hand-written.
 
 Which file carries which fact, and how they join, is in `DATAMODEL.md`.
 
-Current fixtures: 111 projects, 50 people (4'540 % contracted), 40 quarters,
-323 milestones (40 undated, 57 late), 249 history entries, 7 sub-portfolios,
+Current fixtures: 111 projects carrying 270 roles (19 handovers, 13 open in
+the current quarter), 50 people (4'540 % contracted), 40 quarters, 323
+milestones (38 undated, 59 late), 249 history entries, 7 sub-portfolios,
 6 organisations, 8 projects without a lead.
 
 ## Checks

@@ -760,7 +760,9 @@ export function toolbar({ time = false, view = false, print = false, exclude = [
     <span class="toolbar__sep" aria-hidden="true"></span>
 
     ${dropdown({
-      id: 'lead', lead: icons.filter(), label: t('Bearbeitender'),
+      /* Plural: the filter finds a person in any role on a project, not
+         only the one the Bearbeitender column names. */
+      id: 'lead', lead: icons.filter(), label: t('Bearbeitende'),
       count: state.leads.length, width: 312,
       body: leadMenuBody
     })}

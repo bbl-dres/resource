@@ -2493,6 +2493,136 @@ button.pcell--val { cursor: pointer; }
 .assign__none { color: var(--color-text-muted); font-style: italic; }
 
 /* ==========================================================================
+   18a · Roles — the staffing matrix
+
+   A project row folds open to one lane per role, the same four lanes under
+   every project, and each quarter of a lane is a chip: the person, in short,
+   and the pensum, in the heat colour of its value. The whole project row is
+   the switch; the chips are the controls. The lanes borrow the grid's row
+   template, so a chip stands exactly under the figure it is a part of.
+   ========================================================================== */
+
+/* The row as a switch: the pointer says so, the caret says which way. */
+.prow--project { cursor: pointer; }
+.rowcaret {
+  display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto;
+  width: 22px; height: 22px; margin-left: calc(-1 * var(--space-2));
+  border: 0; border-radius: var(--radius-sm); background: none;
+  color: var(--color-text-secondary); cursor: pointer;
+}
+.rowcaret:hover { background: var(--color-surface-hover); color: var(--color-text-strong); }
+.prow--project .pcell--title { display: flex; align-items: center; gap: var(--space-2); }
+.prow--project .prow__title { flex: 1; width: auto; min-width: 0; line-height: var(--row-height); }
+.pcell--roles { padding-right: var(--space-4); color: var(--color-text-secondary); }
+
+/* The link that folds a whole group, beside its heading. */
+.pgrouphead { display: flex; align-items: center; gap: var(--space-5); }
+.pgrouphead__toggle { flex: 1; min-width: 0; width: auto; }
+.pgroup__expand {
+  display: inline-flex; align-items: center; gap: var(--space-2); flex: 0 0 auto;
+  font-size: var(--text-base); white-space: nowrap;
+}
+.pgroup__expand .caret { color: inherit; }
+.pgroup__tools { display: flex; justify-content: flex-end; padding-bottom: var(--space-6); }
+
+/* A lane: one row per role, a step shorter than a project row, its label
+   indented under the project name across the whole frozen block. No hover
+   fill — the chips answer the pointer, not the row. */
+.prow--lane { min-height: 30px; }
+.prow--lane:hover { --row-bg: var(--color-surface); }
+.prow--lane .is-frozen { left: 0; }
+.lane__label {
+  display: flex; align-items: center; gap: var(--space-4); min-width: 0;
+  padding: 0 var(--space-4) 0 34px;
+  font-size: var(--text-sm); color: var(--color-text-secondary);
+}
+.lane__label--project { padding-left: calc(var(--grid-col-id) + 34px); }
+.lane__label > span, .lane__label > .linkbtn { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lane__role { flex: 0 0 auto; font-weight: var(--font-semibold); color: var(--color-text); }
+.lane__num { flex: 0 0 auto; color: var(--color-text-muted); }
+.lane__project { font-size: var(--text-sm); font-weight: var(--font-regular); text-align: left; }
+.lane__note { flex: 0 0 auto; color: var(--color-text-muted); }
+/* A lane ePPM does not foresee for the project: there, but greyed. */
+.prow--lane.is-none .lane__label { color: var(--color-text-disabled); }
+
+.pcell--lane { align-self: stretch; padding: 3px var(--space-2); }
+.pcell--lane.is-today { background: var(--color-surface-sunken); }
+
+/* The chip. 24px tall, the least a pointer target may be; the name gives
+   way before the figure does. The heat classes paint it like a cell. */
+.rchip {
+  display: flex; align-items: center; gap: var(--space-2); flex: 1; min-width: 0;
+  height: var(--target-min); padding: 0 5px;
+  border: var(--border-hairline) solid transparent; border-radius: var(--radius-sm);
+  background: var(--color-surface); color: var(--color-text-body);
+  font: inherit; font-size: var(--text-xs); line-height: 1; text-align: left; cursor: pointer;
+}
+.rchip__name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rchip__val { flex: 0 0 auto; font-variant-numeric: tabular-nums; }
+.rchip:hover { filter: brightness(.93); }
+/* An open role: dashed, in the warning hue, the run's first chip tinted so
+   the eye finds where the gap begins. */
+.rchip.is-open {
+  border-style: dashed; border-color: var(--color-warn-solid);
+  background: var(--color-surface); color: var(--color-warn-fg); font-style: italic;
+}
+.rchip.is-open.is-start { background: var(--color-warn-bg-subtle); }
+.rchip.is-editing { box-shadow: var(--ring-cell-edit); }
+.rchip.is-edited { box-shadow: inset 0 -3px 0 var(--color-accent); }
+.rchip.is-editing.is-edited { box-shadow: var(--ring-cell-edit), inset 0 -3px 0 var(--color-accent); }
+/* An empty slot offers to plan the role, and says so only when pointed at. */
+.rchip--empty { justify-content: center; background: transparent; color: var(--color-text-subtle); }
+.rchip--empty .icon { opacity: 0; }
+.rchip--empty:hover, .rchip--empty:focus-visible, .rchip--empty.is-editing {
+  border-style: dashed; border-color: var(--color-border-emphasis); color: var(--color-text-secondary); filter: none;
+}
+.rchip--empty:hover .icon, .rchip--empty:focus-visible .icon, .rchip--empty.is-editing .icon { opacity: 1; }
+.grid-card.is-uncoloured .rchip:not(.is-open) { background: var(--color-surface); color: var(--color-text-body); }
+
+/* The person table's lanes: the role's pensum where the person holds it, a
+   blank where somebody else does. */
+.pcell--lanev { align-self: stretch; min-height: 30px; justify-content: center; font-size: var(--text-sm); }
+.pcell--lanev.is-empty { background: var(--heat-null-bg); }
+
+/* The legend's swatch for an open role: the chip, small. */
+.legend__swatch.is-open-role {
+  width: 22px; border: var(--border-hairline) dashed var(--color-warn-solid); border-radius: var(--radius-sm);
+  background: var(--color-warn-bg-subtle);
+}
+
+/* The staffing popover: the picker's width, the editor's parts. */
+.pop--staff { width: var(--pop-assign-width); }
+.pop--staff .dd__searchfield { margin: var(--space-2) 0 var(--space-4); }
+.pop__listlabel { margin-top: var(--space-6); font-size: var(--text-sm); font-weight: var(--font-semibold); color: var(--color-text-secondary); }
+.pop__stepper--labelled { margin-top: var(--space-2); }
+.staff__list { max-height: 168px; }
+.pop__warn.is-over { background: var(--color-danger-bg); border-color: var(--color-danger-border); color: var(--color-danger-fg); }
+/* A role planned afresh: a statement, not a warning, so it wears the frame's neutral. */
+.pop__warn.is-plan { background: var(--color-surface-frame); border-color: var(--color-border); color: var(--color-text-secondary); font-weight: var(--font-regular); }
+
+/* The project dialog's roles: a line per role, and the band of who holds it when. */
+.rolelist { display: flex; flex-direction: column; gap: var(--space-6); }
+.rolelist__head { display: flex; align-items: baseline; gap: var(--space-5); font-size: var(--text-sm); }
+.rolelist__role { flex: 0 0 auto; font-weight: var(--font-semibold); color: var(--color-text-strong); }
+.rolelist__holder { flex: 1; min-width: 0; color: var(--color-text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rolelist__holder.is-open { color: var(--color-warn-fg); font-style: italic; }
+.rolelist__now { flex: 0 0 auto; color: var(--color-text-muted); font-variant-numeric: tabular-nums; }
+.roleband { position: relative; height: 22px; margin-top: var(--space-2); border-radius: var(--radius-sm); background: var(--color-surface-alt); }
+.roleband__seg {
+  position: absolute; top: 0; bottom: 0; box-sizing: border-box;
+  display: flex; align-items: center; padding: 0 var(--space-3);
+  border: var(--border-hairline) solid var(--color-bar-border); border-radius: var(--radius-sm);
+  background: var(--color-bar-bg); color: var(--color-text-body);
+  font-size: var(--text-xs); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.roleband__seg.is-open { background: var(--pattern-no-lead); border-color: var(--color-warn-solid); color: var(--color-warn-fg); font-style: italic; }
+.roleband__axis { position: relative; height: 14px; font-size: var(--text-2xs); color: var(--color-text-muted); }
+.roleband__axis span { position: absolute; top: 0; padding-left: var(--space-2); border-left: var(--border-hairline) solid var(--color-border); line-height: 14px; }
+.modal__log--roles li { grid-template-columns: 110px 44px minmax(0, 1fr) 100px; align-items: center; }
+.modal__log--roles li > :last-child { text-align: right; font-variant-numeric: tabular-nums; }
+.modal__log--roles .linkbtn { font-size: var(--text-sm); font-weight: var(--font-regular); text-align: left; }
+
+/* ==========================================================================
    19 · One row for the projects and the time; the small laptop
    ========================================================================== */
 /* Search and filters on the left say WHICH projects; the steps and «Ansicht»

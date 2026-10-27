@@ -462,6 +462,7 @@
                                     longest project name fits */
   --grid-col-phase:     152px;  /* «33 Bewilligungsverfahren» in full, 144px + padding */
   --grid-col-lead:      140px;   /* «Dario Beispielmann» with 8px of air on each side */
+  --grid-col-roles:     64px;    /* «Rollen» with its sort arrow, and a one-digit count */
   --grid-col-portfolio: 110px;
   --grid-col-organisation: 112px;  /* «PM Inland III», the longest short form, plus its padding */
   --grid-col-credit:    112px;
