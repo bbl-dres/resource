@@ -8,12 +8,13 @@
    ============================================================================= */
 
 import {
-  data, state, t, num, fmt, unitSuffix, cellValue, projectDemand, heatStep, personUtilisation, phaseOf, eppmOf,
-  nowIndex, deDate, projectsOf, projectShare, projectCapacity, personHeatStep, personDraft,
-  settingText, settingTyped, settingValue, settingChanges
+  data, state, t, num, fmt, unitSuffix, projectDemand, heatStep, personUtilisation, phaseOf, eppmOf,
+  nowIndex, deDate, projectShare, projectCapacity, personHeatStep, personDraft,
+  settingText, settingTyped, settingValue, settingChanges,
+  roleOf, segAt, holdersAt, openRoleAt, rolesOf, holdSpan
 } from './store.js';
 
-import { html, icons, attr, personOption, personSearch } from './ui.js';
+import { html, icons, attr } from './ui.js';
 
 /**
  * One dialog head for all four: the same close button was written out four
@@ -198,8 +199,10 @@ function modalHead(kicker, title, meta = '') {
 }
 
 /* One entry per dialog; app.js sets state.modal.type to one of these keys.
-   Assigning a person is not one of them any more: it is a popover on the cell,
-   like the pensum editor — see assignPicker() in views-overview.js. */
+   Staffing a role — the person, the quarter it starts, the pensum — is not one
+   of them: it is a popover on the chip, see staffPopover() in
+   views-overview.js. The rebooking dialog went with it; a handover is a
+   change of person on the chip of the quarter it takes effect from. */
 const MODALS = {
   settings: settingsModal,     // the account: the reader's own mail and language
   rules: rulesModal,           // the office's settings, behind the gear
@@ -207,8 +210,7 @@ const MODALS = {
   milestone: milestoneModal,
   project: projectModal,
   person: personModal,
-  share: shareModal,
-  rebook: rebookModal
+  share: shareModal
 };
 
 export function renderModal() {
@@ -343,16 +345,33 @@ function phaseModal({ projectId, from }) {
 
 function projectModal({ projectId }) {
   const p = data.projectsById[projectId];
-  const lead = p.leadId ? data.peopleById[p.leadId] : null;
   const cells = projectDemand(p);
   const now = nowIndex();
   const q0 = data.quarters[now];
+  const n = data.quarters.length;
   const nextMs = data.milestones.items
     .filter(m => m.projectId === p.id)
     .sort((a, b) => a.planDate.localeCompare(b.planDate))[0];
   const nextName = nextMs && data.milestoneCatalog[nextMs.code]?.name;
   const log = data.changes.filter(c => c.projectId === p.id);
-  const util = lead ? personUtilisation(lead.id, now) : null;
+
+  /*
+   * Who is on the project this quarter, role by role, and what is still to
+   * come: a change of hands, or a role whose run starts later. The fact
+   * «Bearbeitender» became «Besetzung» when a project came to carry more
+   * than one person.
+   */
+  const people = holdersAt(p, now);
+  const staffed = p.roles.map(r => {
+    const s = segAt(r, now);
+    if (!s) return null;
+    return `${s.p ? data.peopleById[s.p]?.name : t('offen')} (${t(roleOf(r.role).label)})`;
+  }).filter(Boolean);
+  const ahead = p.roles.flatMap(r => r.segs.filter(s => s.from > now).map(s => {
+    const who = s.p ? data.peopleById[s.p]?.shortName : t('offen');
+    const change = r.segs.some(o => o.to === s.from);
+    return `${change ? `${t('Wechsel')} ` : ''}${t(roleOf(r.role).label)} ${t('ab')} ${data.quarters[s.from].label}: ${who}`;
+  }));
 
   // The wireframe is explicit: five facts, always the same, in this order.
   const facts = [
@@ -362,15 +381,15 @@ function projectModal({ projectId }) {
       sub: `${t('Phase')} ${data.phases.eppm.findIndex(e => e.id === p.phase) + 1} ${t('von')} ${data.phases.eppm.length}`
     },
     {
-      term: 'Bearbeitender',
-      value: lead ? lead.name : t('— nicht zugewiesen'),
-      sub: lead ? `${t('Auslastung')} ${q0.short}: ${util > 100 ? '▲ ' : ''}${util} %` : t('Pensum offen'),
-      tone: lead ? (util > 100 ? 'danger' : null) : 'warn'
+      term: `${t('Besetzung')} ${q0.label}`,
+      value: `${p.roles.length} ${t(p.roles.length === 1 ? 'Rolle' : 'Rollen')} · ${people.size} ${t(people.size === 1 ? 'Person' : 'Personen')}`,
+      sub: [...staffed, ...ahead].join(' · ') || t('Pensum offen'),
+      tone: openRoleAt(p, now) ? 'warn' : null
     },
     {
       term: `${t('Pensum')} ${q0.label}`,
       value: fmt(cells[now]),
-      sub: `${t('Soll')} ${fmt(p.target)} · ${cells[now] > p.target ? t('über Soll') : t('im Soll')}`,
+      sub: `${t('Soll')} ${fmt(p.target)} · ${cells[now] > p.target ? t('über Soll') : t('im Soll')} · ${t('Summe über alle Rollen')}`,
       tone: cells[now] > p.target ? 'danger' : null
     },
     {
@@ -396,8 +415,43 @@ function projectModal({ projectId }) {
       </div>`)}
     </dl>
 
+    <!-- One line per role: who holds it now, its pensum this quarter, and
+         under it the band of who holds it when — the same bars the lanes
+         draw as chips, over the whole window. -->
     <section class="modal__section">
-      <h3>${t('Pensum je Quartal')}</h3>
+      <h3>${t('Rollen und Besetzung')}</h3>
+      ${p.roles.length ? html`<div class="rolelist">
+        ${p.roles.map(r => {
+          const role = roleOf(r.role);
+          const s = segAt(r, now);
+          const holder = s ? (s.p ? data.peopleById[s.p]?.name : t('nicht zugewiesen')) : '—';
+          return html`<div class="rolelist__row">
+            <div class="rolelist__head">
+              <span class="rolelist__role">${t(role.label)}</span>
+              <span class="rolelist__holder ${s && !s.p ? 'is-open' : ''}">${holder}</span>
+              <span class="rolelist__now">${t('Pensum')} ${q0.short}: ${fmt(r.demand[now])}</span>
+            </div>
+            <div class="roleband" aria-hidden="true">
+              ${r.segs.map(seg => {
+                const name = seg.p ? data.peopleById[seg.p]?.name : t('offen');
+                const span = seg.to - seg.from === 1 ? data.quarters[seg.from].label
+                  : `${data.quarters[seg.from].label} – ${data.quarters[seg.to - 1].label}`;
+                return html`<span class="roleband__seg ${seg.p ? '' : 'is-open'}"
+                  style="left:${(seg.from / n * 100).toFixed(2)}%;width:${((seg.to - seg.from) / n * 100).toFixed(2)}%"
+                  title="${name} · ${span}">${name}</span>`;
+              })}
+            </div>
+          </div>`;
+        })}
+        <div class="roleband__axis" aria-hidden="true">
+          ${data.quarters.map((q, i) => (q.short === 'Q1'
+            ? html`<span style="left:${(i / n * 100).toFixed(2)}%">${q.year}</span>` : ''))}
+        </div>
+      </div>` : html`<p class="settings__note">${t('Keine Rollen geplant.')}</p>`}
+    </section>
+
+    <section class="modal__section">
+      <h3>${t('Pensum je Quartal')} · ${t('Summe über alle Rollen')}</h3>
       <div class="minigrid">
         ${data.quarters.map((q, i) => html`<div class="minigrid__col">
           <span class="minigrid__q">${q.short}<span>/${String(q.year).slice(2)}</span></span>
@@ -436,8 +490,10 @@ function personModal(modal) {
   const now = nowIndex();
   const share = projectShare(person);
   const capacity = String(Math.round(projectCapacity(person) * 10) / 10).replace('.', ',');
-  const projects = projectsOf(person.id);
-  const carries = projects.length > 0;
+  /* One line per role, not per project: a person can be Bearbeitender on
+     one project and Bauleitung on three. */
+  const assignments = rolesOf(person.id);
+  const carries = assignments.length > 0;
   const util = data.quarters.map((_, q) => personUtilisation(person.id, q));
   const peak = util.indexOf(Math.max(...util));
   const own = person.projectShare != null;
@@ -505,14 +561,20 @@ function personModal(modal) {
     </section>
 
     <section class="modal__section">
-      <h3>${t('Projekte')} (${projects.length})</h3>
-      ${carries ? html`<ul class="modal__log modal__log--projects">
-        ${projects.map(p => html`<li>
-          <span>${p.number}</span>
-          <button type="button" class="linkbtn" data-act="open-project" data-val="${p.id}">${p.title}</button>
-          <span>${t(eppmOf(p.phase).label)}</span>
-          <span>${fmt(cellValue(p, now))}</span>
-        </li>`)}
+      <h3>${t('Rollen')} (${assignments.length})</h3>
+      ${carries ? html`<ul class="modal__log modal__log--roles">
+        ${assignments.map(({ project: p, role: r }) => {
+          const s = segAt(r, now);
+          const mine = s && s.p === person.id;
+          /* The role's pensum this quarter where the person holds it now;
+             otherwise when they do, which is the more useful fact. */
+          return html`<li>
+            <span>${t(roleOf(r.role).label)}</span>
+            <span>${p.number}</span>
+            <button type="button" class="linkbtn" data-act="open-project" data-val="${p.id}">${p.title}</button>
+            <span>${mine ? fmt(r.demand[now]) : holdSpan(r, person.id)}</span>
+          </li>`;
+        })}
       </ul>` : html`<p class="settings__note">${t('Keine Projekte zugewiesen.')}</p>`}
     </section>
 
@@ -529,72 +591,5 @@ function personModal(modal) {
 
     <footer class="modal__foot">
       <button type="button" class="btn" data-act="filter-lead" data-val="${person.id}">${t('Projekte in der Planung anzeigen')}</button>
-    </footer>`;
-}
-
-function rebookModal({ projectId, q, amount, targetId, quarters = 2, search = '', reason = '' }) {
-  const p = data.projectsById[projectId];
-  const from = p.leadId ? data.peopleById[p.leadId] : null;
-  const quarter = data.quarters[q];
-  const query = search.trim().toLowerCase();
-  const candidates = data.people
-    .filter(x => x.id !== p.leadId)
-    .filter(x => !query || x.name.toLowerCase().includes(query));
-  const target = targetId ? data.peopleById[targetId] : null;
-  const ready = target && amount > 0 && reason.trim();
-
-  return html`
-    ${modalHead(t('Pensum umbuchen'), p.title,
-      `${t('Bearbeitender')} · ${t('ab')} ${quarter.label}, ${quarters} ${t('Quartale')}`)}
-
-    <p class="modal__lead">${t('Ein Vorgang statt zwei Transaktionen: von, an, Betrag und Zeitraum ergeben einen Verlaufseintrag mit beiden Seiten.')}</p>
-
-    <div class="rebook">
-      <div class="rebook__field">
-        <span class="rebook__label">${t('Von')}</span>
-        <span class="rebook__readonly">${from ? from.name : t('nicht zugewiesen')}</span>
-      </div>
-      <div class="rebook__field rebook__field--amount">
-        <label class="rebook__label" for="rebook-amount">${t('Pensum')}</label>
-        <span class="rebook__amount">
-          <input id="rebook-amount" type="number" min="0" max="${cellValue(p, q)}" step="5"
-                 value="${amount}" data-act="rebook-amount" data-fk="rebook-amount">
-          <span>%</span>
-        </span>
-      </div>
-      <div class="rebook__field rebook__field--quarters">
-        <label class="rebook__label" for="rebook-quarters">${t('Dauer')}</label>
-        <span class="rebook__amount">
-          <input id="rebook-quarters" type="number" min="1" max="${data.quarters.length - q}" step="1"
-                 value="${quarters}" data-act="rebook-quarters" data-fk="rebook-quarters">
-          <span>${t('Quartale')}</span>
-        </span>
-      </div>
-    </div>
-
-    <div class="rebook__to">
-      <span class="rebook__label">${t('An')}</span>
-      ${personSearch({ act: 'rebook-search', fk: 'rebook-search', value: search, listId: 'rebook-list',
-        placeholder: 'Person suchen — Name oder Kürzel' })}
-      ${candidates.length ? '' : html`<p class="rebook__empty">${t('Keine Person gefunden.')}</p>`}
-      <ul class="rebook__list" id="rebook-list" role="listbox" aria-label="${t('Person wählen')}">
-        ${candidates.map(c => personOption({
-          id: c.id, name: c.name, act: 'rebook-target', selected: c.id === targetId,
-          meta: t(data.organisationsById[c.organisation]?.short ?? ''),
-          metaTitle: t(data.organisationsById[c.organisation]?.label ?? '')
-        }))}
-      </ul>
-    </div>
-
-    <label class="pop__reason rebook__reason">
-      <span class="pop__reasonlabel">${t('Begründung')}
-        <span>${t('— Pflicht bei jeder Umbuchung')}</span></span>
-      <textarea rows="2" data-act="rebook-reason" data-fk="rebook-reason"
-        placeholder="${t('Entlastung des Bearbeitenden gemäss Beschluss Abteilungssitzung 24.08.2026.')}">${reason}</textarea>
-    </label>
-
-    <footer class="modal__foot">
-      <button type="button" class="btn" data-act="close-modal">${t('Abbrechen')}</button>
-      <button type="button" class="btn btn--primary" data-act="rebook-apply" ${attr(!ready, 'disabled')}>${t('Umbuchen')}</button>
     </footer>`;
 }

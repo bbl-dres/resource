@@ -26,7 +26,7 @@ Resource-planning prototype for the [Federal Office for Buildings and Logistics 
 ## Features
 
 - Review the portfolio in one planning grid that shows workload figures, the phase schedule, or both in the same rows, plus dashboards and a change history.
-- Edit demand, assign or rebook project leads, and see overload warnings with reasons.
+- Fold a project open to its roles — Bearbeitender, Stellvertretung, Bauleitung, Fachplanung — each with its own person and workload per quarter, hand a role over at a quarter boundary, and see overload warnings with reasons. See [`docs/ROLES.md`](docs/ROLES.md).
 - Filter, group, and sort year, quarter, and month views in percent or FTE.
 - Compare demand, capacity, utilisation, free capacity, and person-level workload.
 - Export CSV, Excel, and client-side PDF reports and print schedules from A4 through A0.
@@ -47,6 +47,7 @@ Then open <http://localhost:8000/>.
 - [Architecture](docs/ARCHITECTURE.md) — code structure, state, rendering, grids, time, exports, and data.
 - [Decisions](docs/DECISIONS.md) — standing implementation and design rules.
 - [Data model](docs/DATAMODEL.md) — the entities in `data/`, their fields, and how they join.
+- [Roles](docs/ROLES.md) — several people per project: what the September wireframe asked for, what is built, what was left out.
 - [Contrast review](docs/CONTRAST-REVIEW.md) — measured text contrast per tab, and the text tiers that came out of it.
 - [Current code review](docs/CODE-REVIEW-3.md) — remaining technical limitations.
 - [Dashboard study](docs/DASHBOARD-STUDY.md) — proposal still under discussion.

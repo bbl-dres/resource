@@ -4,9 +4,10 @@
    ============================================================================= */
 
 import {
-  data, state, t, num, fmt, fmtMio, unitSuffix, cellValue, projectDemand, isEdited, personUtilisation,
+  data, state, t, num, fmt, fmtMio, unitSuffix, cellValue, projectDemand, isEdited, roleEdited, personUtilisation,
   totals, loadStatus, heatStep, filteredProjects, groupProjects,
-  periods, periodValue, windowEdges, columnSet, coloured, compareDe, phaseOf
+  periods, periodValue, windowEdges, columnSet, coloured, phaseOf, nowIndex,
+  roleCatalog, roleOf, roleOn, segAt, holdersAt, staffCandidates
 } from './store.js';
 
 import {
@@ -143,6 +144,7 @@ function pensumGrid() {
         <span class="pgrouphead__name">${g.label}</span>
         <span class="count-pill">${g.projects.length}</span>
       </button>
+      ${!collapsed && expandLink(g)}
     </h2>`;
 
     if (collapsed) return html`<section class="pgroup">${head}</section>`;
@@ -157,7 +159,9 @@ function pensumGrid() {
     // printed report already does exactly that. The project rows are wrapped
     // once, so the today marker has something to span that is not the header
     // or the totals.
-    return html`<section class="pgroup">${head}
+    /* Ungrouped, the link that folds every row has no heading to sit in, so
+       it takes a line of its own above the one card. */
+    return html`<section class="pgroup">${head || html`<div class="pgroup__tools">${expandLink(g)}</div>`}
       ${card(html`${columnHeader(tpl, sticky, cols)}
         <div class="pgrid__rows">${rows}${todayMarker(todayLeft)}</div>
         ${L.values && groupSum(g, tpl, sticky, cols)}`,
@@ -248,7 +252,21 @@ export function card(rows, { minWidth, sticky, cls = '' }) {
 
 /** The legend explains what is on screen, so it says whatever the view says. */
 function heatLegend() {
-  return planLegend({ layers: state.layers, coloured: coloured(), legend: data.print.legend });
+  return planLegend({ layers: state.layers, coloured: coloured(), legend: data.print.legend, staffing: true });
+}
+
+/*
+ * «Besetzung aufklappen» for a whole group at once. The label says what the
+ * click will do: fold every row open while any is still shut, fold them all
+ * shut once every one is open.
+ */
+function expandLink(g) {
+  const all = g.projects.length > 0 && g.projects.every(p => state.openRoles[p.id]);
+  const any = g.projects.some(p => state.openRoles[p.id]);
+  return html`<button type="button" class="linkbtn pgroup__expand" data-act="toggle-roles-group" data-val="${g.key}">
+    <span class="caret ${any ? '' : 'is-collapsed'}" aria-hidden="true">${icons.chevronDown()}</span>
+    ${t(all ? 'Besetzung zuklappen' : 'Besetzung aufklappen')}
+  </button>`;
 }
 
 /** Clicking the active column flips it; the toolbar reads the same state. */
@@ -268,14 +286,31 @@ const sortHead = (key, label, opts = {}) => sortableHead({
 const CELL_BODY = {
   id: p => highlight(p.number),
 
-  title: p => html`<button type="button" class="prow__title"
-      data-act="open-project" data-val="${p.id}" title="${p.title}">${highlight(p.title)}</button>`,
+  /* Two controls in one cell, each with its own name: the caret folds the
+     roles open, the name opens the project. */
+  title: p => {
+    const open = !!state.openRoles[p.id];
+    return html`<button type="button" class="rowcaret" data-act="toggle-roles" data-val="${p.id}"
+        aria-expanded="${open}" aria-label="${t('Besetzung ein-/ausklappen')}: ${p.title}">
+        <span class="caret ${open ? '' : 'is-collapsed'}" aria-hidden="true">${icons.chevronDown()}</span>
+      </button>
+      <button type="button" class="prow__title"
+        data-act="open-project" data-val="${p.id}" title="${p.title}">${highlight(p.title)}</button>`;
+  },
 
-  lead: (p, lead) => {
-    const name = lead ? highlight(lead.name)
-      : html`<span class="lead-open">${highlight(t('nicht zugewiesen'))}</span>`;
-    return html`<button type="button" class="leadbtn" data-act="assign" data-val="${p.id}"
-      title="${t('Bearbeitenden zuweisen')}">${name}</button>`;
+  /*
+   * A label now, not a control: the person in this role in the current
+   * quarter. Assigning happens on the chip in the folded-open row, where the
+   * quarter it takes effect from is the one the chip stands in.
+   */
+  lead: (p, lead) => (lead ? highlight(lead.name)
+    : html`<span class="lead-open">${highlight(t('nicht zugewiesen'))}</span>`),
+
+  /* How many lanes the row folds open to, and how many of them want a person today. */
+  roles: p => {
+    const n = p.roles.length;
+    const open = p.roles.filter(r => { const s = segAt(r, nowIndex()); return s && !s.p; }).length;
+    return html`<span title="${n} ${t(n === 1 ? 'Rolle' : 'Rollen')}${open ? ` · ${open} ${t('offen')}` : ''}">${n}</span>`;
   }
 };
 
@@ -370,152 +405,223 @@ function footRow(label, values, tpl, span, cols) {
   </div>`;
 }
 
+/*
+ * A project row, and under it — once it is folded open — one lane per role.
+ *
+ * Folded, the row is the one it always was: the project's demand per quarter,
+ * which is now the sum over its roles. The whole row is the switch, as the
+ * wireframe asks: a click anywhere on it folds the roles open or shut, and
+ * the controls inside it — the title, a bar, a gate — take their clicks
+ * first. The figures stay buttons so the keyboard reaches them, and each
+ * says what it does.
+ */
 function projectRow(p, lay, cols, rowIdx) {
   const { tpl, sticky } = lay;
   const L = state.layers;
   const lead = p.leadId ? data.peopleById[p.leadId] : null;
   const cells = projectDemand(p);
-  const picking = state.picking && state.picking.projectId === p.id;
+  const open = !!state.openRoles[p.id];
 
-  return html`<div class="prow" style="grid-template-columns:${raw(tpl)}"
-      data-row="${rowIdx}">
+  const row = html`<div class="prow prow--project ${open ? 'is-open' : ''}" style="grid-template-columns:${raw(tpl)}"
+      data-row="${rowIdx}" data-act="toggle-roles" data-val="${p.id}">
     ${sticky.shown.map(col => html`<span
-        class="pcell ${col.cls} ${alignCls(col)} ${cellState(col, p, lead)} ${pinCls(sticky, col.key)} ${picking && col.key === 'lead' ? 'is-editing' : ''}"
+        class="pcell ${col.cls} ${alignCls(col)} ${cellState(col, p, lead)} ${pinCls(sticky, col.key)}"
         style="${pinLeft(sticky, col.key)}">${cellBody(col, p, lead)}</span>`)}
 
     ${cols.map(period => {
       const q = period.quarters[0];
       const v = periodValue(cells, period);
-      // The lead being stretched says nothing about a quarter this project does
-      // not run in, and a red nought is noise rather than a warning.
-      const over = lead && v > 0 && period.quarters.some(x => lay.isOver(p.leadId, x));
-      const editing = state.editing && state.editing.projectId === p.id && state.editing.q === q;
+      /* Somebody on the project is over their ceiling in the quarter — in any
+         role, not only the lead's. A nought carries no warning: nobody is
+         stretched by a quarter the project does not run in. */
+      const over = v > 0 && period.quarters.some(x => [...holdersAt(p, x)].some(id => lay.isOver(id, x)));
       /* With the figures switched off the cell is a slot for the band, not a
-         control: nothing to read, nothing to edit. */
+         control: nothing to read, nothing to open. */
       const label = !L.values || (state.hideZeros && v === 0) ? '' : num(v);
       /* With the band drawn under the figures, the cell names the phase that
          runs in its quarter too — the same fact the bar below it carries. */
       const running = L.phases ? p.bars.find(b => b.from <= q && q < b.to) : null;
       const description = `${p.title} · ${lead ? lead.name : t('nicht zugewiesen')}, ${period.label}: ${num(v)}${unitSuffix()}`
         + (running ? ` · ${t(phaseOf(running.phase).label)}` : '')
-        + (over ? ` — ${t('Person über 100 % belegt, Überlast')}` : '');
+        + (over ? ` — ${t('Person über 100 % belegt, Überlast')}` : '')
+        + ` · ${t('Besetzung ein-/ausklappen')}`;
       return html`<button type="button"
-        class="pcell pcell--val heat-${heatStep(v)} ${over ? 'is-warn' : ''} ${editing ? 'is-editing' : ''} ${isEdited(p, q) ? 'is-edited' : ''} ${yearRule(period)}"
-        data-act="cell" data-val="${p.id}" data-q="${q}" data-fk="cell:${p.id}:${q}"
-        ${attr(!L.values, 'disabled')} aria-label="${description}" title="${description}">
+        class="pcell pcell--val heat-${heatStep(v)} ${over ? 'is-warn' : ''} ${isEdited(p, q) ? 'is-edited' : ''} ${yearRule(period)}"
+        data-act="toggle-roles" data-val="${p.id}" data-q="${q}" data-fk="cell:${p.id}:${q}"
+        ${attr(!L.values, 'disabled')} aria-expanded="${open}" aria-label="${description}" title="${description}">
         <span class="cellv">${label}</span>
       </button>`;
     })}
 
     ${(L.phases || L.gates) && phaseBand(p, cols, lay, { compact: L.values, bars: L.phases, gates: L.gates })}
   </div>`;
+
+  return open ? html`${row}${laneRows(p, lay, cols)}` : row;
 }
 
 /* -----------------------------------------------------------------------------
-   Edit popover — anchored to the cell by grid arithmetic
+   The lanes — one per role, in the catalogue's order, under an open row
    -------------------------------------------------------------------------- */
 
-/* The width is the stylesheet token, read when the popover is placed. */
-const popWidth = () => tokenPx('--pop-width');
-/* The tallest the popover gets — the case with no lead, where the notice wraps
-   to three lines. Sized for the worst case so the flip never clips it. */
-const POP_HEIGHT = 400;
+/*
+ * The same four lanes under every project, so the eye finds Bauleitung in the
+ * same place on every row. A lane ePPM does not foresee for the project stays,
+ * empty and greyed, because a slot in it is how the role is added: the
+ * staffing popover creates the role on apply. The lane carries its label in
+ * the frozen block, indented under the project name; the «Bearbeitender»
+ * column may be switched off and the label still says which lane this is.
+ */
+function laneRows(p, lay, cols) {
+  const { tpl, sticky } = lay;
+  const span = sticky.shown.length;
+  return roleCatalog().map(role => {
+    const r = roleOn(p, role.id);
+    const note = r ? t(role.label) : `${t(role.label)}: ${t('im Projekt nicht vorgesehen (ePPM)')}`;
+    return html`<div class="prow prow--lane ${r ? '' : 'is-none'}" style="grid-template-columns:${raw(tpl)}">
+      <div style="grid-column:span ${span}" class="lane__label lane__label--project is-frozen" title="${note}">
+        <span>${t(role.label)}</span>
+      </div>
+      ${cols.map(period => laneCell(p, role, r, period))}
+    </div>`;
+  });
+}
 
-export function editPopover() {
-  const { projectId, q, anchor } = state.editing;
+/*
+ * One quarter of one role: a chip with the person and the pensum, in the heat
+ * colour of the value — or a dashed chip saying the role is open, or an empty
+ * slot that offers to plan it. Every one of them opens the staffing popover
+ * for that role and that quarter. The short name goes on the chip; the full
+ * name is in the hint and in the popover.
+ */
+function laneCell(p, role, r, period) {
+  const q = period.quarters[0];
+  const s = r && segAt(r, q);
+  const st = state.staffing;
+  const editing = st && st.projectId === p.id && st.role === role.id && st.q === q;
+  const base = `pcell pcell--lane ${period.isNow ? 'is-today' : ''} ${yearRule(period)}`;
+  const where = `${t(role.label)} · ${p.title} · ${period.label}`;
+
+  if (!s) {
+    return html`<span class="${base}">
+      <button type="button" class="rchip rchip--empty ${editing ? 'is-editing' : ''}"
+        data-act="staff" data-val="${p.id}" data-role="${role.id}" data-q="${q}" data-fk="chip:${p.id}:${role.id}:${q}"
+        title="${t('Rolle besetzen')}: ${where}" aria-label="${t('Rolle besetzen')}: ${where}">${icons.plus(13)}</button>
+    </span>`;
+  }
+
+  const v = periodValue(r.demand, period);
+  const person = s.p ? data.peopleById[s.p] : null;
+  const label = state.hideZeros && v === 0 ? '' : num(v);
+  const description = `${t(role.label)}: ${person ? person.name : t('nicht zugewiesen')} · ${p.title} · ${period.label}: ${num(v)}${unitSuffix()}`;
+  return html`<span class="${base}">
+    <button type="button"
+      class="rchip ${coloured() ? `heat-${heatStep(v)}` : ''} ${person ? '' : 'is-open'} ${s.from === q ? 'is-start' : ''} ${editing ? 'is-editing' : ''} ${roleEdited(p, role.id, q) ? 'is-edited' : ''}"
+      data-act="staff" data-val="${p.id}" data-role="${role.id}" data-q="${q}" data-fk="chip:${p.id}:${role.id}:${q}"
+      title="${description}" aria-label="${description}">
+      <span class="rchip__name">${person ? highlight(person.shortName) : t('offen')}</span><span class="rchip__val">${label}</span>
+    </button>
+  </span>`;
+}
+
+/* -----------------------------------------------------------------------------
+   The staffing popover — on the chip, as the editor used to be on the cell
+   -------------------------------------------------------------------------- */
+
+/*
+ * One popover answers both questions a chip raises: who carries this role
+ * from this quarter on, and at what pensum in this quarter. The person list
+ * is ordered by free capacity, because capacity is why one name is right and
+ * another is wrong, with the current holder first and «Rolle offen lassen»
+ * last. A different name is a handover — the pensum stays with the role, and
+ * the change asks for a reason, as an overload does. Applied, it is written
+ * into the data and logged like every other edit.
+ */
+const staffWidth = () => tokenPx('--pop-assign-width');
+/* The tallest it gets — a handover note and an overload note at once — so
+   the flip never clips it. */
+const STAFF_HEIGHT = 600;
+
+export function staffPopover() {
+  const { projectId, role: roleId, q, anchor, search = '', target } = state.staffing;
   const p = data.projectsById[projectId];
-  const lead = p.leadId ? data.peopleById[p.leadId] : null;
-  /* The person's utilisation with this edit applied — asked of the one
-     function that converts pensum to utilisation, not worked out here. */
-  const delta = state.draft - cellValue(p, q);
-  const newUtil = lead ? personUtilisation(p.leadId, q, delta) : null;
-  const over = newUtil != null && newUtil > 100;
+  const role = roleOf(roleId);
+  const r = roleOn(p, roleId);
+  const s = r && segAt(r, q);
+  const current = s && s.p ? data.peopleById[s.p] : null;
+  const quarter = data.quarters[q];
+  const chosen = target ? data.peopleById[target] : null;
+  /* A change of hands from this quarter on a role already planned: to
+     somebody else, to nobody, or from nobody to somebody. Planning a role
+     afresh is not one, and asks for no reason. */
+  const handover = !!s && (s.p ?? null) !== (target ?? null);
+  /* What the chosen person would stand at with this pensum on them — asked of
+     the one function that converts, with the points they already carry for
+     this very role taken off first. */
+  const already = chosen && s && s.p === target ? r.demand[q] : 0;
+  const util = chosen ? personUtilisation(target, q, state.draft - already) : null;
+  const over = util != null && util > 100;
+  const needReason = over || handover;
+  const query = search.trim().toLowerCase();
+  const unit = person => data.organisationsById[person.organisation];
+  const rows = staffCandidates(q, current?.id ?? null)
+    .filter(({ person }) => !query || `${person.name} ${t(unit(person)?.label ?? '')}`.toLowerCase().includes(query));
 
-  return html`<div class="pop" role="dialog" aria-modal="false" aria-label="${t('Pensum bearbeiten')}"
-      style="${popoverPosition(anchor, { width: popWidth(), height: POP_HEIGHT, x: anchor.right - popWidth() })}">
-    <div class="pop__kicker">${t('Pensum bearbeiten')}</div>
+  const note = handover
+    ? (chosen && current ? `${t('Übergabe')} ${t('ab')} ${quarter.label}: ${current.name} → ${chosen.name}`
+      : chosen ? `${t('Zugewiesen an')} ${chosen.name} ${t('ab')} ${quarter.label}`
+        : `${t('Übergabe')} ${t('ab')} ${quarter.label}: ${current.name} → ${t('Rolle offen')}`)
+    : !s && (chosen || state.draft > 0) ? `${t('Geplant')} ${t('ab')} ${quarter.label}: ${chosen ? chosen.name : t('Rolle offen')}` : '';
+
+  return html`<div class="pop pop--staff" role="dialog" aria-modal="false" aria-label="${t('Rolle besetzen')}"
+      style="${popoverPosition(anchor, { width: staffWidth(), height: STAFF_HEIGHT, x: anchor.left })}">
+    <div class="pop__kicker">${t(role.label)} · ${quarter.label}</div>
     <div class="pop__who">${p.title}</div>
-    <div class="pop__what">${lead ? `${lead.name} · ${t(lead.role)}` : t('nicht zugewiesen')} · ${data.quarters[q].label}</div>
+    <div class="pop__what">${current
+      ? `${t('Aktuell')}: ${current.name} · ${t('seit')} ${data.quarters[s.from].label}`
+      : s ? t('Aktuell nicht zugewiesen') : t('Noch nicht geplant')}</div>
 
-    <div class="pop__stepper">
+    <div class="pop__listlabel">${t('Pensum')} ${quarter.label}</div>
+    <div class="pop__stepper pop__stepper--labelled">
       <button type="button" class="pop__step" data-act="draft" data-val="-5" aria-label="${t('Pensum verringern')}">${icons.minus(15)}</button>
       <label class="pop__input">
-        <span class="sr-only">${t('Pensum')}</span>
+        <span class="sr-only">${t('Pensum')} ${quarter.label}</span>
         <input type="number" min="0" max="200" step="5" value="${state.draft}" data-act="draft-input" data-fk="draft"
                inputmode="numeric">
-        <span class="pop__unit">${state.unit === 'fte' ? 'FTE' : '%'}</span>
+        <span class="pop__unit">%</span>
       </label>
       <button type="button" class="pop__step" data-act="draft" data-val="5" aria-label="${t('Pensum erhöhen')}">${icons.plus(15)}</button>
     </div>
 
-    ${lead === null && html`<p class="pop__warn is-none">${t(
-      'Kein Bearbeitender zugewiesen — das Pensum kann noch auf keine Person gebucht werden.')}</p>`}
+    <div class="pop__listlabel">${t('Person')} ${t('ab')} ${quarter.label}</div>
+    ${personSearch({ act: 'staff-search', fk: 'staff-search', value: search, listId: 'staff-list' })}
+    ${rows.length ? '' : html`<p class="rebook__empty">${t('Keine Person gefunden.')}</p>`}
+    <ul class="rebook__list assign__list staff__list" id="staff-list" role="listbox" aria-label="${t('Person wählen')}">
+      ${rows.map(({ person, free }) => personOption({
+        id: person.id, name: person.name, act: 'staff-target', selected: person.id === target,
+        meta: person.id === current?.id
+          ? `${t('aktuell')} · ${t(unit(person)?.short ?? '')}`
+          : `${t(unit(person)?.short ?? '')} · ${t('frei')} ${quarter.short}: ${free}`,
+        metaTitle: `${t(unit(person)?.label ?? '')} · ${t('frei')} ${quarter.label}: ${free} ${t('Punkte')}`
+      }))}
+      ${personOption({
+        id: '', act: 'staff-target', selected: !target,
+        name: html`<span class="assign__none">${t('Rolle offen lassen')}</span>`
+      })}
+    </ul>
+
+    ${note && html`<p class="pop__warn ${handover ? 'is-none' : 'is-plan'}">${note}</p>`}
+    ${over && html`<p class="pop__warn is-over">${chosen.name}: ${util} % ${t('der Projektkapazität')} · ${t('Überlast')}</p>`}
 
     <label class="pop__reason">
       <span class="pop__reasonlabel">${t('Begründung')}
-        <span>${over ? t('— Pflicht bei Überlast') : t('— optional')}</span></span>
+        <span>${over ? t('— Pflicht bei Überlast') : handover ? t('— Pflicht bei Übergabe') : t('— optional')}</span></span>
       <textarea rows="2" data-act="reason" data-fk="reason"
         placeholder="${t('Bauleitung Etappe 2 vorgezogen, Freigabe Abteilungsleitung liegt vor.')}">${state.reason}</textarea>
     </label>
 
-    <div class="pop__rebook">
-      <button type="button" class="linkbtn" data-act="rebook">${t('An andere Person umbuchen')}</button>
-    </div>
-
     <div class="pop__actions">
-      <button type="button" class="btn btn--primary" data-act="apply" ${attr(over && !state.reason.trim(), 'disabled')}>${t('Übernehmen')}</button>
-      <button type="button" class="btn" data-act="cancel-edit">${t('Abbrechen')}</button>
+      <button type="button" class="btn btn--primary" data-act="staff-apply" ${attr(needReason && !state.reason.trim(), 'disabled')}>${t('Übernehmen')}</button>
+      <button type="button" class="btn" data-act="cancel-staff">${t('Abbrechen')}</button>
     </div>
-  </div>`;
-}
-
-/* -----------------------------------------------------------------------------
-   The Bearbeitender picker — a popover on the cell, like the pensum editor
-   -------------------------------------------------------------------------- */
-
-/*
- * The application used to open a 760px modal over the whole plan, list the
- * roster in its stored order, and ask for two clicks: pick, then «Zuweisen».
- * Three things follow from the merged view instead.
- *
- * It is a popover on the cell — the plan stays visible behind the decision, and
- * one pattern covers both edits rather than two. The pick is the commit: a
- * single-select list has nothing to confirm, and the change is logged like any
- * other. And it is ordered by the number the choice actually turns on —
- * capacity is why one name is right and another is wrong, so the people with
- * room come first and the light beside each says the same thing without
- * arithmetic.
- */
-const pickWidth = () => tokenPx('--pop-assign-width');
-const PICK_HEIGHT = 380;
-
-export function assignPicker() {
-  const { projectId, anchor, search = '' } = state.picking;
-  const p = data.projectsById[projectId];
-  const current = p.leadId ? data.peopleById[p.leadId] : null;
-  const q = search.trim().toLowerCase();
-  const unit = person => data.organisationsById[person.organisation];
-  const unitOf = person => t(unit(person)?.label ?? '');
-  const rows = data.people
-    .filter(person => !q || `${person.name} ${unitOf(person)}`.toLowerCase().includes(q))
-    .sort((x, y) => compareDe(x.name, y.name));
-
-  return html`<div class="pop pop--assign" role="dialog" aria-modal="false" aria-label="${t('Bearbeitenden zuweisen')}"
-      style="${popoverPosition(anchor, { width: pickWidth(), height: PICK_HEIGHT, x: anchor.left })}">
-    <div class="pop__kicker">${t('Bearbeitender')}</div>
-    <div class="pop__who">${p.title}</div>
-    <div class="pop__what">${current ? `${t('Aktuell')}: ${current.name}` : t('Aktuell nicht zugewiesen')}</div>
-    ${personSearch({ act: 'pick-search', fk: 'pick-search', value: search, listId: 'pick-list' })}
-    ${rows.length ? '' : html`<p class="rebook__empty">${t('Keine Person gefunden.')}</p>`}
-    <ul class="rebook__list assign__list" id="pick-list" role="listbox" aria-label="${t('Person wählen')}">
-      ${rows.map(person => personOption({
-        id: person.id, name: person.name, act: 'pick', selected: person.id === p.leadId,
-        meta: t(unit(person)?.short ?? ''), metaTitle: unitOf(person)
-      }))}
-      ${personOption({
-        id: '', act: 'pick', selected: !p.leadId,
-        name: html`<span class="assign__none">${t('Niemand zuweisen')}</span>`
-      })}
-    </ul>
   </div>`;
 }

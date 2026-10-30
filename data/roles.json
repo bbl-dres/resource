@@ -1,0 +1,8 @@
+{
+  "roles": [
+    { "id": "pl", "label": "Bearbeitender", "short": "BE" },
+    { "id": "stv", "label": "Stv. Bearbeitender", "short": "Stv" },
+    { "id": "bl", "label": "Bauleitung", "short": "BL" },
+    { "id": "fp", "label": "Fachplanung", "short": "FP" }
+  ]
+}

@@ -1965,6 +1965,136 @@
       "en": "— optional",
       "fr": "— facultatif",
       "it": "— facoltativo"
+    },
+    "Bauleitung": {
+      "en": "Site management",
+      "fr": "Direction des travaux",
+      "it": "Direzione lavori"
+    },
+    "Fachplanung": {
+      "en": "Specialist planning",
+      "fr": "Planification spécialisée",
+      "it": "Progettazione specialistica"
+    },
+    "Stv. Bearbeitender": {
+      "en": "Deputy assignee",
+      "fr": "Suppléance",
+      "it": "Sostituto incaricato"
+    },
+    "Rollen": {
+      "en": "Roles",
+      "fr": "Rôles",
+      "it": "Ruoli"
+    },
+    "Besetzung": {
+      "en": "Staffing",
+      "fr": "Dotation",
+      "it": "Assegnazione"
+    },
+    "Besetzung aufklappen": {
+      "en": "Show staffing",
+      "fr": "Afficher la dotation",
+      "it": "Mostra l'assegnazione"
+    },
+    "Besetzung zuklappen": {
+      "en": "Hide staffing",
+      "fr": "Masquer la dotation",
+      "it": "Nascondi l'assegnazione"
+    },
+    "Besetzung ein-/ausklappen": {
+      "en": "Show or hide staffing",
+      "fr": "Afficher ou masquer la dotation",
+      "it": "Mostra o nascondi l'assegnazione"
+    },
+    "Rollen ein-/ausklappen": {
+      "en": "Show or hide roles",
+      "fr": "Afficher ou masquer les rôles",
+      "it": "Mostra o nascondi i ruoli"
+    },
+    "Rolle offen": {
+      "en": "Role open",
+      "fr": "Rôle vacant",
+      "it": "Ruolo aperto"
+    },
+    "Rolle offen lassen": {
+      "en": "Leave the role open",
+      "fr": "Laisser le rôle vacant",
+      "it": "Lasciare il ruolo aperto"
+    },
+    "Rolle besetzen": {
+      "en": "Staff the role",
+      "fr": "Pourvoir le rôle",
+      "it": "Assegnare il ruolo"
+    },
+    "Übergabe": {
+      "en": "Handover",
+      "fr": "Transfert",
+      "it": "Passaggio"
+    },
+    "— Pflicht bei Übergabe": {
+      "en": "— required for a handover",
+      "fr": "— obligatoire en cas de transfert",
+      "it": "— obbligatorio in caso di passaggio"
+    },
+    "Chip = Person · Pensum in Punkten": {
+      "en": "Chip = person · workload in points",
+      "fr": "Puce = personne · charge en points",
+      "it": "Chip = persona · carico in punti"
+    },
+    "im Projekt nicht vorgesehen (ePPM)": {
+      "en": "not foreseen for this project (ePPM)",
+      "fr": "non prévu pour ce projet (ePPM)",
+      "it": "non previsto per questo progetto (ePPM)"
+    },
+    "Rollen und Besetzung": {
+      "en": "Roles and staffing",
+      "fr": "Rôles et dotation",
+      "it": "Ruoli e assegnazione"
+    },
+    "Bearbeitende": {
+      "en": "People",
+      "fr": "Personnes en charge",
+      "it": "Incaricati"
+    },
+    "Wechsel": {
+      "en": "Change",
+      "fr": "Changement",
+      "it": "Cambio"
+    },
+    "Noch nicht geplant": {
+      "en": "Not planned yet",
+      "fr": "Pas encore planifié",
+      "it": "Non ancora pianificato"
+    },
+    "Geplant": {
+      "en": "Planned",
+      "fr": "Planifié",
+      "it": "Pianificato"
+    },
+    "aktuell": {
+      "en": "current",
+      "fr": "actuel",
+      "it": "attuale"
+    },
+    "Punkte": {
+      "en": "points",
+      "fr": "points",
+      "it": "punti"
+    },
+    "Keine Rollen geplant.": {
+      "en": "No roles planned.",
+      "fr": "Aucun rôle planifié.",
+      "it": "Nessun ruolo pianificato."
+    },
+    "Rolle in diesem Quartal nicht bei dieser Person": {
+      "en": "Role not with this person in this quarter",
+      "fr": "Rôle non tenu par cette personne ce trimestre",
+      "it": "Ruolo non assegnato a questa persona in questo trimestre"
+    },
+    "Summe über alle Rollen": {
+      "en": "sum over all roles",
+      "fr": "somme de tous les rôles",
+      "it": "somma di tutti i ruoli"
     }
   }
 }

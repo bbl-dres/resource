@@ -59,6 +59,17 @@ export const COLUMNS = [
     text: leadName
   },
   {
+    /*
+     * How many roles the project carries — the lanes a folded-open row
+     * shows. A count, because the lead column already names the one person
+     * most readers look for, and the rest are a click away.
+     */
+    key: 'roles', label: 'Rollen', flag: 'roles', sort: 'roles', width: '--grid-col-roles',
+    cls: 'pcell--roles', numeric: true, align: 'end',
+    sheet: { w: [40, 48], cls: 'sheet__num sheet__muted' }, xls: { type: 'num', width: 8 },
+    text: p => String(p.roles.length)
+  },
+  {
     key: 'portfolio', label: 'Teilportfolio', flag: 'portfolio', sort: 'portfolio',
     width: '--grid-col-portfolio', cls: 'pcell--text', sheet: { w: [76, 96], cls: 'sheet__muted' },
     xls: { type: 'text', width: 18 },
@@ -90,7 +101,7 @@ export const column = key => BY_KEY[key];
  * load-bearing to most. `id` is not in the list — it is the floor, and on a
  * phone the list runs to its end and leaves exactly that.
  */
-const YIELD_ORDER = ['organisation', 'portfolio', 'credit', 'phase', 'lead', 'title'];
+const YIELD_ORDER = ['organisation', 'portfolio', 'roles', 'credit', 'phase', 'lead', 'title'];
 
 /**
  * The columns that fit. `room` is the width available to the card and
@@ -150,7 +161,7 @@ export function leadLayout(set, fit) {
  * defaults. Not what is switched on right now, so toggling an attribute never
  * moves the name either.
  */
-const TITLE_REFERENCE = ['id', 'phase', 'lead', 'credit'];
+const TITLE_REFERENCE = ['id', 'phase', 'lead', 'roles', 'credit'];
 
 /*
  * And against a fixed number of quarter columns, not however many the current

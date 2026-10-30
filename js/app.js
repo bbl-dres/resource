@@ -11,13 +11,13 @@
 
 import {
   data, state, load, subscribe, setState, syncFromUrl, closeOverlays, touch, OVERLAYS_CLOSED,
-  cellValue, toggleIn, removeFilter, resetFilters, defaultDir, t, columnSetKey, writeUrl,
+  toggleIn, removeFilter, resetFilters, defaultDir, t, columnSetKey, writeUrl,
   offsetForScale, maxOffset, windowStep, pageCount, viewPatch, layerPatch, settingChanges,
-  personDraft, projectShare
+  personDraft, projectShare, groupProjects, roleOf, roleOn, segAt, addRole, setHolder, recomputeDemand
 } from './store.js';
 import { loadIcons } from './icons.js';
 import { html, appHeader, appFooter, toast, forgetTokens, signedOutView } from './ui.js';
-import { renderOverview, editPopover, assignPicker } from './views-overview.js';
+import { renderOverview, staffPopover } from './views-overview.js';
 import { renderModal } from './views-modals.js';
 import { renderPeople, renderDashboard, renderHistory } from './views-analysis.js';
 import { renderApi, renderExport, mountSwagger } from './views-docs.js';
@@ -81,21 +81,12 @@ function restoreScroll(saved) {
  * be. So the anchor is read again off the cell that is about to be replaced.
  */
 function refreshAnchors() {
-  if (state.editing) {
-    const { projectId, q } = state.editing;
-    const cell = root.querySelector(`[data-fk="${CSS.escape(`cell:${projectId}:${q}`)}"]`);
-    if (cell) {
-      const r = cell.getBoundingClientRect();
-      state.editing.anchor = { top: r.top, bottom: r.bottom, right: r.right };
-    }
-  }
-  if (state.picking) {
-    const btn = root.querySelector(`[data-act="assign"][data-val="${CSS.escape(state.picking.projectId)}"]`);
-    const cell = btn?.closest('.pcell') ?? btn;
-    if (cell) {
-      const r = cell.getBoundingClientRect();
-      state.picking.anchor = { left: r.left, top: r.top, bottom: r.bottom };
-    }
+  if (!state.staffing) return;
+  const { projectId, role, q } = state.staffing;
+  const chip = root.querySelector(`[data-fk="${CSS.escape(`chip:${projectId}:${role}:${q}`)}"]`);
+  if (chip) {
+    const r = chip.getBoundingClientRect();
+    state.staffing.anchor = { left: r.left, top: r.top, bottom: r.bottom };
   }
 }
 
@@ -130,8 +121,7 @@ function render() {
     ${appHeader()}
     <main id="main">${state.signedIn ? view() : signedOutView()}</main>
     ${appFooter()}
-    ${state.editing ? editPopover() : ''}
-    ${state.picking ? assignPicker() : ''}
+    ${state.staffing ? staffPopover() : ''}
     ${renderModal()}
     ${toast()}
   `);
@@ -503,121 +493,99 @@ const actions = {
   })),
 
   /*
-   * A cell opens its editor on the first click. There is no edit mode to arm
-   * first: the reader who wants the project record reaches it through the
-   * title, and asking for two clicks before any number could move was the
-   * single thing the prototype was most often faulted for.
+   * A project row folds open to its roles — and shut again. A popover open on
+   * one of its chips goes with it: its chip is about to disappear.
    */
-  cell: (val, el) => {
+  'toggle-roles': (val) => setState(s => ({
+    openRoles: { ...s.openRoles, [val]: !s.openRoles[val] }, staffing: null
+  })),
+  /* A whole group at once: open while any row is still shut, else shut. */
+  'toggle-roles-group': (val) => {
+    const g = groupProjects().find(x => x.key === val);
+    if (!g) return;
+    const all = g.projects.every(p => state.openRoles[p.id]);
+    setState(s => ({
+      openRoles: { ...s.openRoles, ...Object.fromEntries(g.projects.map(p => [p.id, !all])) },
+      staffing: null
+    }));
+  },
+  /* A person row on the Personen tab folds open to the roles they hold. */
+  'toggle-person': (val) => setState(s => ({ openPeople: { ...s.openPeople, [val]: !s.openPeople[val] } })),
+
+  /*
+   * A chip opens the staffing popover on the first click, as a cell used to
+   * open the editor. There is no edit mode to arm first: asking for two
+   * clicks before any number could move was the single thing the prototype
+   * was most often faulted for. Anchored in viewport space, so no scroll
+   * container can clip it.
+   */
+  staff: (val, el) => {
+    const roleId = el.dataset.role;
     const q = Number(el.dataset.q);
-    const project = data.projectsById[val];
-    const r = el.getBoundingClientRect();
+    const r = roleOn(data.projectsById[val], roleId);
+    const s = r && segAt(r, q);
+    const rect = el.getBoundingClientRect();
     setState({
-      editing: { projectId: val, q, anchor: { top: r.top, bottom: r.bottom, right: r.right } },
-      draft: cellValue(project, q),
+      staffing: {
+        projectId: val, role: roleId, q, search: '',
+        anchor: { left: rect.left, top: rect.top, bottom: rect.bottom },
+        target: s ? s.p : null
+      },
+      draft: r ? r.demand[q] : 0,
       reason: '',
-      menu: null,
-      picking: null
+      menu: null, modal: null
     });
   },
-
+  'staff-target': (val) => setState(s => ({ staffing: { ...s.staffing, target: val || null } })),
   draft: (val) => setState(s => ({ draft: Math.max(0, Math.min(200, s.draft + Number(val))) })),
-  'cancel-edit': () => setState({ editing: null, reason: '' }),
+  'cancel-staff': () => setState({ staffing: null, reason: '' }),
 
-  apply: () => {
-    const { projectId, q } = state.editing;
-    const key = `${projectId}:${q}`;
+  /*
+   * Both halves of the popover land at once: who holds the role from this
+   * quarter, and the pensum of this quarter. A changed name is a handover —
+   * the pensum stays with the role, the segment ends the quarter before — and
+   * a slot that was not planned yet becomes planned, creating the role on the
+   * project where ePPM had not foreseen it. Each half is logged on its own,
+   * with the reason on both, because the log reads one fact per line. The
+   * data is changed first and the toast carries the closing patch, so it is
+   * one render and every figure that render draws is already the new one.
+   */
+  'staff-apply': () => {
+    const { projectId, role: roleId, q, target } = state.staffing;
     const project = data.projectsById[projectId];
+    const role = roleOf(roleId);
+    const quarter = data.quarters[q];
     /* Read before setState clears them. */
     const value = state.draft;
     const reason = state.reason.trim();
-    const before = cellValue(project, q);
+    const tail = reason ? ` · ${reason}` : '';
+    const had = roleOn(project, roleId);
+    const was = had && segAt(had, q);
+    /* An empty slot left empty: nothing to write, nothing to say. */
+    if (!was && value === 0 && !target) return setState({ staffing: null, reason: '' });
 
-    const overrides = { ...state.overrides };
-    if (value === project.demand[q]) delete overrides[key];
-    else overrides[key] = value;
+    const r = had ?? addRole(project, roleId);
+    const from = was && was.p ? data.peopleById[was.p] : null;
+    const to = target ? data.peopleById[target] : null;
+    const who = to ? to.name : t('Rolle offen');
+    const before = r.demand[q];
 
-    /*
-     * Logged, like every other edit. The popover demands a justification and
-     * the banner above the grid promises that changes are recorded — and then
-     * this threw the reason away and wrote nothing. Same shape as a rebooking:
-     * one entry carrying both sides and the reason.
-     */
-    logChange(project, 'Pensum',
-      `${data.quarters[q].label}: ${before} % → ${value} %${reason ? ` · ${reason}` : ''}`,
-      `${value} %`);
-
-    setState({ overrides, editing: null, reason: '' });
-    flash(`${t('Pensum übernommen')} — ${project.location}, ${data.quarters[q].label}: ${value} %`);
-  },
-
-  rebook: () => {
-    const { projectId, q } = state.editing;
-    setState({
-      modal: {
-        type: 'rebook', projectId, q,
-        amount: cellValue(data.projectsById[projectId], q),
-        targetId: null, quarters: 2, search: '', reason: ''
-      },
-      editing: null
-    });
-  },
-  'rebook-target': (val) => setState(s => ({ modal: { ...s.modal, targetId: val } })),
-  'rebook-apply': () => {
-    const { projectId, q, amount, targetId, quarters, reason } = state.modal;
-    const project = data.projectsById[projectId];
-    const target = data.peopleById[targetId];
-    const from = project.leadId ? data.peopleById[project.leadId] : null;
-
-    // The prototype moves the lead of this project; a real implementation would
-    // split the allocation into two person-level rows — see docs/GAP-ANALYSIS.md.
-    project.leadId = targetId;
-
-    // One entry carrying both sides, as the wireframe asks.
-    data.changes.unshift({
-      id: `c-${projectId}-${q}-${data.changes.length}`,
-      date: data.meta.today, dateLabel: data.meta.todayLabel,
-      actor: data.meta.user.name, projectId, projectLabel: project.location,
-      field: 'Bearbeitender',
-      change: `${t('Umgebucht')}: ${from ? from.name : t('nicht zugewiesen')} → ${target.name} · ${reason.trim()}`,
-      value: `${amount} % ${t('ab')} ${data.quarters[q].label}, ${quarters} ${t('Quartale')}`
-    });
-
-    touch();
-    flash(`${amount} % ${t('umgebucht auf')} ${target.name} — ${project.location}, ${t('ab')} ${data.quarters[q].label}`,
-      { modal: null });
-  },
-
-  /*
-   * The picker opens on the cell, like the editor, and is anchored in viewport
-   * space for the same reason: no scroll container can clip it.
-   */
-  assign: (val, el) => {
-    const r = (el.closest('.pcell') ?? el).getBoundingClientRect();
-    setState({
-      picking: { projectId: val, anchor: { left: r.left, top: r.top, bottom: r.bottom }, search: '' },
-      editing: null, menu: null
-    });
-  },
-  /* The pick is the commit. An empty value clears the assignment. One render:
-     the data is changed first and the toast carries the closing patch. */
-  pick: (val) => {
-    const project = data.projectsById[state.picking.projectId];
-    const from = project.leadId ? data.peopleById[project.leadId] : null;
-    const to = val ? data.peopleById[val] : null;
-    if ((to ? to.id : null) === (from ? from.id : null)) return setState({ picking: null });
-    project.leadId = to ? to.id : null;
-    project.unassigned = !to;
-    touch();
-    if (to) {
-      logChange(project, 'Bearbeitender',
-        from ? `${from.name} → ${to.name}` : `${t('Zugewiesen an')} ${to.name}`, to.name);
-      flash(`${project.location} — ${t('Bearbeitender')}: ${to.name}`, { picking: null });
-    } else {
-      logChange(project, 'Bearbeitender',
-        from ? `${from.name} → ${t('nicht zugewiesen')}` : t('Zuweisung aufgehoben'), t('nicht zugewiesen'));
-      flash(`${project.location} — ${t('Zuweisung aufgehoben')}`, { picking: null });
+    if (!was || (was.p ?? null) !== (target ?? null)) {
+      setHolder(r, q, target ?? null);
+      logChange(project, role.label,
+        was ? `${t('Übergabe')} ${t('ab')} ${quarter.label}: ${from ? from.name : t('Rolle offen')} → ${who}${tail}`
+          : `${t('Geplant')} ${t('ab')} ${quarter.label}: ${who}${tail}`,
+        who);
     }
+    if (value !== before) {
+      r.demand[q] = value;
+      recomputeDemand(project);
+      state.edited[`${project.id}:${roleId}:${q}`] = true;
+      logChange(project, role.label, `${quarter.label}: ${before} % → ${value} %${tail}`, `${value} %`);
+    }
+    touch();
+    flash(`${project.location} — ${t(role.label)} ${quarter.label}: ${who} · ${value} %`,
+      { staffing: null, reason: '' });
   },
 
   'open-phase': (val) => {
@@ -729,13 +697,19 @@ const actions = {
   'account-lang': (val) => setState(s => ({ account: { ...s.account, lang: val }, lang: val })),
 
   /*
-   * Signing out. Unsaved pensum edits live only in memory, so they go with the
-   * session rather than waiting behind a login for somebody else — and the
-   * signed-out screen says that they did.
+   * Signing out. Edits live only in memory, so they go with the session rather
+   * than waiting behind a login for somebody else — and the signed-out screen
+   * says that they did. They are written into the data, so signing in loads
+   * the fixtures afresh, which is what that screen promises.
    */
-  signout: () => setState({ signedIn: false, ...OVERLAYS_CLOSED, reason: '', overrides: {}, settingsDraft: null }),
+  signout: () => setState({
+    signedIn: false, ...OVERLAYS_CLOSED, reason: '', edited: {}, openRoles: {}, openPeople: {}, settingsDraft: null
+  }),
 
-  signin: () => setState({ signedIn: true }),
+  signin: async () => {
+    await load();
+    setState({ signedIn: true });
+  },
   /* The print layout prints what is on screen: the bar plan when the reader is
      looking at the bar plan, the figures otherwise — it reads the same view. */
   'print-layout': () => setState({ tab: 'export', ...OVERLAYS_CLOSED }),
@@ -832,19 +806,15 @@ root.addEventListener('click', (event) => {
   event.preventDefault();
   // Remember the opener, but only while nothing is open — so the key belongs to
   // whatever is about to open, not to a click inside an open dialog.
-  if (!state.modal && !state.editing && !state.picking) modalReturn = focusKey(el);
+  if (!state.modal && !state.staffing) modalReturn = focusKey(el);
   fn(el.dataset.val, el);
 });
 
 /*
- * Typing. Five of these only write one field of the open dialog, so they are a
- * table rather than a chain: the field name and how to read the value.
+ * Typing. These only write one field of the open dialog, so they are a table
+ * rather than a chain: the field name and how to read the value.
  */
 const MODAL_FIELDS = {
-  'rebook-search':   { field: 'search' },
-  'rebook-reason':   { field: 'reason' },
-  'rebook-amount':   { field: 'amount', parse: v => Math.max(0, Number(v) || 0) },
-  'rebook-quarters': { field: 'quarters', parse: v => Math.max(1, Number(v) || 1) },
   /* Kept as typed: personDraft() says whether they are values yet. */
   'person-employment': { field: 'employment' },
   'person-share':      { field: 'share' }
@@ -872,8 +842,8 @@ root.addEventListener('input', (event) => {
     setState(s => ({ settingsDraft: { ...s.settingsDraft, [el.dataset.val]: el.value } }));
   } else if (act === 'menu-search') {
     setState({ menuSearch: el.value });
-  } else if (act === 'pick-search') {
-    setState(s => ({ picking: { ...s.picking, search: el.value } }));
+  } else if (act === 'staff-search') {
+    setState(s => ({ staffing: { ...s.staffing, search: el.value } }));
   } else if (act === 'reason') {
     setState({ reason: el.value });
   } else if (act === 'draft-input') {
@@ -949,7 +919,7 @@ document.addEventListener('keydown', (event) => {
    * an aria-modal dialog onto the brand link and the header search, behind the
    * scrim, with no way to tell you had left.
    */
-  const modal = (state.modal || state.editing || state.picking)
+  const modal = (state.modal || state.staffing)
     && (root.querySelector('.modal') ?? root.querySelector('.pop'));
   if (modal && event.key === 'Tab') {
     const items = trapFocusables(modal);
@@ -979,29 +949,29 @@ document.addEventListener('keydown', (event) => {
       default: break;
     }
   }
-  // Both person pickers follow the same contract: a listbox answers to the
-  // keys a listbox answers to. Enter picks in the popover and selects in the
-  // rebooking dialog, which still has a button to confirm.
+  // The person list follows the listbox contract: a listbox answers to the
+  // keys a listbox answers to. Enter selects; the popover's button confirms.
   const list = root.querySelector('[role="listbox"]');
-  if (list && root.contains(event.target) && event.target.closest('.rebook__to, .pop--assign, [role="listbox"]')) {
+  if (list && root.contains(event.target) && event.target.closest('.pop--staff, [role="listbox"]')) {
     if (event.key === 'ArrowDown') { event.preventDefault(); return moveOption(1); }
     if (event.key === 'ArrowUp') { event.preventDefault(); return moveOption(-1); }
     if (event.key === 'Enter') {
       const option = document.activeElement?.closest('[role="option"]');
       if (option) {
         event.preventDefault();
-        return actions[state.picking ? 'pick' : 'rebook-target'](option.dataset.val);
+        return actions['staff-target'](option.dataset.val);
       }
     }
   }
 
   if (event.key === 'Escape' && closeOverlays()) event.preventDefault();
 
-  // Enter applies the pending pensum, matching the wireframe's stated contract.
-  if (event.key === 'Enter' && state.editing && root.contains(event.target)
-      && !event.target.matches('textarea, button')) {
-    const apply = root.querySelector('.pop [data-act="apply"]');
-    if (apply && !apply.disabled) { event.preventDefault(); actions.apply(); }
+  // Enter applies the pending staffing, matching the wireframe's stated
+  // contract — from the stepper's field, not from the search or the reason.
+  if (event.key === 'Enter' && state.staffing && root.contains(event.target)
+      && !event.target.matches('textarea, button, [data-act="staff-search"]')) {
+    const apply = root.querySelector('.pop [data-act="staff-apply"]');
+    if (apply && !apply.disabled) { event.preventDefault(); actions['staff-apply'](); }
   }
 });
 
@@ -1017,12 +987,10 @@ document.addEventListener('keydown', (event) => {
  * this. On click the dispatch has already run by the time we re-render.
  */
 document.addEventListener('click', (event) => {
-  const menu = state.menu !== null && !event.target.closest('.dd');
-  /* The picker closes the same way. Its own trigger is exempt, because the
-     dispatch above has just opened it on that very click. */
-  const picker = state.picking !== null && !event.target.closest('.pop--assign, [data-act="assign"]');
-  if (!menu && !picker) return;
-  setState({ ...(menu ? { menu: null } : {}), ...(picker ? { picking: null } : {}) });
+  /* The staffing popover does not close this way: it holds a stepped figure
+     and a typed reason, and Escape and «Abbrechen» are the ways out of it. */
+  if (state.menu === null || event.target.closest('.dd')) return;
+  setState({ menu: null });
 });
 
 /**
@@ -1089,16 +1057,15 @@ document.addEventListener('scroll', (event) => {
   if (performance.now() - lastRenderAt < 150) return;
   /* A list scrolling inside the popover is not the page moving under it. */
   if (event.target instanceof Element && event.target.closest('.pop')) return;
-  if (state.picking) {
-    if (!state.picking.search) setState({ picking: null });
-    return;
-  }
-  if (!state.editing) return;
-  const project = data.projectsById[state.editing.projectId];
-  const started = state.reason.trim() !== ''
-    || (project && state.draft !== cellValue(project, state.editing.q));
+  if (!state.staffing) return;
+  const { projectId, role, q, target, search } = state.staffing;
+  const r = roleOn(data.projectsById[projectId], role);
+  const s = r && segAt(r, q);
+  const started = state.reason.trim() !== '' || search !== ''
+    || state.draft !== (r ? r.demand[q] : 0)
+    || (target ?? null) !== (s ? s.p : null);
   if (started) return;
-  setState({ editing: null });
+  setState({ staffing: null });
 }, { capture: true, passive: true });
 
 window.addEventListener('hashchange', () => {
