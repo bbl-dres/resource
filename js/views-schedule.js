@@ -63,11 +63,10 @@ export function planLegend({ layers, coloured: on, legend, staffing = false, cls
         : null
     },
     {
-      /* The chips of a folded-open row. On screen only: paper has no rows to fold. */
+      /* The rows of a folded-open project. On screen only: paper has no rows to fold. */
       label: 'Besetzung',
       items: staffing
-        ? html`${legendItem(html`<span class="legend__swatch is-open-role"></span>`, 'Rolle offen')}
-          ${legendItem('', 'Chip = Person · Pensum in Punkten')}`
+        ? legendItem(html`<span class="legend__swatch is-open-role"></span>`, 'Rolle offen')
         : null
     },
     {

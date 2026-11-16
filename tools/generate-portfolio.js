@@ -528,9 +528,9 @@ for (const p of generated) {
 
 /*
  * No booked load is written per person any more. A person's load is the sum of
- * the roles they hold, quarter by quarter, and the app derives it from the
- * projects (see the roles section below) — written out as well, it could only
- * drift from the roles it is the sum of.
+ * what they carry on their projects, quarter by quarter, and the app derives
+ * it from the projects (see the assignees section below) — written out as
+ * well, it could only drift from the pensa it is the sum of.
  *
  * The draws the authored occupancy of a non-lead used to take are still
  * taken, and thrown away: the gates and the change log are drawn after this
@@ -754,17 +754,23 @@ people.forEach(person => { person.organisation = teamOfPerson.get(person.id); })
 META.organisations = TEAMS.map(({ id, label, short, projectShare }) => ({ id, label, short, projectShare }));
 
 /* -----------------------------------------------------------------------------
-   Roles — who carries what on a project, quarter by quarter
+   Assignees — who carries how much of a project, quarter by quarter
    -------------------------------------------------------------------------- */
 
 /*
- * A project used to carry one person and one pensum. It now carries up to four
- * roles — the ones data/roles.json names, in its order — and each role has a
- * pensum per quarter and a person who holds it, who may change at a quarter
- * boundary. The project's demand is the sum over its roles, so every total the
- * fixtures were sized against is unchanged: the split only says who the work
- * falls to. Drawn last, after everything else, so the portfolio, the team, the
- * gates and the leads come out exactly as they did before roles existed.
+ * A project carries its Bearbeitende: a list of rows, each a role — one of
+ * the four data/roles.json names, in its order — a person, and that person's
+ * pensum per quarter. A role that changes hands at a quarter boundary is two
+ * rows, one per person; a role nobody has been found for yet is a row with
+ * no person. The project's demand is the sum over the rows, so every total
+ * the fixtures were sized against is unchanged: the split only says who the
+ * work falls to. Drawn last, after everything else, so the portfolio, the
+ * team, the gates and the leads come out exactly as they did before a
+ * project had more than one person.
+ *
+ * The split is drawn role by role, as a pensum per quarter and the runs of
+ * quarters a person holds it for, and written out as rows afterwards — see
+ * assigneesOf() below.
  */
 const ROLES = read('roles').roles.map(r => r.id);
 
@@ -866,10 +872,10 @@ for (const p of projects) {
 /*
  * What the planning has to show: a role that changes hands at a quarter
  * boundary, and a role nobody holds yet. A handover splits the run — the
- * pensum stays with the role, the person after the split is somebody else or
- * nobody — and it never falls in the current quarter, which is the one being
- * worked. An open role is a run with no person from its first quarter; the
- * lead's is open exactly where the project has no assignee.
+ * person after the split is somebody else or nobody — and it never falls in
+ * the current quarter, which is the one being worked. An open role is a run
+ * with no person from its first quarter; the lead's is open exactly where
+ * the project has no assignee.
  */
 const HANDOVER = 0.12, OPEN_AFTER = 0.25, OPEN_FROM_START = 0.05;
 for (const p of projects) {
@@ -900,12 +906,34 @@ META.quarters = QUARTER_CAL.map((c, i) => ({
 }));
 write('meta', META);
 /*
- * Not written: the assignee, the flag for a missing one and the demand curve.
- * All three are now sums or readings of the roles — the Bearbeitender is
- * whoever holds that role in the current quarter — and the app derives them
- * at load, so a file that carried them as well could only disagree.
+ * What a project is written with: one row per role and person, in the order
+ * of the roles and, within a role, in the order its runs were drawn — so
+ * whoever takes a role over stands under whoever hands it on. A row carries
+ * the role's pensum in the quarters that person holds it and nought in the
+ * others; the part of a role nobody holds is a row with no person.
  */
-write('projects', projects.map(({ leadId, unassigned, demand, ...rest }) => rest));
+function assigneesOf(p) {
+  const rows = [];
+  for (const r of p.roles) {
+    const mine = new Map();
+    for (const s of r.segs) {
+      if (!mine.has(s.p)) mine.set(s.p, { role: r.role, person: s.p, demand: Array(QUARTERS).fill(0) });
+      for (let q = s.from; q < s.to; q++) mine.get(s.p).demand[q] += r.demand[q];
+    }
+    rows.push(...mine.values());
+  }
+  return rows;
+}
+for (const p of projects) p.assignees = assigneesOf(p);
+
+/*
+ * Not written: the lead, the flag for a missing one, the demand curve and the
+ * runs the split was drawn with. All of them are sums or readings of the rows
+ * — the lead is whoever holds the first role in the current quarter — and
+ * the app derives them at load, so a file that carried them as well could
+ * only disagree.
+ */
+write('projects', projects.map(({ leadId, unassigned, demand, roles, ...rest }) => rest));
 write('people', people);
 write('capacity', capacity);
 
@@ -922,9 +950,18 @@ const unassigned = projects.filter(p => !p.leadId).length;
 /* Against the project capacity, as the app counts it — not the whole contract. */
 const shareOf = Object.fromEntries(TEAMS.map(team => [team.id, team.projectShare]));
 const over = people.filter(p => loadByRole[p.id][0] / (p.employment * shareOf[p.organisation] / 100) * 100 > 100).length;
-const allRoles = projects.flatMap(p => p.roles);
-const openRoles = allRoles.filter(r => r.segs.some(s => s.from <= 0 && 0 < s.to && !s.p)).length;
-const handovers = allRoles.reduce((a, r) => a + r.segs.filter((s, i) => i > 0 && r.segs[i - 1].to === s.from).length, 0);
+const handovers = projects.flatMap(p => p.roles)
+  .reduce((a, r) => a + r.segs.filter((s, i) => i > 0 && r.segs[i - 1].to === s.from).length, 0);
+const allAssignees = projects.flatMap(p => p.assignees);
+const staffed = allAssignees.filter(a => a.person);
+const openNow = allAssignees.filter(a => !a.person && a.demand[0] > 0).length;
+/* What was written has to add up to what the rest of the files were sized on. */
+for (const p of projects) {
+  p.demand.forEach((v, q) => {
+    const sum = p.assignees.reduce((a, x) => a + x.demand[q], 0);
+    if (sum !== v) throw new Error(`${p.id} Q${q}: assignees ${sum} ≠ demand ${v}`);
+  });
+}
 
 console.log('projects   ', projects.length, '(' + existing.length + ' kept, 100 generated)');
 console.log('people     ', people.length, '· roster', people.reduce((a, p) => a + p.employment, 0), '%');
@@ -938,6 +975,6 @@ console.log('milestones ', milestones.items.length,
   '· ok', milestones.items.filter(m => m.status === 'ok').length,
   '· offen', milestones.items.filter(m => m.forecast === null).length);
 console.log('ohne Projektleitung', unassigned, '· Personen über 100 %', over);
-console.log('roles      ', allRoles.length, '·', ROLES.map(id => `${id} ${allRoles.filter(r => r.role === id).length}`).join(' · '),
-  '· Übergaben', handovers, '· offen heute', openRoles);
-console.log('roles per person   ', (allRoles.length / people.length).toFixed(1));
+console.log('rows       ', allAssignees.length, '·', ROLES.map(id => `${id} ${allAssignees.filter(a => a.role === id).length}`).join(' · '),
+  '· Übergaben', handovers, '· offene Rollen', allAssignees.length - staffed.length, '· davon heute', openNow);
+console.log('rows per person    ', (staffed.length / people.length).toFixed(1));

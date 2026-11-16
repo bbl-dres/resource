@@ -259,8 +259,8 @@ export function renderExport() {
  * as a portfolio total.
  */
 /**
- * The sheet is a stream of rows, not a list of projects: the grouping from the
- * toolbar puts a heading before each group and a sum after it — the per-group
+ * The sheet is a stream of rows, not a list of projects: the grouping by
+ * project size puts a heading before each group and a sum after it — the per-group
  * figures the grid leaves out because they belong on paper.
  */
 function sheetRows() {
@@ -593,7 +593,7 @@ function printSheet(sheet, report, { rows, all, block, page, total, last, tot, c
       </div>
       <div class="sheet__meta">
         <span>${t('Umfang')}: ${scopeLine(all.length)}</span>
-        <span>${t('Filter')}: ${chips.length ? chips.map(c => t(c.label)).join(', ') : t('keine')}
+        <span>${t('Filter')}: ${chips.length ? chips.map(c => c.label).join(', ') : t('keine')}
           · ${t('Einheit')}: ${state.unit === 'fte' ? 'FTE' : t('Pensum in %')}</span>
         <span>${t(cfg.classification)}</span>
       </div>

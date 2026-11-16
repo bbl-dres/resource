@@ -11,13 +11,14 @@
 
 import {
   data, state, load, subscribe, setState, syncFromUrl, closeOverlays, touch, OVERLAYS_CLOSED,
-  toggleIn, removeFilter, resetFilters, defaultDir, t, columnSetKey, writeUrl,
+  toggleIn, removeFilter, resetFilters, noFilters, FILTERS, defaultDir, t, columnSetKey, writeUrl,
   offsetForScale, maxOffset, windowStep, pageCount, viewPatch, layerPatch, settingChanges,
-  personDraft, projectShare, groupProjects, roleOf, roleOn, segAt, addRole, setHolder, recomputeDemand
+  groupProjects, roleOf, laneKey, laneOf, addLane, reassignLane, pruneLanes, recomputeDemand,
+  periodValue, compareDe
 } from './store.js';
 import { loadIcons } from './icons.js';
 import { html, appHeader, appFooter, toast, forgetTokens, signedOutView } from './ui.js';
-import { renderOverview, staffPopover } from './views-overview.js';
+import { renderOverview } from './views-overview.js';
 import { renderModal } from './views-modals.js';
 import { renderPeople, renderDashboard, renderHistory } from './views-analysis.js';
 import { renderApi, renderExport, mountSwagger } from './views-docs.js';
@@ -75,26 +76,16 @@ function restoreScroll(saved) {
 }
 
 /*
- * A popover is anchored to the cell it was opened on, in viewport space, and
- * the anchor was taken at the click. A render that moves the cell — a resize,
- * a column switched on, a filter — left the popover where the cell used to
- * be. So the anchor is read again off the cell that is about to be replaced.
+ * True while the page is being replaced. A browser may report the focused
+ * cell as left when its node is removed; that is not the reader leaving it,
+ * and must not write the cell.
  */
-function refreshAnchors() {
-  if (!state.staffing) return;
-  const { projectId, role, q } = state.staffing;
-  const chip = root.querySelector(`[data-fk="${CSS.escape(`chip:${projectId}:${role}:${q}`)}"]`);
-  if (chip) {
-    const r = chip.getBoundingClientRect();
-    state.staffing.anchor = { left: r.left, top: r.top, bottom: r.bottom };
-  }
-}
+let rendering = false;
 
 function render() {
   const focus = captureFocus();
   const scroll = captureScroll();
   const scrollY = window.scrollY;
-  refreshAnchors();
 
   const view = VIEWS[state.tab] ?? renderOverview;
 
@@ -117,14 +108,16 @@ function render() {
    * no figures. The header keeps only the wordmark, so the page still says
    * whose it is.
    */
-  root.innerHTML = String(html`
+  const page = String(html`
     ${appHeader()}
     <main id="main">${state.signedIn ? view() : signedOutView()}</main>
     ${appFooter()}
-    ${state.staffing ? staffPopover() : ''}
     ${renderModal()}
     ${toast()}
   `);
+  rendering = true;
+  root.innerHTML = page;
+  rendering = false;
 
   document.documentElement.lang = state.lang;
   if (state.tab === 'api') mountSwagger();
@@ -138,7 +131,6 @@ function render() {
   syncModalFocus();
   if (Math.abs(window.scrollY - scrollY) > 1) window.scrollTo({ top: scrollY });
   renderedAxis = axisKey();
-  lastRenderAt = performance.now();
 }
 
 /*
@@ -189,9 +181,6 @@ function syncZoom() {
   // Never magnify to fill: a sheet smaller than the pane stays its own size.
   mount.style.setProperty('--sheet-zoom', paper > room ? room / paper : 1);
 }
-
-/** Programmatic scroll restoration must not read as a user scroll. */
-let lastRenderAt = 0;
 
 /*
  * Place the open menu against its trigger, in window coordinates.
@@ -269,12 +258,17 @@ const focusSelector = (found) => {
 };
 
 function captureFocus() {
-  const found = focusKey(document.activeElement);
+  const el = document.activeElement;
+  const found = focusKey(el);
   if (!found) return null;
   return {
     ...found,
-    start: document.activeElement.selectionStart ?? null,
-    end: document.activeElement.selectionEnd ?? null
+    start: el.selectionStart ?? null,
+    end: el.selectionEnd ?? null,
+    /* A figure half typed into a cell of the grid. The render draws the cell
+       from the data, which does not have it yet — a toast fading or a window
+       resized mid-keystroke would otherwise take the typing with it. */
+    typed: el.dataset.act === 'lane-input' && el.value !== el.defaultValue ? el.value : null
   };
 }
 
@@ -283,6 +277,7 @@ function restoreFocus(focus) {
   const el = root.querySelector(focusSelector(focus));
   if (!el) return;
   el.focus({ preventScroll: true });
+  if (focus.typed != null) el.value = focus.typed;
   if (focus.start != null && typeof el.setSelectionRange === 'function') {
     try { el.setSelectionRange(focus.start, focus.end); } catch { /* number inputs refuse */ }
   }
@@ -305,7 +300,7 @@ function trapFocusables(scope) {
 let overlayWasOpen = false;
 
 function syncModalFocus() {
-  const overlay = root.querySelector('.modal') ?? root.querySelector('.pop');
+  const overlay = root.querySelector('.modal');
 
   if (!overlay) {
     // Only on the render where it actually closed, so this never fights
@@ -331,29 +326,24 @@ function focusSearch() {
   });
 }
 
-/** Every app-owned change lands in the log, with both sides of it. */
-function logChange(project, field, change, value) {
-  data.changes.unshift({
-    id: `c-${project.id}-${data.changes.length}`,
-    date: data.meta.today, dateLabel: data.meta.todayLabel,
-    actor: data.meta.user.name, projectId: project.id, projectLabel: project.location,
-    field, change, value
-  });
-}
-
-/*
- * A changed rule is logged too, with no project: the entry then stays in the
- * log under every filter, which is right for a change that moved figures on
- * projects nobody touched.
+/**
+ * Every app-owned change lands in the log, with both sides of it. A change to
+ * a project is filed under the project; a changed rule has none, and is filed
+ * under the area it belongs to — the entry then stays in the log under every
+ * filter, which is right for a change that moved figures on projects nobody
+ * touched.
  */
-function logSetting(field, change, value, area = t('Einstellungen')) {
+function logEntry({ project = null, area = t('Einstellungen'), field, change, value }) {
   data.changes.unshift({
-    id: `c-setting-${data.changes.length}`,
+    id: `c-${project ? project.id : 'setting'}-${data.changes.length}`,
     date: data.meta.today, dateLabel: data.meta.todayLabel,
-    actor: data.meta.user.name, projectId: null, projectLabel: area,
+    actor: data.meta.user.name,
+    projectId: project ? project.id : null, projectLabel: project ? project.location : area,
     field, change, value
   });
 }
+const logChange = (project, field, change, value) => logEntry({ project, field, change, value });
+const logSetting = (field, change, value) => logEntry({ field, change, value });
 
 /*
  * A toast, and optionally the state change it reports, in one render. Both
@@ -386,11 +376,7 @@ const actions = {
 
   tab: (val) => setState({ tab: val, ...OVERLAYS_CLOSED }),
   // The brand is a way back to a clean slate, not just to another route.
-  home: () => setState({
-    tab: 'overview', ...OVERLAYS_CLOSED,
-    phases: [], leads: [], portfolios: [], organisations: [], search: '',
-    searchOpen: false
-  }),
+  home: () => setState({ tab: 'overview', ...OVERLAYS_CLOSED, ...noFilters(), searchOpen: false }),
   lang: (val) => setState({ lang: val, menu: null }),
 
   menu: (val, el) => {
@@ -401,7 +387,7 @@ const actions = {
      * answer was always false — which is why arrow keys never reached the panel.
      */
     const byKeyboard = el.matches(':focus-visible');
-    setState({ menu: opening ? val : null, menuSearch: '', picking: null });
+    setState({ menu: opening ? val : null, menuSearch: '' });
     if (!opening) return;
     if (byKeyboard) {
       requestAnimationFrame(() => {
@@ -417,15 +403,12 @@ const actions = {
   },
   'search-close': () => setState({ searchOpen: false, search: '' }),
 
-  sort: (val) => setState({ sort: val, sortDir: defaultDir(val), menu: null }),
-  'sort-dir': (val) => setState({ sortDir: val, menu: null }),
   // A header click picks the column; clicking the active one flips direction.
   'sort-col': (val) => setState(s => (
     s.sort === val
       ? { sortDir: s.sortDir === 'asc' ? 'desc' : 'asc' }
       : { sort: val, sortDir: defaultDir(val) }
   )),
-  group: (val) => setState({ group: val, menu: null }),
   /* «card:by:value», «card:dir:desc» — one half of a card's sort at a time.
      The menu stays open: the other half is usually the next click. */
   'card-sort': (val) => {
@@ -448,26 +431,16 @@ const actions = {
     setState({ leads: mine ? [] : [me] });
   },
 
-  'toggle-phase': (val) => toggleIn('phases', val),
-  'toggle-lead': (val) => toggleIn('leads', val),
-  'toggle-portfolio': (val) => toggleIn('portfolios', val),
-  'toggle-organisation': (val) => toggleIn('organisations', val),
+  /* toggle-phase, toggle-lead, toggle-portfolio, toggle-organisation — one per filter. */
+  ...Object.fromEntries(FILTERS.map(f => [`toggle-${f.kind}`, (val) => toggleIn(f.key, val)])),
 
   /*
-   * «Alle» needs the full id list for the menu it sits in. A lookup rather than
-   * a chain ending in a default: the chain quietly handed the portfolio ids to
-   * whatever kind it did not recognise.
+   * «Alle» and «Keine» of the menu they sit in. Looked up, not defaulted: a
+   * kind the registry does not know changes nothing.
    */
   bulk: (val, el) => {
-    const kind = el.dataset.kind;
-    const every = {
-      phases: () => data.phases.eppm.map(e => e.id),
-      leads: () => [...data.people.map(p => p.id), 'none'],
-      portfolios: () => data.meta.portfolios.map(p => p.id),
-      organisations: () => data.meta.organisations.map(o => o.id)
-    }[kind];
-    if (!every) return;
-    setState({ [kind]: val === 'all' ? every() : [] });
+    const f = FILTERS.find(x => x.key === el.dataset.kind);
+    if (f) setState({ [f.key]: val === 'all' ? f.ids() : [] });
   },
 
   /* Writes into the set the visible grid is driven by, never the other one. */
@@ -484,7 +457,7 @@ const actions = {
 
   'filter-remove': (val, el) => removeFilter(el.dataset.kind, val),
   'filters-reset': () => resetFilters(),
-  /* Also the way out of the person dialog, so it closes whatever is open. */
+  /* From the bell: the reader's own projects. It closes whatever is open. */
   'filter-lead': (val) => setState({ tab: 'overview', ...OVERLAYS_CLOSED, leads: [val] }),
 
   'foot-details': () => setState(s => ({ footDetails: !s.footDetails })),
@@ -493,99 +466,34 @@ const actions = {
   })),
 
   /*
-   * A project row folds open to its roles — and shut again. A popover open on
-   * one of its chips goes with it: its chip is about to disappear.
+   * A project row folds open to its Bearbeitende — and shut again. That is
+   * all a click on the row does. The empty rows asked for under it are not
+   * kept: folded open again, the project shows what is planned.
    */
-  'toggle-roles': (val) => setState(s => ({
-    openRoles: { ...s.openRoles, [val]: !s.openRoles[val] }, staffing: null
+  'toggle-project': (val) => setState(s => ({
+    openProjects: { ...s.openProjects, [val]: !s.openProjects[val] },
+    extraRows: Object.fromEntries(Object.entries(s.extraRows).filter(([key]) => !key.startsWith(`${val}:`)))
   })),
   /* A whole group at once: open while any row is still shut, else shut. */
-  'toggle-roles-group': (val) => {
+  'toggle-projects-group': (val) => {
     const g = groupProjects().find(x => x.key === val);
     if (!g) return;
-    const all = g.projects.every(p => state.openRoles[p.id]);
+    const all = g.projects.every(p => state.openProjects[p.id]);
     setState(s => ({
-      openRoles: { ...s.openRoles, ...Object.fromEntries(g.projects.map(p => [p.id, !all])) },
-      staffing: null
+      openProjects: { ...s.openProjects, ...Object.fromEntries(g.projects.map(p => [p.id, !all])) }
     }));
   },
   /* A person row on the Personen tab folds open to the roles they hold. */
   'toggle-person': (val) => setState(s => ({ openPeople: { ...s.openPeople, [val]: !s.openPeople[val] } })),
 
   /*
-   * A chip opens the staffing popover on the first click, as a cell used to
-   * open the editor. There is no edit mode to arm first: asking for two
-   * clicks before any number could move was the single thing the prototype
-   * was most often faulted for. Anchored in viewport space, so no scroll
-   * container can clip it.
+   * «Weitere Person»: an empty row under a role that already has somebody,
+   * with the caret in its list of people — the next thing to do is choose.
    */
-  staff: (val, el) => {
-    const roleId = el.dataset.role;
-    const q = Number(el.dataset.q);
-    const r = roleOn(data.projectsById[val], roleId);
-    const s = r && segAt(r, q);
-    const rect = el.getBoundingClientRect();
-    setState({
-      staffing: {
-        projectId: val, role: roleId, q, search: '',
-        anchor: { left: rect.left, top: rect.top, bottom: rect.bottom },
-        target: s ? s.p : null
-      },
-      draft: r ? r.demand[q] : 0,
-      reason: '',
-      menu: null, modal: null
-    });
-  },
-  'staff-target': (val) => setState(s => ({ staffing: { ...s.staffing, target: val || null } })),
-  draft: (val) => setState(s => ({ draft: Math.max(0, Math.min(200, s.draft + Number(val))) })),
-  'cancel-staff': () => setState({ staffing: null, reason: '' }),
-
-  /*
-   * Both halves of the popover land at once: who holds the role from this
-   * quarter, and the pensum of this quarter. A changed name is a handover —
-   * the pensum stays with the role, the segment ends the quarter before — and
-   * a slot that was not planned yet becomes planned, creating the role on the
-   * project where ePPM had not foreseen it. Each half is logged on its own,
-   * with the reason on both, because the log reads one fact per line. The
-   * data is changed first and the toast carries the closing patch, so it is
-   * one render and every figure that render draws is already the new one.
-   */
-  'staff-apply': () => {
-    const { projectId, role: roleId, q, target } = state.staffing;
-    const project = data.projectsById[projectId];
-    const role = roleOf(roleId);
-    const quarter = data.quarters[q];
-    /* Read before setState clears them. */
-    const value = state.draft;
-    const reason = state.reason.trim();
-    const tail = reason ? ` · ${reason}` : '';
-    const had = roleOn(project, roleId);
-    const was = had && segAt(had, q);
-    /* An empty slot left empty: nothing to write, nothing to say. */
-    if (!was && value === 0 && !target) return setState({ staffing: null, reason: '' });
-
-    const r = had ?? addRole(project, roleId);
-    const from = was && was.p ? data.peopleById[was.p] : null;
-    const to = target ? data.peopleById[target] : null;
-    const who = to ? to.name : t('Rolle offen');
-    const before = r.demand[q];
-
-    if (!was || (was.p ?? null) !== (target ?? null)) {
-      setHolder(r, q, target ?? null);
-      logChange(project, role.label,
-        was ? `${t('Übergabe')} ${t('ab')} ${quarter.label}: ${from ? from.name : t('Rolle offen')} → ${who}${tail}`
-          : `${t('Geplant')} ${t('ab')} ${quarter.label}: ${who}${tail}`,
-        who);
-    }
-    if (value !== before) {
-      r.demand[q] = value;
-      recomputeDemand(project);
-      state.edited[`${project.id}:${roleId}:${q}`] = true;
-      logChange(project, role.label, `${quarter.label}: ${before} % → ${value} %${tail}`, `${value} %`);
-    }
-    touch();
-    flash(`${project.location} — ${t(role.label)} ${quarter.label}: ${who} · ${value} %`,
-      { staffing: null, reason: '' });
+  'lane-more': (val, el) => {
+    const role = el.dataset.role;
+    setState(s => ({ extraRows: { ...s.extraRows, [`${val}:${role}`]: true } }));
+    root.querySelector(`[data-fk="${CSS.escape(`lanep:${val}:${role}:none`)}"]`)?.focus();
   },
 
   'open-phase': (val) => {
@@ -597,41 +505,6 @@ const actions = {
 
   'open-project': (val) => setState({ ...OVERLAYS_CLOSED, modal: { type: 'project', projectId: val } }),
 
-  /* The dialog opens with the person's two figures in its fields, as text —
-     an empty share means «as the unit has it». */
-  'open-person': (val) => {
-    const person = data.peopleById[val];
-    if (!person) return;
-    setState({
-      ...OVERLAYS_CLOSED,
-      modal: {
-        type: 'person', personId: val,
-        employment: String(person.employment),
-        share: person.projectShare == null ? '' : String(person.projectShare)
-      }
-    });
-  },
-  'person-save': () => {
-    const person = data.peopleById[state.modal.personId];
-    const draft = personDraft(state.modal);
-    if (!person || !draft) return;
-    if (draft.employment !== person.employment) {
-      /* Gross capacity is the sum of the contracts, so it moves with this one —
-         or the office's utilisation would go on counting the old contract. */
-      const delta = draft.employment - person.employment;
-      data.capacity.gross = data.capacity.gross.map(v => v + delta);
-      logSetting('Anstellung', person.name, `${person.employment} % → ${draft.employment} %`, t('Personen'));
-      person.employment = draft.employment;
-    }
-    if (draft.share !== person.projectShare) {
-      const before = projectShare(person);
-      if (draft.share === undefined) delete person.projectShare;
-      else person.projectShare = draft.share;
-      logSetting('Projektanteil', person.name, `${before} % → ${projectShare(person)} %`, t('Personen'));
-    }
-    touch();
-    flash(`${person.name} — ${t('Angaben gespeichert')}`, { modal: null });
-  },
   /* The bar plan is a view of the Planung tab now, not a tab of its own. */
   'open-schedule': (val) => setState({
     tab: 'overview', ...OVERLAYS_CLOSED, search: data.projectsById[val].location, ...viewPatch('termine')
@@ -703,11 +576,18 @@ const actions = {
    * the fixtures afresh, which is what that screen promises.
    */
   signout: () => setState({
-    signedIn: false, ...OVERLAYS_CLOSED, reason: '', edited: {}, openRoles: {}, openPeople: {}, settingsDraft: null
+    signedIn: false, ...OVERLAYS_CLOSED, edited: {}, extraRows: {}, openProjects: {}, openPeople: {}, settingsDraft: null
   }),
 
   signin: async () => {
-    await load();
+    try {
+      await load();
+    } catch (error) {
+      /* The fixtures did not come back — a server stopped under the page. Said,
+         not left as an unhandled rejection behind a button that did nothing. */
+      console.error(error);
+      return flash(t('Die Daten konnten nicht geladen werden.'));
+    }
     setState({ signedIn: true });
   },
   /* The print layout prints what is on screen: the bar plan when the reader is
@@ -806,31 +686,15 @@ root.addEventListener('click', (event) => {
   event.preventDefault();
   // Remember the opener, but only while nothing is open — so the key belongs to
   // whatever is about to open, not to a click inside an open dialog.
-  if (!state.modal && !state.staffing) modalReturn = focusKey(el);
+  if (!state.modal) modalReturn = focusKey(el);
   fn(el.dataset.val, el);
 });
-
-/*
- * Typing. These only write one field of the open dialog, so they are a table
- * rather than a chain: the field name and how to read the value.
- */
-const MODAL_FIELDS = {
-  /* Kept as typed: personDraft() says whether they are values yet. */
-  'person-employment': { field: 'employment' },
-  'person-share':      { field: 'share' }
-};
 
 let searchTimer;
 root.addEventListener('input', (event) => {
   const el = event.target.closest('[data-act]');
   if (!el) return;
   const act = el.dataset.act;
-
-  const target = MODAL_FIELDS[act];
-  if (target) {
-    const value = target.parse ? target.parse(el.value) : el.value;
-    return setState(s => ({ modal: { ...s.modal, [target.field]: value } }));
-  }
 
   if (act === 'search') {
     state.search = el.value;                 // written directly: no re-render per keystroke
@@ -842,18 +706,186 @@ root.addEventListener('input', (event) => {
     setState(s => ({ settingsDraft: { ...s.settingsDraft, [el.dataset.val]: el.value } }));
   } else if (act === 'menu-search') {
     setState({ menuSearch: el.value });
-  } else if (act === 'staff-search') {
-    setState(s => ({ staffing: { ...s.staffing, search: el.value } }));
-  } else if (act === 'reason') {
-    setState({ reason: el.value });
-  } else if (act === 'draft-input') {
-    const n = Number(el.value);
-    if (Number.isFinite(n)) setState({ draft: Math.max(0, Math.min(200, n)) });
   }
 });
 
 /* -----------------------------------------------------------------------------
-   Listbox keyboard behaviour, used by the rebooking person picker.
+   The rows under a project — typed into like a spreadsheet
+   -------------------------------------------------------------------------- */
+
+/*
+ * There is no editor to open. A cell is a field: the figure is typed over,
+ * and leaving the cell — Tab, Enter, an arrow up or down, a click anywhere
+ * else — writes it. Escape puts back what was there. The person of a row is
+ * chosen from the list in its «Bearbeitende» cell, and that is written the
+ * moment it is chosen. Every change goes into the log under the role's name.
+ *
+ * This replaced a popover with a stepper, a list of people, a reason and two
+ * buttons. The users asked for the cell and nothing around it.
+ */
+
+/** What a typed figure means in pensum points, or null where it is not one. */
+function typedPensum(text) {
+  const raw = text.trim().replace(/[’'\s%]/g, '').replace(',', '.');
+  if (raw === '') return 0;
+  if (!/^\d+(\.\d+)?$/.test(raw)) return null;
+  const points = state.unit === 'fte' ? Number(raw) * 100 : Number(raw);
+  return Math.max(0, Math.min(200, Math.round(points)));
+}
+
+/** The row a cell or a list belongs to, read off its attributes. */
+function laneAt(el) {
+  const project = data.projectsById[el.dataset.val];
+  const role = roleOf(el.dataset.role);
+  return { project, role, a: laneOf(project, role.id, el.dataset.holder) };
+}
+
+const personName = id => (id ? data.peopleById[id].name : t('nicht zugewiesen'));
+
+/*
+ * Write a cell. Compared against the data, not against what the field held
+ * when it was focused, so it may be called twice for one edit — by Enter and
+ * again by the blur that follows — and writes once. A figure typed into an
+ * empty row plans the role, for nobody yet; the last figure taken out of a
+ * row nobody holds leaves an empty row behind for as long as the project
+ * stays open, so the cell being left for the next one is still there.
+ */
+function commitCell(el) {
+  if (!el.isConnected) return false;
+  const { project, role, a } = laneAt(el);
+  const from = Number(el.dataset.q);
+  const to = Number(el.dataset.to);
+  const quarters = Array.from({ length: to - from }, (_, i) => from + i);
+  const before = a ? periodValue(a.demand, { quarters }) : 0;
+  const value = typedPensum(el.value);
+  /* Not a figure, or the figure that is there: put the cell back as it was. */
+  if (value === null || value === before) { el.value = el.defaultValue; return false; }
+
+  const row = a ?? addLane(project, role.id, null);
+  for (const q of quarters) {
+    row.demand[q] = value;
+    state.edited[`${project.id}:${laneKey(row)}:${q}`] = true;
+  }
+  if (!row.person && !row.demand.some(v => v > 0)) state.extraRows[`${project.id}:${role.id}`] = true;
+  if (!row.person && value > 0) delete state.extraRows[`${project.id}:${role.id}`];
+  pruneLanes(project);
+  recomputeDemand(project);
+  const span = from + 1 === to ? data.quarters[from].label : `${data.quarters[from].label} – ${data.quarters[to - 1].label}`;
+  logChange(project, role.label, `${personName(row.person)}, ${span}: ${before} % → ${value} %`, `${value} %`);
+  touch();
+  /*
+   * Rendered on the next turn, not now. The blur that brought us here is
+   * half of a move — the next cell is about to take focus, or the click that
+   * caused it has yet to be dispatched — and replacing the page under it
+   * would lose both.
+   */
+  setTimeout(() => setState({}), 0);
+  return true;
+}
+
+/*
+ * Choose the person of a row. A row that has pensum moves to them whole; an
+ * empty row becomes theirs, ready for its figures. «nicht zugewiesen» takes
+ * the person off, and a row left with neither person nor pensum goes.
+ */
+function commitPerson(el) {
+  const { project, role, a } = laneAt(el);
+  const personId = el.value || null;
+  const was = a?.person ?? null;
+  if (personId === was) return;
+  const row = a ? reassignLane(project, a, personId) : addLane(project, role.id, personId);
+  delete state.extraRows[`${project.id}:${role.id}`];
+  /* The marks of this session's edits go with the row they are on. */
+  if (a) {
+    const from = `${project.id}:${role.id}:${el.dataset.holder}:`;
+    for (const key of Object.keys(state.edited).filter(k => k.startsWith(from))) {
+      delete state.edited[key];
+      state.edited[`${project.id}:${laneKey(row)}:${key.slice(from.length)}`] = true;
+    }
+  }
+  pruneLanes(project);
+  recomputeDemand(project);
+  logChange(project, role.label,
+    !a ? `${t('Geplant')}: ${personName(personId)}`
+      : was ? `${t('Übergabe')}: ${personName(was)} → ${personName(personId)}`
+        : `${t('Zugewiesen an')} ${personName(personId)}`,
+    personName(personId));
+  touch();
+  setState({});
+  root.querySelector(`[data-fk="${CSS.escape(`lanep:${project.id}:${laneKey(row)}`)}"]`)?.focus();
+}
+
+/*
+ * The roster, as the options of a row's list. A row is drawn with the one
+ * name it shows; the rest is filled in here the first time the list is
+ * pointed at or focused — fifty options on each of four hundred open rows
+ * was most of the page.
+ */
+function fillPeople(select) {
+  if (select.options.length > 2) return;
+  const current = select.value;
+  const people = [...data.people].sort((a, b) => compareDe(a.name, b.name));
+  for (const option of [...select.options]) if (option.value) option.remove();
+  for (const person of people) select.add(new Option(person.name, person.id));
+  select.value = current;
+}
+
+/** The same column of the row above or below, where there is one. */
+function cellBeside(el, step) {
+  const rows = [...root.querySelectorAll('.prow--lane')];
+  const next = rows[rows.indexOf(el.closest('.prow--lane')) + step];
+  return next?.querySelector(`[data-act="lane-input"][data-col="${CSS.escape(el.dataset.col)}"]`) ?? null;
+}
+
+root.addEventListener('focusout', (event) => {
+  if (rendering) return;
+  if (event.target.matches?.('[data-act="lane-input"]')) commitCell(event.target);
+});
+
+root.addEventListener('change', (event) => {
+  if (event.target.matches?.('[data-act="lane-person"]')) commitPerson(event.target);
+});
+
+root.addEventListener('focusin', (event) => {
+  if (event.target.matches?.('[data-act="lane-person"]')) fillPeople(event.target);
+});
+
+/* A click into a cell selects the figure, as a spreadsheet does: the next
+   keystroke replaces it. Only the click that brings focus — a second click
+   places the caret. */
+let clickedInto = null;
+root.addEventListener('pointerdown', (event) => {
+  const el = event.target.closest?.('[data-act="lane-person"], [data-act="lane-input"]');
+  if (!el) return;
+  if (el.tagName === 'SELECT') return fillPeople(el);
+  clickedInto = document.activeElement === el ? null : el;
+});
+root.addEventListener('click', (event) => {
+  const el = event.target.closest?.('[data-act="lane-input"]');
+  if (el && el === clickedInto && el.selectionStart === el.selectionEnd) el.select();
+  clickedInto = null;
+});
+
+root.addEventListener('keydown', (event) => {
+  const el = event.target;
+  if (!el.matches?.('[data-act="lane-input"]')) return;
+  if (event.key === 'Escape') {
+    /* Before the handler that closes overlays: here Escape means «not this figure». */
+    event.preventDefault(); event.stopPropagation();
+    el.value = el.defaultValue; el.select();
+    return;
+  }
+  const step = event.key === 'ArrowDown' || (event.key === 'Enter' && !event.shiftKey) ? 1
+    : event.key === 'ArrowUp' || (event.key === 'Enter' && event.shiftKey) ? -1 : 0;
+  if (!step) return;
+  event.preventDefault();
+  const next = cellBeside(el, step);
+  /* Moving on writes the cell through its blur; with nowhere to go, here. */
+  if (next) { next.focus(); next.select(); } else if (!commitCell(el)) el.select();
+});
+
+/* -----------------------------------------------------------------------------
+   Roaming focus along a list of controls — the menus use it
    -------------------------------------------------------------------------- */
 
 /**
@@ -870,16 +902,6 @@ function roam(items, step, from = items.indexOf(document.activeElement)) {
         : (from + step + items.length) % items.length;
   items[next]?.focus();
   return items[next] ?? null;
-}
-
-function moveOption(step) {
-  const list = root.querySelector('[role="listbox"]');
-  if (!list) return null;
-  const options = [...list.querySelectorAll('[role="option"]')];
-  /* Where focus is, first; the selected row is only the entry point. */
-  let from = options.indexOf(document.activeElement);
-  if (from < 0) from = options.findIndex(o => o.classList.contains('is-on'));
-  return roam(options, step, from);
 }
 
 /* -----------------------------------------------------------------------------
@@ -919,8 +941,7 @@ document.addEventListener('keydown', (event) => {
    * an aria-modal dialog onto the brand link and the header search, behind the
    * scrim, with no way to tell you had left.
    */
-  const modal = (state.modal || state.staffing)
-    && (root.querySelector('.modal') ?? root.querySelector('.pop'));
+  const modal = state.modal && root.querySelector('.modal');
   if (modal && event.key === 'Tab') {
     const items = trapFocusables(modal);
     if (items.length) {
@@ -949,30 +970,7 @@ document.addEventListener('keydown', (event) => {
       default: break;
     }
   }
-  // The person list follows the listbox contract: a listbox answers to the
-  // keys a listbox answers to. Enter selects; the popover's button confirms.
-  const list = root.querySelector('[role="listbox"]');
-  if (list && root.contains(event.target) && event.target.closest('.pop--staff, [role="listbox"]')) {
-    if (event.key === 'ArrowDown') { event.preventDefault(); return moveOption(1); }
-    if (event.key === 'ArrowUp') { event.preventDefault(); return moveOption(-1); }
-    if (event.key === 'Enter') {
-      const option = document.activeElement?.closest('[role="option"]');
-      if (option) {
-        event.preventDefault();
-        return actions['staff-target'](option.dataset.val);
-      }
-    }
-  }
-
   if (event.key === 'Escape' && closeOverlays()) event.preventDefault();
-
-  // Enter applies the pending staffing, matching the wireframe's stated
-  // contract — from the stepper's field, not from the search or the reason.
-  if (event.key === 'Enter' && state.staffing && root.contains(event.target)
-      && !event.target.matches('textarea, button, [data-act="staff-search"]')) {
-    const apply = root.querySelector('.pop [data-act="staff-apply"]');
-    if (apply && !apply.disabled) { event.preventDefault(); actions['staff-apply'](); }
-  }
 });
 
 /*
@@ -987,8 +985,6 @@ document.addEventListener('keydown', (event) => {
  * this. On click the dispatch has already run by the time we re-render.
  */
 document.addEventListener('click', (event) => {
-  /* The staffing popover does not close this way: it holds a stepped figure
-     and a typed reason, and Escape and «Abbrechen» are the ways out of it. */
   if (state.menu === null || event.target.closest('.dd')) return;
   setState({ menu: null });
 });
@@ -1047,26 +1043,6 @@ window.addEventListener('resize', () => {
   clearTimeout(resizeTimer);
   resizeTimer = setTimeout(() => setState({}), 150);
 });
-
-/*
- * The popover is anchored in viewport space, so a scroll has to close it — but
- * not once there is work in it. One inertial trackpad tick used to discard a
- * typed reason with no way to get it back.
- */
-document.addEventListener('scroll', (event) => {
-  if (performance.now() - lastRenderAt < 150) return;
-  /* A list scrolling inside the popover is not the page moving under it. */
-  if (event.target instanceof Element && event.target.closest('.pop')) return;
-  if (!state.staffing) return;
-  const { projectId, role, q, target, search } = state.staffing;
-  const r = roleOn(data.projectsById[projectId], role);
-  const s = r && segAt(r, q);
-  const started = state.reason.trim() !== '' || search !== ''
-    || state.draft !== (r ? r.demand[q] : 0)
-    || (target ?? null) !== (s ? s.p : null);
-  if (started) return;
-  setState({ staffing: null });
-}, { capture: true, passive: true });
 
 window.addEventListener('hashchange', () => {
   syncFromUrl();

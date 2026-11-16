@@ -39,8 +39,8 @@ that way is the point.
 | 5 | `app.js` | Boot, render loop, event dispatch |
 
 `store.js` importing nothing is a constraint, not an accident. It is why a
-derived figure cannot quietly acquire a German label or a DOM identifier — see
-the first finding in `CODE-REVIEW-3.md` for what happens when it does.
+derived figure cannot quietly acquire a DOM identifier — and why
+`tools/check.mjs` can load it in Node and test it without a browser.
 
 ## Rendering
 
@@ -112,27 +112,48 @@ arrangement rule; change one of the two numbers.
 Colouring by pensum (`state.colour`) is a switch of its own and means nothing
 while the figures are hidden — `coloured()` is the one place that says so.
 
-### Roles
+### Roles and Bearbeitende
 
-A project carries up to four roles (`data/roles.json`), each with a pensum per
-quarter and the person holding it, who may change at a quarter boundary. The
-project row shows the sum and is the switch: folded open (`state.openRoles`),
-it grows one lane per role in the catalogue's order — `laneRows()` in
-`views-overview.js` — and every quarter of a lane is a chip with the person
-and the pensum. A chip opens the staffing popover (`staffPopover()`,
-`state.staffing`), which sets the person from that quarter on and the pensum
-of that quarter; the apply action in `app.js` writes into the roles and logs
-both halves. The Bearbeitender column, the organisation and the per-person
-load are readings of the roles — `leadId` is a getter, `personLoad()` an index
-built per change of state — so nothing is written twice. The Personen tab
-folds a person open the same way (`state.openPeople`), to one lane per role
-they hold. `docs/ROLES.md` maps the September wireframe to what is built.
+A project carries rows of `{ role, person, demand[] }` — a role from
+`data/roles.json`, the person who holds it, their pensum per quarter. The
+project row shows the sum and is the switch: a click anywhere on it folds it
+open (`state.openProjects`) and does nothing else. The caret stands in a
+frozen track of its own in front of the columns (`caretCell()` in `ui.js`,
+`fit.lead` in `leadLayout()`), on Planung and on Personen alike. Open, a
+project shows the four roles in the catalogue's order — `laneRows()` in `views-overview.js` — one
+row per role and person: the role under the project's name, the person under
+«Bearbeitende», a plain number per quarter.
+
+There is no editor to open. A number cell is a text field, and leaving it —
+Tab, Enter, an arrow up or down, a click elsewhere — writes it
+(`commitCell()` in `app.js`); Escape puts the old figure back. The person is a
+native `<select>` in the row's «Bearbeitende» cell, written the moment it is
+chosen (`commitPerson()`); it is drawn with the one name it shows and filled
+with the roster when first focused or pointed at. A role the project does not
+have is one empty, greyed row; «Weitere Person» adds an empty row to a role
+that has somebody (`state.extraRows`), which is how a handover is entered.
+Every write is logged in Verlauf under the role's name.
+
+The lead (`leadId`, a getter), the organisation and the per-person load are
+readings of the rows — `personLoad()` is an index built per change of state —
+so nothing is written twice. The Personen tab folds a person open the same
+way (`state.openPeople`), to one row per role they hold; neither table opens
+a dialog on a row click. `docs/ROLES.md` has the history.
+
+### Groups
+
+The planning grid, the print sheets and the export are cut one way, always:
+by project size, small before large, then the projects whose credit is still
+open — `groupProjects()` in `store.js`, the line being
+`meta.settings.smallProjectMio`. There is no grouping menu and no `group` key
+in the URL; an old link that carries one is read without it. The Personen
+table is not grouped.
 
 The chrome above the grid is measured for a 1366×768 laptop: one toolbar row
 carries the filters, the time steps and the «Ansicht» menu; the tabs share a
 line with the page actions; there is no breadcrumb bar and no page title.
 The measurements are in the comments of the last three sections of
-`main.css`, and in `docs/PLANUNG-MERGE.md`.
+`main.css`.
 
 ## Events
 
@@ -161,7 +182,6 @@ the reader's own.
 | `zeros` | Nullwerte ausblenden | `hide` |
 | `scale`, `from`, `unit` | the time scale, the window offset, the unit | `year`/`quarter`/`month`, a count, `pct`/`fte` |
 | `sort`, `dir` | the grid sort | a column key or `q3`, `asc`/`desc` |
-| `group` | Gruppieren nach | `portfolio`, `lead`, `phase`, `organisation`, `size`, `none` |
 | `q`, `phase`, `lead`, `portfolio`, `org` | the search and the filters | ids, comma-separated |
 | `psort`, `pdir`, `csort` | the person table's sort, the dashboard cards' order | a column or `q3`; `asc`/`desc`; `card:by:dir` per card |
 | `page`, `pageSize` | the change log | numbers |
@@ -184,13 +204,15 @@ applied silently.
 the per-person project index are memoised against that counter, so a list is
 computed once per change however many views ask for it in one render. Anything
 that changes what a derived list would say **without** going through
-`setState` — the search field, written per keystroke; a role staffed by the
-popover — calls `touch()`. Every value read back from the hash is validated against
+`setState` — the search field, written per keystroke; a figure typed into a
+cell of the grid — calls `touch()`. Every value read back from the hash is validated against
 `VOCAB`, a closed vocabulary — an unknown value falls back to the default rather
 than reaching a view.
 
-Known gap: `writeUrl` enumerates its keys by hand and omits several, and the
-history layer double-pushes. See “Still open” in `CODE-REVIEW-3.md`.
+The four list filters — phase, person, portfolio, organisation — are declared
+once, in `FILTERS`: the hash, the chips, «Alle», the reset and the toggle
+actions all read that registry. A fifth filter is one entry there and one
+menu in the toolbar.
 
 ## Grids
 
@@ -264,15 +286,34 @@ hand-written.
 
 Which file carries which fact, and how they join, is in `DATAMODEL.md`.
 
-Current fixtures: 111 projects carrying 270 roles (19 handovers, 13 open in
-the current quarter), 50 people (4'540 % contracted), 40 quarters, 323
+Current fixtures: 111 projects carrying 285 rows — a role and a person each
+(20 handovers, 20 rows nobody holds, 13 of them in the current quarter), 50 people (4'540 % contracted), 40 quarters, 323
 milestones (38 undated, 59 late), 249 history entries, 7 sub-portfolios,
 6 organisations, 8 projects without a lead.
 
 ## Checks
 
-The Playwright suites cited throughout `docs/` run from a harness that is **not
-in this repository**. Figures quoted in the documents were measured with it; a
-reader cannot currently reproduce them. Either commit the harness or stop citing
-it — this is the weakest thing in the documentation and it is recorded here so it
-is not forgotten.
+```
+node tools/check.mjs
+```
+
+Node 22.7 or later, no dependencies, about a second. It loads `store.js` the
+way the app does — `fetch` answered from disk — and asserts what the views
+take for granted:
+
+- the fixtures are whole: every row's role and person exist, a role and a
+  person appear once per project, every per-quarter array has one entry per
+  quarter, gates and log entries point at real projects;
+- the derived figures are what they claim: a project's demand is the sum over
+  its rows, a person's load the sum of theirs, the groups hold every project
+  exactly once;
+- the writes behave: a new row lands under its role, a row given to somebody
+  who has one for the role merges, an empty row goes;
+- the URL reads back what it wrote, and drops what it does not know;
+- every `t('…')` literal has an entry in `i18n.json`, and every `data-act`
+  in the markup has a handler.
+
+Run it after touching `store.js`, the generator or the fixtures. It does not
+replace looking at the page: nothing here renders. The Playwright suites the
+archived reviews cite ran from a harness that was never committed; the
+figures in those documents cannot be reproduced from this repository.

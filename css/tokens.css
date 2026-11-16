@@ -456,13 +456,13 @@
    */
   --chart-col:          40px;
 
-  --grid-col-id:        62px;
+  --grid-col-caret:     38px;    /* the caret that folds a row open: the card's inset, the button, a little air */
+  --grid-col-id:        92px;    /* «Projekt-ID» with its sort arrow */
   --grid-col-title:     285px;   /* the floor; the column takes the slack */
   --grid-col-title-max: 460px;   /* and its ceiling — the width at which the
                                     longest project name fits */
   --grid-col-phase:     152px;  /* «33 Bewilligungsverfahren» in full, 144px + padding */
-  --grid-col-lead:      140px;   /* «Dario Beispielmann» with 8px of air on each side */
-  --grid-col-roles:     64px;    /* «Rollen» with its sort arrow, and a one-digit count */
+  --grid-col-lead:      164px;   /* «Dario Beispielmann +2» with 8px of air on each side */
   --grid-col-portfolio: 110px;
   --grid-col-organisation: 112px;  /* «PM Inland III», the longest short form, plus its padding */
   --grid-col-credit:    112px;
@@ -481,8 +481,6 @@
 
   /* Popovers and the dialog: one width each, read by the stylesheet and by
      the code that places them (tokenPx), so the two cannot drift apart. */
-  --pop-width:          308px;  /* the pensum editor */
-  --pop-assign-width:   336px;  /* the Bearbeitender picker */
   --modal-width:        760px;
 
   /* The milestone diamond's hit area. Every diamond sits in a band, so there

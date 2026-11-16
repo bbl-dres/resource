@@ -166,16 +166,6 @@
       "fr": "Filtres actifs :",
       "it": "Filtri attivi:"
     },
-    "Aktuell": {
-      "en": "Current",
-      "fr": "Actuellement",
-      "it": "Attualmente"
-    },
-    "Aktuell nicht zugewiesen": {
-      "en": "Currently unassigned",
-      "fr": "Actuellement non attribué",
-      "it": "Attualmente non assegnato"
-    },
     "Alle": {
       "en": "All",
       "fr": "Tous",
@@ -216,16 +206,6 @@
       "fr": "Réaffecter à une autre personne",
       "it": "Riassegnare a un'altra persona"
     },
-    "Angaben gespeichert": {
-      "en": "details saved",
-      "fr": "données enregistrées",
-      "it": "dati salvati"
-    },
-    "Angaben zur Person öffnen": {
-      "en": "Open the person’s details",
-      "fr": "Ouvrir les données de la personne",
-      "it": "Apri i dati della persona"
-    },
     "Angemeldet": {
       "en": "Signed in",
       "fr": "Connecté",
@@ -250,11 +230,6 @@
       "en": "contract",
       "fr": "taux d'activité",
       "it": "grado di occupazione"
-    },
-    "Anstellung anpassen": {
-      "en": "Change the contract",
-      "fr": "Modifier le taux d’activité",
-      "it": "Modifica il grado di occupazione"
     },
     "Anteil der Anstellung, der für Projekte eingesetzt werden darf": {
       "en": "Share of the contract that may be used for projects",
@@ -551,16 +526,6 @@
       "fr": "Couches",
       "it": "Livelli"
     },
-    "Eigener Projektanteil": {
-      "en": "Own project share",
-      "fr": "Part projets propre",
-      "it": "Quota progetti propria"
-    },
-    "Eigener Projektanteil leer: es gilt die Vorgabe der Organisation.": {
-      "en": "Own project share empty: the organisation’s default applies.",
-      "fr": "Part projets propre vide : la valeur de l’organisation s’applique.",
-      "it": "Quota progetti propria vuota: vale il valore dell’organizzazione."
-    },
     "Ein Vorgang statt zwei Transaktionen: von, an, Betrag und Zeitraum ergeben einen Verlaufseintrag mit beiden Seiten.": {
       "en": "One operation instead of two transactions: from, to, amount and period make a single log entry carrying both sides.",
       "fr": "Une opération au lieu de deux transactions : de, à, montant et période forment une seule entrée d'historique portant les deux côtés.",
@@ -726,11 +691,6 @@
       "fr": "Grands projets",
       "it": "Progetti grandi"
     },
-    "Gruppieren nach": {
-      "en": "Group by",
-      "fr": "Grouper par",
-      "it": "Raggruppa per"
-    },
     "Hauptphase": {
       "en": "Main phase",
       "fr": "Phase principale",
@@ -835,11 +795,6 @@
       "en": "No person found.",
       "fr": "Aucune personne trouvée.",
       "it": "Nessuna persona trovata."
-    },
-    "Keine Projekte zugewiesen.": {
-      "en": "No projects assigned.",
-      "fr": "Aucun projet attribué.",
-      "it": "Nessun progetto assegnato."
     },
     "Klassifizierung: intern": {
       "en": "Classification: internal",
@@ -1096,11 +1051,6 @@
       "fr": "Colorer selon la charge",
       "it": "Colora per carico"
     },
-    "Pensum erhöhen": {
-      "en": "Increase workload",
-      "fr": "Augmenter la charge",
-      "it": "Aumenta il carico"
-    },
     "Pensum gegen Kapazität netto": {
       "en": "Workload against net capacity",
       "fr": "Besoin rapporté à la capacité nette",
@@ -1150,11 +1100,6 @@
       "en": "Reallocate workload",
       "fr": "Réaffecter la charge",
       "it": "Riassegna il carico"
-    },
-    "Pensum verringern": {
-      "en": "Decrease workload",
-      "fr": "Réduire la charge",
-      "it": "Riduci il carico"
     },
     "Pensum übernommen": {
       "en": "Workload applied",
@@ -1300,11 +1245,6 @@
       "en": "projects in the current scope",
       "fr": "projets dans le périmètre défini",
       "it": "progetti nell'ambito definito"
-    },
-    "Projekte in der Planung anzeigen": {
-      "en": "Show projects in the plan",
-      "fr": "Afficher les projets dans la planification",
-      "it": "Mostra i progetti nella pianificazione"
     },
     "Projekte mit Kredit": {
       "en": "projects with a credit",
@@ -1536,11 +1476,6 @@
       "fr": "Réaffecté",
       "it": "Riassegnato"
     },
-    "Ungültiger Wert: Anstellung 10 – 100 %, Projektanteil 1 – 100 % oder leer.": {
-      "en": "Invalid value: contract 10 – 100 %, project share 1 – 100 % or empty.",
-      "fr": "Valeur non valide : taux d’activité 10 – 100 %, part projets 1 – 100 % ou vide.",
-      "it": "Valore non valido: grado di occupazione 10 – 100 %, quota progetti 1 – 100 % o vuoto."
-    },
     "Ungültiger Wert: Projektanteil 1 – 100 %, Schwelle grösser als 0.": {
       "en": "Invalid value: project share 1 – 100 %, threshold greater than 0.",
       "fr": "Valeur non valide : part projets 1 – 100 %, seuil supérieur à 0.",
@@ -1575,11 +1510,6 @@
       "en": "From",
       "fr": "De",
       "it": "Da"
-    },
-    "Vorgabe der Organisation": {
-      "en": "organisation default",
-      "fr": "valeur de l’organisation",
-      "it": "valore dell’organizzazione"
     },
     "Vorherige Seite": {
       "en": "Previous page",
@@ -1730,11 +1660,6 @@
       "en": "by",
       "fr": "par",
       "it": "da"
-    },
-    "eigener Wert": {
-      "en": "own value",
-      "fr": "valeur propre",
-      "it": "valore proprio"
     },
     "frei": {
       "en": "free",
@@ -1921,11 +1846,6 @@
       "fr": "surcharge sur",
       "it": "sovraccarico in"
     },
-    "Übernehmen": {
-      "en": "Apply",
-      "fr": "Appliquer",
-      "it": "Applica"
-    },
     "Übersicht": {
       "en": "Overview",
       "fr": "Vue d'ensemble",
@@ -1951,20 +1871,10 @@
       "fr": "— obligatoire pour toute réaffectation",
       "it": "— obbligatorio per ogni riassegnazione"
     },
-    "— Pflicht bei Überlast": {
-      "en": "— required when over capacity",
-      "fr": "— obligatoire en cas de surcharge",
-      "it": "— obbligatorio in caso di sovraccarico"
-    },
     "— nicht zugewiesen": {
       "en": "— unassigned",
       "fr": "— non attribué",
       "it": "— non assegnato"
-    },
-    "— optional": {
-      "en": "— optional",
-      "fr": "— facultatif",
-      "it": "— facoltativo"
     },
     "Bauleitung": {
       "en": "Site management",
@@ -2016,55 +1926,20 @@
       "fr": "Rôle vacant",
       "it": "Ruolo aperto"
     },
-    "Rolle offen lassen": {
-      "en": "Leave the role open",
-      "fr": "Laisser le rôle vacant",
-      "it": "Lasciare il ruolo aperto"
-    },
-    "Rolle besetzen": {
-      "en": "Staff the role",
-      "fr": "Pourvoir le rôle",
-      "it": "Assegnare il ruolo"
-    },
     "Übergabe": {
       "en": "Handover",
       "fr": "Transfert",
       "it": "Passaggio"
-    },
-    "— Pflicht bei Übergabe": {
-      "en": "— required for a handover",
-      "fr": "— obligatoire en cas de transfert",
-      "it": "— obbligatorio in caso di passaggio"
-    },
-    "Chip = Person · Pensum in Punkten": {
-      "en": "Chip = person · workload in points",
-      "fr": "Puce = personne · charge en points",
-      "it": "Chip = persona · carico in punti"
     },
     "im Projekt nicht vorgesehen (ePPM)": {
       "en": "not foreseen for this project (ePPM)",
       "fr": "non prévu pour ce projet (ePPM)",
       "it": "non previsto per questo progetto (ePPM)"
     },
-    "Rollen und Besetzung": {
-      "en": "Roles and staffing",
-      "fr": "Rôles et dotation",
-      "it": "Ruoli e assegnazione"
-    },
     "Bearbeitende": {
       "en": "People",
       "fr": "Personnes en charge",
       "it": "Incaricati"
-    },
-    "Wechsel": {
-      "en": "Change",
-      "fr": "Changement",
-      "it": "Cambio"
-    },
-    "Noch nicht geplant": {
-      "en": "Not planned yet",
-      "fr": "Pas encore planifié",
-      "it": "Non ancora pianificato"
     },
     "Geplant": {
       "en": "Planned",
@@ -2076,25 +1951,45 @@
       "fr": "actuel",
       "it": "attuale"
     },
-    "Punkte": {
-      "en": "points",
-      "fr": "points",
-      "it": "punti"
-    },
     "Keine Rollen geplant.": {
       "en": "No roles planned.",
       "fr": "Aucun rôle planifié.",
       "it": "Nessun ruolo pianificato."
     },
-    "Rolle in diesem Quartal nicht bei dieser Person": {
-      "en": "Role not with this person in this quarter",
-      "fr": "Rôle non tenu par cette personne ce trimestre",
-      "it": "Ruolo non assegnato a questa persona in questo trimestre"
-    },
     "Summe über alle Rollen": {
       "en": "sum over all roles",
       "fr": "somme de tous les rôles",
       "it": "somma di tutti i ruoli"
+    },
+    "Projekt-ID": {
+      "en": "Project ID",
+      "fr": "ID du projet",
+      "it": "ID progetto"
+    },
+    "Weitere Person": {
+      "en": "Another person",
+      "fr": "Autre personne",
+      "it": "Altra persona"
+    },
+    "Die Daten konnten nicht geladen werden.": {
+      "en": "The data could not be loaded.",
+      "fr": "Les données n’ont pas pu être chargées.",
+      "it": "Impossibile caricare i dati."
+    },
+    "Format": {
+      "en": "Format",
+      "fr": "Format",
+      "it": "Formato"
+    },
+    "Sprache": {
+      "en": "Language",
+      "fr": "Langue",
+      "it": "Lingua"
+    },
+    "Suche": {
+      "en": "Search",
+      "fr": "Recherche",
+      "it": "Ricerca"
     }
   }
 }

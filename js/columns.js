@@ -22,24 +22,37 @@
      short    a shorter form for a cell, with `text` as its hint (optional)
    ============================================================================= */
 
-import { data, t, eppmOf } from './store.js';
+import { data, t, eppmOf, peopleOn } from './store.js';
 
-/** The project lead's name, or the words that stand in for an empty one. */
-const leadName = p => data.peopleById[p.leadId]?.name ?? t('nicht zugewiesen');
+/**
+ * Who is on the project, in the width of one name: the lead — see leadOf() in
+ * store.js — and how many more, or the words that stand in for nobody. The
+ * names themselves are the rows a folded-open project shows.
+ */
+const leadName = p => {
+  const lead = data.peopleById[p.leadId];
+  const more = peopleOn(p).filter(id => id !== p.leadId).length;
+  return (lead ? lead.name : t('nicht zugewiesen')) + (more > 0 ? ` +${more}` : '');
+};
 
 /*
  * Six columns, not eleven. Ampel, Priorität, Nächster Meilenstein, Soll-Pensum
  * and Verlauf were taken out in review: nobody switched them on, and a menu
  * of eleven switches hid the five that matter. The facts are still in the
- * data and in the project dialog; only the columns are gone.
+ * data and in the project dialog; only the columns are gone. «Rollen», a
+ * count of a project's rows, went too: «Bearbeitende» says how many people
+ * are on the project beside the one it names.
  */
 
 export const COLUMNS = [
   {
     // The one column with no switch: hide everything else and a row is still
-    // a row, hide this and it is an anonymous strip of numbers.
-    key: 'id', label: 'ID', flag: null, sort: 'id', width: '--grid-col-id',
-    cls: 'pcell--id', sheet: { w: [52, 62], cls: 'sheet__id' }, xls: { type: 'text', width: 12 },
+    // a row, hide this and it is an anonymous strip of numbers. It stands in
+    // front of the name, so that the name — under which a folded-open
+    // project lists its roles — stands next to «Bearbeitende», where each
+    // role's person is.
+    key: 'id', label: 'Projekt-ID', flag: null, sort: 'id', width: '--grid-col-id',
+    cls: 'pcell--id', sheet: { w: [64, 70], cls: 'sheet__id' }, xls: { type: 'text', width: 12 },
     text: p => p.number
   },
   {
@@ -54,20 +67,14 @@ export const COLUMNS = [
     text: p => t(eppmOf(p.phase).label)
   },
   {
-    key: 'lead', label: 'Bearbeitender', flag: 'lead', sort: 'lead', width: '--grid-col-lead',
-    cls: 'pcell--lead', sheet: { w: [86, 108], cls: 'sheet__muted' }, xls: { type: 'text', width: 20 },
-    text: leadName
-  },
-  {
     /*
-     * How many roles the project carries — the lanes a folded-open row
-     * shows. A count, because the lead column already names the one person
-     * most readers look for, and the rest are a click away.
+     * Plural: the column names the people on the project. On a project row
+     * that is the lead and a count of the others; folded open, each row under
+     * it carries the person of one role in this same column.
      */
-    key: 'roles', label: 'Rollen', flag: 'roles', sort: 'roles', width: '--grid-col-roles',
-    cls: 'pcell--roles', numeric: true, align: 'end',
-    sheet: { w: [40, 48], cls: 'sheet__num sheet__muted' }, xls: { type: 'num', width: 8 },
-    text: p => String(p.roles.length)
+    key: 'lead', label: 'Bearbeitende', flag: 'lead', sort: 'lead', width: '--grid-col-lead',
+    cls: 'pcell--lead', sheet: { w: [112, 128], cls: 'sheet__muted' }, xls: { type: 'text', width: 24 },
+    text: leadName
   },
   {
     key: 'portfolio', label: 'Teilportfolio', flag: 'portfolio', sort: 'portfolio',
@@ -101,17 +108,17 @@ export const column = key => BY_KEY[key];
  * load-bearing to most. `id` is not in the list — it is the floor, and on a
  * phone the list runs to its end and leaves exactly that.
  */
-const YIELD_ORDER = ['organisation', 'portfolio', 'roles', 'credit', 'phase', 'lead', 'title'];
+const YIELD_ORDER = ['organisation', 'portfolio', 'credit', 'phase', 'lead', 'title'];
 
 /**
  * The columns that fit. `room` is the width available to the card and
  * `axis` what the time axis needs at a minimum; anything that does not fit is
  * dropped in yield order and returned so the view can say what it hid.
  */
-export function fittingColumns(set, { room, axis, widthOf }) {
+export function fittingColumns(set, { room, axis, widthOf, lead: before = 0 }) {
   const shown = visibleColumns(set);
   const hidden = [];
-  const lead = () => shown.reduce((a, c) => a + widthOf(c), 0);
+  const lead = () => before + shown.reduce((a, c) => a + widthOf(c), 0);
 
   for (const key of YIELD_ORDER) {
     if (lead() + axis <= room) break;
@@ -130,6 +137,10 @@ export function fittingColumns(set, { room, axis, widthOf }) {
  * Both tabs freeze the same columns in the same order for the same reason, so
  * they compute it from one place — a project sits in the same spot whichever
  * tab you are reading.
+ *
+ * `fit.lead` is the width of a track in front of them that is not a column of
+ * the registry: the planning grid's caret. It is frozen with the block and
+ * counted in its width; the columns' own offsets start after it.
  */
 export function leadLayout(set, fit) {
   const { shown, hidden } = fittingColumns(set, fit);
@@ -140,9 +151,10 @@ export function leadLayout(set, fit) {
    * capacity band, which measures the frozen block, no longer lined up under it.
    */
   const grow = fit.grow === true;
-  const parts = [];
+  const before = fit.lead ?? 0;
+  const parts = before ? [`${before}px`] : [];
   const sticky = {};
-  let offset = 0;
+  let offset = before;
 
   for (const col of shown) {
     const w = col.grow && fit.titleW ? fit.titleW : fit.widthOf(col);
@@ -161,7 +173,7 @@ export function leadLayout(set, fit) {
  * defaults. Not what is switched on right now, so toggling an attribute never
  * moves the name either.
  */
-const TITLE_REFERENCE = ['id', 'phase', 'lead', 'roles', 'credit'];
+const TITLE_REFERENCE = ['id', 'phase', 'lead', 'credit'];
 
 /*
  * And against a fixed number of quarter columns, not however many the current
@@ -180,7 +192,7 @@ const REFERENCE_COLUMNS = 8;
  * on every switch. Both ask this instead.
  */
 export function titleWidth({ room, px }) {
-  const fixed = TITLE_REFERENCE.reduce((a, key) => a + px(column(key).width), 0);
+  const fixed = px('--grid-col-caret') + TITLE_REFERENCE.reduce((a, key) => a + px(column(key).width), 0);
   const spare = room - fixed - REFERENCE_COLUMNS * px('--grid-quarter');
   return Math.round(Math.max(px('--grid-col-title'),
     Math.min(px('--grid-col-title-max'), spare)));

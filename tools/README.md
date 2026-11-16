@@ -1,5 +1,16 @@
 # tools
 
+## `check.mjs`
+
+```
+node tools/check.mjs
+```
+
+The repository's own regression check: fixtures, derived figures, the writes
+the grid makes, the URL round trip, translations and action names. Node 22.7
+or later, no dependencies. What it covers is listed under «Checks» in
+`docs/ARCHITECTURE.md`. Run it after every run of the generator.
+
 ## `generate-portfolio.js`
 
 Builds the demonstration portfolio in `data/`. Node, no dependencies:
@@ -152,19 +163,24 @@ the same reason.
 Teilphase; the Bearbeitender takes the remainder, in steps of five, so the
 roles add up to the project's demand to the point. `ROLE_ODDS` decides
 whether a project has a Stellvertretung, a Bauleitung or a Fachplanung at
-all. A role holds a run of quarters with demand, one segment per run; the
-Bearbeitender keeps the project's assignee, the other roles go to whoever of
-the roster would carry them most lightly, peak against contract. Then some
-runs change hands at a quarter boundary — never in the current one — and
-some stay open, because a plan that shows no handover and no vacancy shows
-nothing the tool is for.
+all. A role holds a run of quarters with demand; the Bearbeitender keeps the
+project's assignee, the other roles go to whoever of the roster would carry
+them most lightly, peak against contract. Then some runs change hands at a
+quarter boundary — never in the current one — and some stay open, because a
+plan that shows no handover and no vacancy shows nothing the tool is for.
+
+That is how the split is drawn, not how it is written. `assigneesOf()` turns
+each role into one row per person who holds it — `{ role, person, demand[] }`,
+the role's pensum in that person's quarters and nought in the others — and a
+row with no person for the part nobody holds. The run checks that the rows
+add up to the demand everything else was sized on, and stops if they do not.
 
 ### What it writes
 
 `data/meta.json` (the quarter list only), `projects.json`, `people.json`,
 `capacity.json`, `milestones.json`, `dashboard.json`, `changes.json`. A person
-carries their organisation and no load; a project carries its roles and no
-assignee and no demand curve — the app derives all three (see
+carries their organisation and no load; a project carries its `assignees` —
+rows of a role and a person — and no lead and no demand curve — the app derives all three (see
 `docs/DATAMODEL.md`). The organisations in `meta.json` come from the
 generator's `TEAMS` table, each with its `projectShare`; the generator writes
 that figure out but still sizes and balances the team against whole

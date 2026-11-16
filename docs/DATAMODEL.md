@@ -11,24 +11,23 @@ the current fixture counts.
 
 ```
 meta.organisations ──1:n──▶ people.organisation
-roles.roles ───────1:n──▶ projects.roles[].role
-people ────────────1:n──▶ projects.roles[].segs[].p   projects.leadId = holder of role «pl» in the current quarter (derived)
+roles.roles ───────1:n──▶ projects.assignees[].role
+people ────────────1:n──▶ projects.assignees[].person projects.leadId = holder of role «pl» in the current quarter (derived)
                                                       projects.organisation = people[leadId].organisation (derived)
 meta.portfolios ───1:n──▶ projects.portfolio
 phases.eppm ───────1:n──▶ projects.phase · projects.bars[].phase · milestones.items[].subPhase
 milestones.catalog 1:n──▶ milestones.items.code
 projects ──────────1:n──▶ milestones.items.projectId · changes.projectId
-meta.quarters[i] ───────▶ index i of every per-quarter array: roles[].demand, gross, absence, external
+meta.quarters[i] ───────▶ index i of every per-quarter array: assignees[].demand, gross, absence, external
 ```
 
 Four rules hold the model together:
 
-- **A project carries roles; a person holds them.** Each role on a project has
-  a pensum per quarter and segments of quarters with the person holding it —
-  or nobody, for an open role. The person may change at a quarter boundary;
-  the pensum stays with the role. The project's demand, its assignee and
-  every person's load are sums or readings of these, derived in `store.js`
-  and never written as fields.
+- **A project carries rows of a role and a person.** Each row is a role, the
+  person who holds it — or nobody, for an open role — and that person's
+  pensum per quarter. A role that changes hands is two rows. The project's
+  demand, its lead and every person's load are sums or readings of the rows,
+  derived in `store.js` and never written as fields.
 - **A person belongs to an organisation; a project does not.** The unit is a
   fact about the person. A project reaches its unit through its assignee — the
   holder of the Bearbeitender role in the current quarter — and the join is one
@@ -74,23 +73,24 @@ is the order of the chain; `eppmRank()` in `store.js` sorts by it.
 
 `roles[]` is the ordered list of roles a project may carry, as
 `{ id, label, short }`: `pl` Bearbeitender, `stv` Stv. Bearbeitender, `bl`
-Bauleitung, `fp` Fachplanung. The order in the file is the order of the lanes
-under a folded-open project row. `pl` is the role the Bearbeitender column,
-the organisation join and the «Gruppieren nach: Bearbeitender» grouping read.
+Bauleitung, `fp` Fachplanung. The order in the file is the order of the rows
+under a folded-open project. The first role, `pl`, is the one the lead — the
+name a folded row shows under «Bearbeitende» — and the organisation join
+read.
 
 ### `people.json` — the roster
 
 | Field | Meaning |
 | --- | --- |
-| `id` | stable slug, the key `projects.roles[].segs[].p` points at |
-| `name`, `initials`, `shortName` | display forms, precomputed; the short name is what a chip shows |
+| `id` | stable slug, the key `projects.assignees[].person` points at |
+| `name`, `initials`, `shortName` | display forms, precomputed |
 | `role` | the job title, `Projektleitung`, `Projektentwicklung` or `Bauleitung` — not the role on a project, which is in the project |
 | `employment` | the contract, in % of a full position |
 | `organisation` | id in `meta.organisations` |
 | `projectShare` | optional: the person's own project share in %, where it differs from the unit's. No fixture carries one yet |
 
-A person carries no booked load. `personLoad()` sums the demand of the roles
-the person holds in a quarter over every project, indexed once per change of
+A person carries no booked load. `personLoad()` sums the demand of the rows
+the person has in a quarter over every project, indexed once per change of
 state, and `personUtilisation()` turns it into a share of the person's project
 capacity. Somebody who holds no role has no load and no utilisation; the
 Personen tab prints a dash for them.
@@ -125,26 +125,26 @@ is not read; the arrays are indexed by `meta.quarters`.
 | `credit`, `creditLabel` | the credit in Mio. CHF, or `null` and «offen» before the Baukredit is released |
 | `preCredit` | whether the project is still before the Baukredit release; its demand is reported separately in the totals |
 | `target` | the Soll-Pensum in % |
-| `roles[]` | the roles the project carries, in catalogue order: `{ role, demand[], segs[] }` — see below |
+| `assignees[]` | who carries the project, in catalogue order of the roles: `{ role, person, demand[] }` — see below |
 | `bars[]` | the phases that touch the window: `{ phase, from, to, label }`, in quarter offsets from index 0; `from` is negative for a phase that began before the window |
 
-A role is `{ role, demand[], segs[] }`: the id in `roles.roles`, the planned
-pensum per quarter in % of a full position, and the segments
-`{ p, from, to }` — a `people.id` or `null` for an open role, over the
-quarters `[from, to)`. Segments do not overlap; a run of quarters with no
-segment is not planned, and a chip is drawn only where a segment covers the
-quarter. The generator writes one segment per run of quarters with demand
-and splits a run where the role changes hands; the app's `setHolder()` does
-the same for a handover made in the popover, joining neighbouring segments
-held by the same person.
+A row is `{ role, person, demand[] }`: the id in `roles.roles`, a `people.id`
+or `null` for an open role, and the pensum per quarter in % of a full
+position. A pair of role and person appears once per project; a role that
+changes hands at a quarter boundary is two rows, the one with noughts from
+that quarter on and the other with noughts before it. The generator draws a
+role as a pensum and the runs of quarters a person holds it for, and writes
+one row per person. In the app a figure typed into a cell writes `demand[]`,
+a person chosen in a row's list moves the row to them (`reassignLane()`,
+merging with a row they already have for the role), and a row with neither
+person nor pensum is dropped (`pruneLanes()`).
 
-Three facts the file used to carry are now readings of the roles, defined on
-every project at load time in `store.js`: `demand[]` is the sum over the
-roles, kept as a plain array and recomputed after every edit; `leadId` is the
-holder of role `pl` in the current quarter, or `null`; `unassigned` is its
+Three facts the file used to carry are readings of the rows, defined on every
+project at load time in `store.js`: `demand[]` is the sum over the rows, kept
+as a plain array and recomputed after every edit; `leadId` is the holder of
+role `pl` in the current quarter, or `null` (`leadOf()`); `unassigned` is its
 absence; and `organisation` is that person's unit. The column, the filter,
-the grouping, the dashboard cards and the export all read them and see the
-same answer.
+the dashboard cards and the export all read them and see the same answer.
 
 ### `milestones.json` — the gates
 
@@ -173,8 +173,9 @@ A flat list, newest first: `{ id, date, dateLabel, actor, projectId,
 projectLabel, field, change, value, onLanding }`. `value` is the before-after
 text («30 % → 35 %»), `onLanding` marks the entries the landing page's
 notification badge counts against `meta.lastVisit`. The app prepends to it in
-memory for every edit made in the session — a staffed role, a stepped pensum,
-a changed rule — under the role's label as `field`; nothing is written back.
+memory for every edit made in the session — a pensum typed into a cell, a
+person chosen for a role, a changed rule — under the role's label as `field`;
+nothing is written back.
 
 ### `dashboard.json` — what is not derived
 
@@ -193,7 +194,7 @@ does not.
 - `openapi.json` — the API the prototype would talk to. Its schemas are the
   richer model the office will need — `Allocation` and `Target` per person and
   project, `Absence` per person, a `PersonCapacity` — which the fixtures flatten
-  into the roles' `demand[]` and `segs[]` and the office-level `capacity.json`.
+  into the rows' `role`, `person` and `demand[]` and the office-level `capacity.json`.
 
 ## Derived in the app
 
@@ -203,15 +204,14 @@ in a file.
 | Derived | From |
 | --- | --- |
 | `peopleById`, `projectsById`, `rolesById`, `portfoliosById`, `organisationsById`, `quarterIndex` | the lists above |
-| `project.demand[]`, `project.leadId`, `project.unassigned`, `project.organisation` | the roles: the sum, the holder of `pl` now, its absence, that person's unit |
-| `cellValue(p, q)`, `projectDemand(p)` | `demand[]`; an edit is written into the roles and the sum recomputed, `state.edited` marks the chips touched |
-| `holderAt`, `segAt`, `holdersAt`, `openRoleAt`, `holdsRole`, `rolesOf`, `projectsOf` | readings of the segments: who holds what when, per project or per person |
-| `setHolder(role, q, personId)`, `addRole(p, roleId)` | the two writes: a handover from a quarter on, and a role the project did not have |
+| `project.demand[]`, `project.leadId`, `project.unassigned`, `project.organisation` | the rows: the sum, the holder of `pl` now, its absence, that person's unit |
+| `cellValue(p, q)`, `projectDemand(p)` | `demand[]`; an edit is written into the rows and the sum recomputed, `state.edited` marks the cells touched |
+| `laneOf`, `lanesOf`, `peopleOn`, `holdersAt`, `unstaffedAt`, `assignedTo`, `assignmentsOf`, `activeSpan` | readings of the rows: who holds what when, per project or per person |
+| `addLane(p, roleId, personId)`, `reassignLane(p, row, personId)`, `pruneLanes(p)` | the writes beside a typed figure: a new row, a row given to somebody else, and the tidy-up after either |
 | `projectShare(person)`, `projectCapacity(person)` | the person's share or the unit's; `employment × share / 100` |
-| `personLoad(id, q)`, `personUtilisation(id, q)` | the sum of the roles the person holds in the quarter, indexed per change of state; divided by `projectCapacity` |
-| `staffCandidates(q, currentId)` | the roster for the popover, the current holder first and the rest by free capacity in that quarter |
+| `personLoad(id, q)`, `personUtilisation(id, q)` | the sum of the rows the person has in the quarter, indexed per change of state; divided by `projectCapacity` |
 | `totals(list)` | per quarter: `demand`, `preCredit`, `external`, `net`, `utilisation = demand / net`, `free = net − demand` |
-| `filteredProjects()`, `groupProjects()`, `groupPeople()` | the state's search, filters and grouping |
+| `filteredProjects()`, `groupProjects()` | the state's search and filters; the fixed grouping by project size |
 | `periods()` | the visible columns: quarters, or years and months folded from them, at the current offset |
 | `kpis()` | projects in scope, credit total, pensum total, gates this quarter |
 

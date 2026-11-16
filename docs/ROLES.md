@@ -1,8 +1,8 @@
 # Roles — planning several people per project
 
-What the September wireframe asked for, what is built, and what was left out.
-For the feedback round with the users; the rules it settled are in
-`DECISIONS.md`, the data in `DATAMODEL.md`.
+What the September wireframe asked for, what the November feedback round
+changed, and what is built now. The data is in `DATAMODEL.md`, the code map
+in `ARCHITECTURE.md`.
 
 ## The request
 
@@ -10,77 +10,101 @@ A project used to carry one person and one pensum. The users asked to plan
 the people a project actually needs — Bearbeitender, Stellvertretung,
 Bauleitung, Fachplanung — each with their own pensum, quarter by quarter, and
 to hand a role over to somebody else at a quarter boundary without losing the
-plan. The wireframe is `docs/wireframes/260910_Planung-kombiniert.html`,
-eleven screens: the current state (0a), a first iteration with role rows and
-role columns (1a–1f), a redesign from scratch (2a, 2b), and the concept
-brought back into the prototype's own design (3a, 3b).
+plan. The wireframe is `docs/wireframes/260910_Planung-kombiniert.html`.
+
+The first build drew four fixed role lanes under a folded-open project, a
+chip per quarter carrying the person's short name and the pensum, and a
+popover on the chip with a stepper, a list of people, a reason and two
+buttons.
+
+## What the feedback round changed
+
+The users tried that build and asked for less of it. Six points, all built:
+
+1. **No «Gruppieren nach».** Six ways to cut the table were five too many.
+   The projects stand in fixed groups by project size — Kleinprojekte,
+   Grossprojekte, and the ones whose credit is still open. The line between
+   small and large is still a setting behind the gear.
+2. **A person per row, a number per cell.** The role stays where it was,
+   under the project's name. The person moved off the chips into the
+   «Bearbeitende» column, one row per role and person, so a cell is a plain
+   number.
+3. **No pensum popover.** A cell is typed into like a spreadsheet's: click,
+   type, Tab or Enter. Nothing opens, nothing is confirmed, no reason is
+   asked for.
+4. **A click on a project row only folds it.** The project's name is text;
+   the summary dialog no longer opens from the grid.
+5. **The same on Personen.** A click on a person folds the row open; the
+   person dialog is gone.
+6. **A column for the caret, and the role beside its person.** The caret
+   that folds a row has a narrow column of its own in front of everything,
+   on both tabs, whichever columns are switched on. The number is called
+   «Projekt-ID» and stands before «Projekt», so that «Projekt» — under which
+   an open project lists its roles — is the neighbour of «Bearbeitende».
 
 ## What is built
 
-**3b — fixed role lanes.** The Planung tab is the one the users know. The
-project row shows the sum over its roles and is the switch: a click anywhere
-on it — the caret, a figure, the empty space — folds it open to four lanes in
-a fixed order, Bearbeitender, Stv. Bearbeitender, Bauleitung, Fachplanung,
-the same under every project. Each quarter of a lane is a chip: the person's
-short name and the pensum, in the heat colour of the value. A dashed amber
-chip is a role that is planned and open. A lane ePPM does not foresee for the
-project is there but greyed. «Besetzung aufklappen» beside a group heading
-folds the whole group. The «Rollen» column counts the lanes; the
-«Bearbeitender» column is now a label, the person in that role in the current
-quarter.
+**The Planung grid.** A project row shows the sum over its rows and is the
+switch. Folded open it shows the four roles, always in the same order:
 
-**Staffing on the chip.** A chip opens a popover for that role and that
-quarter: the pensum of the quarter with the stepper the cell editor had, and
-the person from that quarter on, listed by free capacity with the current
-holder first and «Rolle offen lassen» last. A different name is a handover —
-the previous holder's segment ends the quarter before, the pensum stays with
-the role — and asks for a reason, as an overload does. A slot in an empty
-lane plans the role afresh, creating it on the project. Everything is logged
-in Verlauf under the role's name, one entry per half.
+| under «Projekt» | under «Bearbeitende» | per quarter |
+| --- | --- | --- |
+| the role | the person, as a list to choose from | the pensum, as a field |
 
-**Project dialog (1c).** «Bearbeitender» became «Besetzung»: how many roles
-and people this quarter, who holds what, and the changes ahead. A new section
-«Rollen und Besetzung» draws one band per role over the whole window, with
-the person on each segment.
+- A role two people hold in turn is two rows.
+- A role with pensum and nobody to carry it says «nicht zugewiesen», in the
+  warning hue.
+- A role the project does not have is one empty, greyed row. Choosing a
+  person or typing a figure plans it.
+- «Weitere Person» — the plus beside a role's name, on its last row — adds an
+  empty row to a role that already has somebody. That is how a handover is
+  entered: empty the one row from a quarter on, fill the other.
+- A folded row's «Bearbeitende» cell names the lead — whoever holds
+  «Bearbeitender» now — and counts the others: «Sonja Beispiel +2».
 
-**Personen tab (1e).** A person's row folds open to one lane per role they
-hold — role, project, when — with the role's pensum in the quarters they
-carry it and a blank where somebody else does. «Projekte» became «Rollen».
-A person's load is the sum of their roles, so the utilisation figures move
-with every staffing change.
+**Editing.** Tab moves along the row, Enter and the arrows move down and up,
+Escape puts the old figure back. Leaving a cell writes it. A column that
+spans several quarters — a year, at year scale — shows their average, and a
+figure typed into it is the pensum of each of them. In FTE the cells take
+«0,4». Choosing another person in a row's list gives the whole row to them;
+«nicht zugewiesen» takes the person off, and a row with neither person nor
+pensum disappears. Every change is logged in Verlauf under the role's name.
 
-**Everything around it.** The «Bearbeitende» filter and «Mir zugewiesen»
-find a person in any role on a project; «nicht zugewiesen» is a role that is
-open now. The search finds every name on the project. The bell lists the
-projects the reader has any role on. Export, print, the dashboard and the
-history read the same roles through the same derived figures.
+**Personen.** A person's row folds open to one row per role they hold — the
+role under the person's name, then the Projekt-ID, the project and when —
+with their pensum per quarter. Read-only: the figures are set on Planung.
 
-## What is not built, and why
+**Everything around it.** The «Bearbeitende» filter and «Mir zugewiesen» find
+a person in any role on a project; «nicht zugewiesen» is a role that is open
+now. The search finds every name on the project. Export and print carry the
+same groups, the same column order and «Projekt-ID»; the caret's column is
+the screen's alone.
 
-- **3a — chips inside the project cell.** The alternative the wireframe
-  shows beside 3b: the folded-open row keeps its one line per project and
-  stacks the role chips inside each cell. Not built; 3b maps one role to one
-  row, which is what the grid is made of, and the wireframe's own note calls
-  it the MVP. Worth asking the users which of the two reads better.
-- **1f — the handover dialog.** The wireframe re-purposed the rebooking
-  dialog as a form with a preview of the role's band. A handover is a change
-  of person on the chip of the quarter it starts from instead, so one
-  control covers assigning, handing over and leaving open. The dialog can
-  come back if the users want the preview.
-- **1d — «Rolle hinzufügen» as a second popover.** Adding a role is a slot
-  in its lane; the lane is always there.
-- **Overload marks on the chips.** The wireframe's 3b leaves them out; the
-  folded project row keeps its warning, and the popover says what the chosen
-  person would stand at.
-- **One role shared by two people in the same quarter.** The model holds one
-  holder per role and quarter. Not asked for.
-- **Pensum over several quarters at once.** The stepper sets one quarter, as
-  the cell editor always did.
+## What went, and what that costs
+
+- **The reason for an overload or a handover.** The popover asked for one and
+  logged it. A cell has nowhere to ask. Verlauf still records who changed
+  what, from what to what — not why.
+- **The overload warning at the moment of editing.** The popover said what a
+  person would stand at before the figure was applied. Now the figure is
+  written and the Personen tab shows the result; the cell's hint says when
+  the person is over 100 %.
+- **The list of people ordered by free capacity.** The row's list is the
+  roster in alphabetical order.
+- **A person's contract and own project share.** They were edited in the
+  person dialog, and nowhere else. The unit's share is still a setting.
+- **The «Rollen» column.** The count beside the lead's name says how many
+  more people are on the project.
+- **Grouping by lead, organisation, phase or portfolio.** Each is a filter or
+  a column sort away; none of them is a heading any more.
+
+The project dialog itself is still there, reached from the bell, from
+Verlauf, from a bar or a gate in the Termine view, and from a project's name
+in an open Personen row.
 
 ## Trying it
 
-Serve the repository (`python -m http.server 8000`), open the Planung tab,
-filter to a Teilportfolio and click «Besetzung aufklappen». Project 4888
-(Beispielau, Kasernenstrasse 93) has an open Bearbeitender; several projects
-change hands during 2027. Edits last until the page is reloaded — signing
-out and in loads the fixtures afresh.
+Serve the repository (`python -m http.server 8000`), open the Planung tab and
+click a project. Project 8868 (Beispielried, Rebbergweg 25) has an open
+Bearbeitender and a Bauleitung that changes hands. Edits last until the page
+is reloaded — signing out and in loads the fixtures afresh.

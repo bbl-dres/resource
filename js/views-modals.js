@@ -1,17 +1,16 @@
 /* =============================================================================
-   views-modals.js — the dialogs: a project's detail sheet, a person's, a
-   phase, a gate, moving a pensum to somebody else, sharing the view, the
-   account, and the office's settings.
+   views-modals.js — the dialogs: a project's detail sheet, a phase, a gate,
+   sharing the view, the account, and the office's settings.
 
    They share one shell (scrim, role="dialog", one close button) and differ
    only in their body, so they live together and away from the grid.
    ============================================================================= */
 
 import {
-  data, state, t, num, fmt, unitSuffix, projectDemand, heatStep, personUtilisation, phaseOf, eppmOf,
-  nowIndex, deDate, projectShare, projectCapacity, personHeatStep, personDraft,
+  data, state, t, num, fmt, fmtFte, unitSuffix, projectDemand, heatStep, phaseOf, eppmOf,
+  nowIndex, deDate,
   settingText, settingTyped, settingValue, settingChanges,
-  roleOf, segAt, holdersAt, openRoleAt, rolesOf, holdSpan
+  roleOf, holdersAt, unstaffedAt
 } from './store.js';
 
 import { html, icons, attr } from './ui.js';
@@ -100,9 +99,6 @@ function settingsModal() {
  * at once, and closing it any other way leaves the rules as they were.
  */
 
-/** A pensum in FTE, the Swiss way round: 1,25. */
-const fte = v => (v / 100).toFixed(2).replace('.', ',');
-
 /*
  * One field. Text with a numeric keyboard rather than type="number": the
  * dialog re-renders as it is typed in, and a number input refuses the caret
@@ -151,7 +147,7 @@ function rulesModal() {
             <span class="settable__name">${t(o.label)} <span class="settable__short">(${t(o.short)})</span></span>
             <span class="settable__num">${people.length}</span>
             <span class="settable__num">${settingField(`share:${o.id}`, { label: `${t('Projektanteil')} ${t(o.label)}`, unit: '%' })}</span>
-            <span class="settable__num settable__extra">${available === null ? '—' : `${fte(available)} FTE`}</span>
+            <span class="settable__num settable__extra">${available === null ? '—' : `${fmtFte(available)} FTE`}</span>
           </div>`;
         })}
       </div>
@@ -199,17 +195,15 @@ function modalHead(kicker, title, meta = '') {
 }
 
 /* One entry per dialog; app.js sets state.modal.type to one of these keys.
-   Staffing a role — the person, the quarter it starts, the pensum — is not one
-   of them: it is a popover on the chip, see staffPopover() in
-   views-overview.js. The rebooking dialog went with it; a handover is a
-   change of person on the chip of the quarter it takes effect from. */
+   Setting a pensum or choosing a person is not one of them — both are typed
+   or picked in the grid's own cells, see laneRow() in views-overview.js —
+   and neither is a person: the Personen table folds open and says the rest. */
 const MODALS = {
   settings: settingsModal,     // the account: the reader's own mail and language
   rules: rulesModal,           // the office's settings, behind the gear
   phase: phaseModal,
   milestone: milestoneModal,
   project: projectModal,
-  person: personModal,
   share: shareModal
 };
 
@@ -356,22 +350,29 @@ function projectModal({ projectId }) {
   const log = data.changes.filter(c => c.projectId === p.id);
 
   /*
-   * Who is on the project this quarter, role by role, and what is still to
-   * come: a change of hands, or a role whose run starts later. The fact
-   * «Bearbeitender» became «Besetzung» when a project came to carry more
-   * than one person.
+   * Who is on the project this quarter, role by role and with how much, and
+   * who is still to come: somebody whose part starts later.
    */
-  const people = holdersAt(p, now);
-  const staffed = p.roles.map(r => {
-    const s = segAt(r, now);
-    if (!s) return null;
-    return `${s.p ? data.peopleById[s.p]?.name : t('offen')} (${t(roleOf(r.role).label)})`;
-  }).filter(Boolean);
-  const ahead = p.roles.flatMap(r => r.segs.filter(s => s.from > now).map(s => {
-    const who = s.p ? data.peopleById[s.p]?.shortName : t('offen');
-    const change = r.segs.some(o => o.to === s.from);
-    return `${change ? `${t('Wechsel')} ` : ''}${t(roleOf(r.role).label)} ${t('ab')} ${data.quarters[s.from].label}: ${who}`;
-  }));
+  const active = holdersAt(p, now);
+  const nameOf = a => (a.person ? data.peopleById[a.person]?.name : t('offen'));
+  const firstOf = a => a.demand.findIndex(v => v > 0);
+  const staffed = p.assignees.filter(a => a.demand[now] > 0)
+    .map(a => `${nameOf(a)} (${t(roleOf(a.role).label)})`);
+  const ahead = p.assignees.filter(a => !(a.demand[now] > 0) && firstOf(a) > now)
+    .map(a => `${t(roleOf(a.role).label)} ${t('ab')} ${data.quarters[firstOf(a)].label}: ${
+      a.person ? data.peopleById[a.person]?.shortName : t('offen')}`);
+
+  /* The runs of quarters somebody carries a pensum in, as [from, to) pairs. */
+  const runsOf = demand => {
+    const out = [];
+    let start = -1;
+    demand.forEach((v, q) => {
+      if (v > 0 && start < 0) start = q;
+      if (!(v > 0) && start >= 0) { out.push([start, q]); start = -1; }
+    });
+    if (start >= 0) out.push([start, demand.length]);
+    return out;
+  };
 
   // The wireframe is explicit: five facts, always the same, in this order.
   const facts = [
@@ -381,10 +382,10 @@ function projectModal({ projectId }) {
       sub: `${t('Phase')} ${data.phases.eppm.findIndex(e => e.id === p.phase) + 1} ${t('von')} ${data.phases.eppm.length}`
     },
     {
-      term: `${t('Besetzung')} ${q0.label}`,
-      value: `${p.roles.length} ${t(p.roles.length === 1 ? 'Rolle' : 'Rollen')} · ${people.size} ${t(people.size === 1 ? 'Person' : 'Personen')}`,
+      term: `${t('Bearbeitende')} ${q0.label}`,
+      value: `${active.size} ${t(active.size === 1 ? 'Person' : 'Personen')}`,
       sub: [...staffed, ...ahead].join(' · ') || t('Pensum offen'),
-      tone: openRoleAt(p, now) ? 'warn' : null
+      tone: unstaffedAt(p, now) ? 'warn' : null
     },
     {
       term: `${t('Pensum')} ${q0.label}`,
@@ -415,30 +416,26 @@ function projectModal({ projectId }) {
       </div>`)}
     </dl>
 
-    <!-- One line per role: who holds it now, its pensum this quarter, and
-         under it the band of who holds it when — the same bars the lanes
-         draw as chips, over the whole window. -->
+    <!-- One line per role and person: the pensum this quarter, and under it
+         the band of when they hold the role, over the whole window. -->
     <section class="modal__section">
-      <h3>${t('Rollen und Besetzung')}</h3>
-      ${p.roles.length ? html`<div class="rolelist">
-        ${p.roles.map(r => {
-          const role = roleOf(r.role);
-          const s = segAt(r, now);
-          const holder = s ? (s.p ? data.peopleById[s.p]?.name : t('nicht zugewiesen')) : '—';
+      <h3>${t('Bearbeitende')}</h3>
+      ${p.assignees.length ? html`<div class="rolelist">
+        ${p.assignees.map(a => {
+          const name = a.person ? data.peopleById[a.person]?.name : t('nicht zugewiesen');
           return html`<div class="rolelist__row">
             <div class="rolelist__head">
-              <span class="rolelist__role">${t(role.label)}</span>
-              <span class="rolelist__holder ${s && !s.p ? 'is-open' : ''}">${holder}</span>
-              <span class="rolelist__now">${t('Pensum')} ${q0.short}: ${fmt(r.demand[now])}</span>
+              <span class="rolelist__role">${t(roleOf(a.role).label)}</span>
+              <span class="rolelist__holder ${a.person ? '' : 'is-open'}">${name}</span>
+              <span class="rolelist__now">${t('Pensum')} ${q0.short}: ${fmt(a.demand[now])}</span>
             </div>
             <div class="roleband" aria-hidden="true">
-              ${r.segs.map(seg => {
-                const name = seg.p ? data.peopleById[seg.p]?.name : t('offen');
-                const span = seg.to - seg.from === 1 ? data.quarters[seg.from].label
-                  : `${data.quarters[seg.from].label} – ${data.quarters[seg.to - 1].label}`;
-                return html`<span class="roleband__seg ${seg.p ? '' : 'is-open'}"
-                  style="left:${(seg.from / n * 100).toFixed(2)}%;width:${((seg.to - seg.from) / n * 100).toFixed(2)}%"
-                  title="${name} · ${span}">${name}</span>`;
+              ${runsOf(a.demand).map(([from, to]) => {
+                const span = to - from === 1 ? data.quarters[from].label
+                  : `${data.quarters[from].label} – ${data.quarters[to - 1].label}`;
+                return html`<span class="roleband__seg ${a.person ? '' : 'is-open'}"
+                  style="left:${(from / n * 100).toFixed(2)}%;width:${((to - from) / n * 100).toFixed(2)}%"
+                  title="${name} · ${span}">${span}</span>`;
               })}
             </div>
           </div>`;
@@ -473,123 +470,3 @@ function projectModal({ projectId }) {
     </footer>`;
 }
 
-/**
- * A person, the way the project dialog shows a project: what they are
- * contracted for, how much of that may go to projects, what they carry, and
- * how that sits against the ceiling quarter by quarter.
- *
- * It is also where the two figures of the person themselves are set — the
- * contract, and a project share of their own where it differs from the
- * unit's. Both are rare, so they are two plain fields behind one button, and
- * the facts above them show what is saved, not what is being typed.
- */
-function personModal(modal) {
-  const person = data.peopleById[modal.personId];
-  if (!person) return '';
-  const org = data.organisationsById[person.organisation];
-  const now = nowIndex();
-  const share = projectShare(person);
-  const capacity = String(Math.round(projectCapacity(person) * 10) / 10).replace('.', ',');
-  /* One line per role, not per project: a person can be Bearbeitender on
-     one project and Bauleitung on three. */
-  const assignments = rolesOf(person.id);
-  const carries = assignments.length > 0;
-  const util = data.quarters.map((_, q) => personUtilisation(person.id, q));
-  const peak = util.indexOf(Math.max(...util));
-  const own = person.projectShare != null;
-
-  const facts = [
-    { term: 'Organisation', value: org ? t(org.label) : '—', sub: org ? t(org.short) : '' },
-    { term: 'Anstellung', value: `${person.employment} %` },
-    {
-      term: 'Projektanteil',
-      value: `${share} %`,
-      sub: `${t('Für Projekte verfügbar')}: ${capacity} % · ${t(own ? 'eigener Wert' : 'Vorgabe der Organisation')}`
-    },
-    /* Somebody who leads nothing has work this table does not model, so their
-       figure is not a utilisation — the person table prints a dash for them too. */
-    carries ? {
-      term: `${t('Auslastung')} ${data.quarters[now].label}`,
-      value: `${util[now] > 100 ? '▲ ' : ''}${util[now]} %`,
-      sub: `${t('Spitze')} ${util[peak]} % · ${data.quarters[peak].label}`,
-      tone: util[now] > 100 ? 'danger' : null
-    } : {
-      term: `${t('Auslastung')} ${data.quarters[now].label}`,
-      value: '—', sub: t('Keine Projekte zugewiesen.')
-    }
-  ];
-
-  const draft = personDraft(modal);
-  const changed = draft && (draft.employment !== person.employment || draft.share !== person.projectShare);
-
-  return html`
-    ${modalHead(t(person.role), person.name)}
-
-    <dl class="facts">
-      ${facts.map(f => html`<div class="facts__row">
-        <dt>${t(f.term)}</dt>
-        <dd class="${f.tone ? 'is-' + f.tone : ''}">${f.value}<span class="facts__sub">${f.sub}</span></dd>
-      </div>`)}
-    </dl>
-
-    <!-- Under the facts, with its own button: at the foot of the dialog the two
-         fields sat below forty quarters, a screen and a half down a small laptop. -->
-    <section class="modal__section">
-      <h3>${t('Anstellung anpassen')}</h3>
-      <div class="personedit">
-        <div class="rebook__field">
-          <label class="rebook__label" for="person-employment">${t('Anstellung')}</label>
-          <span class="rebook__amount">
-            <input id="person-employment" type="text" inputmode="numeric" autocomplete="off"
-                   value="${modal.employment}" data-act="person-employment" data-fk="person-employment">
-            <span>%</span>
-          </span>
-        </div>
-        <div class="rebook__field">
-          <label class="rebook__label" for="person-share">${t('Eigener Projektanteil')}</label>
-          <span class="rebook__amount">
-            <input id="person-share" type="text" inputmode="numeric" autocomplete="off"
-                   value="${modal.share}" data-act="person-share" data-fk="person-share">
-            <span>%</span>
-          </span>
-        </div>
-        <button type="button" class="btn btn--primary" data-act="person-save" ${attr(!changed, 'disabled')}>${t('Speichern')}</button>
-      </div>
-      <p class="personedit__note">${t('Eigener Projektanteil leer: es gilt die Vorgabe der Organisation.')}</p>
-      ${draft ? '' : html`<p class="personedit__error" role="status">${
-        t('Ungültiger Wert: Anstellung 10 – 100 %, Projektanteil 1 – 100 % oder leer.')}</p>`}
-    </section>
-
-    <section class="modal__section">
-      <h3>${t('Rollen')} (${assignments.length})</h3>
-      ${carries ? html`<ul class="modal__log modal__log--roles">
-        ${assignments.map(({ project: p, role: r }) => {
-          const s = segAt(r, now);
-          const mine = s && s.p === person.id;
-          /* The role's pensum this quarter where the person holds it now;
-             otherwise when they do, which is the more useful fact. */
-          return html`<li>
-            <span>${t(roleOf(r.role).label)}</span>
-            <span>${p.number}</span>
-            <button type="button" class="linkbtn" data-act="open-project" data-val="${p.id}">${p.title}</button>
-            <span>${mine ? fmt(r.demand[now]) : holdSpan(r, person.id)}</span>
-          </li>`;
-        })}
-      </ul>` : html`<p class="settings__note">${t('Keine Projekte zugewiesen.')}</p>`}
-    </section>
-
-    ${carries && html`<section class="modal__section">
-      <h3>${t('Auslastung je Quartal')}</h3>
-      <div class="minigrid">
-        ${data.quarters.map((q, i) => html`<div class="minigrid__col">
-          <span class="minigrid__q">${q.short}<span>/${String(q.year).slice(2)}</span></span>
-          <span class="minigrid__v heat-${personHeatStep(util[i])}"
-                title="${q.label}: ${util[i]} % ${t('der Projektkapazität')}">${util[i]}</span>
-        </div>`)}
-      </div>
-    </section>`}
-
-    <footer class="modal__foot">
-      <button type="button" class="btn" data-act="filter-lead" data-val="${person.id}">${t('Projekte in der Planung anzeigen')}</button>
-    </footer>`;
-}

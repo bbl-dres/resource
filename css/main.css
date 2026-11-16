@@ -254,8 +254,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
  * Open, the field gives way before the labelled triggers do. At a fixed 250px
  * it was the one thing in the row that could not shrink, and the 216px it adds
  * over the closed icon were never in the row's budget — section 19 measured
- * the row with the search closed — so on a wide screen the group trigger
- * cropped to «Gruppieren ... Ke...». The floor is sized for the placeholder
+ * the row with the search closed — so on a wide screen the triggers beside
+ * it cropped. The floor is sized for the placeholder
  * «Projekt, ID oder Person» at 14px with the icon and the close button, about
  * 210px; an estimate, not yet measured on the rendered field.
  */
@@ -476,7 +476,7 @@ h1, h2, h3,
  */
 :is(.btn, .iconbtn, .dd__item, .tabs__tab, .segmented button,
     .pgrouphead__toggle, .sheetbar button,
-    .pop__step, .toolbar__check, .modal__close):active:active {
+    .toolbar__check, .modal__close):active:active {
   background: var(--color-surface-pressed);
 }
 
@@ -932,16 +932,17 @@ h1, h2, h3,
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;
   line-height: var(--row-height);
 }
-.pcell--id { padding-right: var(--space-4); color: var(--color-text-muted); font-size: var(--text-sm); }
+.pcell--id { padding-inline: var(--space-4); color: var(--color-text-muted); font-size: var(--text-sm); }
 .pcell--title { padding-right: var(--space-4); }
 .prow__title {
   display: block; width: 100%; border: 0; padding: 0; background: none; text-align: left;
   /* The darker ink already makes the name the row's anchor; the weight on top
      of it only added mass to 111 rows. Its neighbours stay secondary. */
   color: var(--color-text-strong); font-size: var(--text-base);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.prow__title:hover { color: var(--color-text-link); text-decoration: underline; text-underline-offset: 2px; }
+/* Text, not a control, in both tables: the row it sits in is the switch,
+   and a link inside it promised a second thing a click would do. */
 .pcell--phase { color: var(--color-text-secondary); }
 .pcell--lead { color: var(--color-text); }
 .pcell--lead.is-none { color: var(--color-text-muted); }
@@ -1011,7 +1012,6 @@ h1, h2, h3,
    dashboard draws the same cell and is read-only. */
 .pgrid--editable .pcell--val:hover { filter: brightness(.93); }
 
-.pcell--val.is-editing { position: relative; z-index: var(--z-raised); }
 .pcell--val.is-edited { box-shadow: inset 0 -3px 0 var(--color-accent); }
 
 button.pcell--val { cursor: pointer; }
@@ -1143,66 +1143,6 @@ button.pcell--val { cursor: pointer; }
 .legend .diamond, .legend .ampel { flex: 0 0 auto; }
 
 /* ==========================================================================
-   8 · Edit popover
-   ========================================================================== */
-
-.pop {
-  position: fixed; z-index: var(--z-modal); width: var(--pop-width);
-  padding: var(--space-7);
-  border: var(--border-hairline) solid var(--color-border-emphasis);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface); box-shadow: var(--shadow-modal);
-}
-.pop__kicker { font-size: var(--text-sm); font-weight: var(--font-semibold); color: var(--color-text-muted); }
-.pop__who { margin-top: var(--space-2); font-size: var(--text-btn); font-weight: var(--font-semibold); color: var(--color-text-strong); }
-.pop__what { font-size: var(--text-sm); color: var(--color-text-secondary); line-height: var(--leading-compact); }
-
-.pop__stepper { display: flex; align-items: center; gap: var(--space-4); margin-top: var(--space-6); }
-.pop__step {
-  display: inline-flex; align-items: center; justify-content: center;
-  width: var(--control-height-xl); height: var(--control-height-xl); flex: 0 0 auto;
-  border: var(--border-hairline) solid var(--color-border-strong); border-radius: var(--radius);
-  background: var(--color-surface); color: var(--color-text-strong); cursor: pointer;
-}
-.pop__step:hover { background: var(--color-surface-hover); }
-.pop__input {
-  display: flex; align-items: center; justify-content: center; gap: var(--space-2); flex: 1;
-  height: var(--control-height-xl);
-  border: var(--border-emphasis) solid var(--color-accent); border-radius: var(--radius);
-}
-.pop__input input {
-  width: 4.5ch; border: 0; background: none; outline: none; text-align: right;
-  font-size: var(--text-lg); font-weight: var(--font-bold); color: var(--color-text-strong);
-  font-variant-numeric: tabular-nums;
-  -moz-appearance: textfield;
-}
-.pop__input input::-webkit-outer-spin-button,
-.pop__input input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-.pop__unit { font-size: var(--text-btn); font-weight: var(--font-semibold); color: var(--color-text-secondary); }
-
-.pop__warn {
-  margin-top: var(--space-5); padding: var(--space-4) var(--space-5);
-  border: var(--border-hairline) solid; border-radius: var(--radius);
-  font-size: var(--text-sm); line-height: var(--leading-compact); font-weight: var(--font-semibold);
-}
-.pop__warn.is-none { background: var(--color-warn-bg-subtle);   border-color: var(--color-warn-border);          color: var(--color-warn-fg); }
-
-.pop__reason { display: block; margin-top: var(--space-5); }
-.pop__reasonlabel { font-size: var(--text-sm); font-weight: var(--font-semibold); color: var(--color-text-secondary); }
-.pop__reasonlabel span { font-weight: var(--font-regular); color: var(--color-text-muted); }
-.pop__reason textarea {
-  display: block; width: 100%; margin-top: var(--space-2); padding: var(--space-3) var(--space-4);
-  border: var(--border-hairline) solid var(--color-border-strong); border-radius: var(--radius);
-  background: var(--color-surface); font-size: var(--text-sm); line-height: var(--leading-compact);
-  resize: vertical;
-}
-.pop__rebook { margin-top: var(--space-5); }
-.pop__rebook .linkbtn { font-size: var(--text-sm); }
-.pop__actions { display: flex; gap: var(--space-4); margin-top: var(--space-6); }
-.pop__actions .btn { height: var(--control-height-xl); }
-.pop__actions .btn--primary { flex: 1; justify-content: center; }
-
-/* ==========================================================================
    9 · Modal
    ========================================================================== */
 
@@ -1262,21 +1202,6 @@ button.pcell--val { cursor: pointer; }
   font-size: var(--text-sm); color: var(--color-text-secondary);
 }
 .modal__log li:first-child { border-top: 0; }
-/* The person dialog lists projects in the same rows: number, name, phase, pensum. */
-.modal__log--projects li { grid-template-columns: 44px minmax(0, 1fr) 150px 64px; align-items: center; }
-.modal__log--projects li > :last-child { text-align: right; font-variant-numeric: tabular-nums; }
-.modal__log--projects .linkbtn { font-size: var(--text-sm); font-weight: var(--font-regular); text-align: left; }
-
-/* The person's own two figures: the contract and, where it differs, a project share. */
-.personedit {
-  display: grid; grid-template-columns: max-content max-content auto;
-  /* Both fields are a label over an input, so the button lines up with the inputs. */
-  align-items: end; justify-content: start; gap: var(--space-11);
-}
-.personedit .btn { height: var(--control-height-xl); }
-.personedit__note { margin-top: var(--space-4); font-size: var(--text-sm); color: var(--color-text-muted); }
-.personedit__error { margin-top: var(--space-5); font-size: var(--text-sm); font-weight: var(--font-semibold); color: var(--color-danger-fg); }
-
 .modal__foot {
   display: flex; align-items: center; justify-content: flex-end; gap: var(--space-4);
   padding: var(--space-8) var(--space-11);
@@ -1303,48 +1228,6 @@ button.pcell--val { cursor: pointer; }
 }
 
 /* Rebooking — von / Pensum / Dauer, then the person picker, then the reason. */
-.rebook {
-  display: grid; grid-template-columns: minmax(0, 1fr) 130px 150px;
-  gap: var(--space-8); padding: var(--space-8) var(--space-11) var(--space-6);
-}
-.rebook__field { display: flex; flex-direction: column; gap: var(--space-3); min-width: 0; }
-.rebook__label { font-size: var(--text-sm); font-weight: var(--font-semibold); color: var(--color-text-muted); }
-.rebook__readonly {
-  display: flex; align-items: center; height: var(--control-height-xl); padding: 0 var(--space-5);
-  border: var(--border-hairline) solid var(--color-border); border-radius: var(--radius);
-  background: var(--color-surface-frame);
-  font-size: var(--text-btn); font-weight: var(--font-semibold); color: var(--color-text-strong);
-}
-.rebook__amount { display: flex; align-items: center; gap: var(--space-4); font-size: var(--text-base); color: var(--color-text-secondary); }
-.rebook__amount input {
-  width: 72px; height: var(--control-height-xl); padding: 0 var(--space-4);
-  border: var(--border-hairline) solid var(--color-border-strong); border-radius: var(--radius);
-  text-align: right; font-variant-numeric: tabular-nums;
-}
-
-.rebook__to { display: flex; flex-direction: column; gap: var(--space-3); padding: 0 var(--space-11) var(--space-6); }
-.rebook__list {
-  max-height: 176px; overflow-y: auto;
-  border: var(--border-hairline) solid var(--color-border); border-radius: var(--radius);
-}
-/* Two columns, name and unit, at 60/40: the units line up down the list and
-   read as a column of their own, and none of them sits at the far edge, which
-   is where figures go. */
-.rebook__list li {
-  display: grid; grid-template-columns: 3fr 2fr; align-items: center; column-gap: var(--space-5);
-  min-height: var(--control-height-xl); padding: var(--space-3) var(--space-6);
-  border-bottom: var(--border-hairline) solid var(--color-border-subtle);
-  font-size: var(--text-base); cursor: pointer;
-}
-.rebook__list li:last-child { border-bottom: 0; }
-.rebook__list li:hover { background: var(--color-surface-hover); }
-.rebook__list li.is-on {
-  background: var(--color-surface-selected); color: var(--color-text-strong); font-weight: var(--font-semibold);
-}
-.rebook__role { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--color-text-muted); font-size: var(--text-sm); font-weight: var(--font-regular); }
-.rebook__empty { color: var(--color-text-muted); cursor: default; }
-.rebook__reason { padding: 0 var(--space-11) var(--space-8); }
-
 .share { display: flex; gap: var(--space-4); padding: var(--space-8) var(--space-11) var(--space-11); }
 .share__field { flex: 1; min-width: 0; }
 .share__field input {
@@ -2164,7 +2047,6 @@ button.pcell--val { cursor: pointer; }
   .page-header__actions { flex-wrap: wrap; }
   .log { grid-template-columns: minmax(0, 1fr); gap: var(--space-2); }
   .log--head { display: none; }
-  .rebook { grid-template-columns: minmax(0, 1fr); }
   /* The modal's twin of the .chg/.log reflow, missed when that one was written. */
   .modal__log li, .facts__row { grid-template-columns: minmax(0, 1fr); gap: var(--space-2); }
 }
@@ -2449,71 +2331,37 @@ button.pcell--val { cursor: pointer; }
   letter-spacing: var(--tracking-caption); white-space: nowrap;
 }
 
-/* ---- the cell being edited ------------------------------------------------
-   The ring used to close around the whole cell, which was right when the cell
-   held nothing but a number. It now also carries the band, so the ring takes
-   the number's own lane and stops above the bar; and the cell drops out of the
-   heat ramp while it is in flux — a value being changed is not a value you
-   should still be reading a magnitude off. The white ground yields the same
-   lane, or it painted over the bar underneath for as long as the popover was
-   open. */
-.pgrid .pcell--val.is-editing {
-  box-shadow: none;
-  background-color: transparent;
-  background-image: linear-gradient(to bottom,
-    var(--color-surface) var(--values-h), transparent var(--values-h));
-}
-.pgrid .pcell--val.is-editing::after {
-  content: ''; position: absolute; pointer-events: none;
-  inset: 0; bottom: var(--band-h);
-  border-radius: var(--radius-sm);
-  box-shadow: var(--ring-cell-edit);
-}
-/* The picker marks its cell the same way. That one is frozen and has no band
-   under it, so the ring takes the whole cell — and it stays sticky: made
-   relative, its frozen offset turned into a shift over the quarter columns. */
-.pgrid .pcell--lead.is-editing {
-  position: sticky; z-index: calc(var(--z-frozen) + 1);
-  box-shadow: var(--ring-cell-edit); border-radius: var(--radius-sm);
-}
-
-/* ---- the Bearbeitender picker ---------------------------------------------
-   A popover on the cell, like the pensum editor; the list reuses the rebooking
-   dialog's rows. */
-.pop--assign { width: var(--pop-assign-width); }
-.pop--assign .dd__searchfield { margin: var(--space-6) 0 var(--space-5); }
-.assign__list { max-height: 232px; }
-.assign__list li { gap: var(--space-4); }
-.person__name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-/* «Niemand zuweisen» has no unit and takes the row. */
-.person__name:only-child { grid-column: 1 / -1; }
-.assign__list .ampel { flex: 0 0 auto; }
-.assign__list li.is-on { background: var(--color-surface-selected); font-weight: var(--font-semibold); }
-.assign__list li:focus-visible { outline: var(--focus-ring); outline-offset: -2px; }
-.assign__none { color: var(--color-text-muted); font-style: italic; }
-
 /* ==========================================================================
-   18a · Roles — the staffing matrix
+   18a · Bearbeitende — the rows under a project
 
-   A project row folds open to one lane per role, the same four lanes under
-   every project, and each quarter of a lane is a chip: the person, in short,
-   and the pensum, in the heat colour of its value. The whole project row is
-   the switch; the chips are the controls. The lanes borrow the grid's row
-   template, so a chip stands exactly under the figure it is a part of.
+   A project row folds open to its roles, and a row under it reads like a
+   line of a spreadsheet: the role under the project's name, the person under
+   «Bearbeitende», a plain number in every quarter. The whole project row is
+   the switch; under it the cells themselves are the fields — the number is
+   typed over, the person chosen from the list in its cell. The rows borrow
+   the grid's template, so a number stands exactly under the sum it is a
+   part of.
    ========================================================================== */
 
 /* The row as a switch: the pointer says so, the caret says which way. */
 .prow--project { cursor: pointer; }
+/* The caret has a track of its own, in front of the columns and frozen with
+   them: the first thing in a row whichever columns are switched on. Empty on
+   the rows that do not fold — the head, the rows under a project. */
+.pcell--caret { padding-right: 0; }
 .rowcaret {
   display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto;
-  width: 22px; height: 22px; margin-left: calc(-1 * var(--space-2));
+  width: 22px; height: 22px;
   border: 0; border-radius: var(--radius-sm); background: none;
   color: var(--color-text-secondary); cursor: pointer;
 }
 .rowcaret:hover { background: var(--color-surface-hover); color: var(--color-text-strong); }
-.prow--project .pcell--title { display: flex; align-items: center; gap: var(--space-2); }
-.prow--project .prow__title { flex: 1; width: auto; min-width: 0; line-height: var(--row-height); }
-.pcell--roles { padding-right: var(--space-4); color: var(--color-text-secondary); }
+
+/* The folded row's «Bearbeitende» cell: one name, and how many more. The
+   name gives way before the count does. */
+.leadcell { display: flex; align-items: baseline; gap: var(--space-3); min-width: 0; }
+.leadcell__name { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.leadcell__more { flex: 0 0 auto; color: var(--color-text-muted); font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
 
 /* The link that folds a whole group, beside its heading. */
 .pgrouphead { display: flex; align-items: center; gap: var(--space-5); }
@@ -2523,84 +2371,106 @@ button.pcell--val { cursor: pointer; }
   font-size: var(--text-base); white-space: nowrap;
 }
 .pgroup__expand .caret { color: inherit; }
-.pgroup__tools { display: flex; justify-content: flex-end; padding-bottom: var(--space-6); }
 
-/* A lane: one row per role, a step shorter than a project row, its label
-   indented under the project name across the whole frozen block. No hover
-   fill — the chips answer the pointer, not the row. */
-.prow--lane { min-height: 30px; }
-.prow--lane:hover { --row-bg: var(--color-surface); }
-.prow--lane .is-frozen { left: 0; }
-.lane__label {
-  display: flex; align-items: center; gap: var(--space-4); min-width: 0;
-  padding: 0 var(--space-4) 0 34px;
+/* A row under a project: a step shorter than the project's, on a ground a
+   shade off it so the block reads as belonging to the row above. No hover
+   fill — the cells answer the pointer, not the row. */
+.prow--lane { min-height: 30px; --row-bg: var(--color-surface-sunken); }
+.prow--lane:hover { --row-bg: var(--color-surface-sunken); }
+
+/* Its frozen cells. One per column of the block, so the role stands under
+   the project's name and the person under «Bearbeitende» whatever else is
+   switched on between them. */
+.lane__cell {
+  display: flex; align-items: center; gap: var(--space-3); min-width: 0;
+  padding-inline: var(--space-4);
   font-size: var(--text-sm); color: var(--color-text-secondary);
 }
-.lane__label--project { padding-left: calc(var(--grid-col-id) + 34px); }
+.lane__role { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--color-text); }
+.lane__role--short { flex: 0 0 auto; color: var(--color-text-muted); }
+/* A role the project does not have yet: there, but greyed, until it is planned. */
+.prow--lane.is-unplanned .lane__role { color: var(--color-text-disabled); }
+
+/* «Weitere Person»: a second row for the role, on its last one. */
+.lane__more {
+  display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto;
+  width: var(--target-min); height: var(--target-min);
+  border: 0; border-radius: var(--radius-sm); background: none;
+  color: var(--color-text-muted); cursor: pointer;
+}
+.lane__more:hover { background: var(--color-surface-hover); color: var(--color-text-strong); }
+
+/* The person, as the list it is chosen from. At rest it is the name and
+   nothing else; the chevron and the frame come with the pointer or the
+   focus, which is as much as a cell of a table should say about itself. */
+.lanepick {
+  flex: 1; min-width: 0; width: 100%; height: var(--target-min);
+  margin-inline: calc(-1 * var(--space-2)); padding: 0 var(--space-7) 0 var(--space-2);
+  border: var(--border-hairline) solid transparent; border-radius: var(--radius-sm);
+  background: transparent; color: var(--color-text);
+  font: inherit; text-overflow: ellipsis; cursor: pointer;
+  appearance: none; -webkit-appearance: none;
+}
+.lanepick:hover, .lanepick:focus-visible {
+  border-color: var(--color-border-strong); background-color: var(--color-surface);
+  background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position: calc(100% - 11px) 50%, calc(100% - 7px) 50%;
+  background-size: 4px 4px, 4px 4px; background-repeat: no-repeat;
+}
+/* A role with pensum and nobody to carry it, in the warning hue of the mark. */
+.lanepick.is-open { color: var(--color-warn-fg); font-style: italic; }
+/* An empty row: nothing chosen yet. */
+.lanepick.is-blank { color: var(--color-text-muted); }
+.lanepick option { color: var(--color-text); font-style: normal; }
+
+/* The Personen tab's rows: the role under the person's name, and across the
+   rest of the frozen block the project it is held on — number first. */
+.lane__label {
+  display: flex; align-items: center; gap: var(--space-4); min-width: 0;
+  padding-inline: var(--space-4);
+  font-size: var(--text-sm); color: var(--color-text-secondary);
+}
 .lane__label > span, .lane__label > .linkbtn { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.lane__role { flex: 0 0 auto; font-weight: var(--font-semibold); color: var(--color-text); }
 .lane__num { flex: 0 0 auto; color: var(--color-text-muted); }
 .lane__project { font-size: var(--text-sm); font-weight: var(--font-regular); text-align: left; }
 .lane__note { flex: 0 0 auto; color: var(--color-text-muted); }
-/* A lane ePPM does not foresee for the project: there, but greyed. */
-.prow--lane.is-none .lane__label { color: var(--color-text-disabled); }
 
-.pcell--lane { align-self: stretch; padding: 3px var(--space-2); }
-.pcell--lane.is-today { background: var(--color-surface-sunken); }
-
-/* The chip. 24px tall, the least a pointer target may be; the name gives
-   way before the figure does. The heat classes paint it like a cell. */
-.rchip {
-  display: flex; align-items: center; gap: var(--space-2); flex: 1; min-width: 0;
-  height: var(--target-min); padding: 0 5px;
-  border: var(--border-hairline) solid transparent; border-radius: var(--radius-sm);
-  background: var(--color-surface); color: var(--color-text-body);
-  font: inherit; font-size: var(--text-xs); line-height: 1; text-align: left; cursor: pointer;
+/* The number. The project row's cell without the band's share of the row —
+   a row under a project has no bar — and with a field in it. */
+.pcell--lanev { min-height: 30px; padding: 0; font-size: var(--text-sm); }
+.pgrid .prow--lane > .pcell--val { padding-bottom: 0; }
+.lanev__in {
+  width: 100%; height: 100%; min-height: 30px; padding: 0 var(--space-2);
+  border: 0; border-radius: 0; background: transparent; outline: none;
+  color: inherit; font: inherit; font-variant-numeric: tabular-nums; text-align: center;
+  cursor: cell;
 }
-.rchip__name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.rchip__val { flex: 0 0 auto; font-variant-numeric: tabular-nums; }
-.rchip:hover { filter: brightness(.93); }
-/* An open role: dashed, in the warning hue, the run's first chip tinted so
-   the eye finds where the gap begins. */
-.rchip.is-open {
-  border-style: dashed; border-color: var(--color-warn-solid);
-  background: var(--color-surface); color: var(--color-warn-fg); font-style: italic;
+/* The cell being typed in: a white ground and the ring, as a spreadsheet draws it. */
+.pcell--lanev:focus-within {
+  position: relative; z-index: var(--z-raised);
+  background: var(--color-surface); color: var(--color-text-strong);
+  box-shadow: var(--ring-cell-edit); filter: none;
 }
-.rchip.is-open.is-start { background: var(--color-warn-bg-subtle); }
-.rchip.is-editing { box-shadow: var(--ring-cell-edit); }
-.rchip.is-edited { box-shadow: inset 0 -3px 0 var(--color-accent); }
-.rchip.is-editing.is-edited { box-shadow: var(--ring-cell-edit), inset 0 -3px 0 var(--color-accent); }
-/* An empty slot offers to plan the role, and says so only when pointed at. */
-.rchip--empty { justify-content: center; background: transparent; color: var(--color-text-subtle); }
-.rchip--empty .icon { opacity: 0; }
-.rchip--empty:hover, .rchip--empty:focus-visible, .rchip--empty.is-editing {
-  border-style: dashed; border-color: var(--color-border-emphasis); color: var(--color-text-secondary); filter: none;
-}
-.rchip--empty:hover .icon, .rchip--empty:focus-visible .icon, .rchip--empty.is-editing .icon { opacity: 1; }
-.grid-card.is-uncoloured .rchip:not(.is-open) { background: var(--color-surface); color: var(--color-text-body); }
+.lanev__in:focus { cursor: text; }
+/* The rows under a project are still the way to set a pensum while the
+   project row's own figures are switched off. */
+.grid-card.is-values-off .pgrid .prow--lane > .pcell--val { pointer-events: auto; cursor: default; }
+/* A quarter the person carries nothing in: blank. */
+.pcell--lanev.is-zero { background: transparent; }
+.pgrid--editable .pcell--lanev.is-zero:hover { background: var(--color-surface); filter: none; }
+/* Pensum nobody carries yet: the warning hue, as the «nicht zugewiesen» mark. */
+.pcell--lanev.is-open { background: var(--color-warn-bg-subtle); color: var(--color-warn-fg); font-style: italic; }
+.grid-card.is-uncoloured .pgrid .pcell--lanev.is-open { background: var(--color-warn-bg-subtle); color: var(--color-warn-fg); }
+.grid-card.is-uncoloured .pgrid .pcell--lanev.is-zero { background: transparent; }
+.pcell--lanev.is-edited:focus-within { box-shadow: var(--ring-cell-edit), inset 0 -3px 0 var(--color-accent); }
 
-/* The person table's lanes: the role's pensum where the person holds it, a
-   blank where somebody else does. */
-.pcell--lanev { align-self: stretch; min-height: 30px; justify-content: center; font-size: var(--text-sm); }
-.pcell--lanev.is-empty { background: var(--heat-null-bg); }
-
-/* The legend's swatch for an open role: the chip, small. */
+/* The legend's swatch for pensum nobody carries. */
 .legend__swatch.is-open-role {
   width: 22px; border: var(--border-hairline) dashed var(--color-warn-solid); border-radius: var(--radius-sm);
   background: var(--color-warn-bg-subtle);
 }
 
-/* The staffing popover: the picker's width, the editor's parts. */
-.pop--staff { width: var(--pop-assign-width); }
-.pop--staff .dd__searchfield { margin: var(--space-2) 0 var(--space-4); }
-.pop__listlabel { margin-top: var(--space-6); font-size: var(--text-sm); font-weight: var(--font-semibold); color: var(--color-text-secondary); }
-.pop__stepper--labelled { margin-top: var(--space-2); }
-.staff__list { max-height: 168px; }
-.pop__warn.is-over { background: var(--color-danger-bg); border-color: var(--color-danger-border); color: var(--color-danger-fg); }
-/* A role planned afresh: a statement, not a warning, so it wears the frame's neutral. */
-.pop__warn.is-plan { background: var(--color-surface-frame); border-color: var(--color-border); color: var(--color-text-secondary); font-weight: var(--font-regular); }
-
-/* The project dialog's roles: a line per role, and the band of who holds it when. */
+/* The project dialog's Bearbeitende: a line per role and person, and the band of when they hold it. */
 .rolelist { display: flex; flex-direction: column; gap: var(--space-6); }
 .rolelist__head { display: flex; align-items: baseline; gap: var(--space-5); font-size: var(--text-sm); }
 .rolelist__role { flex: 0 0 auto; font-weight: var(--font-semibold); color: var(--color-text-strong); }
@@ -2618,9 +2488,6 @@ button.pcell--val { cursor: pointer; }
 .roleband__seg.is-open { background: var(--pattern-no-lead); border-color: var(--color-warn-solid); color: var(--color-warn-fg); font-style: italic; }
 .roleband__axis { position: relative; height: 14px; font-size: var(--text-2xs); color: var(--color-text-muted); }
 .roleband__axis span { position: absolute; top: 0; padding-left: var(--space-2); border-left: var(--border-hairline) solid var(--color-border); line-height: 14px; }
-.modal__log--roles li { grid-template-columns: 110px 44px minmax(0, 1fr) 100px; align-items: center; }
-.modal__log--roles li > :last-child { text-align: right; font-variant-numeric: tabular-nums; }
-.modal__log--roles .linkbtn { font-size: var(--text-sm); font-weight: var(--font-regular); text-align: left; }
 
 /* ==========================================================================
    19 · One row for the projects and the time; the small laptop
@@ -2648,24 +2515,6 @@ button.pcell--val { cursor: pointer; }
   .toolbar:has(.xsearch.is-open) { flex-wrap: wrap; }
   .toolbar:has(.xsearch.is-open) .toolbar__spacer { flex-basis: 100%; }
   .toolbar:has(.xsearch.is-open) .toolbar__spacer + .btn { margin-left: auto; }
-}
-
-/* «Gruppieren nach:» is read, not seen, once the row cannot hold it. The full
-   toolbar measures 1310px and a 1366 window offers 1293, so the prefix yields
-   from 1400px down. Below that the button says only «Teilportfolio» beside a
-   filter that says the same; the grid icon and the title tell them apart. */
-@media (max-width: 1400px) {
-  .btn__prefix {
-    position: absolute; width: 1px; height: 1px; margin: -1px;
-    padding: 0; border: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
-  }
-}
-
-/* And at any width once the search is open: the open field costs the row more
-   than the prefix does, and the prefix is the first thing the row gives up. */
-.toolbar:has(.xsearch.is-open) .btn__prefix {
-  position: absolute; width: 1px; height: 1px; margin: -1px;
-  padding: 0; border: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
 }
 
 /* The mockup is designed at 1440px and the first breakpoint above was 1100px.

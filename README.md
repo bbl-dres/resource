@@ -26,8 +26,8 @@ Resource-planning prototype for the [Federal Office for Buildings and Logistics 
 ## Features
 
 - Review the portfolio in one planning grid that shows workload figures, the phase schedule, or both in the same rows, plus dashboards and a change history.
-- Fold a project open to its roles — Bearbeitender, Stellvertretung, Bauleitung, Fachplanung — each with its own person and workload per quarter, hand a role over at a quarter boundary, and see overload warnings with reasons. See [`docs/ROLES.md`](docs/ROLES.md).
-- Filter, group, and sort year, quarter, and month views in percent or FTE.
+- Fold a project open to its roles — Bearbeitender, Stellvertretung, Bauleitung, Fachplanung — one row per role and person, and type the workload per quarter straight into the cells, as in a spreadsheet. See [`docs/ROLES.md`](docs/ROLES.md).
+- Read the projects by size — small before large — and filter and sort year, quarter, and month views in percent or FTE.
 - Compare demand, capacity, utilisation, free capacity, and person-level workload.
 - Export CSV, Excel, and client-side PDF reports and print schedules from A4 through A0.
 - Use the responsive interface in German, French, Italian, or English.
@@ -42,14 +42,20 @@ python -m http.server 8000
 
 Then open <http://localhost:8000/>.
 
+To check the fixtures and the model without a browser — Node 22.7 or later, no dependencies:
+
+```bash
+node tools/check.mjs
+```
+
 ## Documentation
 
 - [Architecture](docs/ARCHITECTURE.md) — code structure, state, rendering, grids, time, exports, and data.
 - [Decisions](docs/DECISIONS.md) — standing implementation and design rules.
 - [Data model](docs/DATAMODEL.md) — the entities in `data/`, their fields, and how they join.
-- [Roles](docs/ROLES.md) — several people per project: what the September wireframe asked for, what is built, what was left out.
+- [Roles](docs/ROLES.md) — several people per project: what is built, and what the feedback round changed.
 - [Contrast review](docs/CONTRAST-REVIEW.md) — measured text contrast per tab, and the text tiers that came out of it.
-- [Current code review](docs/CODE-REVIEW-3.md) — remaining technical limitations.
+- [Code review, November 2026](docs/reviews/2026-11-16-code-review.md) — findings, what was fixed, and what is still open.
 - [Dashboard study](docs/DASHBOARD-STUDY.md) — proposal still under discussion.
 - [Data generator](tools/README.md) — deterministic fixture generation and known data limitations.
 

@@ -32,9 +32,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "sonja",
         "demand": [
           35,
           45,
@@ -76,17 +77,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "sonja",
-            "from": 0,
-            "to": 15
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "tobias",
         "demand": [
           15,
           50,
@@ -128,17 +123,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "tobias",
-            "from": 0,
-            "to": 9
-          }
         ]
       },
       {
         "role": "fp",
+        "person": "alina",
         "demand": [
           15,
           0,
@@ -180,13 +169,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "alina",
-            "from": 0,
-            "to": 1
-          }
         ]
       }
     ]
@@ -218,9 +200,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "alina",
         "demand": [
           50,
           10,
@@ -262,17 +245,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "alina",
-            "from": 0,
-            "to": 6
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "lars",
         "demand": [
           50,
           0,
@@ -314,13 +291,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "lars",
-            "from": 0,
-            "to": 1
-          }
         ]
       }
     ]
@@ -364,9 +334,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "lars",
         "demand": [
           30,
           45,
@@ -408,17 +379,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "lars",
-            "from": 0,
-            "to": 24
-          }
         ]
       },
       {
         "role": "fp",
+        "person": "evamustermann",
         "demand": [
           10,
           10,
@@ -460,13 +425,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "evamustermann",
-            "from": 0,
-            "to": 7
-          }
         ]
       }
     ]
@@ -504,9 +462,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "sonja",
         "demand": [
           60,
           60,
@@ -548,17 +507,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "sonja",
-            "from": 0,
-            "to": 15
-          }
         ]
       },
       {
         "role": "stv",
+        "person": "oliviamusterli",
         "demand": [
           5,
           5,
@@ -600,13 +553,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "oliviamusterli",
-            "from": 0,
-            "to": 10
-          }
         ]
       }
     ]
@@ -638,9 +584,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "sonja",
         "demand": [
           30,
           30,
@@ -682,17 +629,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "sonja",
-            "from": 0,
-            "to": 9
-          }
         ]
       },
       {
         "role": "stv",
+        "person": "ursinamuster",
         "demand": [
           10,
           10,
@@ -734,17 +675,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "ursinamuster",
-            "from": 0,
-            "to": 6
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "ginamusterli",
         "demand": [
           45,
           45,
@@ -786,13 +721,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "ginamusterli",
-            "from": 0,
-            "to": 6
-          }
         ]
       }
     ]
@@ -824,13 +752,60 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "tobias",
         "demand": [
           40,
           40,
           10,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "role": "pl",
+        "person": "evamustermann",
+        "demand": [
+          0,
+          0,
+          0,
           10,
           10,
           10,
@@ -868,22 +843,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "tobias",
-            "from": 0,
-            "to": 3
-          },
-          {
-            "p": "evamustermann",
-            "from": 3,
-            "to": 11
-          }
         ]
       },
       {
         "role": "stv",
+        "person": "nicobeispieler",
         "demand": [
           10,
           10,
@@ -925,17 +889,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "nicobeispieler",
-            "from": 0,
-            "to": 2
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "annamuster",
         "demand": [
           50,
           50,
@@ -977,13 +935,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "annamuster",
-            "from": 0,
-            "to": 2
-          }
         ]
       }
     ]
@@ -1033,14 +984,61 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "alina",
         "demand": [
           10,
           10,
           10,
           10,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "role": "pl",
+        "person": "evamustermann",
+        "demand": [
+          0,
+          0,
+          0,
+          0,
           10,
           15,
           15,
@@ -1077,22 +1075,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "alina",
-            "from": 0,
-            "to": 4
-          },
-          {
-            "p": "evamustermann",
-            "from": 4,
-            "to": 17
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "nicobeispieler",
         "demand": [
           0,
           0,
@@ -1134,17 +1121,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "nicobeispieler",
-            "from": 3,
-            "to": 13
-          }
         ]
       },
       {
         "role": "fp",
+        "person": "veramustermann",
         "demand": [
           0,
           0,
@@ -1186,13 +1167,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "veramustermann",
-            "from": 2,
-            "to": 5
-          }
         ]
       }
     ]
@@ -1218,9 +1192,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "lars",
         "demand": [
           5,
           5,
@@ -1262,13 +1237,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "lars",
-            "from": 0,
-            "to": 4
-          }
         ]
       }
     ]
@@ -1324,9 +1292,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "tobias",
         "demand": [
           10,
           10,
@@ -1368,17 +1337,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "tobias",
-            "from": 0,
-            "to": 28
-          }
         ]
       },
       {
         "role": "stv",
+        "person": "timobeispiel",
         "demand": [
           0,
           0,
@@ -1420,17 +1383,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "timobeispiel",
-            "from": 2,
-            "to": 23
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "leonbeispielmann",
         "demand": [
           0,
           0,
@@ -1472,17 +1429,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "leonbeispielmann",
-            "from": 7,
-            "to": 23
-          }
         ]
       },
       {
         "role": "fp",
+        "person": "dariobeispielmann",
         "demand": [
           0,
           0,
@@ -1492,6 +1443,52 @@
           10,
           10,
           10,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "role": "fp",
+        "person": "alina",
+        "demand": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
           10,
           10,
           10,
@@ -1524,18 +1521,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "dariobeispielmann",
-            "from": 2,
-            "to": 8
-          },
-          {
-            "p": "alina",
-            "from": 8,
-            "to": 12
-          }
         ]
       }
     ]
@@ -1585,9 +1570,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "paula",
         "demand": [
           10,
           15,
@@ -1629,17 +1615,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "paula",
-            "from": 0,
-            "to": 16
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "corinamusterli",
         "demand": [
           0,
           0,
@@ -1681,17 +1661,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "corinamusterli",
-            "from": 2,
-            "to": 13
-          }
         ]
       },
       {
         "role": "fp",
+        "person": "fabiobeispieler",
         "demand": [
           5,
           5,
@@ -1733,13 +1707,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "fabiobeispieler",
-            "from": 0,
-            "to": 5
-          }
         ]
       }
     ]
@@ -1789,9 +1756,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": null,
         "demand": [
           10,
           10,
@@ -1833,17 +1801,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": null,
-            "from": 0,
-            "to": 11
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "veramustermann",
         "demand": [
           0,
           0,
@@ -1885,17 +1847,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "veramustermann",
-            "from": 4,
-            "to": 9
-          }
         ]
       },
       {
         "role": "fp",
+        "person": "carlamuster",
         "demand": [
           5,
           5,
@@ -1937,13 +1893,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "carlamuster",
-            "from": 0,
-            "to": 6
-          }
         ]
       }
     ]
@@ -1994,9 +1943,10 @@
         "continues": true
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "oliviamusterli",
         "demand": [
           15,
           15,
@@ -2038,17 +1988,11 @@
           45,
           45,
           45
-        ],
-        "segs": [
-          {
-            "p": "oliviamusterli",
-            "from": 0,
-            "to": 40
-          }
         ]
       },
       {
         "role": "stv",
+        "person": "carlamuster",
         "demand": [
           0,
           0,
@@ -2090,17 +2034,11 @@
           10,
           10,
           10
-        ],
-        "segs": [
-          {
-            "p": "carlamuster",
-            "from": 2,
-            "to": 40
-          }
         ]
       },
       {
         "role": "bl",
+        "person": null,
         "demand": [
           0,
           0,
@@ -2142,17 +2080,11 @@
           55,
           55,
           55
-        ],
-        "segs": [
-          {
-            "p": null,
-            "from": 16,
-            "to": 40
-          }
         ]
       },
       {
         "role": "fp",
+        "person": "evamustermann",
         "demand": [
           5,
           5,
@@ -2194,13 +2126,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "evamustermann",
-            "from": 0,
-            "to": 29
-          }
         ]
       }
     ]
@@ -2238,9 +2163,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "annamuster",
         "demand": [
           10,
           15,
@@ -2282,17 +2208,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "annamuster",
-            "from": 0,
-            "to": 12
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "martamustermann",
         "demand": [
           5,
           15,
@@ -2334,17 +2254,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "martamustermann",
-            "from": 0,
-            "to": 9
-          }
         ]
       },
       {
         "role": "fp",
+        "person": "timobeispiel",
         "demand": [
           5,
           0,
@@ -2386,13 +2300,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "timobeispiel",
-            "from": 0,
-            "to": 1
-          }
         ]
       }
     ]
@@ -2424,9 +2331,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "ursinamuster",
         "demand": [
           25,
           25,
@@ -2468,17 +2376,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "ursinamuster",
-            "from": 0,
-            "to": 8
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "tanjamuster",
         "demand": [
           25,
           25,
@@ -2520,13 +2422,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "tanjamuster",
-            "from": 0,
-            "to": 4
-          }
         ]
       }
     ]
@@ -2558,9 +2453,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "ginamusterli",
         "demand": [
           25,
           25,
@@ -2602,17 +2498,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "ginamusterli",
-            "from": 0,
-            "to": 9
-          }
         ]
       },
       {
         "role": "stv",
+        "person": "bernhardbeispieler",
         "demand": [
           10,
           10,
@@ -2654,17 +2544,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "bernhardbeispieler",
-            "from": 0,
-            "to": 4
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "elenamustermann",
         "demand": [
           40,
           40,
@@ -2706,13 +2590,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "elenamustermann",
-            "from": 0,
-            "to": 4
-          }
         ]
       }
     ]
@@ -2768,15 +2645,62 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "evamustermann",
         "demand": [
           0,
           0,
           5,
           10,
           10,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "role": "pl",
+        "person": "alina",
+        "demand": [
+          0,
+          0,
+          0,
+          0,
+          0,
           10,
           15,
           15,
@@ -2812,22 +2736,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "evamustermann",
-            "from": 2,
-            "to": 5
-          },
-          {
-            "p": "alina",
-            "from": 5,
-            "to": 23
-          }
         ]
       },
       {
         "role": "stv",
+        "person": "karinmuster",
         "demand": [
           0,
           0,
@@ -2869,13 +2782,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "karinmuster",
-            "from": 11,
-            "to": 20
-          }
         ]
       }
     ]
@@ -2913,9 +2819,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "nicobeispieler",
         "demand": [
           20,
           20,
@@ -2957,17 +2864,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "nicobeispieler",
-            "from": 0,
-            "to": 14
-          }
         ]
       },
       {
         "role": "stv",
+        "person": "danielbeispielmann",
         "demand": [
           5,
           5,
@@ -3009,17 +2910,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "danielbeispielmann",
-            "from": 0,
-            "to": 10
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "petramustermann",
         "demand": [
           5,
           5,
@@ -3061,17 +2956,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "petramustermann",
-            "from": 0,
-            "to": 10
-          }
         ]
       },
       {
         "role": "fp",
+        "person": null,
         "demand": [
           5,
           5,
@@ -3113,13 +3002,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": null,
-            "from": 0,
-            "to": 2
-          }
         ]
       }
     ]
@@ -3163,9 +3045,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "leonbeispielmann",
         "demand": [
           50,
           55,
@@ -3207,17 +3090,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "leonbeispielmann",
-            "from": 0,
-            "to": 21
-          }
         ]
       },
       {
         "role": "stv",
+        "person": "jonasbeispiel",
         "demand": [
           10,
           10,
@@ -3259,17 +3136,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "jonasbeispiel",
-            "from": 0,
-            "to": 15
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "bernhardbeispieler",
         "demand": [
           0,
           15,
@@ -3311,13 +3182,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "bernhardbeispieler",
-            "from": 1,
-            "to": 15
-          }
         ]
       }
     ]
@@ -3349,9 +3213,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "dariobeispielmann",
         "demand": [
           45,
           45,
@@ -3393,17 +3258,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "dariobeispielmann",
-            "from": 0,
-            "to": 17
-          }
         ]
       },
       {
         "role": "stv",
+        "person": "karinmuster",
         "demand": [
           10,
           10,
@@ -3445,17 +3304,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "karinmuster",
-            "from": 0,
-            "to": 6
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "noahbeispielmann",
         "demand": [
           55,
           55,
@@ -3497,13 +3350,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "noahbeispielmann",
-            "from": 0,
-            "to": 6
-          }
         ]
       }
     ]
@@ -3535,9 +3381,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "veramustermann",
         "demand": [
           35,
           35,
@@ -3579,19 +3426,59 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "veramustermann",
-            "from": 0,
-            "to": 10
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "zenobeispieler",
         "demand": [
           40,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "role": "bl",
+        "person": "jonasbeispiel",
+        "demand": [
+          0,
           40,
           40,
           40,
@@ -3631,18 +3518,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "zenobeispieler",
-            "from": 0,
-            "to": 1
-          },
-          {
-            "p": "jonasbeispiel",
-            "from": 1,
-            "to": 6
-          }
         ]
       }
     ]
@@ -3674,9 +3549,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "timobeispiel",
         "demand": [
           25,
           25,
@@ -3718,17 +3594,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "timobeispiel",
-            "from": 0,
-            "to": 8
-          }
         ]
       },
       {
         "role": "stv",
+        "person": "yvesmuster",
         "demand": [
           10,
           10,
@@ -3770,17 +3640,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "yvesmuster",
-            "from": 0,
-            "to": 5
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "katjamuster",
         "demand": [
           40,
           40,
@@ -3822,13 +3686,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "katjamuster",
-            "from": 0,
-            "to": 5
-          }
         ]
       }
     ]
@@ -3866,9 +3723,10 @@
         "label": "53 Inbetriebnahme"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": null,
         "demand": [
           40,
           40,
@@ -3910,17 +3768,11 @@
           35,
           35,
           35
-        ],
-        "segs": [
-          {
-            "p": null,
-            "from": 0,
-            "to": 40
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "ursinamuster",
         "demand": [
           0,
           0,
@@ -3962,13 +3814,6 @@
           40,
           40,
           40
-        ],
-        "segs": [
-          {
-            "p": "ursinamuster",
-            "from": 4,
-            "to": 40
-          }
         ]
       }
     ]
@@ -4012,9 +3857,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": null,
         "demand": [
           35,
           40,
@@ -4056,17 +3902,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": null,
-            "from": 0,
-            "to": 32
-          }
         ]
       },
       {
         "role": "stv",
+        "person": "fabiobeispieler",
         "demand": [
           5,
           5,
@@ -4108,17 +3948,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "fabiobeispieler",
-            "from": 0,
-            "to": 23
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "tanjamuster",
         "demand": [
           0,
           10,
@@ -4131,6 +3965,52 @@
           10,
           10,
           10,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "role": "bl",
+        "person": "zoebeispielmann",
+        "demand": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
           40,
           40,
           40,
@@ -4160,18 +4040,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "tanjamuster",
-            "from": 1,
-            "to": 11
-          },
-          {
-            "p": "zoebeispielmann",
-            "from": 11,
-            "to": 23
-          }
         ]
       }
     ]
@@ -4197,9 +4065,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "corinamusterli",
         "demand": [
           5,
           5,
@@ -4241,13 +4110,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "corinamusterli",
-            "from": 0,
-            "to": 2
-          }
         ]
       }
     ]
@@ -4279,9 +4141,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "martamustermann",
         "demand": [
           25,
           25,
@@ -4323,17 +4186,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "martamustermann",
-            "from": 0,
-            "to": 24
-          }
         ]
       },
       {
         "role": "stv",
+        "person": "heinzbeispieler",
         "demand": [
           10,
           10,
@@ -4375,17 +4232,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "heinzbeispieler",
-            "from": 0,
-            "to": 15
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "gretamustermann",
         "demand": [
           40,
           40,
@@ -4427,13 +4278,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "gretamustermann",
-            "from": 0,
-            "to": 15
-          }
         ]
       }
     ]
@@ -4471,9 +4315,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "carlamuster",
         "demand": [
           15,
           15,
@@ -4515,17 +4360,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "carlamuster",
-            "from": 0,
-            "to": 11
-          }
         ]
       },
       {
         "role": "stv",
+        "person": "ursbeispielmann",
         "demand": [
           0,
           0,
@@ -4567,17 +4406,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "ursbeispielmann",
-            "from": 2,
-            "to": 8
-          }
         ]
       },
       {
         "role": "fp",
+        "person": "inesmusterli",
         "demand": [
           5,
           5,
@@ -4619,13 +4452,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "inesmusterli",
-            "from": 0,
-            "to": 2
-          }
         ]
       }
     ]
@@ -4681,9 +4507,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "ursinamuster",
         "demand": [
           15,
           25,
@@ -4725,13 +4552,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "ursinamuster",
-            "from": 0,
-            "to": 32
-          }
         ]
       }
     ]
@@ -4775,9 +4595,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "fabiobeispieler",
         "demand": [
           15,
           25,
@@ -4819,17 +4640,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "fabiobeispieler",
-            "from": 0,
-            "to": 14
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "danielbeispielmann",
         "demand": [
           0,
           5,
@@ -4871,17 +4686,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "danielbeispielmann",
-            "from": 1,
-            "to": 11
-          }
         ]
       },
       {
         "role": "fp",
+        "person": "ursbeispielmann",
         "demand": [
           10,
           5,
@@ -4923,13 +4732,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "ursbeispielmann",
-            "from": 0,
-            "to": 4
-          }
         ]
       }
     ]
@@ -4961,9 +4763,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "tanjamuster",
         "demand": [
           25,
           25,
@@ -5005,17 +4808,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "tanjamuster",
-            "from": 0,
-            "to": 29
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "saramusterli",
         "demand": [
           25,
           25,
@@ -5057,13 +4854,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "saramusterli",
-            "from": 0,
-            "to": 21
-          }
         ]
       }
     ]
@@ -5095,9 +4885,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "danielbeispielmann",
         "demand": [
           30,
           30,
@@ -5139,13 +4930,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "danielbeispielmann",
-            "from": 0,
-            "to": 8
-          }
         ]
       }
     ]
@@ -5171,9 +4955,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "bernhardbeispieler",
         "demand": [
           5,
           5,
@@ -5215,13 +5000,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "bernhardbeispieler",
-            "from": 0,
-            "to": 3
-          }
         ]
       }
     ]
@@ -5253,9 +5031,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "elenamustermann",
         "demand": [
           65,
           65,
@@ -5297,17 +5076,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "elenamustermann",
-            "from": 0,
-            "to": 28
-          }
         ]
       },
       {
         "role": "stv",
+        "person": "retobeispieler",
         "demand": [
           10,
           10,
@@ -5349,13 +5122,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "retobeispieler",
-            "from": 0,
-            "to": 18
-          }
         ]
       }
     ]
@@ -5387,9 +5153,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "petramustermann",
         "demand": [
           45,
           45,
@@ -5431,17 +5198,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "petramustermann",
-            "from": 0,
-            "to": 7
-          }
         ]
       },
       {
         "role": "stv",
+        "person": "janbeispiel",
         "demand": [
           5,
           5,
@@ -5483,13 +5244,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "janbeispiel",
-            "from": 0,
-            "to": 2
-          }
         ]
       }
     ]
@@ -5527,9 +5281,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "karinmuster",
         "demand": [
           65,
           65,
@@ -5571,17 +5326,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "karinmuster",
-            "from": 0,
-            "to": 31
-          }
         ]
       },
       {
         "role": "fp",
+        "person": "alinemustermann",
         "demand": [
           15,
           15,
@@ -5623,13 +5372,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "alinemustermann",
-            "from": 0,
-            "to": 2
-          }
         ]
       }
     ]
@@ -5661,9 +5403,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": null,
         "demand": [
           25,
           5,
@@ -5705,17 +5448,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": null,
-            "from": 0,
-            "to": 4
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "chiaramuster",
         "demand": [
           25,
           0,
@@ -5757,13 +5494,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "chiaramuster",
-            "from": 0,
-            "to": 1
-          }
         ]
       }
     ]
@@ -5795,15 +5525,62 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "zenobeispieler",
         "demand": [
           25,
           25,
           25,
           25,
           25,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "role": "pl",
+        "person": null,
+        "demand": [
+          0,
+          0,
+          0,
+          0,
+          0,
           10,
           10,
           10,
@@ -5839,22 +5616,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "zenobeispieler",
-            "from": 0,
-            "to": 5
-          },
-          {
-            "p": null,
-            "from": 5,
-            "to": 10
-          }
         ]
       },
       {
         "role": "stv",
+        "person": "simonbeispiel",
         "demand": [
           10,
           10,
@@ -5896,17 +5662,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "simonbeispiel",
-            "from": 0,
-            "to": 5
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "brunobeispiel",
         "demand": [
           40,
           40,
@@ -5948,13 +5708,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "brunobeispiel",
-            "from": 0,
-            "to": 5
-          }
         ]
       }
     ]
@@ -5986,9 +5739,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "evamustermann",
         "demand": [
           70,
           15,
@@ -6030,17 +5784,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "evamustermann",
-            "from": 0,
-            "to": 11
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "corinamusterli",
         "demand": [
           75,
           0,
@@ -6082,13 +5830,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "corinamusterli",
-            "from": 0,
-            "to": 1
-          }
         ]
       }
     ]
@@ -6120,9 +5861,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "jonasbeispiel",
         "demand": [
           45,
           15,
@@ -6164,17 +5906,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "jonasbeispiel",
-            "from": 0,
-            "to": 10
-          }
         ]
       },
       {
         "role": "stv",
+        "person": "zoebeispielmann",
         "demand": [
           10,
           0,
@@ -6216,17 +5952,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "zoebeispielmann",
-            "from": 0,
-            "to": 1
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "andreamusterli",
         "demand": [
           55,
           0,
@@ -6268,13 +5998,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "andreamusterli",
-            "from": 0,
-            "to": 1
-          }
         ]
       }
     ]
@@ -6306,9 +6029,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "noahbeispielmann",
         "demand": [
           35,
           35,
@@ -6350,17 +6074,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "noahbeispielmann",
-            "from": 0,
-            "to": 8
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "inesmusterli",
         "demand": [
           40,
           40,
@@ -6402,13 +6120,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "inesmusterli",
-            "from": 0,
-            "to": 3
-          }
         ]
       }
     ]
@@ -6440,9 +6151,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "chiaramuster",
         "demand": [
           20,
           20,
@@ -6484,17 +6196,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "chiaramuster",
-            "from": 0,
-            "to": 9
-          }
         ]
       },
       {
         "role": "stv",
+        "person": "beatbeispiel",
         "demand": [
           5,
           5,
@@ -6536,17 +6242,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "beatbeispiel",
-            "from": 0,
-            "to": 5
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "rahelmusterli",
         "demand": [
           25,
           25,
@@ -6588,13 +6288,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "rahelmusterli",
-            "from": 0,
-            "to": 5
-          }
         ]
       }
     ]
@@ -6626,9 +6319,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "yvesmuster",
         "demand": [
           35,
           35,
@@ -6670,17 +6364,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "yvesmuster",
-            "from": 0,
-            "to": 15
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "heinzbeispieler",
         "demand": [
           40,
           40,
@@ -6722,13 +6410,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "heinzbeispieler",
-            "from": 0,
-            "to": 10
-          }
         ]
       }
     ]
@@ -6766,9 +6447,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "bernhardbeispieler",
         "demand": [
           40,
           40,
@@ -6810,17 +6492,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "bernhardbeispieler",
-            "from": 0,
-            "to": 13
-          }
         ]
       },
       {
         "role": "stv",
+        "person": "walterbeispieler",
         "demand": [
           5,
           5,
@@ -6862,19 +6538,59 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "walterbeispieler",
-            "from": 0,
-            "to": 9
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "janbeispiel",
         "demand": [
           10,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "role": "bl",
+        "person": null,
+        "demand": [
+          0,
           10,
           40,
           40,
@@ -6914,18 +6630,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "janbeispiel",
-            "from": 0,
-            "to": 1
-          },
-          {
-            "p": null,
-            "from": 1,
-            "to": 9
-          }
         ]
       }
     ]
@@ -6951,9 +6655,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "inesmusterli",
         "demand": [
           5,
           5,
@@ -6995,13 +6700,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "inesmusterli",
-            "from": 0,
-            "to": 3
-          }
         ]
       }
     ]
@@ -7034,9 +6732,10 @@
         "continues": true
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "gretamustermann",
         "demand": [
           45,
           45,
@@ -7078,17 +6777,11 @@
           15,
           15,
           15
-        ],
-        "segs": [
-          {
-            "p": "gretamustermann",
-            "from": 0,
-            "to": 40
-          }
         ]
       },
       {
         "role": "stv",
+        "person": "nadia",
         "demand": [
           10,
           10,
@@ -7130,17 +6823,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "nadia",
-            "from": 0,
-            "to": 20
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "retobeispieler",
         "demand": [
           55,
           55,
@@ -7158,6 +6845,52 @@
           55,
           55,
           55,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "role": "bl",
+        "person": "evamustermann",
+        "demand": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
           55,
           55,
           55,
@@ -7182,18 +6915,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "retobeispieler",
-            "from": 0,
-            "to": 16
-          },
-          {
-            "p": "evamustermann",
-            "from": 16,
-            "to": 20
-          }
         ]
       }
     ]
@@ -7243,9 +6964,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "corinamusterli",
         "demand": [
           15,
           15,
@@ -7287,17 +7009,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "corinamusterli",
-            "from": 0,
-            "to": 20
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "alinemustermann",
         "demand": [
           0,
           0,
@@ -7339,17 +7055,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "alinemustermann",
-            "from": 3,
-            "to": 15
-          }
         ]
       },
       {
         "role": "fp",
+        "person": "lucabeispielmann",
         "demand": [
           5,
           10,
@@ -7391,13 +7101,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "lucabeispielmann",
-            "from": 0,
-            "to": 7
-          }
         ]
       }
     ]
@@ -7429,9 +7132,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "heinzbeispieler",
         "demand": [
           25,
           25,
@@ -7473,17 +7177,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "heinzbeispieler",
-            "from": 0,
-            "to": 8
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "hansbeispiel",
         "demand": [
           25,
           25,
@@ -7525,13 +7223,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "hansbeispiel",
-            "from": 0,
-            "to": 6
-          }
         ]
       }
     ]
@@ -7563,9 +7254,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "katjamuster",
         "demand": [
           25,
           25,
@@ -7576,6 +7268,52 @@
           25,
           25,
           25,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "role": "pl",
+        "person": null,
+        "demand": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
           25,
           10,
           10,
@@ -7607,22 +7345,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "katjamuster",
-            "from": 0,
-            "to": 9
-          },
-          {
-            "p": null,
-            "from": 9,
-            "to": 16
-          }
         ]
       },
       {
         "role": "stv",
+        "person": "ursbeispielmann",
         "demand": [
           10,
           10,
@@ -7664,17 +7391,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "ursbeispielmann",
-            "from": 0,
-            "to": 10
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "simonbeispiel",
         "demand": [
           40,
           40,
@@ -7716,13 +7437,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "simonbeispiel",
-            "from": 0,
-            "to": 10
-          }
         ]
       }
     ]
@@ -7767,9 +7481,10 @@
         "continues": true
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "annamuster",
         "demand": [
           30,
           30,
@@ -7811,17 +7526,11 @@
           15,
           15,
           15
-        ],
-        "segs": [
-          {
-            "p": "annamuster",
-            "from": 0,
-            "to": 40
-          }
         ]
       },
       {
         "role": "stv",
+        "person": "zoebeispielmann",
         "demand": [
           10,
           10,
@@ -7863,17 +7572,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "zoebeispielmann",
-            "from": 0,
-            "to": 37
-          }
         ]
       },
       {
         "role": "fp",
+        "person": "beatbeispiel",
         "demand": [
           20,
           20,
@@ -7915,13 +7618,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "beatbeispiel",
-            "from": 0,
-            "to": 16
-          }
         ]
       }
     ]
@@ -7971,9 +7667,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "danielbeispielmann",
         "demand": [
           20,
           20,
@@ -8015,17 +7712,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "danielbeispielmann",
-            "from": 0,
-            "to": 21
-          }
         ]
       },
       {
         "role": "stv",
+        "person": "walterbeispieler",
         "demand": [
           5,
           5,
@@ -8067,17 +7758,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "walterbeispieler",
-            "from": 0,
-            "to": 17
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "ursbeispielmann",
         "demand": [
           0,
           0,
@@ -8119,13 +7804,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "ursbeispielmann",
-            "from": 7,
-            "to": 17
-          }
         ]
       }
     ]
@@ -8175,9 +7853,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "inesmusterli",
         "demand": [
           15,
           20,
@@ -8219,17 +7898,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "inesmusterli",
-            "from": 0,
-            "to": 20
-          }
         ]
       },
       {
         "role": "stv",
+        "person": "damianbeispiel",
         "demand": [
           5,
           5,
@@ -8271,17 +7944,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "damianbeispiel",
-            "from": 0,
-            "to": 17
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "lucabeispielmann",
         "demand": [
           0,
           0,
@@ -8323,13 +7990,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "lucabeispielmann",
-            "from": 4,
-            "to": 17
-          }
         ]
       }
     ]
@@ -8367,9 +8027,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "ursbeispielmann",
         "demand": [
           65,
           65,
@@ -8411,17 +8072,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "ursbeispielmann",
-            "from": 0,
-            "to": 31
-          }
         ]
       },
       {
         "role": "fp",
+        "person": "paula",
         "demand": [
           15,
           15,
@@ -8463,13 +8118,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "paula",
-            "from": 0,
-            "to": 7
-          }
         ]
       }
     ]
@@ -8501,9 +8149,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "janbeispiel",
         "demand": [
           55,
           55,
@@ -8545,17 +8194,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "janbeispiel",
-            "from": 0,
-            "to": 12
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "nicobeispieler",
         "demand": [
           55,
           55,
@@ -8597,13 +8240,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "nicobeispieler",
-            "from": 0,
-            "to": 5
-          }
         ]
       }
     ]
@@ -8642,9 +8278,10 @@
         "continues": true
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "petramustermann",
         "demand": [
           30,
           30,
@@ -8686,17 +8323,11 @@
           45,
           45,
           45
-        ],
-        "segs": [
-          {
-            "p": "petramustermann",
-            "from": 0,
-            "to": 40
-          }
         ]
       },
       {
         "role": "stv",
+        "person": "damianbeispiel",
         "demand": [
           10,
           10,
@@ -8738,17 +8369,11 @@
           10,
           10,
           10
-        ],
-        "segs": [
-          {
-            "p": "damianbeispiel",
-            "from": 0,
-            "to": 40
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "dariobeispielmann",
         "demand": [
           0,
           0,
@@ -8790,17 +8415,11 @@
           55,
           55,
           55
-        ],
-        "segs": [
-          {
-            "p": "dariobeispielmann",
-            "from": 6,
-            "to": 40
-          }
         ]
       },
       {
         "role": "fp",
+        "person": "walterbeispieler",
         "demand": [
           20,
           20,
@@ -8842,13 +8461,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "walterbeispieler",
-            "from": 0,
-            "to": 21
-          }
         ]
       }
     ]
@@ -8880,9 +8492,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "saramusterli",
         "demand": [
           30,
           5,
@@ -8924,13 +8537,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "saramusterli",
-            "from": 0,
-            "to": 3
-          }
         ]
       }
     ]
@@ -8980,9 +8586,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "saramusterli",
         "demand": [
           15,
           15,
@@ -9024,17 +8631,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "saramusterli",
-            "from": 0,
-            "to": 16
-          }
         ]
       },
       {
         "role": "stv",
+        "person": "zoebeispielmann",
         "demand": [
           5,
           5,
@@ -9076,17 +8677,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "zoebeispielmann",
-            "from": 0,
-            "to": 14
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "timobeispiel",
         "demand": [
           0,
           0,
@@ -9128,13 +8723,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "timobeispiel",
-            "from": 3,
-            "to": 14
-          }
         ]
       }
     ]
@@ -9190,12 +8778,59 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "carlamuster",
         "demand": [
           10,
           10,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "role": "pl",
+        "person": "martamustermann",
+        "demand": [
+          0,
+          0,
           10,
           15,
           15,
@@ -9234,22 +8869,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "carlamuster",
-            "from": 0,
-            "to": 2
-          },
-          {
-            "p": "martamustermann",
-            "from": 2,
-            "to": 28
-          }
         ]
       },
       {
         "role": "fp",
+        "person": "nadia",
         "demand": [
           0,
           0,
@@ -9291,13 +8915,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "nadia",
-            "from": 3,
-            "to": 13
-          }
         ]
       }
     ]
@@ -9323,9 +8940,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "brunobeispiel",
         "demand": [
           5,
           5,
@@ -9367,13 +8985,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "brunobeispiel",
-            "from": 0,
-            "to": 2
-          }
         ]
       }
     ]
@@ -9405,9 +9016,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "retobeispieler",
         "demand": [
           55,
           55,
@@ -9449,21 +9061,61 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "retobeispieler",
-            "from": 0,
-            "to": 17
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "oliviamusterli",
         "demand": [
           55,
           55,
           55,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "role": "bl",
+        "person": "inesmusterli",
+        "demand": [
+          0,
+          0,
+          0,
           55,
           55,
           55,
@@ -9501,18 +9153,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "oliviamusterli",
-            "from": 0,
-            "to": 3
-          },
-          {
-            "p": "inesmusterli",
-            "from": 3,
-            "to": 11
-          }
         ]
       }
     ]
@@ -9550,9 +9190,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "simonbeispiel",
         "demand": [
           10,
           10,
@@ -9594,17 +9235,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "simonbeispiel",
-            "from": 0,
-            "to": 15
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "zoebeispielmann",
         "demand": [
           5,
           5,
@@ -9646,17 +9281,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "zoebeispielmann",
-            "from": 0,
-            "to": 11
-          }
         ]
       },
       {
         "role": "fp",
+        "person": "damianbeispiel",
         "demand": [
           5,
           5,
@@ -9698,13 +9327,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "damianbeispiel",
-            "from": 0,
-            "to": 2
-          }
         ]
       }
     ]
@@ -9736,9 +9358,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": null,
         "demand": [
           25,
           25,
@@ -9780,17 +9403,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": null,
-            "from": 0,
-            "to": 16
-          }
         ]
       },
       {
         "role": "stv",
+        "person": "alinemustermann",
         "demand": [
           10,
           10,
@@ -9832,17 +9449,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "alinemustermann",
-            "from": 0,
-            "to": 7
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "timobeispiel",
         "demand": [
           40,
           40,
@@ -9884,13 +9495,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "timobeispiel",
-            "from": 0,
-            "to": 7
-          }
         ]
       }
     ]
@@ -9940,9 +9544,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "brunobeispiel",
         "demand": [
           10,
           10,
@@ -9984,17 +9589,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "brunobeispiel",
-            "from": 0,
-            "to": 14
-          }
         ]
       },
       {
         "role": "stv",
+        "person": "rahelmusterli",
         "demand": [
           0,
           0,
@@ -10036,17 +9635,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "rahelmusterli",
-            "from": 8,
-            "to": 11
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "beatbeispiel",
         "demand": [
           0,
           0,
@@ -10088,13 +9681,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "beatbeispiel",
-            "from": 4,
-            "to": 11
-          }
         ]
       }
     ]
@@ -10126,9 +9712,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "zoebeispielmann",
         "demand": [
           35,
           35,
@@ -10170,17 +9757,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "zoebeispielmann",
-            "from": 0,
-            "to": 16
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "martamustermann",
         "demand": [
           40,
           40,
@@ -10222,13 +9803,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "martamustermann",
-            "from": 0,
-            "to": 9
-          }
         ]
       }
     ]
@@ -10260,9 +9834,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "alinemustermann",
         "demand": [
           25,
           10,
@@ -10304,17 +9879,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "alinemustermann",
-            "from": 0,
-            "to": 4
-          }
         ]
       },
       {
         "role": "stv",
+        "person": "lucabeispielmann",
         "demand": [
           10,
           0,
@@ -10356,17 +9925,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "lucabeispielmann",
-            "from": 0,
-            "to": 1
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "fabiobeispieler",
         "demand": [
           40,
           0,
@@ -10408,13 +9971,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "fabiobeispieler",
-            "from": 0,
-            "to": 1
-          }
         ]
       }
     ]
@@ -10446,9 +10002,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "andreamusterli",
         "demand": [
           20,
           20,
@@ -10490,17 +10047,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "andreamusterli",
-            "from": 0,
-            "to": 7
-          }
         ]
       },
       {
         "role": "stv",
+        "person": "beatbeispiel",
         "demand": [
           5,
           5,
@@ -10542,17 +10093,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "beatbeispiel",
-            "from": 0,
-            "to": 3
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "nadia",
         "demand": [
           25,
           25,
@@ -10594,13 +10139,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "nadia",
-            "from": 0,
-            "to": 3
-          }
         ]
       }
     ]
@@ -10638,9 +10176,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "beatbeispiel",
         "demand": [
           40,
           40,
@@ -10682,17 +10221,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "beatbeispiel",
-            "from": 0,
-            "to": 27
-          }
         ]
       },
       {
         "role": "stv",
+        "person": "paula",
         "demand": [
           10,
           10,
@@ -10734,17 +10267,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "paula",
-            "from": 0,
-            "to": 20
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "chiaramuster",
         "demand": [
           15,
           15,
@@ -10786,17 +10313,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "chiaramuster",
-            "from": 0,
-            "to": 20
-          }
         ]
       },
       {
         "role": "fp",
+        "person": "veramustermann",
         "demand": [
           15,
           15,
@@ -10838,13 +10359,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "veramustermann",
-            "from": 0,
-            "to": 4
-          }
         ]
       }
     ]
@@ -10900,9 +10414,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "rahelmusterli",
         "demand": [
           0,
           0,
@@ -10944,17 +10459,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "rahelmusterli",
-            "from": 2,
-            "to": 22
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "hansbeispiel",
         "demand": [
           0,
           0,
@@ -10966,6 +10475,52 @@
           5,
           5,
           5,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "role": "bl",
+        "person": "janbeispiel",
+        "demand": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
           5,
           25,
           25,
@@ -10996,18 +10551,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "hansbeispiel",
-            "from": 7,
-            "to": 10
-          },
-          {
-            "p": "janbeispiel",
-            "from": 10,
-            "to": 18
-          }
         ]
       }
     ]
@@ -11051,9 +10594,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "heinzbeispieler",
         "demand": [
           60,
           60,
@@ -11095,17 +10639,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "heinzbeispieler",
-            "from": 0,
-            "to": 19
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "jonasbeispiel",
         "demand": [
           0,
           0,
@@ -11115,6 +10653,52 @@
           15,
           15,
           55,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "role": "bl",
+        "person": null,
+        "demand": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
           55,
           55,
           55,
@@ -11147,18 +10731,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "jonasbeispiel",
-            "from": 2,
-            "to": 8
-          },
-          {
-            "p": null,
-            "from": 8,
-            "to": 14
-          }
         ]
       }
     ]
@@ -11190,9 +10762,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "walterbeispieler",
         "demand": [
           50,
           50,
@@ -11234,13 +10807,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "walterbeispieler",
-            "from": 0,
-            "to": 10
-          }
         ]
       }
     ]
@@ -11266,9 +10832,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "damianbeispiel",
         "demand": [
           5,
           5,
@@ -11310,13 +10877,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "damianbeispiel",
-            "from": 0,
-            "to": 4
-          }
         ]
       }
     ]
@@ -11342,12 +10902,59 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "lucabeispielmann",
         "demand": [
           15,
           15,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "role": "pl",
+        "person": "janbeispiel",
+        "demand": [
+          0,
+          0,
           15,
           15,
           15,
@@ -11386,18 +10993,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "lucabeispielmann",
-            "from": 0,
-            "to": 2
-          },
-          {
-            "p": "janbeispiel",
-            "from": 2,
-            "to": 9
-          }
         ]
       }
     ]
@@ -11429,9 +11024,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "damianbeispiel",
         "demand": [
           10,
           10,
@@ -11473,17 +11069,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "damianbeispiel",
-            "from": 0,
-            "to": 6
-          }
         ]
       },
       {
         "role": "stv",
+        "person": "hansbeispiel",
         "demand": [
           5,
           5,
@@ -11525,17 +11115,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "hansbeispiel",
-            "from": 0,
-            "to": 2
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "carlamuster",
         "demand": [
           15,
           15,
@@ -11577,13 +11161,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "carlamuster",
-            "from": 0,
-            "to": 2
-          }
         ]
       }
     ]
@@ -11633,9 +11210,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "damianbeispiel",
         "demand": [
           10,
           10,
@@ -11677,17 +11255,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "damianbeispiel",
-            "from": 0,
-            "to": 15
-          }
         ]
       },
       {
         "role": "stv",
+        "person": "yvesmuster",
         "demand": [
           0,
           0,
@@ -11729,17 +11301,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "yvesmuster",
-            "from": 7,
-            "to": 11
-          }
         ]
       },
       {
         "role": "fp",
+        "person": "yvesmuster",
         "demand": [
           0,
           0,
@@ -11781,13 +11347,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "yvesmuster",
-            "from": 3,
-            "to": 7
-          }
         ]
       }
     ]
@@ -11838,9 +11397,10 @@
         "continues": true
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": null,
         "demand": [
           10,
           10,
@@ -11882,17 +11442,11 @@
           25,
           25,
           25
-        ],
-        "segs": [
-          {
-            "p": null,
-            "from": 0,
-            "to": 40
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "paula",
         "demand": [
           0,
           0,
@@ -11934,13 +11488,6 @@
           25,
           25,
           25
-        ],
-        "segs": [
-          {
-            "p": "paula",
-            "from": 15,
-            "to": 40
-          }
         ]
       }
     ]
@@ -11972,9 +11519,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "brunobeispiel",
         "demand": [
           20,
           20,
@@ -12016,17 +11564,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "brunobeispiel",
-            "from": 0,
-            "to": 8
-          }
         ]
       },
       {
         "role": "stv",
+        "person": "paula",
         "demand": [
           5,
           5,
@@ -12068,17 +11610,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "paula",
-            "from": 0,
-            "to": 4
-          }
         ]
       },
       {
         "role": "bl",
+        "person": null,
         "demand": [
           25,
           25,
@@ -12120,13 +11656,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": null,
-            "from": 0,
-            "to": 4
-          }
         ]
       }
     ]
@@ -12183,9 +11712,10 @@
         "continues": true
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "ginamusterli",
         "demand": [
           0,
           15,
@@ -12227,17 +11757,11 @@
           45,
           15,
           15
-        ],
-        "segs": [
-          {
-            "p": "ginamusterli",
-            "from": 1,
-            "to": 40
-          }
         ]
       },
       {
         "role": "stv",
+        "person": "paula",
         "demand": [
           0,
           0,
@@ -12279,17 +11803,11 @@
           10,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "paula",
-            "from": 5,
-            "to": 38
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "yvesmuster",
         "demand": [
           0,
           0,
@@ -12331,17 +11849,11 @@
           55,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "yvesmuster",
-            "from": 17,
-            "to": 38
-          }
         ]
       },
       {
         "role": "fp",
+        "person": "veramustermann",
         "demand": [
           0,
           5,
@@ -12383,13 +11895,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "veramustermann",
-            "from": 1,
-            "to": 25
-          }
         ]
       }
     ]
@@ -12427,9 +11932,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "hansbeispiel",
         "demand": [
           35,
           35,
@@ -12471,17 +11977,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "hansbeispiel",
-            "from": 0,
-            "to": 23
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "alina",
         "demand": [
           10,
           10,
@@ -12523,17 +12023,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "alina",
-            "from": 0,
-            "to": 16
-          }
         ]
       },
       {
         "role": "fp",
+        "person": "yvesmuster",
         "demand": [
           10,
           10,
@@ -12575,13 +12069,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "yvesmuster",
-            "from": 0,
-            "to": 2
-          }
         ]
       }
     ]
@@ -12607,9 +12094,10 @@
         "label": "61"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "simonbeispiel",
         "demand": [
           5,
           0,
@@ -12651,13 +12139,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "simonbeispiel",
-            "from": 0,
-            "to": 1
-          }
         ]
       }
     ]
@@ -12689,9 +12170,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "rahelmusterli",
         "demand": [
           20,
           20,
@@ -12733,17 +12215,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "rahelmusterli",
-            "from": 0,
-            "to": 11
-          }
         ]
       },
       {
         "role": "stv",
+        "person": "carlamuster",
         "demand": [
           5,
           5,
@@ -12785,17 +12261,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "carlamuster",
-            "from": 0,
-            "to": 6
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "leonbeispielmann",
         "demand": [
           25,
           25,
@@ -12837,13 +12307,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "leonbeispielmann",
-            "from": 0,
-            "to": 6
-          }
         ]
       }
     ]
@@ -12881,9 +12344,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "nicobeispieler",
         "demand": [
           35,
           35,
@@ -12904,6 +12368,52 @@
           35,
           35,
           35,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "role": "pl",
+        "person": "gretamustermann",
+        "demand": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
           35,
           35,
           35,
@@ -12925,22 +12435,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "nicobeispieler",
-            "from": 0,
-            "to": 19
-          },
-          {
-            "p": "gretamustermann",
-            "from": 19,
-            "to": 30
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "zenobeispieler",
         "demand": [
           10,
           10,
@@ -12958,6 +12457,52 @@
           40,
           40,
           40,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "role": "bl",
+        "person": "yvesmuster",
+        "demand": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
           40,
           40,
           40,
@@ -12982,22 +12527,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "zenobeispieler",
-            "from": 0,
-            "to": 16
-          },
-          {
-            "p": "yvesmuster",
-            "from": 16,
-            "to": 22
-          }
         ]
       },
       {
         "role": "fp",
+        "person": "lucabeispielmann",
         "demand": [
           10,
           10,
@@ -13039,13 +12573,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "lucabeispielmann",
-            "from": 0,
-            "to": 6
-          }
         ]
       }
     ]
@@ -13089,9 +12616,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "fabiobeispieler",
         "demand": [
           20,
           25,
@@ -13133,17 +12661,11 @@
           5,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "fabiobeispieler",
-            "from": 0,
-            "to": 38
-          }
         ]
       },
       {
         "role": "stv",
+        "person": null,
         "demand": [
           5,
           5,
@@ -13185,17 +12707,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": null,
-            "from": 0,
-            "to": 29
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "veramustermann",
         "demand": [
           0,
           5,
@@ -13237,13 +12753,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "veramustermann",
-            "from": 1,
-            "to": 29
-          }
         ]
       }
     ]
@@ -13276,9 +12785,10 @@
         "continues": true
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "chiaramuster",
         "demand": [
           65,
           65,
@@ -13320,17 +12830,11 @@
           55,
           55,
           55
-        ],
-        "segs": [
-          {
-            "p": "chiaramuster",
-            "from": 0,
-            "to": 40
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "katjamuster",
         "demand": [
           15,
           15,
@@ -13342,6 +12846,52 @@
           15,
           15,
           55,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "role": "bl",
+        "person": "jonasbeispiel",
+        "demand": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
           55,
           55,
           55,
@@ -13372,18 +12922,6 @@
           55,
           55,
           55
-        ],
-        "segs": [
-          {
-            "p": "katjamuster",
-            "from": 0,
-            "to": 10
-          },
-          {
-            "p": "jonasbeispiel",
-            "from": 10,
-            "to": 40
-          }
         ]
       }
     ]
@@ -13439,9 +12977,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "andreamusterli",
         "demand": [
           10,
           15,
@@ -13483,17 +13022,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "andreamusterli",
-            "from": 0,
-            "to": 18
-          }
         ]
       },
       {
         "role": "stv",
+        "person": "carlamuster",
         "demand": [
           0,
           5,
@@ -13535,17 +13068,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "carlamuster",
-            "from": 1,
-            "to": 13
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "yvesmuster",
         "demand": [
           0,
           0,
@@ -13587,13 +13114,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "yvesmuster",
-            "from": 5,
-            "to": 13
-          }
         ]
       }
     ]
@@ -13649,9 +13169,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "noahbeispielmann",
         "demand": [
           20,
           20,
@@ -13693,17 +13214,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "noahbeispielmann",
-            "from": 0,
-            "to": 30
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "alinemustermann",
         "demand": [
           0,
           0,
@@ -13745,13 +13260,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "alinemustermann",
-            "from": 10,
-            "to": 25
-          }
         ]
       }
     ]
@@ -13783,9 +13291,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "oliviamusterli",
         "demand": [
           45,
           45,
@@ -13827,17 +13336,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "oliviamusterli",
-            "from": 0,
-            "to": 12
-          }
         ]
       },
       {
         "role": "stv",
+        "person": null,
         "demand": [
           10,
           10,
@@ -13879,17 +13382,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": null,
-            "from": 0,
-            "to": 7
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "carlamuster",
         "demand": [
           55,
           55,
@@ -13931,13 +13428,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "carlamuster",
-            "from": 0,
-            "to": 7
-          }
         ]
       }
     ]
@@ -13963,9 +13453,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "paula",
         "demand": [
           10,
           10,
@@ -14007,13 +13498,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "paula",
-            "from": 0,
-            "to": 4
-          }
         ]
       }
     ]
@@ -14045,9 +13529,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "simonbeispiel",
         "demand": [
           25,
           25,
@@ -14089,17 +13574,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "simonbeispiel",
-            "from": 0,
-            "to": 14
-          }
         ]
       },
       {
         "role": "bl",
+        "person": null,
         "demand": [
           25,
           25,
@@ -14141,13 +13620,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": null,
-            "from": 0,
-            "to": 9
-          }
         ]
       }
     ]
@@ -14173,9 +13645,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "lucabeispielmann",
         "demand": [
           15,
           15,
@@ -14217,13 +13690,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "lucabeispielmann",
-            "from": 0,
-            "to": 7
-          }
         ]
       }
     ]
@@ -14249,9 +13715,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "paula",
         "demand": [
           15,
           15,
@@ -14293,13 +13760,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "paula",
-            "from": 0,
-            "to": 4
-          }
         ]
       }
     ]
@@ -14331,9 +13791,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "corinamusterli",
         "demand": [
           65,
           65,
@@ -14375,17 +13836,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "corinamusterli",
-            "from": 0,
-            "to": 11
-          }
         ]
       },
       {
         "role": "stv",
+        "person": "nadia",
         "demand": [
           10,
           10,
@@ -14427,13 +13882,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "nadia",
-            "from": 0,
-            "to": 8
-          }
         ]
       }
     ]
@@ -14465,9 +13913,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "inesmusterli",
         "demand": [
           10,
           5,
@@ -14509,17 +13958,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "inesmusterli",
-            "from": 0,
-            "to": 4
-          }
         ]
       },
       {
         "role": "stv",
+        "person": "tanjamuster",
         "demand": [
           5,
           0,
@@ -14561,17 +14004,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "tanjamuster",
-            "from": 0,
-            "to": 1
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "tanjamuster",
         "demand": [
           15,
           0,
@@ -14613,13 +14050,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "tanjamuster",
-            "from": 0,
-            "to": 1
-          }
         ]
       }
     ]
@@ -14669,9 +14099,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "paula",
         "demand": [
           20,
           20,
@@ -14713,17 +14144,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "paula",
-            "from": 0,
-            "to": 19
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "timobeispiel",
         "demand": [
           0,
           0,
@@ -14765,13 +14190,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "timobeispiel",
-            "from": 4,
-            "to": 15
-          }
         ]
       }
     ]
@@ -14809,9 +14227,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": null,
         "demand": [
           30,
           30,
@@ -14853,17 +14272,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": null,
-            "from": 0,
-            "to": 10
-          }
         ]
       },
       {
         "role": "fp",
+        "person": "alinemustermann",
         "demand": [
           5,
           5,
@@ -14905,13 +14318,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "alinemustermann",
-            "from": 0,
-            "to": 2
-          }
         ]
       }
     ]
@@ -14956,9 +14362,10 @@
         "continues": true
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "tanjamuster",
         "demand": [
           40,
           40,
@@ -15000,13 +14407,6 @@
           110,
           110,
           110
-        ],
-        "segs": [
-          {
-            "p": "tanjamuster",
-            "from": 0,
-            "to": 40
-          }
         ]
       }
     ]
@@ -15056,9 +14456,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "zenobeispieler",
         "demand": [
           25,
           25,
@@ -15100,17 +14501,11 @@
           15,
           15,
           15
-        ],
-        "segs": [
-          {
-            "p": "zenobeispieler",
-            "from": 0,
-            "to": 40
-          }
         ]
       },
       {
         "role": "stv",
+        "person": "veramustermann",
         "demand": [
           5,
           5,
@@ -15152,17 +14547,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "veramustermann",
-            "from": 0,
-            "to": 33
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "timobeispiel",
         "demand": [
           0,
           0,
@@ -15204,17 +14593,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "timobeispiel",
-            "from": 8,
-            "to": 33
-          }
         ]
       },
       {
         "role": "fp",
+        "person": "nadia",
         "demand": [
           10,
           10,
@@ -15256,13 +14639,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "nadia",
-            "from": 0,
-            "to": 15
-          }
         ]
       }
     ]
@@ -15312,9 +14688,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "inesmusterli",
         "demand": [
           10,
           10,
@@ -15356,17 +14733,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "inesmusterli",
-            "from": 0,
-            "to": 13
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "veramustermann",
         "demand": [
           0,
           0,
@@ -15408,13 +14779,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "veramustermann",
-            "from": 4,
-            "to": 10
-          }
         ]
       }
     ]
@@ -15458,9 +14822,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "saramusterli",
         "demand": [
           15,
           15,
@@ -15502,17 +14867,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "saramusterli",
-            "from": 0,
-            "to": 10
-          }
         ]
       },
       {
         "role": "stv",
+        "person": "veramustermann",
         "demand": [
           0,
           0,
@@ -15554,17 +14913,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "veramustermann",
-            "from": 4,
-            "to": 7
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "dariobeispielmann",
         "demand": [
           0,
           0,
@@ -15606,13 +14959,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "dariobeispielmann",
-            "from": 2,
-            "to": 7
-          }
         ]
       }
     ]
@@ -15638,9 +14984,10 @@
         "label": "61"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": null,
         "demand": [
           10,
           0,
@@ -15682,13 +15029,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": null,
-            "from": 0,
-            "to": 1
-          }
         ]
       }
     ]
@@ -15720,9 +15060,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "carlamuster",
         "demand": [
           20,
           20,
@@ -15764,17 +15105,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "carlamuster",
-            "from": 0,
-            "to": 21
-          }
         ]
       },
       {
         "role": "stv",
+        "person": "veramustermann",
         "demand": [
           5,
           5,
@@ -15816,17 +15151,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "veramustermann",
-            "from": 0,
-            "to": 16
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "leonbeispielmann",
         "demand": [
           25,
           25,
@@ -15868,13 +15197,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "leonbeispielmann",
-            "from": 0,
-            "to": 16
-          }
         ]
       }
     ]
@@ -15906,9 +15228,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "lars",
         "demand": [
           20,
           20,
@@ -15950,17 +15273,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "lars",
-            "from": 0,
-            "to": 5
-          }
         ]
       },
       {
         "role": "stv",
+        "person": "danielbeispielmann",
         "demand": [
           5,
           5,
@@ -16002,17 +15319,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "danielbeispielmann",
-            "from": 0,
-            "to": 2
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "jonasbeispiel",
         "demand": [
           25,
           25,
@@ -16054,13 +15365,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "jonasbeispiel",
-            "from": 0,
-            "to": 2
-          }
         ]
       }
     ]
@@ -16110,9 +15414,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "ursinamuster",
         "demand": [
           10,
           10,
@@ -16154,17 +15459,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "ursinamuster",
-            "from": 0,
-            "to": 14
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "alina",
         "demand": [
           0,
           0,
@@ -16206,17 +15505,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "alina",
-            "from": 3,
-            "to": 12
-          }
         ]
       },
       {
         "role": "fp",
+        "person": "danielbeispielmann",
         "demand": [
           0,
           5,
@@ -16258,13 +15551,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "danielbeispielmann",
-            "from": 1,
-            "to": 5
-          }
         ]
       }
     ]
@@ -16320,9 +15606,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "alinemustermann",
         "demand": [
           0,
           0,
@@ -16364,17 +15651,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "alinemustermann",
-            "from": 2,
-            "to": 17
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "petramustermann",
         "demand": [
           0,
           0,
@@ -16416,17 +15697,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "petramustermann",
-            "from": 6,
-            "to": 14
-          }
         ]
       },
       {
         "role": "fp",
+        "person": null,
         "demand": [
           0,
           0,
@@ -16468,13 +15743,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": null,
-            "from": 2,
-            "to": 10
-          }
         ]
       }
     ]
@@ -16506,9 +15774,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "bernhardbeispieler",
         "demand": [
           20,
           20,
@@ -16550,17 +15819,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "bernhardbeispieler",
-            "from": 0,
-            "to": 7
-          }
         ]
       },
       {
         "role": "stv",
+        "person": "dariobeispielmann",
         "demand": [
           5,
           5,
@@ -16602,17 +15865,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "dariobeispielmann",
-            "from": 0,
-            "to": 2
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "timobeispiel",
         "demand": [
           25,
           25,
@@ -16654,13 +15911,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "timobeispiel",
-            "from": 0,
-            "to": 2
-          }
         ]
       }
     ]
@@ -16686,9 +15936,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "walterbeispieler",
         "demand": [
           5,
           5,
@@ -16730,13 +15981,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "walterbeispieler",
-            "from": 0,
-            "to": 2
-          }
         ]
       }
     ]
@@ -16768,9 +16012,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "timobeispiel",
         "demand": [
           35,
           35,
@@ -16812,17 +16057,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "timobeispiel",
-            "from": 0,
-            "to": 20
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "veramustermann",
         "demand": [
           40,
           40,
@@ -16864,13 +16103,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "veramustermann",
-            "from": 0,
-            "to": 10
-          }
         ]
       }
     ]
@@ -16920,9 +16152,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "ginamusterli",
         "demand": [
           15,
           15,
@@ -16964,17 +16197,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "ginamusterli",
-            "from": 0,
-            "to": 17
-          }
         ]
       },
       {
         "role": "fp",
+        "person": "petramustermann",
         "demand": [
           5,
           5,
@@ -17016,13 +16243,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "petramustermann",
-            "from": 0,
-            "to": 6
-          }
         ]
       }
     ]
@@ -17072,9 +16292,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "lucabeispielmann",
         "demand": [
           15,
           15,
@@ -17116,17 +16337,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "lucabeispielmann",
-            "from": 0,
-            "to": 23
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "dariobeispielmann",
         "demand": [
           0,
           0,
@@ -17168,17 +16383,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "dariobeispielmann",
-            "from": 6,
-            "to": 18
-          }
         ]
       },
       {
         "role": "fp",
+        "person": "danielbeispielmann",
         "demand": [
           5,
           5,
@@ -17220,13 +16429,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "danielbeispielmann",
-            "from": 0,
-            "to": 9
-          }
         ]
       }
     ]
@@ -17252,9 +16454,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "veramustermann",
         "demand": [
           5,
           5,
@@ -17296,13 +16499,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "veramustermann",
-            "from": 0,
-            "to": 4
-          }
         ]
       }
     ]
@@ -17328,9 +16524,10 @@
         "label": "61"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "martamustermann",
         "demand": [
           5,
           0,
@@ -17372,13 +16569,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "martamustermann",
-            "from": 0,
-            "to": 1
-          }
         ]
       }
     ]
@@ -17410,9 +16600,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "danielbeispielmann",
         "demand": [
           70,
           70,
@@ -17454,22 +16645,62 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "danielbeispielmann",
-            "from": 0,
-            "to": 19
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "dariobeispielmann",
         "demand": [
           75,
           75,
           75,
           75,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "role": "bl",
+        "person": "andreamusterli",
+        "demand": [
+          0,
+          0,
+          0,
+          0,
           75,
           75,
           75,
@@ -17506,18 +16737,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "dariobeispielmann",
-            "from": 0,
-            "to": 4
-          },
-          {
-            "p": "andreamusterli",
-            "from": 4,
-            "to": 12
-          }
         ]
       }
     ]
@@ -17549,9 +16768,10 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "fabiobeispieler",
         "demand": [
           10,
           5,
@@ -17593,17 +16813,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "fabiobeispieler",
-            "from": 0,
-            "to": 3
-          }
         ]
       },
       {
         "role": "stv",
+        "person": "damianbeispiel",
         "demand": [
           5,
           0,
@@ -17645,17 +16859,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "damianbeispiel",
-            "from": 0,
-            "to": 1
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "martamustermann",
         "demand": [
           15,
           0,
@@ -17697,13 +16905,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "martamustermann",
-            "from": 0,
-            "to": 1
-          }
         ]
       }
     ]
@@ -17759,14 +16960,61 @@
         "label": "61 Betrieb"
       }
     ],
-    "roles": [
+    "assignees": [
       {
         "role": "pl",
+        "person": "walterbeispieler",
         "demand": [
           0,
           0,
           15,
           15,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "role": "pl",
+        "person": null,
+        "demand": [
+          0,
+          0,
+          0,
+          0,
           25,
           25,
           40,
@@ -17803,22 +17051,11 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "walterbeispieler",
-            "from": 2,
-            "to": 4
-          },
-          {
-            "p": null,
-            "from": 4,
-            "to": 25
-          }
         ]
       },
       {
         "role": "bl",
+        "person": "rahelmusterli",
         "demand": [
           0,
           0,
@@ -17860,13 +17097,6 @@
           0,
           0,
           0
-        ],
-        "segs": [
-          {
-            "p": "rahelmusterli",
-            "from": 9,
-            "to": 21
-          }
         ]
       }
     ]

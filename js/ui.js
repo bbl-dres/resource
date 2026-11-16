@@ -6,7 +6,7 @@
    ============================================================================= */
 
 import {
-  data, state, t, activeFilters, kpis, filteredProjects, canStep, notifications,
+  data, state, t, FILTERS, activeFilters, kpis, filteredProjects, canStep, notifications,
   columnSet, coloured, searchMatcher
 } from './store.js';
 import { toggleableColumns } from './columns.js';
@@ -210,6 +210,20 @@ export const pinCls = (s, k, extra = '') =>
 export const pinLeft = (s, k) => (s[k] === undefined ? '' : `left:${s[k]}px`);
 
 /**
+ * The first cell of every row in the two folding tables: a narrow frozen
+ * track of its own, in front of the columns, that holds the caret on a row
+ * that folds and nothing on any other. The caret used to sit inside the
+ * first column's cell, which tied it to whichever column that was.
+ */
+export const caretCell = (body = '') => html`<span class="pcell pcell--caret is-frozen" style="left:0">${body}</span>`;
+
+/** The caret itself: the row's switch, for the keyboard and for the eye. */
+export const rowCaret = ({ act, val, open, label }) => html`<button type="button" class="rowcaret"
+    data-act="${act}" data-val="${val}" aria-expanded="${open}" aria-label="${label}">
+  <span class="caret ${open ? '' : 'is-collapsed'}" aria-hidden="true">${icons.chevronDown()}</span>
+</button>`;
+
+/**
  * A sortable column header. Both grids use it; they differ only in which pair
  * of state fields they sort by and which action they dispatch.
  */
@@ -331,59 +345,6 @@ export function segmented(options, value, act, label = '') {
 
 
 export function divider() { return html`<div class="dd__divider"></div>`; }
-
-/* -----------------------------------------------------------------------------
-   Popovers and person lists — shared by the pensum editor, the Bearbeitender
-   picker and the rebooking dialog, which used to spell each of these out.
-   -------------------------------------------------------------------------- */
-
-const POP_GAP = 6;     // clear of the cell; mirrors --space-3
-const POP_EDGE = 8;    // how close a popover may come to the window edge
-
-/**
- * Where a popover of this size goes: under its anchor, flipped above it when
- * there is no room below, and kept inside the window sideways. `x` is the
- * horizontal edge it lines up with — the cell's right edge less its own width
- * for the editor, the cell's left edge for the picker. Returned as the style
- * fragment the element carries, in viewport space, so no scroll container can
- * clip it.
- */
-export function popoverPosition(anchor, { width, height, x }) {
-  const vw = window.innerWidth;
-  const vh = window.innerHeight;
-  const left = Math.min(Math.max(POP_EDGE, x), vw - width - POP_EDGE);
-  const below = anchor.bottom + POP_GAP;
-  const flip = below + height > vh - POP_EDGE && anchor.top - height - POP_GAP > POP_EDGE;
-  const top = flip ? anchor.top - height - POP_GAP : Math.min(below, Math.max(POP_EDGE, vh - height - POP_EDGE));
-  return `left:${Math.round(left)}px; top:${Math.round(top)}px`;
-}
-
-/** A person in a list to choose from: a mark, the name, and what they carry. */
-/*
- * A person to choose: the name, and on the right the unit they sit in — the
- * short form, with the name of the unit as the hint, since «Programm- und
- * Projektentwicklung II» wrapped to two lines and squeezed the name. The
- * load mark and the role used to be here too, and the users asked for them
- * to go — who is free is a question for the Personen table, not for a list
- * whose one job is to find a name.
- */
-export function personOption({ id, name, meta = '', metaTitle = '', selected = false, act, cls = '' }) {
-  return html`<li role="option" tabindex="-1" class="${cls} ${selected ? 'is-on' : ''}"
-      aria-selected="${selected}" data-act="${act}" data-val="${id}">
-    <span class="person__name">${name}</span>
-    ${meta && html`<span class="rebook__role" title="${metaTitle}">${meta}</span>`}
-  </li>`;
-}
-
-/** The search field over such a list, wired to it as a combobox. */
-export function personSearch({ act, fk, value, listId, placeholder = 'Person suchen' }) {
-  return html`<label class="dd__searchfield">
-    ${icons.search(15)}
-    <input type="search" role="combobox" aria-expanded="true" aria-controls="${listId}"
-           data-act="${act}" data-fk="${fk}" value="${value}"
-           placeholder="${t(placeholder)}" aria-label="${t(placeholder)}" autocomplete="off">
-  </label>`;
-}
 
 /* -----------------------------------------------------------------------------
    Application shell
@@ -650,33 +611,14 @@ export function kpiStrip() {
 }
 
 /* -----------------------------------------------------------------------------
-   Toolbar — search, sort, group, filters, attributes
+   Toolbar — search, filters, time, view
    -------------------------------------------------------------------------- */
 
-const GROUPS = [
-  { id: 'none', label: 'Keine' },
-  { id: 'size', label: 'Projektgrösse' },   // small or large by credit, see sizeOf() in store.js
-  { id: 'lead', label: 'Bearbeitender' },
-  { id: 'organisation', label: 'Organisation' },
-  { id: 'phase', label: 'Phase (ePPM)' },   // the current Teilphase, as the column and the filter say
-  { id: 'portfolio', label: 'Teilportfolio' }
-];
 /*
- * Some entries are columns and some are flags of their own; that is an
- * implementation detail the menu does not expose. Order comes from the
- * registry, so the menu always reads against the table.
- */
-
-
-/*
- * A control names its subject, and prints a value only where that value would
- * otherwise be invisible.
- *
- * «Gruppieren nach: Teilportfolio» prints one, because a grouping is a single
- * choice that cannot be seen until the menu is open. A filter does not: what
- * it is holding shows twice already, as the count on the button and as the
- * named chips in the «Aktive Filter» row underneath. The funnel says what kind
- * of control it is; the count says how much it is doing.
+ * A filter names its subject and prints no value: what it is holding shows
+ * twice already, as the count on the button and as the named chips in the
+ * «Aktive Filter» row underneath. The funnel says what kind of control it is;
+ * the count says how much it is doing.
  *
  * Spelling the selection out on the button instead cost more than it returned.
  * «Teilportfolio: 2 von 7» is four words for a fact the chips state by name,
@@ -687,81 +629,31 @@ const GROUPS = [
  * No sort menu. The column headers sort, and a menu that said the same thing
  * a second way was 150px of the row.
  *
- * The row has three subjects, left to right: WHICH projects (search, grouping,
+ * No grouping menu either. «Gruppieren nach» offered six ways to cut the
+ * table, and the users asked for one that never changes: the projects stand
+ * by size, small before large — see groupProjects() in store.js.
+ *
+ * The row has three subjects, left to right: WHICH projects (search,
  * filters), WHICH quarters (the steps beside «Zu heute») and HOW the rows are
  * drawn («Ansicht»). The time controls used to be a bar of their own under
  * this one; folded in they give back 40px above the first row.
  */
-export function toolbar({ time = false, view = false, print = false, exclude = [], groups = null } = {}) {
-  /*
-   * The groupings that apply to the rows under the bar. The person table can
-   * only be cut by what a person has, so it names the ones it understands;
-   * a state that says anything else reads as «Keine» there, and a choice made
-   * there is one the planning grid understands as well.
-   */
-  const options = groups ? GROUPS.filter(g => groups.includes(g.id)) : GROUPS;
-  const current = options.find(g => g.id === state.group) ?? GROUPS[0];
-  const groupLabel = current.label;
+export function toolbar({ time = false, view = false, print = false, exclude = [] } = {}) {
   const mine = data.meta.user.personId;
   const minesOnly = state.leads.length === 1 && state.leads[0] === mine;
 
   return html`<div class="toolbar">
     ${expandableSearch({ placeholder: 'Projekt, ID oder Person' })}
 
-    ${dropdown({
-      id: 'group', lead: icons.grid(), width: 288,
-      /* The prefix yields on a small laptop and stays in the accessible name;
-         the value is the part a reader has to see. The two share one flex
-         item, so the space between them is a real one. */
-      label: html`<span class="btn__prefix">${t('Gruppieren nach')}:</span> <span>${t(groupLabel)}</span>`,
-      title: `${t('Gruppieren nach')}: ${t(groupLabel)}`,
-      body: () => html`${menuGroupLabel(t('Gruppieren nach'))}
-        ${options.map(g => menuRadio(t(g.label), current.id === g.id, 'group', g.id))}`
-    })}
+    ${filterMenu('portfolio', { label: 'Teilportfolio', width: 276 })}
+    ${filterMenu('phase', { label: 'Phase (ePPM)', heading: 'Phase (ePPM) · Mehrfachauswahl', width: 284 })}
+    ${filterMenu('organisation', { label: 'Organisation', width: 244 })}
 
     <span class="toolbar__sep" aria-hidden="true"></span>
 
     ${dropdown({
-      id: 'portfolio', lead: icons.filter(), label: t('Teilportfolio'),
-      count: state.portfolios.length, width: 276,
-      body: () => html`${menuGroupLabel(t('Mehrfachauswahl'))}
-        <div class="dd__bulk">
-          <button type="button" data-act="bulk" data-kind="portfolios" data-val="all">${t('Alle')}</button>
-          <span aria-hidden="true">·</span>
-          <button type="button" data-act="bulk" data-kind="portfolios" data-val="none">${t('Keine')}</button>
-        </div>
-        ${data.meta.portfolios.map(pf => menuTick(t(pf.label), state.portfolios.includes(pf.id), 'toggle-portfolio', pf.id))}`
-    })}
-
-    ${dropdown({
-      id: 'phase', lead: icons.filter(), label: t('Phase (ePPM)'),
-      count: state.phases.length, width: 284,
-      body: () => html`${menuGroupLabel(t('Phase (ePPM) · Mehrfachauswahl'))}
-        <div class="dd__bulk">
-          <button type="button" data-act="bulk" data-kind="phases" data-val="all">${t('Alle')}</button>
-          <span aria-hidden="true">·</span>
-          <button type="button" data-act="bulk" data-kind="phases" data-val="none">${t('Keine')}</button>
-        </div>
-        ${data.phases.eppm.map(e => menuTick(t(e.label), state.phases.includes(e.id), 'toggle-phase', e.id))}`
-    })}
-
-    ${dropdown({
-      id: 'organisation', lead: icons.filter(), label: t('Organisation'),
-      count: state.organisations.length, width: 244,
-      body: () => html`${menuGroupLabel(t('Mehrfachauswahl'))}
-        <div class="dd__bulk">
-          <button type="button" data-act="bulk" data-kind="organisations" data-val="all">${t('Alle')}</button>
-          <span aria-hidden="true">·</span>
-          <button type="button" data-act="bulk" data-kind="organisations" data-val="none">${t('Keine')}</button>
-        </div>
-        ${data.meta.organisations.map(o => menuTick(t(o.label), state.organisations.includes(o.id), 'toggle-organisation', o.id))}`
-    })}
-
-    <span class="toolbar__sep" aria-hidden="true"></span>
-
-    ${dropdown({
-      /* Plural: the filter finds a person in any role on a project, not
-         only the one the Bearbeitender column names. */
+      /* The filter finds everybody on a project, not only the one name a
+         folded row shows in the column. */
       id: 'lead', lead: icons.filter(), label: t('Bearbeitende'),
       count: state.leads.length, width: 312,
       body: leadMenuBody
@@ -787,6 +679,27 @@ export function toolbar({ time = false, view = false, print = false, exclude = [
       id: 'view', lead: icons.eye(), label: t('Ansicht'), width: 296, align: 'right', body: () => viewMenuBody({ exclude, print })
     })}
   </div>`;
+}
+
+/** «Alle · Keine» at the head of a filter's menu. */
+const bulkLinks = key => html`<div class="dd__bulk">
+  <button type="button" data-act="bulk" data-kind="${key}" data-val="all">${t('Alle')}</button>
+  <span aria-hidden="true">·</span>
+  <button type="button" data-act="bulk" data-kind="${key}" data-val="none">${t('Keine')}</button>
+</div>`;
+
+/**
+ * One list filter as a toolbar menu, drawn from the registry in store.js: a
+ * tick per value, under «Alle · Keine». Three of these were written out in
+ * full, differing in four words.
+ */
+function filterMenu(kind, { label, heading = 'Mehrfachauswahl', width }) {
+  const f = FILTERS.find(x => x.kind === kind);
+  return dropdown({
+    id: kind, lead: icons.filter(), label: t(label), count: state[f.key].length, width,
+    body: () => html`${menuGroupLabel(t(heading))}${bulkLinks(f.key)}
+      ${f.ids().map(id => menuTick(f.name(id), state[f.key].includes(id), `toggle-${f.kind}`, id))}`
+  });
 }
 
 /* -----------------------------------------------------------------------------
@@ -860,11 +773,9 @@ function viewMenuBody({ exclude = [], print = false } = {}) {
  * selected entries to the top and scrolls the rest.
  */
 function leadMenuBody() {
+  const f = FILTERS.find(x => x.kind === 'lead');
   const q = state.menuSearch.trim().toLowerCase();
-  const entries = [
-    ...data.people.map(p => ({ id: p.id, name: p.name })),
-    { id: 'none', name: t('nicht zugewiesen') }
-  ];
+  const entries = f.ids().map(id => ({ id, name: f.name(id) }));
   const matches = entries.filter(e => !q || e.name.toLowerCase().includes(q));
   // Selected first, so a choice never scrolls out of sight as the list grows.
   const selected = matches.filter(e => state.leads.includes(e.id));
@@ -878,20 +789,13 @@ function leadMenuBody() {
                placeholder="${t('Person suchen')}" aria-label="${t('Person suchen')}" autocomplete="off">
       </label>
     </div>
-    <div class="dd__bulk">
-      <button type="button" data-act="bulk" data-kind="leads" data-val="all">${t('Alle')}</button>
-      <span aria-hidden="true">·</span>
-      <button type="button" data-act="bulk" data-kind="leads" data-val="none">${t('Keine')}</button>
-    </div>
+    ${bulkLinks(f.key)}
     <div class="dd__scroll">
       ${matches.length
         ? [...selected, ...rest].map(e => menuTick(e.name, state.leads.includes(e.id), 'toggle-lead', e.id))
         : html`<p class="dd__empty">${t('Keine Person gefunden.')}</p>`}
-    </div>
-`;
+    </div>`;
 }
-
-
 
 /** «111 Bauprojekte», or «31 von 111 Bauprojekten» once something is filtered. */
 export function scopeLine(shown) {
@@ -907,7 +811,7 @@ export function activeFilterRow() {
   return html`<div class="filterbar">
     ${chips.length
       ? html`<span class="filterbar__label">${t('Aktive Filter:')}</span>
-             ${chips.map(c => chip(t(c.label), { kind: c.kind, id: c.id }))}
+             ${chips.map(c => chip(c.label, { kind: c.kind, id: c.id }))}
              <button type="button" class="linkbtn" data-act="filters-reset">${icons.close(13)} ${t('Alle Filter zurücksetzen')}</button>`
       : html`<span class="filterbar__label">${t('Aktive Filter:')} <span class="filterbar__none">${t('keine')}</span></span>`}
     <span class="toolbar__spacer"></span>

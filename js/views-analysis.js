@@ -5,10 +5,10 @@
    ============================================================================= */
 
 import {
-  data, state, t, num, unitSuffix, fmtMio, totals, loadStatus, cellValue, heatStep,
+  data, state, t, num, unitSuffix, fmtMio, fmtFte, totals, loadStatus, cellValue, heatStep,
   filteredProjects, visibleChanges,
-  periods, periodValue, personRows, sortPersonRows, groupPeople, pageOf, chartTone, nowIndex, compareDe,
-  projectShare, projectCapacity, personHeatStep, rolesOf, roleOf, segAt, holdSpan
+  periods, periodValue, personRows, sortPersonRows, pageOf, chartTone, nowIndex, compareDe,
+  projectShare, projectCapacity, personHeatStep, assignmentsOf, roleOf, activeSpan
 } from './store.js';
 import { card } from './views-overview.js';
 
@@ -16,7 +16,7 @@ import {
   html, raw, icons, pageHeader, pageActions, toolbar, activeFilterRow,
   columnCharts, barList, kpiStrip,
   tokenPx, yearRule, pinCls, pinLeft, sortableHead, attr, dropdown, menuRadio, menuGroupLabel, divider, changeProject,
-  highlight
+  highlight, caretCell, rowCaret
 } from './ui.js';
 
 /* =============================================================================
@@ -50,9 +50,8 @@ export function renderDashboard() {
 
 /*
  * A tab of its own, beside Planung. It was the second section of the
- * dashboard, behind a switch under the KPI strip, which suited a table one
- * only reads. It is where a person's pensum is to be set, and a page one
- * works in is a tab, not a section of a report.
+ * dashboard, behind a switch under the KPI strip; the question it answers —
+ * who carries how much, and on what — is asked often enough for a tab.
  */
 export function renderPeople() {
   return html`
@@ -60,7 +59,7 @@ export function renderPeople() {
       actions: pageActions()
     })}
     <div class="wrap"><div class="content">
-      ${toolbar({ time: true, groups: PEOPLE_GROUPS })}
+      ${toolbar({ time: true })}
       ${activeFilterRow()}
       ${personSection()}
     </div></div>`;
@@ -75,11 +74,10 @@ export function renderPeople() {
  * right over centred values.
  */
 
-/** What a person can be grouped by — see groupPeople(). */
-const PEOPLE_GROUPS = ['none', 'organisation'];
-
 /** The frozen columns of the person table, in order, with their width token. */
 const PERSON_COLS = [
+  /* The caret's own track, as on Planung — see caretCell() in ui.js. */
+  { key: 'caret', token: '--grid-col-caret' },
   { key: 'name', token: '--person-col-name', grow: true },
   /* The same short form and width as the planning grid's column. */
   { key: 'organisation', token: '--grid-col-organisation' },
@@ -124,7 +122,6 @@ function personSection() {
   const cols = periods();
   const { tpl, minWidth, sticky } = personLayout(cols);
   const rows = sortPersonRows(personRows());
-  const groups = groupPeople(rows);
   const span = PERSON_COLS.length;
   /*
    * A total adds up what is booked, not the percentages: a row's figure is a
@@ -139,6 +136,7 @@ function personSection() {
       style="${pinLeft(sticky, key)}" title="${title}">${body}</span>`;
 
   const head = html`<div class="prow prow--head" style="grid-template-columns:${raw(tpl)}">
+    ${caretCell()}
     ${personHead('name', t('Person'), sticky)}
     ${personHead('organisation', t('Organisation'), sticky)}
     ${personHead('employment', t('Anstellung'), sticky, 'pcell--num align-end')}
@@ -153,30 +151,32 @@ function personSection() {
   </div>`;
 
   /*
-   * A person's row folds open to the roles they hold, one lane per role and
-   * project, with the role's pensum in the quarters the person carries it and
-   * a blank where somebody else does — the same shape as a project row on
-   * Planung, read from the other side. The whole row is the switch; the name
-   * opens the dialog.
+   * A person's row folds open to the roles they hold, one row per role and
+   * project: the role under the person's name, then the project — its number
+   * in front of its name, as on Planung — and the pensum they carry there
+   * quarter by quarter, blank where they carry none. The rows under a
+   * project on Planung, read from the other side. The whole row is the
+   * switch, and that is all a click on it does: the name used to open a
+   * dialog about the person, and the users found the table said enough.
    */
-  const personLanes = r => rolesOf(r.person.id).map(({ project: p, role: ro }) => {
-    const label = t(roleOf(ro.role).label);
-    const when = holdSpan(ro, r.person.id);
+  const rest = PERSON_COLS.length - 2;
+  const personLanes = r => assignmentsOf(r.person.id).map(({ project: p, lane }) => {
+    const label = t(roleOf(lane.role).label);
+    const when = activeSpan(lane);
+    const hint = `${label} · ${p.title}${when ? ` · ${when}` : ''}`;
     return html`<div class="prow prow--lane" style="grid-template-columns:${raw(tpl)}">
-      <div style="grid-column:span ${span}" class="lane__label is-frozen"
-           title="${label} · ${p.title}${when ? ` · ${when}` : ''}">
+      ${caretCell()}
+      <span class="pcell lane__cell ${pinCls(sticky, 'name')}" style="${pinLeft(sticky, 'name')}" title="${hint}">
         <span class="lane__role">${label}</span>
+      </span>
+      <div style="grid-column:span ${rest}; ${pinLeft(sticky, PERSON_COLS[2].key)}" class="lane__label is-frozen" title="${hint}">
         <span class="lane__num">${p.number}</span>
         <button type="button" class="linkbtn lane__project" data-act="open-project" data-val="${p.id}">${p.title}</button>
         ${when && html`<span class="lane__note">${when}</span>`}
       </div>
       ${cols.map(col => {
-        const s = segAt(ro, col.quarters[0]);
-        if (!s || s.p !== r.person.id) {
-          return html`<span class="pcell pcell--lanev is-empty ${yearRule(col)}"
-            title="${t('Rolle in diesem Quartal nicht bei dieser Person')}"></span>`;
-        }
-        const v = periodValue(ro.demand, col);
+        const v = periodValue(lane.demand, col);
+        if (!v) return html`<span class="pcell pcell--val pcell--lanev is-zero ${yearRule(col)}"></span>`;
         return html`<span class="pcell pcell--val pcell--lanev heat-${heatStep(v)} ${yearRule(col)}"
           title="${label} · ${p.title}, ${col.label}: ${num(v)}${unitSuffix()}">${num(v)}</span>`;
       })}
@@ -191,13 +191,10 @@ function personSection() {
     const capacity = String(Math.round(projectCapacity(r.person) * 10) / 10).replace('.', ',');
     const row = html`<div class="prow prow--project ${open ? 'is-open' : ''}" style="grid-template-columns:${raw(tpl)}"
         data-act="toggle-person" data-val="${r.person.id}">
-      ${leadCell('name', 'pcell--title', html`<button type="button" class="rowcaret"
-          data-act="toggle-person" data-val="${r.person.id}" aria-expanded="${open}"
-          aria-label="${t('Rollen ein-/ausklappen')}: ${r.person.name}">
-          <span class="caret ${open ? '' : 'is-collapsed'}" aria-hidden="true">${icons.chevronDown()}</span>
-        </button><button type="button" class="prow__title"
-          data-act="open-person" data-val="${r.person.id}"
-          title="${t('Angaben zur Person öffnen')}">${r.person.name}</button>`)}
+      ${caretCell(rowCaret({
+        act: 'toggle-person', val: r.person.id, open, label: `${t('Rollen ein-/ausklappen')}: ${r.person.name}`
+      }))}
+      ${leadCell('name', 'pcell--title', html`<span class="prow__title">${r.person.name}</span>`)}
       ${leadCell('organisation', 'pcell--phase', org ? t(org.short) : '—', org ? t(org.label) : '')}
       ${leadCell('employment', 'pcell--target align-end', `${r.person.employment} %`)}
       ${leadCell('share', 'pcell--target align-end', `${share} %`,
@@ -216,38 +213,24 @@ function personSection() {
     return open ? html`${row}${personLanes(r)}` : row;
   };
 
-  const sumRow = (label, note, list, cls = '') => html`<div class="prow prow--sum ${cls}"
+  const sumRow = (label, note, list) => html`<div class="prow prow--sum"
       style="grid-template-columns:${raw(tpl)}">
     <div style="grid-column:span ${span}" class="prow__sumlabel is-frozen">
       ${label}${note && html`<span class="prow__sumnote">${note}</span>`}
     </div>
-    ${sumOf(list).map((v, i) => html`<span class="pcell pcell--sum ${yearRule(cols[i])}">${fte(v)}</span>`)}
+    ${sumOf(list).map((v, i) => html`<span class="pcell pcell--sum ${yearRule(cols[i])}">${fmtFte(v)}</span>`)}
   </div>`;
 
-  /* Built like the planning grid's groups: a heading on the page ground, the
-     rows in a card under it, and the group's own sum closing the card. */
-  const body = groups.map(g => {
-    const collapsed = g.label ? state.collapsedGroups[g.key] : false;
-    const heading = g.label && html`<h2 class="pgrouphead">
-      <button type="button" class="pgrouphead__toggle"
-              data-act="toggle-group" data-val="${g.key}" aria-expanded="${!collapsed}">
-        <span class="caret ${collapsed ? 'is-collapsed' : ''}" aria-hidden="true">${icons.chevronDown()}</span>
-        <span class="pgrouphead__name">${g.label}</span>
-        <span class="count-pill">${g.rows.length}</span>
-      </button>
-    </h2>`;
-    if (collapsed) return html`<section class="pgroup">${heading}</section>`;
-    return html`<section class="pgroup">${heading}
-      ${card(html`${head}${g.rows.map(personRow)}
-        ${g.label && sumRow(`${t('Summe')} ${g.label} (${g.rows.length})`, '', g.rows, 'prow--groupsum')}`,
-        { minWidth, sticky })}
-    </section>`;
-  });
+  /* One table: people have no size to stand in groups by, and the sort —
+     the peak first, as it opens — is what orders them. */
+  const body = html`<section class="pgroup">
+    ${card(html`${head}${rows.map(personRow)}`, { minWidth, sticky })}
+  </section>`;
 
   const foot = sumRow(t('Summe Total'), `${rows.length} ${t('Personen')} · ${t('Pensum in FTE')}`, rows);
 
   /*
-   * The same cards as the planning grid — the groups and, under them, the
+   * The same cards as the planning grid — the table and, under it, the
    * total — each wrapping its own scroller, so the frame stays put while the
    * quarters move and the fades sit on the frozen edge. The switches say the
    * table has no band: without them the figures kept a band's worth of room
@@ -385,16 +368,13 @@ function organisationCountCard() {
     barList(ordered('organisationen', rows), { max: Math.max(1, ...rows.map(r => r.value)) }));
 }
 
-/** A pensum in FTE, the Swiss way round: 1,25. */
-const fte = v => (v / 100).toFixed(2).replace('.', ',');
-
 function portfolioCard() {
   const list = filteredProjects();
   const now = nowIndex();
   const rows = data.meta.portfolios
     .map(pf => {
       const v = list.filter(p => p.portfolio === pf.id).reduce((a, p) => a + cellValue(p, now), 0);
-      return { label: t(pf.label), value: v, valueLabel: `${fte(v)} FTE` };
+      return { label: t(pf.label), value: v, valueLabel: `${fmtFte(v)} FTE` };
     })
     .filter(r => r.value > 0);
   return biCard('portfolio', 'FTE nach Teilportfolio',
@@ -411,7 +391,7 @@ function organisationFteCard() {
     .map(o => ({ label: t(o.label), value: pensumOf(p => p.organisation === o.id) }))
     .concat({ label: `(${t('nicht zugewiesen')})`, value: pensumOf(p => !p.organisation), tail: true })
     .filter(r => r.value > 0)
-    .map(r => ({ ...r, valueLabel: `${fte(r.value)} FTE` }));
+    .map(r => ({ ...r, valueLabel: `${fmtFte(r.value)} FTE` }));
   return biCard('organisation-fte', 'FTE nach Organisation',
     `${data.quarters[now].label} · ${t('Pensum in FTE')}`,
     barList(ordered('organisation-fte', rows)));

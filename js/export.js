@@ -40,7 +40,6 @@ function projectCells(p, cols) {
   // Numbers must reach the workbook as numbers, not as the words the grid shows.
   row.id = p.number.replace('…', '');
   row.credit = p.credit ?? null;
-  row.roles = p.roles.length;
   cols.forEach(period => { row[period.id] = periodValue(demand, period); });
   return row;
 }
