@@ -8,8 +8,8 @@ node tools/check.mjs
 
 The repository's own regression check: fixtures, derived figures, the writes
 the grid makes, the URL round trip, translations and action names. Node 22.7
-or later, no dependencies. What it covers is listed under «Checks» in
-`docs/ARCHITECTURE.md`. Run it after every run of the generator.
+or later, no dependencies. What it covers is listed under «The check» in the
+reviews in `docs/reviews/`. Run it after every run of the generator.
 
 ## `generate-portfolio.js`
 
@@ -25,15 +25,17 @@ opening the app.
 
 ### Repeatable
 
-The generator reads its **seed** from `tools/seed/` and never from `data/`. That
+The generator reads its **seed** from `tools/seed/` and never the lists it
+generates from `data/`. What it does read there is hand-kept and only
+completed: `phases.json` and `roles.json` as they are, and `meta.json`,
+`capacity.json` and `dashboard.json`, into which it writes its own keys. That
 matters: it used to read `data/projects.json`, append a hundred generated
 projects and write the result back, so a second run produced two hundred and
 eleven projects out of a hundred and eleven. The header claimed determinism; the
 file was not reproducible.
 
 `tools/seed/` holds the hand-written core the wireframe tells its story with —
-eleven projects, six named people, their gates, and the nine change-log entries
-the landing page shows. Those keep their identity (address, lead, credit,
+eleven projects, six named people, their gates, and nine change-log entries. Those keep their identity (address, lead, credit,
 priority) but their timelines are generated like every other, or they would be
 the only projects in the portfolio still finishing inside a year.
 
@@ -75,7 +77,7 @@ Every project has the whole chain, `Vorstudien` through `61`: the six
 Teilphasen as ePPM names them — Vorstudien, 22, 31, 32, 53, 61. What differs
 is how long each phase takes and when the first one began. The list is read
 from `data/phases.json`; it is the one place the order lives, and the app
-reads the same file for its filter and its grouping.
+reads the same file for its filter.
 
 ePPM's full value list reads Vorstudien, 1, 22, 2, 31, 3, 32, 4, 53, 5, 61, 6:
 phase, gate, phase, gate. The Hauptphasen 1 to 6 are not phases a project
@@ -177,11 +179,12 @@ add up to the demand everything else was sized on, and stops if they do not.
 
 ### What it writes
 
-`data/meta.json` (the quarter list only), `projects.json`, `people.json`,
+`data/meta.json` (the quarter list and the organisations), `projects.json`, `people.json`,
 `capacity.json`, `milestones.json`, `dashboard.json`, `changes.json`. A person
 carries their organisation and no load; a project carries its `assignees` —
-rows of a role and a person — and no lead and no demand curve — the app derives all three (see
-`docs/DATAMODEL.md`). The organisations in `meta.json` come from the
+rows of a role and a person — and no lead and no demand curve: the app derives
+those (see `docs/DATAMODEL.md`). Nothing is written until the run has checked
+that the rows add up to the demand; a run that fails leaves `data/` as it was. The organisations in `meta.json` come from the
 generator's `TEAMS` table, each with its `projectShare`; the generator writes
 that figure out but still sizes and balances the team against whole
 contracts.
@@ -198,6 +201,5 @@ The app reads the files directly, so a reload is enough. Worth checking:
 
 - the utilisation line the generator prints — a peak somewhere above 100 with
   room around it, not a flat wall
-- `docs/` for the review that covers whatever you changed
-- the harness, if you have it: the flow suite asserts the horizon rather than a
-  fixed number of quarters, so it survives a wider window
+- `node tools/check.mjs`, which asserts what the app takes for granted about
+  the files — see the top of this page

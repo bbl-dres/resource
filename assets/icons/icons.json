@@ -1,9 +1,7 @@
 {
   "source": "lucide-static v1.34.0 (ISC)",
   "icons": [
-    "arrow-down-wide-narrow",
     "arrow-right",
-    "arrow-up-narrow-wide",
     "bell",
     "check",
     "chevron-down",
@@ -15,16 +13,11 @@
     "eye",
     "funnel",
     "info",
-    "layout-grid",
-    "minus",
-    "pencil",
     "plus",
     "printer",
     "search",
     "settings",
     "share-2",
-    "sliders-horizontal",
-    "triangle-alert",
     "x"
   ]
 }

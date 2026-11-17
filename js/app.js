@@ -11,18 +11,17 @@
 
 import {
   data, state, load, subscribe, setState, syncFromUrl, closeOverlays, touch, OVERLAYS_CLOSED,
-  toggleIn, removeFilter, resetFilters, noFilters, FILTERS, defaultDir, t, columnSetKey, writeUrl,
-  offsetForScale, maxOffset, windowStep, pageCount, viewPatch, layerPatch, settingChanges,
-  groupProjects, roleOf, laneKey, laneOf, addLane, reassignLane, pruneLanes, recomputeDemand,
-  periodValue, compareDe
+  toggleIn, removeFilter, resetFilters, noFilters, FILTERS, idsHere, defaultDir, t, columnSetKey, writeUrl,
+  offsetForScale, maxOffset, windowStep, todayOffset, pageCount, viewPatch, layerPatch, settingChanges,
+  groupProjects, roleOf, laneOf, recomputeDemand, periodValue, num
 } from './store.js';
 import { loadIcons } from './icons.js';
-import { html, appHeader, appFooter, toast, forgetTokens, signedOutView } from './ui.js';
+import { html, appHeader, appFooter, toast, forgetTokens, signedOutView, tabTitle } from './ui.js';
 import { renderOverview } from './views-overview.js';
 import { renderModal } from './views-modals.js';
 import { renderPeople, renderDashboard, renderHistory } from './views-analysis.js';
 import { renderApi, renderExport, mountSwagger } from './views-docs.js';
-import { exportCsv, exportXlsx } from './export.js';
+import { exportCsv, exportXlsx, download } from './export.js';
 
 const root = document.getElementById('app');
 
@@ -60,10 +59,16 @@ let renderedAxis = null;
 function captureScroll() {
   const plan = root.querySelector('[data-scroll]');
   const toolbar = root.querySelector('.toolbar');
+  const panel = root.querySelector('.dd__panel');
   return {
     axis: renderedAxis,
     plan: plan ? plan.scrollLeft : 0,
-    toolbar: toolbar ? toolbar.scrollLeft : 0
+    toolbar: toolbar ? toolbar.scrollLeft : 0,
+    /* The open menu and how far its list has been scrolled — the panel itself
+       and, in the person filter, the list inside it. */
+    menu: panel ? panel.closest('.dd')?.querySelector('[data-act="menu"]')?.dataset.val ?? null : null,
+    panel: panel ? panel.scrollTop : 0,
+    list: panel?.querySelector('.dd__scroll')?.scrollTop ?? 0
   };
 }
 
@@ -73,6 +78,21 @@ function restoreScroll(saved) {
   }
   const toolbar = root.querySelector('.toolbar');
   if (toolbar && saved.toolbar) toolbar.scrollLeft = saved.toolbar;
+}
+
+/*
+ * A menu that stays open across a render keeps its place. Ticking a name far
+ * down the list of fifty people used to throw the list back to its top, for
+ * every name. After positionMenu(): the panel only scrolls once its height
+ * has been capped.
+ */
+function restoreMenuScroll(saved) {
+  if (!saved.menu || saved.menu !== state.menu) return;
+  const panel = root.querySelector('.dd__panel');
+  if (!panel) return;
+  panel.scrollTop = saved.panel;
+  const list = panel.querySelector('.dd__scroll');
+  if (list) list.scrollTop = saved.list;
 }
 
 /*
@@ -96,13 +116,6 @@ function render() {
    * itself out against the previous tab's width.
    */
   document.documentElement.dataset.tab = state.tab;
-  /* Before the markup, not after: the grids measure their own columns as they
-     build, and a scale set afterwards was measured one render too late. */
-  if (document.documentElement.dataset.scale !== state.scale) {
-    document.documentElement.dataset.scale = state.scale;
-    forgetTokens();
-  }
-
   /*
    * Signed out, the application draws nothing of its own: no tabs, no toolbar,
    * no figures. The header keeps only the wordmark, so the page still says
@@ -110,7 +123,7 @@ function render() {
    */
   const page = String(html`
     ${appHeader()}
-    <main id="main">${state.signedIn ? view() : signedOutView()}</main>
+    <main id="main" tabindex="-1">${state.signedIn ? view() : signedOutView()}</main>
     ${appFooter()}
     ${renderModal()}
     ${toast()}
@@ -120,11 +133,19 @@ function render() {
   rendering = false;
 
   document.documentElement.lang = state.lang;
+  /* The window's title and the link past the header are outside #app, and
+     stayed German under lang="fr": said by a French voice, in German. The
+     title names the tab, so six tabs are six entries in the history. */
+  document.title = state.signedIn ? `${tabTitle()} · ${t('Personalplanung')} — BBL` : `${t('Personalplanung')} — BBL`;
+  const skip = document.querySelector('.skip-link');
+  if (skip) skip.textContent = t('Zum Inhalt springen');
+  announceCount();
   if (state.tab === 'api') mountSwagger();
   /* Before the fades are read: they are computed from scrollLeft. */
   restoreScroll(scroll);
   root.querySelectorAll('[data-scroll]').forEach(syncScrollFades);
   positionMenu();
+  restoreMenuScroll(scroll);
   syncPageSize();
   syncZoom();
   restoreFocus(focus);
@@ -263,6 +284,10 @@ function captureFocus() {
   if (!found) return null;
   return {
     ...found,
+    /* Where to go if this is gone after the render: an item of a menu hands
+       back to the button that opened it, a chip to the next chip. */
+    opener: focusKey(el.closest('.dd')?.querySelector('[data-act="menu"]')),
+    act: el.dataset.act,
     start: el.selectionStart ?? null,
     end: el.selectionEnd ?? null,
     /* A figure half typed into a cell of the grid. The render draws the cell
@@ -274,8 +299,29 @@ function captureFocus() {
 
 function restoreFocus(focus) {
   if (!focus) return;
-  const el = root.querySelector(focusSelector(focus));
+  /*
+   * The thing that had focus may not have survived its own action — a chip
+   * that was removed, a menu that closed on a choice, a link that reset the
+   * filters. Focus used to fall to <body> then, and the next Tab began at
+   * the top of the page. It goes to the menu's button, to what is left of
+   * the same kind, or to the content, in that order.
+   */
+  let el = root.querySelector(focusSelector(focus))
+    ?? (focus.opener && root.querySelector(focusSelector(focus.opener)))
+    ?? (focus.act && root.querySelector(`[data-act="${CSS.escape(focus.act)}"]:not(:disabled)`))
+    ?? (root.contains(document.activeElement) ? null : root.querySelector('#main'));
   if (!el) return;
+  /*
+   * A button whose own press disabled it — «Zu heute» at today, «Weiter» at
+   * the end of the plan, the pager on its last page — cannot take focus back,
+   * and it used to fall to <body>. The enabled button after it in the same
+   * group takes it, or failing that the last one before.
+   */
+  if (el.disabled) {
+    const peers = [...el.parentElement.children].filter(x => x.matches('button:not(:disabled)'));
+    el = peers.find(x => el.compareDocumentPosition(x) & Node.DOCUMENT_POSITION_FOLLOWING) ?? peers.at(-1);
+    if (!el) return;
+  }
   el.focus({ preventScroll: true });
   if (focus.typed != null) el.value = focus.typed;
   if (focus.start != null && typeof el.setSelectionRange === 'function') {
@@ -351,7 +397,31 @@ const logSetting = (field, change, value) => logEntry({ field, change, value });
  * during the previous one's fade was wiped by that fade's `toast: null`.
  */
 let toastTimer;
+/*
+ * One live region, outside #app. Every render replaces the page, and a
+ * region that is created with its text already in it is not announced —
+ * which is how the toast was written. This one stays, and what changes on
+ * screen without the reader having moved there is put into it: a toast, the
+ * count beside the filters, a figure that was saved.
+ */
+function announce(text) {
+  const live = document.getElementById('live');
+  if (!live || !text) return;
+  live.textContent = '';
+  setTimeout(() => { live.textContent = text; }, 50);
+}
+
+let lastCount = null;
+function announceCount() {
+  const text = root.querySelector('.filterbar__count')?.textContent.trim() ?? null;
+  const key = text && `${state.tab}\u0001${text}`;
+  /* A change of tab reads its own heading; only a filter moving the count on the same page is news. */
+  if (key && lastCount && key !== lastCount && lastCount.startsWith(`${state.tab}\u0001`)) announce(text);
+  lastCount = key;
+}
+
 function flash(message, patch = {}) {
+  announce(message);
   clearTimeout(toastTimer);
   setState({ ...patch, toast: message });
   // It arrives over 160ms; it should leave the same way rather than blink out.
@@ -421,7 +491,7 @@ const actions = {
      end would otherwise spend the first click getting back to it. */
   period: (val) => setState(s => ({
     periodOffset: val === 'today'
-      ? 0
+      ? todayOffset()
       : Math.max(0, Math.min(maxOffset(), Math.min(s.periodOffset, maxOffset()) + Number(val) * windowStep()))
   })),
 
@@ -439,8 +509,8 @@ const actions = {
    * kind the registry does not know changes nothing.
    */
   bulk: (val, el) => {
-    const f = FILTERS.find(x => x.key === el.dataset.kind);
-    if (f) setState({ [f.key]: val === 'all' ? f.ids() : [] });
+    const f = FILTERS.find(x => x.kind === el.dataset.kind);
+    if (f) setState({ [f.key]: val === 'all' ? idsHere(f) : [] });
   },
 
   /* Writes into the set the visible grid is driven by, never the other one. */
@@ -467,12 +537,10 @@ const actions = {
 
   /*
    * A project row folds open to its Bearbeitende — and shut again. That is
-   * all a click on the row does. The empty rows asked for under it are not
-   * kept: folded open again, the project shows what is planned.
+   * all a click on the row does.
    */
   'toggle-project': (val) => setState(s => ({
-    openProjects: { ...s.openProjects, [val]: !s.openProjects[val] },
-    extraRows: Object.fromEntries(Object.entries(s.extraRows).filter(([key]) => !key.startsWith(`${val}:`)))
+    openProjects: { ...s.openProjects, [val]: !s.openProjects[val] }
   })),
   /* A whole group at once: open while any row is still shut, else shut. */
   'toggle-projects-group': (val) => {
@@ -486,16 +554,6 @@ const actions = {
   /* A person row on the Personen tab folds open to the roles they hold. */
   'toggle-person': (val) => setState(s => ({ openPeople: { ...s.openPeople, [val]: !s.openPeople[val] } })),
 
-  /*
-   * «Weitere Person»: an empty row under a role that already has somebody,
-   * with the caret in its list of people — the next thing to do is choose.
-   */
-  'lane-more': (val, el) => {
-    const role = el.dataset.role;
-    setState(s => ({ extraRows: { ...s.extraRows, [`${val}:${role}`]: true } }));
-    root.querySelector(`[data-fk="${CSS.escape(`lanep:${val}:${role}:none`)}"]`)?.focus();
-  },
-
   'open-phase': (val) => {
     const [projectId, from] = val.split(':');
     setState({ ...OVERLAYS_CLOSED, modal: { type: 'phase', projectId, from: Number(from) } });
@@ -504,11 +562,7 @@ const actions = {
   'open-milestone': (val) => setState({ ...OVERLAYS_CLOSED, modal: { type: 'milestone', milestoneId: val } }),
 
   'open-project': (val) => setState({ ...OVERLAYS_CLOSED, modal: { type: 'project', projectId: val } }),
-
-  /* The bar plan is a view of the Planung tab now, not a tab of its own. */
-  'open-schedule': (val) => setState({
-    tab: 'overview', ...OVERLAYS_CLOSED, search: data.projectsById[val].location, ...viewPatch('termine')
-  }),
+  'open-person': (val) => setState({ ...OVERLAYS_CLOSED, modal: { type: 'person', personId: val } }),
 
   share: () => setState({ ...OVERLAYS_CLOSED, modal: { type: 'share', copied: false } }),
   'share-select': (val, el) => el.select(),
@@ -576,7 +630,7 @@ const actions = {
    * the fixtures afresh, which is what that screen promises.
    */
   signout: () => setState({
-    signedIn: false, ...OVERLAYS_CLOSED, edited: {}, extraRows: {}, openProjects: {}, openPeople: {}, settingsDraft: null
+    signedIn: false, ...OVERLAYS_CLOSED, openProjects: {}, openPeople: {}, settingsDraft: null
   }),
 
   signin: async () => {
@@ -652,12 +706,10 @@ const actions = {
        */
       const sheets = [...root.querySelectorAll('.sheet')].filter(s => s.isConnected);
       if (!sheets.length) return;
-      const url = URL.createObjectURL(new Blob([sheetsToPdf(sheets)], { type: 'application/pdf' }));
-      const link = Object.assign(document.createElement('a'), { href: url, download: val });
-      link.click();
-      // Revoked on the next turn of the loop; Safari needs the URL to still be
-      // there when the click is handled.
-      setTimeout(() => URL.revokeObjectURL(url), 0);
+      /* The same way out as the spreadsheet: one helper, one rule for when the
+         object URL may go. There were two, and they disagreed — ten seconds
+         there, none here, for the largest file of the three. */
+      download(new Blob([sheetsToPdf(sheets)], { type: 'application/pdf' }), val);
     } catch (error) {
       /* A failed import or a writer error is said, as the spreadsheet export
          says it — not left as an unhandled rejection behind a stuck button. */
@@ -716,9 +768,12 @@ root.addEventListener('input', (event) => {
 /*
  * There is no editor to open. A cell is a field: the figure is typed over,
  * and leaving the cell — Tab, Enter, an arrow up or down, a click anywhere
- * else — writes it. Escape puts back what was there. The person of a row is
- * chosen from the list in its «Bearbeitende» cell, and that is written the
- * moment it is chosen. Every change goes into the log under the role's name.
+ * else — writes it. Escape puts back what was there. Every change goes into
+ * the log under the role's name.
+ *
+ * The pensum is the one thing that is written. Roles and the people in them
+ * come from SAP ePPM and are read, so nothing here adds a row, removes one
+ * or changes whose it is.
  *
  * This replaced a popover with a stepper, a list of people, a reason and two
  * buttons. The users asked for the cell and nothing around it.
@@ -745,34 +800,48 @@ const personName = id => (id ? data.peopleById[id].name : t('nicht zugewiesen'))
 /*
  * Write a cell. Compared against the data, not against what the field held
  * when it was focused, so it may be called twice for one edit — by Enter and
- * again by the blur that follows — and writes once. A figure typed into an
- * empty row plans the role, for nobody yet; the last figure taken out of a
- * row nobody holds leaves an empty row behind for as long as the project
- * stays open, so the cell being left for the next one is still there.
+ * again by the blur that follows — and writes once. The row stays whatever
+ * is typed: emptied to the last quarter it is still the role ePPM names.
  */
 function commitCell(el) {
   if (!el.isConnected) return false;
   const { project, role, a } = laneAt(el);
+  if (!project || !a) return false;
   const from = Number(el.dataset.q);
   const to = Number(el.dataset.to);
   const quarters = Array.from({ length: to - from }, (_, i) => from + i);
-  const before = a ? periodValue(a.demand, { quarters }) : 0;
-  const value = typedPensum(el.value);
-  /* Not a figure, or the figure that is there: put the cell back as it was. */
-  if (value === null || value === before) { el.value = el.defaultValue; return false; }
-
-  const row = a ?? addLane(project, role.id, null);
-  for (const q of quarters) {
-    row.demand[q] = value;
-    state.edited[`${project.id}:${laneKey(row)}:${q}`] = true;
+  const before = periodValue(a.demand, { quarters });
+  const typed = el.value;
+  const value = typedPensum(typed);
+  const range = state.unit === 'fte' ? '0 – 2,00 FTE' : '0 – 200 %';
+  /*
+   * Not a figure: the cell goes back to what it was, and says why. It used
+   * to do so in silence — «abc» and «-20» simply vanished, and the reader
+   * was left to guess whether the old figure or the new one had been kept.
+   */
+  if (value === null) {
+    el.value = el.defaultValue;
+    if (typed.trim() !== '') flash(`${t('Kein Pensum')}: «${typed.trim()}». ${t('Zulässig sind ganze Zahlen im Bereich')} ${range}.`);
+    return false;
   }
-  if (!row.person && !row.demand.some(v => v > 0)) state.extraRows[`${project.id}:${role.id}`] = true;
-  if (!row.person && value > 0) delete state.extraRows[`${project.id}:${role.id}`];
-  pruneLanes(project);
+  /* The figure that is there: nothing to write. */
+  if (value === before) { el.value = el.defaultValue; return false; }
+  /* A figure that was cut to the range or rounded is saved as something
+     other than what was typed — 500 as 200, 12,5 as 13 — and has to say so. */
+  const asTyped = Number(typed.trim().replace(/[’'\s%]/g, '').replace(',', '.')) * (state.unit === 'fte' ? 100 : 1);
+  const adjusted = asTyped !== value;
+
+  for (const q of quarters) a.demand[q] = value;
   recomputeDemand(project);
+  /* The field now holds what was saved, not what was typed. The render that
+     follows keeps a half-typed figure in the focused cell — and took «500»
+     for one, so the cell went on showing it under a toast that said 200. */
+  el.value = el.defaultValue = value > 0 ? num(value) : '';
   const span = from + 1 === to ? data.quarters[from].label : `${data.quarters[from].label} – ${data.quarters[to - 1].label}`;
-  logChange(project, role.label, `${personName(row.person)}, ${span}: ${before} % → ${value} %`, `${value} %`);
+  logChange(project, role.label, `${personName(a.person)}, ${span}: ${before} % → ${value} %`, `${value} %`);
   touch();
+  if (adjusted) flash(`${t('Gespeichert als')} ${value} %. ${t('Zulässig sind ganze Zahlen im Bereich')} ${range}.`);
+  else announce(`${personName(a.person)}, ${span}: ${value} % — ${t('gespeichert')}`);
   /*
    * Rendered on the next turn, not now. The blur that brought us here is
    * half of a move — the next cell is about to take focus, or the click that
@@ -781,53 +850,6 @@ function commitCell(el) {
    */
   setTimeout(() => setState({}), 0);
   return true;
-}
-
-/*
- * Choose the person of a row. A row that has pensum moves to them whole; an
- * empty row becomes theirs, ready for its figures. «nicht zugewiesen» takes
- * the person off, and a row left with neither person nor pensum goes.
- */
-function commitPerson(el) {
-  const { project, role, a } = laneAt(el);
-  const personId = el.value || null;
-  const was = a?.person ?? null;
-  if (personId === was) return;
-  const row = a ? reassignLane(project, a, personId) : addLane(project, role.id, personId);
-  delete state.extraRows[`${project.id}:${role.id}`];
-  /* The marks of this session's edits go with the row they are on. */
-  if (a) {
-    const from = `${project.id}:${role.id}:${el.dataset.holder}:`;
-    for (const key of Object.keys(state.edited).filter(k => k.startsWith(from))) {
-      delete state.edited[key];
-      state.edited[`${project.id}:${laneKey(row)}:${key.slice(from.length)}`] = true;
-    }
-  }
-  pruneLanes(project);
-  recomputeDemand(project);
-  logChange(project, role.label,
-    !a ? `${t('Geplant')}: ${personName(personId)}`
-      : was ? `${t('Übergabe')}: ${personName(was)} → ${personName(personId)}`
-        : `${t('Zugewiesen an')} ${personName(personId)}`,
-    personName(personId));
-  touch();
-  setState({});
-  root.querySelector(`[data-fk="${CSS.escape(`lanep:${project.id}:${laneKey(row)}`)}"]`)?.focus();
-}
-
-/*
- * The roster, as the options of a row's list. A row is drawn with the one
- * name it shows; the rest is filled in here the first time the list is
- * pointed at or focused — fifty options on each of four hundred open rows
- * was most of the page.
- */
-function fillPeople(select) {
-  if (select.options.length > 2) return;
-  const current = select.value;
-  const people = [...data.people].sort((a, b) => compareDe(a.name, b.name));
-  for (const option of [...select.options]) if (option.value) option.remove();
-  for (const person of people) select.add(new Option(person.name, person.id));
-  select.value = current;
 }
 
 /** The same column of the row above or below, where there is one. */
@@ -842,23 +864,13 @@ root.addEventListener('focusout', (event) => {
   if (event.target.matches?.('[data-act="lane-input"]')) commitCell(event.target);
 });
 
-root.addEventListener('change', (event) => {
-  if (event.target.matches?.('[data-act="lane-person"]')) commitPerson(event.target);
-});
-
-root.addEventListener('focusin', (event) => {
-  if (event.target.matches?.('[data-act="lane-person"]')) fillPeople(event.target);
-});
-
 /* A click into a cell selects the figure, as a spreadsheet does: the next
    keystroke replaces it. Only the click that brings focus — a second click
    places the caret. */
 let clickedInto = null;
 root.addEventListener('pointerdown', (event) => {
-  const el = event.target.closest?.('[data-act="lane-person"], [data-act="lane-input"]');
-  if (!el) return;
-  if (el.tagName === 'SELECT') return fillPeople(el);
-  clickedInto = document.activeElement === el ? null : el;
+  const el = event.target.closest?.('[data-act="lane-input"]');
+  if (el) clickedInto = document.activeElement === el ? null : el;
 });
 root.addEventListener('click', (event) => {
   const el = event.target.closest?.('[data-act="lane-input"]');
@@ -1041,10 +1053,23 @@ let resizeTimer;
 window.addEventListener('resize', () => {
   root.querySelectorAll('[data-scroll]').forEach(syncScrollFades);
   clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(() => setState({}), 150);
+  resizeTimer = setTimeout(() => {
+    /* The stylesheet gives some of the layout tokens another value below a
+       breakpoint — the shell's inset at 1440px — and the cache would go on
+       answering with the one it read first. */
+    forgetTokens();
+    setState({});
+  }, 150);
 });
 
 window.addEventListener('hashchange', () => {
+  /*
+   * An in-page anchor — the skip link's «#main» — is not an address of ours.
+   * Read as one it has no parameters at all, which meant every default: the
+   * skip link reset the tab, the filters, the search and the view. The state
+   * is still right, so its own address goes back into the bar.
+   */
+  if (!location.hash.startsWith('#?')) return writeUrl();
   syncFromUrl();
 });
 

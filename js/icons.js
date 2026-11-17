@@ -21,13 +21,28 @@ function innerMarkup(svgText) {
 }
 
 export async function loadIcons() {
-  const manifest = await fetch(`${ICON_DIR}/icons.json`, { cache: 'no-cache' }).then(r => r.json());
-  await Promise.all(manifest.icons.map(async name => {
+  /*
+   * Icons must never take the app down — icon() falls back to nothing. That
+   * was only true of a single icon: the manifest itself was fetched outside
+   * any guard, so a missing icons.json failed the boot, and a 404 page was
+   * read as an icon and registered as an empty symbol.
+   */
+  const text = async url => {
+    const res = await fetch(url, { cache: 'no-cache' });
+    if (!res.ok) throw new Error(`${url} — HTTP ${res.status}`);
+    return res.text();
+  };
+  let names = [];
+  try {
+    names = JSON.parse(await text(`${ICON_DIR}/icons.json`)).icons ?? [];
+  } catch (error) {
+    console.warn('Icons not loaded:', error.message);
+  }
+  await Promise.all(names.map(async name => {
     try {
-      const text = await fetch(`${ICON_DIR}/${name}.svg`, { cache: 'no-cache' }).then(r => r.text());
-      symbols.set(name, innerMarkup(text));
+      symbols.set(name, innerMarkup(await text(`${ICON_DIR}/${name}.svg`)));
     } catch {
-      /* A missing icon must never take the app down — icon() falls back below. */
+      /* One missing icon is one missing icon. */
     }
   }));
 
@@ -43,12 +58,10 @@ export async function loadIcons() {
 }
 
 /**
- * Render an icon reference. The sprite already carries stroke-width 2, which is
- * right for every size the app uses (13–15px on Lucide's 24px grid); `stroke`
- * overrides it for a size far outside that range, where 2px would read heavy.
+ * Render an icon reference. The sprite carries stroke-width 2, which is right
+ * for every size the app uses (13–15px on Lucide's 24px grid).
  */
-export function icon(name, size = 16, { stroke, cls = '' } = {}) {
+export function icon(name, size = 16) {
   if (!symbols.has(name)) return '';
-  return `<svg class="icon ${cls}" width="${size}" height="${size}" aria-hidden="true"
-    ${stroke ? `style="stroke-width:${stroke}"` : ''}><use href="#i-${name}"></use></svg>`;
+  return `<svg class="icon" width="${size}" height="${size}" aria-hidden="true"><use href="#i-${name}"></use></svg>`;
 }

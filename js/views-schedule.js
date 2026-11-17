@@ -9,11 +9,11 @@
    knows what a bar is.
    ============================================================================= */
 
-import { data, t, phaseOf, deDate } from './store.js';
+import { data, t, phaseOf, deDate, nowIndex } from './store.js';
 
 import {
   html, raw, icons, legendBlock, legendItem, yearRule,
-  pinCls, pinLeft, textWidth
+  pinCls, pinLeft, textWidth, plainCell, attr
 } from './ui.js';
 
 import { alignCls } from './columns.js';
@@ -37,8 +37,7 @@ export function todayFraction(cols) {
   const today = new Date(data.meta.today + 'T00:00:00');
   const qStart = new Date(today.getFullYear(), Math.floor(today.getMonth() / 3) * 3, 1);
   const qEnd = new Date(qStart.getFullYear(), qStart.getMonth() + 3, 1);
-  const q = data.quarterIndex[data.meta.todayQuarter] ?? 0;
-  const at = q + (today - qStart) / (qEnd - qStart);
+  const at = nowIndex() + (today - qStart) / (qEnd - qStart);
 
   const i = cols.findIndex(c => at >= c.from && at < c.to);
   if (i < 0) return null;                        // the window has moved past today
@@ -55,6 +54,12 @@ export function todayFraction(cols) {
  * label.
  */
 export function planLegend({ layers, coloured: on, legend, staffing = false, cls = '' }) {
+  /*
+   * A bar can be hatched as a delay, but only where the data carries one, and
+   * the fixtures carry none: the legend explained «Verzug» on every screen
+   * and every sheet for a hatching that was never drawn. It asks the data.
+   */
+  const delays = layers.phases && data.projects.some(p => (p.bars ?? []).some(b => b.delay));
   return legendBlock([
     {
       label: 'Pensum',
@@ -64,17 +69,14 @@ export function planLegend({ layers, coloured: on, legend, staffing = false, cls
     },
     {
       /* The rows of a folded-open project. On screen only: paper has no rows to fold. */
-      label: 'Besetzung',
+      label: 'Rollen',
       items: staffing
         ? legendItem(html`<span class="legend__swatch is-open-role"></span>`, 'Rolle offen')
         : null
     },
     {
       label: 'Balken',
-      items: layers.phases
-        ? html`${legendItem(html`<span class="legend__swatch is-delay"></span>`, 'Verzug')}
-          ${legendItem(html`<span class="legend__swatch is-nolead"></span>`, 'ohne Bearbeitenden')}`
-        : null
+      items: delays ? legendItem(html`<span class="legend__swatch is-delay"></span>`, 'Verzug') : null
     },
     {
       label: 'Meilenstein',
@@ -82,20 +84,21 @@ export function planLegend({ layers, coloured: on, legend, staffing = false, cls
     },
     {
       label: 'Markierung',
-      /* The bar legend already names «ohne Bearbeitenden». */
-      items: layers.phases ? null : legendItem(html`<span class="legend__swatch is-nolead"></span>`, legend.noLead)
+      items: legendItem(html`<span class="legend__swatch is-nolead"></span>`, legend.noLead)
     },
     {
       label: 'Auslastung',
-      items: layers.values ? html`${t(legend.thresholds).replace(/^Auslastung:\s*/, '')}` : null
+      /* The sentence opens with its own heading, whatever the language calls
+         it — stripped as «Auslastung:» the English one printed it twice. */
+      items: layers.values ? html`${t(legend.thresholds).replace(/^[^:]*:\s*/, '')}` : null
     }
   ], cls);
 }
 
-/** The bar plan's own legend: bars, gates and the utilisation bands. */
-export function ganttLegend(cls = '') {
+/** The bar plan's own legend: the layers it draws, and the utilisation bands of its closing row. */
+export function ganttLegend({ bars = true, gates = true } = {}, cls = '') {
   return planLegend({
-    layers: { values: true, phases: true, gates: true }, coloured: false,
+    layers: { values: true, phases: bars, gates }, coloured: false,
     legend: data.print.legend, cls
   });
 }
@@ -110,14 +113,26 @@ export function ganttLegend(cls = '') {
  * sub-phase number at most. With the row to itself the full label rule
  * applies. Which layers to draw is the caller's — the view's — decision.
  */
-export function phaseBand(p, cols, lay, { compact = true, bars = true, gates: withGates = true } = {}) {
+export function phaseBand(p, cols, lay, { compact = true, bars = true, gates = true, cell = false } = {}) {
+  const marks = trackMarks(p, cols, lay, { compact, bars, gates });
+  /* In the planning grid the band is one more cell of its row — the phases
+     and gates of the project, after its quarters; on a printed sheet it is a
+     strip in a row that is no table. */
+  return marks && html`<div class="pband" ${attr(cell, `role="cell" aria-label="${t('Phasen und Meilensteine')}"`)}>${marks}</div>`;
+}
+
+/*
+ * The bars and gates of one project on one time axis — the band under a
+ * pensum row and the track of a bar-plan row are the same marks, and which
+ * of the two layers is drawn is the view's decision in both. They were built
+ * twice, and the copy for the printed bar plan had no such switch: with the
+ * milestones turned off on screen, the sheet printed them all the same.
+ */
+function trackMarks(p, cols, lay, { compact = false, bars = true, gates: withGates = true } = {}) {
   const marks = withGates ? gatePlaces(p, cols) : [];
   const placed = bars ? placeBars(p.bars ?? [], cols) : [];
   if (!placed.length && !marks.length) return '';
-  return html`<div class="pband">
-    ${placed.map(at => ganttBar(at, placed, cols, p, lay, marks, compact))}
-    ${gates(marks, cols, p)}
-  </div>`;
+  return html`${placed.map(at => ganttBar(at, placed, cols, p, lay, marks, compact))}${gates(marks, cols, p)}`;
 }
 
 /** What a lead column shows in the bar plan. The title is a link; the rest is text. */
@@ -126,16 +141,13 @@ function leadCell(col, p) {
     return html`<button type="button" class="gantt__rowtitle" data-act="open-project"
         data-val="${p.id}" title="${p.title}">${p.title}</button>`;
   }
-  if (col.short) return html`<span title="${col.text(p)}">${col.short(p)}</span>`;
-  return col.text ? col.text(p) : '';
+  return plainCell(col, p);
 }
 
-export function ganttRow(p, cols, lay) {
+export function ganttRow(p, cols, lay, layers = {}) {
   const bars = p.bars ?? [];
   const delayed = bars.some(b => b.delay);
   const rail = p.unassigned ? 'is-unassigned' : delayed ? 'is-delayed' : '';
-  const marks = gatePlaces(p, cols);
-  const placed = placeBars(bars, cols);
   const open = bars.find(b => b.openEnd);
 
   return html`<div class="gantt__row ${rail}" style="grid-template-columns:${raw(lay.tpl)}">
@@ -145,8 +157,7 @@ export function ganttRow(p, cols, lay) {
     <div class="gantt__track">
       ${cols.map((col, n) => html`<span class="gantt__gridline ${yearRule(col)}"
         style="grid-column:${n + 1}"></span>`)}
-      ${placed.map(at => ganttBar(at, placed, cols, p, lay, marks))}
-      ${gates(marks, cols, p)}
+      ${trackMarks(p, cols, lay, layers)}
       ${open && openEndRail(open, cols)}
     </div>
   </div>`;
@@ -346,9 +357,9 @@ function ganttBar(at, placed, cols, p, lay, gates, compact = false) {
   /*
    * The bar is the same control under the figures as in the bar plan: it
    * carries its hint and opens the phase. It takes the bottom of the cell
-   * away from the editor, and the users chose that — whoever wants the whole
-   * cell back switches the bars off in the Ansicht menu. Under the figures it
-   * shows only its number; the name is one hover away.
+   * away from the row's own click, and the users chose that — whoever wants
+   * the whole cell back switches the bars off in the Ansicht menu. Under the
+   * figures it shows only its number; the name is one hover away.
    */
   return html`<button type="button" class="${cls}" style="${pos}"
       data-act="open-phase" data-val="${p.id}:${b.from}"

@@ -15,6 +15,12 @@
 
 <a class="skip-link" href="#main">Zum Inhalt springen</a>
 
+<!-- Said to a screen reader when something changes that the reader did not
+     move to: a toast, the count beside the filters, a figure that was saved.
+     Outside #app, because #app is replaced on every render and a live region
+     has to be there before its text is. -->
+<div id="live" class="sr-only" role="status" aria-live="polite"></div>
+
 <div id="app" class="app">
   <div class="boot" role="status">
     <span class="boot__spinner" aria-hidden="true"></span>

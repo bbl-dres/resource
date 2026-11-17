@@ -7,10 +7,8 @@
    ============================================================================= */
 
 import {
-  data, state, t, num, fmt, fmtFte, unitSuffix, projectDemand, heatStep, phaseOf, eppmOf,
-  nowIndex, deDate,
-  settingText, settingTyped, settingValue, settingChanges,
-  roleOf, holdersAt, unstaffedAt
+  data, state, t, num, fmtFte, unitSuffix, projectDemand, phaseOf, eppmOf, deDate,
+  settingText, settingTyped, settingValue, settingChanges, peopleOn, projectShare, assignmentsOf
 } from './store.js';
 
 import { html, icons, attr } from './ui.js';
@@ -195,15 +193,15 @@ function modalHead(kicker, title, meta = '') {
 }
 
 /* One entry per dialog; app.js sets state.modal.type to one of these keys.
-   Setting a pensum or choosing a person is not one of them — both are typed
-   or picked in the grid's own cells, see laneRow() in views-overview.js —
-   and neither is a person: the Personen table folds open and says the rest. */
+   Setting a pensum is not one of them: it is typed into the grid's own
+   cells, see laneCell() in views-overview.js. */
 const MODALS = {
   settings: settingsModal,     // the account: the reader's own mail and language
   rules: rulesModal,           // the office's settings, behind the gear
   phase: phaseModal,
   milestone: milestoneModal,
   project: projectModal,
+  person: personModal,
   share: shareModal
 };
 
@@ -280,7 +278,7 @@ function milestoneModal({ milestoneId }) {
 
     <footer class="modal__foot">
       <button type="button" class="btn" data-act="open-project" data-val="${p.id}">${t('Projekt öffnen')}</button>
-      <button type="button" class="btn btn--primary" data-act="noop">${t('Im ePPM öffnen')}</button>
+      ${eppmButton()}
     </footer>`;
 }
 
@@ -333,140 +331,86 @@ function phaseModal({ projectId, from }) {
 
     <footer class="modal__foot">
       <button type="button" class="btn" data-act="open-project" data-val="${p.id}">${t('Projekt öffnen')}</button>
-      <button type="button" class="btn btn--primary" data-act="noop">${t('Im ePPM öffnen')}</button>
+      ${eppmButton()}
     </footer>`;
 }
 
+/*
+ * The way to the system that knows the rest: SAP ePPM for a project, the
+ * federal directory for a person. These dialogs end on it. It opens nothing
+ * yet — the prototype has neither system behind it, and the action says so.
+ */
+const externalButton = label => html`<button type="button" class="btn btn--primary" data-act="noop">
+  ${icons.externalLink(15)}${t(label)}</button>`;
+const eppmButton = () => externalButton('In SAP ePPM öffnen');
+
+/** The rows of a dialog's facts: a term, its value, and a line under it where there is one. */
+const factList = facts => html`<dl class="facts">
+  ${facts.map(f => html`<div class="facts__row">
+    <dt>${t(f.term)}</dt>
+    <dd>${f.value}${f.sub && html`<span class="facts__sub">${f.sub}</span>`}</dd>
+  </div>`)}
+</dl>`;
+
+/*
+ * A project at a glance, and nothing more: what it is called, where it sits,
+ * which phase it is in, what it is worth and how many people are on it.
+ *
+ * It was a sheet of its own once — five facts, a band per role over ten
+ * years, forty quarters of pensum and the change log — and the users found
+ * it stood between them and the grid, so for a while a click on a project
+ * opened nothing at all. This is what they asked back: the name is a link
+ * again, and behind it are four lines and the button to SAP ePPM, where the
+ * project is kept. The figures are in the row; the history is on Verlauf.
+ */
 function projectModal({ projectId }) {
   const p = data.projectsById[projectId];
-  const cells = projectDemand(p);
-  const now = nowIndex();
-  const q0 = data.quarters[now];
-  const n = data.quarters.length;
-  const nextMs = data.milestones.items
-    .filter(m => m.projectId === p.id)
-    .sort((a, b) => a.planDate.localeCompare(b.planDate))[0];
-  const nextName = nextMs && data.milestoneCatalog[nextMs.code]?.name;
-  const log = data.changes.filter(c => c.projectId === p.id);
+  if (!p) return '';
+  const people = peopleOn(p).map(id => data.peopleById[id]?.name).filter(Boolean);
 
-  /*
-   * Who is on the project this quarter, role by role and with how much, and
-   * who is still to come: somebody whose part starts later.
-   */
-  const active = holdersAt(p, now);
-  const nameOf = a => (a.person ? data.peopleById[a.person]?.name : t('offen'));
-  const firstOf = a => a.demand.findIndex(v => v > 0);
-  const staffed = p.assignees.filter(a => a.demand[now] > 0)
-    .map(a => `${nameOf(a)} (${t(roleOf(a.role).label)})`);
-  const ahead = p.assignees.filter(a => !(a.demand[now] > 0) && firstOf(a) > now)
-    .map(a => `${t(roleOf(a.role).label)} ${t('ab')} ${data.quarters[firstOf(a)].label}: ${
-      a.person ? data.peopleById[a.person]?.shortName : t('offen')}`);
-
-  /* The runs of quarters somebody carries a pensum in, as [from, to) pairs. */
-  const runsOf = demand => {
-    const out = [];
-    let start = -1;
-    demand.forEach((v, q) => {
-      if (v > 0 && start < 0) start = q;
-      if (!(v > 0) && start >= 0) { out.push([start, q]); start = -1; }
-    });
-    if (start >= 0) out.push([start, demand.length]);
-    return out;
-  };
-
-  // The wireframe is explicit: five facts, always the same, in this order.
   const facts = [
+    { term: 'Teilportfolio', value: t(data.portfoliosById[p.portfolio]?.label ?? p.portfolio) },
+    { term: 'Phase (ePPM)', value: t(eppmOf(p.phase).label) },
+    { term: 'Kredit CHF', value: t(p.creditLabel) },
     {
-      term: 'Phase (ePPM)',
-      value: t(eppmOf(p.phase).label),
-      sub: `${t('Phase')} ${data.phases.eppm.findIndex(e => e.id === p.phase) + 1} ${t('von')} ${data.phases.eppm.length}`
-    },
-    {
-      term: `${t('Bearbeitende')} ${q0.label}`,
-      value: `${active.size} ${t(active.size === 1 ? 'Person' : 'Personen')}`,
-      sub: [...staffed, ...ahead].join(' · ') || t('Pensum offen'),
-      tone: unstaffedAt(p, now) ? 'warn' : null
-    },
-    {
-      term: `${t('Pensum')} ${q0.label}`,
-      value: fmt(cells[now]),
-      sub: `${t('Soll')} ${fmt(p.target)} · ${cells[now] > p.target ? t('über Soll') : t('im Soll')} · ${t('Summe über alle Rollen')}`,
-      tone: cells[now] > p.target ? 'danger' : null
-    },
-    {
-      term: 'Kredit CHF',
-      value: t(p.creditLabel),
-      sub: p.preCredit ? t('Freigabe steht aus') : t('Kredit freigegeben')
-    },
-    {
-      term: 'Nächster Meilenstein',
-      value: nextMs ? `${t(nextName ?? nextMs.code)} · ${deDate(nextMs.planDate)}` : '—',
-      sub: nextMs ? t(nextMs.statusLabel).replace('▲ ', '') : t('kein Gate im Zeitraum'),
-      tone: nextMs && nextMs.status !== 'ok' ? 'danger' : null
+      term: 'Bearbeitende',
+      value: people.length ? `${people.length} ${t(people.length === 1 ? 'Person' : 'Personen')}` : t('nicht zugewiesen'),
+      sub: people.join(', ')
     }
   ];
 
   return html`
-    ${modalHead(`${p.number} · ${t(data.portfoliosById[p.portfolio].label)} · ${p.location.split(',')[0]}`, p.title)}
-
-    <dl class="facts">
-      ${facts.map(f => html`<div class="facts__row">
-        <dt>${t(f.term)}</dt>
-        <dd class="${f.tone ? 'is-' + f.tone : ''}">${f.value}<span class="facts__sub">${f.sub}</span></dd>
-      </div>`)}
-    </dl>
-
-    <!-- One line per role and person: the pensum this quarter, and under it
-         the band of when they hold the role, over the whole window. -->
-    <section class="modal__section">
-      <h3>${t('Bearbeitende')}</h3>
-      ${p.assignees.length ? html`<div class="rolelist">
-        ${p.assignees.map(a => {
-          const name = a.person ? data.peopleById[a.person]?.name : t('nicht zugewiesen');
-          return html`<div class="rolelist__row">
-            <div class="rolelist__head">
-              <span class="rolelist__role">${t(roleOf(a.role).label)}</span>
-              <span class="rolelist__holder ${a.person ? '' : 'is-open'}">${name}</span>
-              <span class="rolelist__now">${t('Pensum')} ${q0.short}: ${fmt(a.demand[now])}</span>
-            </div>
-            <div class="roleband" aria-hidden="true">
-              ${runsOf(a.demand).map(([from, to]) => {
-                const span = to - from === 1 ? data.quarters[from].label
-                  : `${data.quarters[from].label} – ${data.quarters[to - 1].label}`;
-                return html`<span class="roleband__seg ${a.person ? '' : 'is-open'}"
-                  style="left:${(from / n * 100).toFixed(2)}%;width:${((to - from) / n * 100).toFixed(2)}%"
-                  title="${name} · ${span}">${span}</span>`;
-              })}
-            </div>
-          </div>`;
-        })}
-        <div class="roleband__axis" aria-hidden="true">
-          ${data.quarters.map((q, i) => (q.short === 'Q1'
-            ? html`<span style="left:${(i / n * 100).toFixed(2)}%">${q.year}</span>` : ''))}
-        </div>
-      </div>` : html`<p class="settings__note">${t('Keine Rollen geplant.')}</p>`}
-    </section>
-
-    <section class="modal__section">
-      <h3>${t('Pensum je Quartal')} · ${t('Summe über alle Rollen')}</h3>
-      <div class="minigrid">
-        ${data.quarters.map((q, i) => html`<div class="minigrid__col">
-          <span class="minigrid__q">${q.short}<span>/${String(q.year).slice(2)}</span></span>
-          <span class="minigrid__v heat-${heatStep(cells[i])}">${num(cells[i])}</span>
-        </div>`)}
-      </div>
-    </section>
-
-    ${log.length ? html`<section class="modal__section">
-      <h3>${t('Letzte Änderungen')}</h3>
-      <ul class="modal__log">
-        ${log.map(c => html`<li><span>${c.dateLabel}</span><span>${t(c.field)}</span><span>${c.change}</span><span>${c.value}</span></li>`)}
-      </ul>
-    </section>` : ''}
-
-    <footer class="modal__foot">
-      <button type="button" class="btn" data-act="open-schedule" data-val="${p.id}">${t('Termine anzeigen')}</button>
-      <button type="button" class="btn btn--primary" data-act="noop">${t('Im ePPM öffnen')}</button>
-    </footer>`;
+    ${modalHead(`${t('Projekt')} ${p.number}`, p.title)}
+    ${factList(facts)}
+    <footer class="modal__foot">${eppmButton()}</footer>`;
 }
 
+/*
+ * A person at a glance, the way the project's dialog shows a project: where
+ * they sit, what they are contracted for, how much of that may go to
+ * projects, and how many they are on — and the way to their page in the
+ * federal directory, where the rest about a person is kept.
+ *
+ * There was a larger one, with the load of forty quarters and two fields to
+ * change the contract. It went when the users asked for a click on a person
+ * to do nothing but fold the row; this is what they asked back, for the name
+ * alone. It edits nothing.
+ */
+function personModal({ personId }) {
+  const person = data.peopleById[personId];
+  if (!person) return '';
+  const org = data.organisationsById[person.organisation];
+  const projects = new Set(assignmentsOf(person.id).map(a => a.project.id)).size;
+
+  const facts = [
+    { term: 'Organisation', value: org ? t(org.label) : '—' },
+    { term: 'Anstellung', value: `${person.employment} %` },
+    { term: 'Projektanteil', value: `${projectShare(person)} %` },
+    { term: 'Projekte', value: String(projects) }
+  ];
+
+  return html`
+    ${modalHead(t(person.role), person.name)}
+    ${factList(facts)}
+    <footer class="modal__foot">${externalButton('Im Admin-Verzeichnis öffnen')}</footer>`;
+}

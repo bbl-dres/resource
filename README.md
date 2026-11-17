@@ -26,7 +26,7 @@ Resource-planning prototype for the [Federal Office for Buildings and Logistics 
 ## Features
 
 - Review the portfolio in one planning grid that shows workload figures, the phase schedule, or both in the same rows, plus dashboards and a change history.
-- Fold a project open to its roles — Bearbeitender, Stellvertretung, Bauleitung, Fachplanung — one row per role and person, and type the workload per quarter straight into the cells, as in a spreadsheet. See [`docs/ROLES.md`](docs/ROLES.md).
+- Fold a project open to its roles — Bearbeitender, Stellvertretung, Bauleitung, Fachplanung — one row per role and person, read from SAP ePPM — and type the workload per quarter straight into the cells, as in a spreadsheet. See [`docs/ROLES.md`](docs/ROLES.md).
 - Read the projects by size — small before large — and filter and sort year, quarter, and month views in percent or FTE.
 - Compare demand, capacity, utilisation, free capacity, and person-level workload.
 - Export CSV, Excel, and client-side PDF reports and print schedules from A4 through A0.
@@ -51,12 +51,11 @@ node tools/check.mjs
 ## Documentation
 
 - [Architecture](docs/ARCHITECTURE.md) — code structure, state, rendering, grids, time, exports, and data.
-- [Decisions](docs/DECISIONS.md) — standing implementation and design rules.
 - [Data model](docs/DATAMODEL.md) — the entities in `data/`, their fields, and how they join.
 - [Roles](docs/ROLES.md) — several people per project: what is built, and what the feedback round changed.
-- [Contrast review](docs/CONTRAST-REVIEW.md) — measured text contrast per tab, and the text tiers that came out of it.
 - [Code review, November 2026](docs/reviews/2026-11-16-code-review.md) — findings, what was fixed, and what is still open.
-- [Dashboard study](docs/DASHBOARD-STUDY.md) — proposal still under discussion.
+- [Consistency review](docs/reviews/2026-11-17-consistency-review.md) — which switch and which link parameter changes which tab, the print layout and the files.
+- [Design review](docs/reviews/2026-11-17-design-review.md) — tokens, shared styles, screens from phone to meeting-room wall, accessibility.
 - [Data generator](tools/README.md) — deterministic fixture generation and known data limitations.
 
 Earlier retrospectives are retained in [`docs/archive/`](docs/archive/) for historical context.

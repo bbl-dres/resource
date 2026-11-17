@@ -71,15 +71,13 @@ const DEFAULT_STATE = {
   hideZeros: false,        // in the URL as zeros=hide
   /*
    * Editing. A pensum is typed into its cell, in the row of the role and the
-   * person who carries it, the way a figure is typed into a spreadsheet; the
-   * person is chosen from the list in the row's «Bearbeitende» cell. An edit
-   * is written into the data the moment the cell is left — the prototype has
-   * nothing to save to — and `edited` remembers which cells were touched this
-   * session, so the grid can mark them. `extraRows` are the empty rows asked
-   * for with «Weitere Person»: a second person for a role that has one.
+   * person who carries it, the way a figure is typed into a spreadsheet. It
+   * is the only thing edited: the roles and who holds them are master data
+   * from SAP ePPM. An edit is written into the data the moment the cell is
+   * left — the prototype has nothing to save to — and leaves no mark on the
+   * cell: a changed figure looks like any other, as it does in a
+   * spreadsheet. What was changed, and from what, is in Verlauf.
    */
-  edited: {},              // 'projectId:role:holder:q' -> true
-  extraRows: {},           // 'projectId:role' -> true
   openProjects: {},        // projectId -> true, a project row folded open to its Bearbeitende
   openPeople: {},          // personId -> true, a person row folded open to their roles
   settingsDraft: null,     // setting key -> text typed in the Einstellungen dialog, not yet saved
@@ -105,8 +103,8 @@ const DEFAULT_STATE = {
   zoom: 'fit',             // print preview, see VOCAB.zoom
   page: 1,                 // change log, 1-based
   pageSize: '25',          // see VOCAB.pageSize
-  pSort: 'peak',           // person table: name | organisation | employment | share | roles | peak | q0…q7
-  pDir: 'desc',
+  pSort: 'name',           // person table: name | projects | organisation | employment | share | q0…q7
+  pDir: 'asc',
   searchOpen: false,
   collapsedGroups: {},
   cardSort: {},            // dashboard card id -> { by: 'label'|'value', dir: 'asc'|'desc' }
@@ -176,8 +174,14 @@ export function layerPatch(key) {
   return { layers: { ...state.layers, [key]: !state.layers[key] }, view: 'custom' };
 }
 
+/**
+ * Are there figures on the page? On Planung and on paper that is a layer of
+ * the view. Personen has no view to switch them off in: its table is figures.
+ */
+export const figuresShown = () => state.tab === 'people' || state.layers.values;
+
 /** Are the figures coloured? Never while there are no figures to colour. */
-export const coloured = () => state.layers.values && state.colour === 'pensum';
+export const coloured = () => figuresShown() && state.colour === 'pensum';
 
 /**
  * Which set of switches the view in front of the reader is driven by.
@@ -282,7 +286,10 @@ export const FILTERS = [
   {
     kind: 'lead', key: 'leads', param: 'lead',
     ids: () => [...data.people.map(x => x.id), 'none'],
-    name: id => (id === 'none' ? t('nicht zugewiesen') : data.peopleById[id]?.name ?? id)
+    name: id => (id === 'none' ? t('nicht zugewiesen') : data.peopleById[id]?.name ?? id),
+    /* On Personen the filter names the people themselves. A role nobody
+       holds is something a project has, so «nicht zugewiesen» stays behind. */
+    people: id => id !== 'none'
   },
   {
     kind: 'portfolio', key: 'portfolios', param: 'portfolio',
@@ -292,9 +299,25 @@ export const FILTERS = [
   {
     kind: 'organisation', key: 'organisations', param: 'org',
     ids: () => data.meta.organisations.map(x => x.id),
-    name: id => t(data.organisationsById[id]?.label ?? id)
+    name: id => t(data.organisationsById[id]?.label ?? id),
+    /* A person has an organisation of their own, and a column that shows it. */
+    people: () => true
   }
 ];
+
+/*
+ * What a filter means where the reader is standing. Every tab lists projects
+ * or is counted from them, and answers to all four — except Personen, whose
+ * rows are people: a phase and a sub-portfolio are properties of a project
+ * and select nothing there, so that tab neither offers nor shows them. They
+ * stay in the state and in the link, and are back on the next tab.
+ */
+const onPeople = () => state.tab === 'people';
+export const filtersHere = () => (onPeople() ? FILTERS.filter(f => f.people) : FILTERS);
+/** The ids of one filter that are set and mean something on this tab. */
+export const selectedHere = f => (onPeople() ? state[f.key].filter(id => f.people?.(id)) : state[f.key]);
+/** Every id of one filter that this tab's menu offers. */
+export const idsHere = f => (onPeople() ? f.ids().filter(id => f.people?.(id)) : f.ids());
 
 /** The state with no filter set and no search — what «zurücksetzen» and the brand link write. */
 export const noFilters = () => ({ ...Object.fromEntries(FILTERS.map(f => [f.key, []])), search: '' });
@@ -399,11 +422,11 @@ export function readUrl() {
   patch.searchOpen = patch.search !== '';   // a link with a query opens the field
   patch.cols = readColumns(p, list);
   patch.hideZeros = p.get('zeros') === 'hide';
-  /* «Projekte» became «Rollen» when a person came to hold several on one
-     project; a link sorted by the old column sorts by the new one. */
-  const psort = p.get('psort') === 'projects' ? 'roles' : (p.get('psort') ?? '');
+  /* A link sorted by a column the table no longer has — «Rollen», «Spitze» —
+     opens in the default order, in the default direction. */
+  const psort = p.get('psort') ?? '';
   patch.pSort = isPersonSort(psort) ? psort : DEFAULT_STATE.pSort;
-  patch.pDir = p.get('pdir') === 'asc' ? 'asc' : DEFAULT_STATE.pDir;
+  patch.pDir = isPersonSort(psort) && VOCAB.sortDir.includes(p.get('pdir')) ? p.get('pdir') : DEFAULT_STATE.pDir;
   patch.cardSort = readCardSort(p);
   for (const f of FILTERS) patch[f.key] = list(f.param);
   return patch;
@@ -419,9 +442,17 @@ export function readUrl() {
 export function writeUrl({ push = false } = {}) {
   const p = new URLSearchParams();
   p.set('tab', state.tab);
-  if (state.tab === 'export') p.set('sheet', state.sheet);
-  if (state.tab === 'export' && state.paper !== 'a4') p.set('paper', state.paper);
-  if (state.tab === 'export' && state.zoom !== 'fit') p.set('zoom', state.zoom);
+  /*
+   * One rule: a parameter is in the link wherever it is not at its default,
+   * on every tab. The person table's sort, the cards' order, the page of the
+   * log and the paper used to be written on their own tab only, and readUrl()
+   * sets whatever a hash leaves out back to its default — so they survived a
+   * click from tab to tab, which keeps the state, and were lost on Back,
+   * Forward and reload, which read it from the link.
+   */
+  if (state.sheet !== DEFAULT_STATE.sheet) p.set('sheet', state.sheet);
+  if (state.paper !== DEFAULT_STATE.paper) p.set('paper', state.paper);
+  if (state.zoom !== DEFAULT_STATE.zoom) p.set('zoom', state.zoom);
   if (state.unit !== 'pct') p.set('unit', state.unit);
   if (state.view !== 'pensum') p.set('view', state.view);
   if (state.view === 'custom') p.set('layers', LAYER_KEYS.filter(k => state.layers[k]).join(','));
@@ -434,11 +465,11 @@ export function writeUrl({ push = false } = {}) {
   if (state.periodOffset) p.set('from', String(state.periodOffset));
   if (state.sort !== 'project') p.set('sort', state.sort);
   if (state.sortDir !== 'asc') p.set('dir', state.sortDir);
-  if (state.tab === 'people' && state.pSort !== DEFAULT_STATE.pSort) p.set('psort', state.pSort);
-  if (state.tab === 'people' && state.pDir !== DEFAULT_STATE.pDir) p.set('pdir', state.pDir);
-  if (state.tab === 'dashboard' && cardSortParam()) p.set('csort', cardSortParam());
-  if (state.tab === 'history' && state.page > 1) p.set('page', String(state.page));
-  if (state.tab === 'history' && state.pageSize !== '25') p.set('pageSize', state.pageSize);
+  if (state.pSort !== DEFAULT_STATE.pSort) p.set('psort', state.pSort);
+  if (state.pDir !== DEFAULT_STATE.pDir) p.set('pdir', state.pDir);
+  if (cardSortParam()) p.set('csort', cardSortParam());
+  if (state.page > 1) p.set('page', String(state.page));
+  if (state.pageSize !== DEFAULT_STATE.pageSize) p.set('pageSize', state.pageSize);
   if (state.search) p.set('q', state.search);
   for (const f of FILTERS) if (state[f.key].length) p.set(f.param, state[f.key].join(','));
   const next = '#?' + p.toString();
@@ -522,6 +553,10 @@ export const nowIndex = () => data.quarterIndex[data.meta.todayQuarter] ?? 0;
    and nothing else. A role that changes hands is two rows; a role nobody
    holds yet is a row with no person. Everything the app reads off a
    project's people is a reading of this list.
+
+   The list itself is master data from SAP ePPM: which rows there are, and
+   whose. The app writes one thing into it, a row's demand[] — nothing here
+   adds a row, removes one or gives it to somebody else.
    -------------------------------------------------------------------------- */
 
 /** The role catalogue, in the order the rows are drawn. */
@@ -539,9 +574,6 @@ export const laneKey = a => `${a.role}:${holderKey(a)}`;
 /** A project's row for a role and a person — «none» for the row nobody holds — or null. */
 export const laneOf = (p, roleId, holder) =>
   p.assignees.find(a => a.role === roleId && holderKey(a) === holder) ?? null;
-
-/** A project's rows for one role, in order. */
-export const lanesOf = (p, roleId) => p.assignees.filter(a => a.role === roleId);
 
 /** The people on a project, each once, in the order of their rows. */
 export const peopleOn = p => [...new Set(p.assignees.map(a => a.person).filter(Boolean))];
@@ -581,41 +613,6 @@ export function holdersAt(p, q) {
 /** The project's demand is the sum over its rows. Called after every edit. */
 export function recomputeDemand(p) {
   p.demand = data.quarters.map((_, q) => p.assignees.reduce((sum, a) => sum + (a.demand[q] || 0), 0));
-}
-
-/**
- * A row the project did not have yet, with nothing planned: under the last
- * row of the same role, or where the role belongs in the catalogue's order.
- */
-export function addLane(p, roleId, personId = null) {
-  const a = { role: roleId, person: personId, demand: data.quarters.map(() => 0) };
-  const order = roleCatalog().map(r => r.id);
-  const rank = x => order.indexOf(x.role);
-  let at = p.assignees.findLastIndex(x => rank(x) <= order.indexOf(roleId));
-  p.assignees.splice(at + 1, 0, a);
-  return a;
-}
-
-/**
- * Give a row to somebody else — or to nobody. Where that person already has
- * a row for the role the two become one, their pensa added up. Returns the
- * row the pensum now stands in.
- */
-export function reassignLane(p, a, personId) {
-  const twin = p.assignees.find(x => x !== a && x.role === a.role && (x.person ?? null) === (personId ?? null));
-  if (!twin) { a.person = personId ?? null; return a; }
-  a.demand.forEach((v, q) => { twin.demand[q] += v; });
-  p.assignees = p.assignees.filter(x => x !== a);
-  return twin;
-}
-
-/**
- * A row with nobody on it and no pensum in the whole window says nothing, and
- * goes. A row with a person stays while it has one, pensum or not — it is how
- * somebody is put on a project before their figures are typed in.
- */
-export function pruneLanes(p) {
-  p.assignees = p.assignees.filter(a => a.person || a.demand.some(v => v > 0));
 }
 
 /*
@@ -734,12 +731,6 @@ export function fmtMio(v, digits = 1) {
  */
 export const cellValue = (project, q) => project.demand[q];
 export const projectDemand = project => project.demand;
-
-/** Was this cell of a row touched in the session? The grid underlines it. */
-export const laneEdited = (project, key, q) => !!state.edited[`${project.id}:${key}:${q}`];
-
-/** Was any row of the project touched in the quarter? The folded row carries the mark. */
-export const isEdited = (project, q) => project.assignees.some(a => laneEdited(project, laneKey(a), q));
 
 /*
  * How loaded a person is, in two steps, and the unit changes exactly once.
@@ -1104,6 +1095,16 @@ function buildHorizon(scale) {
   }));
 }
 
+/**
+ * The offset at which the window shows today: the column the current quarter
+ * is in, as far as the window can be stepped. «Zu heute» goes there — it used
+ * to go to 0, which is today only while the horizon opens on it.
+ */
+export function todayOffset() {
+  const at = allPeriods().findIndex(c => c.quarters.includes(nowIndex()));
+  return Math.max(0, Math.min(at, maxOffset()));
+}
+
 /** How far the window may be stepped before it runs off the end. */
 export const maxOffset = (cols = allPeriods()) => Math.max(0, cols.length - windowColumns());
 
@@ -1172,7 +1173,8 @@ export const SORT_KEYS = {
   id:        { label: 'Projekt-ID', numeric: false, value: p => p.number },
   project:   { label: 'Projekt', numeric: false, value: p => p.title },
   phase:     { label: 'Phase (ePPM)', numeric: false, value: p => eppmRank(p.phase) },
-  lead:      { label: 'Bearbeitende', numeric: false, value: p => data.peopleById[p.leadId]?.name ?? '\uffff' },
+  /* By what the column shows on a project row: how many people are on it. */
+  lead:      { label: 'Bearbeitende', numeric: true, value: p => peopleOn(p).length },
   portfolio: { label: 'Teilportfolio', numeric: false, value: p => data.portfoliosById[p.portfolio]?.label ?? '' },
   organisation: { label: 'Organisation', numeric: false, value: p => data.organisationsById[p.organisation]?.label ?? '' },
   credit:    { label: 'Kredit CHF', numeric: true, value: p => p.credit ?? -1 }
@@ -1259,10 +1261,12 @@ export function groupProjects(list = filteredProjects()) {
  * was a string no entry could match and stayed German in every language,
  * and the spreadsheet did not translate at all.
  */
-export function activeFilters() {
+export function activeFilters({ projects = false } = {}) {
   const chips = [];
-  for (const f of FILTERS) {
-    for (const id of state[f.key]) chips.push({ kind: f.kind, id, label: (f.chip ?? f.name)(id) });
+  /* A file of projects names every filter its rows went through, whichever
+     tab it was asked for on; a tab names the ones its own rows answer to. */
+  for (const f of projects ? FILTERS : filtersHere()) {
+    for (const id of projects ? state[f.key] : selectedHere(f)) chips.push({ kind: f.kind, id, label: (f.chip ?? f.name)(id) });
   }
   if (state.search) chips.push({ kind: 'search', id: '1', label: `${t('Suche')}: ${state.search}` });
   return chips;
@@ -1295,8 +1299,8 @@ export function toggleIn(key, id) {
  * replaces had drifted from the data — it announced a moved gate that this
  * lead does not have.
  *
- * The scope is deliberately personal. Across the division there are 59 late
- * gates and 35 people over 100 %; a bell carrying those is a number, not a
+ * The scope is deliberately personal. Across the division there are some
+ * sixty late gates and forty people over 100 %; a bell carrying those is a number, not a
  * message. Three questions matter to one project lead: am I over my own
  * contract, has a gate on one of my projects moved, and did somebody change my
  * project while I was away.
@@ -1391,44 +1395,58 @@ export function pageOf(rows) {
    -------------------------------------------------------------------------- */
 
 /**
- * Everything the person table shows, in one place: the load a person carries in
- * each period against their own project capacity, plus the peak — which is the
- * answer a single quarter cannot give.
+ * Everything the person table shows, in one place: the load a person carries
+ * in each period, against their own project capacity.
  */
 export function personRows() {
   const cols = periods();
-  return data.people.map(person => {
+  /*
+   * The filters, read for a table of people: «Bearbeitende» names them,
+   * «Organisation» is their own, and the search finds a person by name, by
+   * organisation or by a project they hold a role on — the rows under a
+   * person name those, as the rows under a project name its people. A row is
+   * always the whole person: every role, and the load of all of them.
+   */
+  const named = state.leads.filter(id => id !== 'none');
+  const match = searchMatcher();
+  const shown = data.people.filter(person => {
+    if (named.length && !named.includes(person.id)) return false;
+    if (state.organisations.length && !state.organisations.includes(person.organisation)) return false;
+    if (match) {
+      const org = data.organisationsById[person.organisation];
+      const projects = assignmentsOf(person.id).map(a => `${a.project.title} ${a.project.number}`).join(' ');
+      if (!match.test(`${person.name} ${org ? `${t(org.short)} ${t(org.label)}` : ''} ${projects}`)) return false;
+    }
+    return true;
+  });
+  return shown.map(person => {
     /* Through the accessor, so an unsaved edit shows here too. Read straight
        from baseLoad, this table answered 170 % while the grid beside it said
        220 % for the same person in the same session. */
     const load = data.quarters.map((_, q) => personLoad(person.id, q));
     const values = cols.map(col =>
       Math.round(periodValue(load, col) / projectCapacity(person) * 100));
-    /* How many roles, not how many projects: a person can be Bearbeitender
-       on one project and Bauleitung on three, and the rows under theirs
-       are one per role. */
-    const roles = assignmentsOf(person.id).length;
-    return {
-      person, values, load, roles,
-      peak: roles ? Math.max(...values) : null
-    };
+    /* Somebody who holds no role has no utilisation to show — the table
+       prints a dash for them, not a nought. The projects are counted once
+       each: somebody with two roles on one project is on one project. */
+    const held = assignmentsOf(person.id);
+    return { person, values, load, roles: held.length, projects: new Set(held.map(a => a.project.id)).size };
   });
 }
 
 /** Sorters for the person table, one per column the header offers. */
 export const P_SORTS = {
   name: r => r.person.name,
+  projects: r => r.projects,
   organisation: r => data.organisationsById[r.person.organisation]?.label ?? '',
   employment: r => r.person.employment,
-  share: r => projectShare(r.person),
-  roles: r => r.roles,
-  peak: r => r.peak ?? -1
+  share: r => projectShare(r.person)
 };
 
 export function sortPersonRows(rows) {
   const q = /^q(\d+)$/.exec(state.pSort);
   const value = q ? (r => r.values[Number(q[1])] ?? -1)
-    : (Object.hasOwn(P_SORTS, state.pSort) ? P_SORTS[state.pSort] : P_SORTS.peak);
+    : (Object.hasOwn(P_SORTS, state.pSort) ? P_SORTS[state.pSort] : P_SORTS.name);
   const dir = state.pDir === 'asc' ? 1 : -1;
   return [...rows].sort((a, b) => {
     const x = value(a), y = value(b);

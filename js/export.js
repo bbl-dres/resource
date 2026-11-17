@@ -9,7 +9,7 @@
 
 import {
   data, state, t, projectDemand, groupProjects, filteredProjects, columnSet,
-  totals, periods, periodValue, loadStatus, activeFilters
+  totals, periods, periodValue, activeFilters
 } from './store.js';
 
 import { scopeLine } from './ui.js';
@@ -19,7 +19,7 @@ import { visibleColumns } from './columns.js';
    The table
    -------------------------------------------------------------------------- */
 
-/** 'text' left-aligns, 'num' is a real number, 'pct' a number in percent points. */
+/** 'text' left-aligns, 'num' is an amount in millions, 'int' a plain count, 'pct' a number in percent points. */
 function columns(cols) {
   const list = visibleColumns(columnSet()).map(c => ({
     key: c.key,
@@ -36,10 +36,9 @@ function columns(cols) {
 function projectCells(p, cols) {
   const demand = projectDemand(p);
   const row = {};
-  for (const c of visibleColumns(columnSet())) row[c.key] = c.text ? c.text(p) : null;
-  // Numbers must reach the workbook as numbers, not as the words the grid shows.
-  row.id = p.number.replace('…', '');
-  row.credit = p.credit ?? null;
+  // Numbers must reach the workbook as numbers, not as the words the grid
+  // shows: a column that is a figure says so with `value`.
+  for (const c of visibleColumns(columnSet())) row[c.key] = c.value ? c.value(p) : c.text(p);
   cols.forEach(period => { row[period.id] = periodValue(demand, period); });
   return row;
 }
@@ -51,7 +50,17 @@ export function buildTable() {
   const cols = periods();
   const list = filteredProjects();
   const tot = totals(list);
-  const filters = activeFilters();
+  const filters = activeFilters({ projects: true });
+  const table = columns(cols);
+  /*
+   * Under a filter the first two rows of the foot describe the selection and
+   * the rest the whole portfolio — capacity cannot be filtered. The grid says
+   * so beside each label; the file did not, and a search that matched nothing
+   * exported «Summe Total 0» above «Auslastung 112» with nothing to tell the
+   * two apart.
+   */
+  const scope = (label, word) => (tot.scoped ? `${t(label)} (${t(word)})` : t(label));
+  const foot = (label, word, values) => ({ label: scope(label, word), values: cols.map(c => periodValue(values, c)) });
 
   return {
     name: t('Personalplanung'),
@@ -61,19 +70,20 @@ export function buildTable() {
       scopeLine(list.length),
       filters.length ? `${t('Filter')}: ${filters.map(f => f.label).join(', ')}` : t('ohne Filter')
     ].join(' · '),
-    columns: columns(cols),
+    columns: table,
+    /* How many columns stand in front of the time axis. */
+    lead: table.length - cols.length,
     groups: groupProjects(list).map(g => ({
       label: g.label,
       rows: g.projects.map(p => projectCells(p, cols))
     })),
     footer: [
-      { label: t('Summe Total'), values: cols.map(c => periodValue(tot.demand, c)) },
-      { label: t('davon vor Baukredit-Freigabe'), values: cols.map(c => periodValue(tot.preCredit, c)) },
-      { label: t('davon extern beauftragt'), values: cols.map(c => periodValue(tot.external, c)) },
-      { label: t('Kapazität netto, nach Abwesenheiten'), values: cols.map(c => periodValue(tot.net, c)) },
-      { label: t('Auslastung'), values: cols.map(c => periodValue(tot.utilisation, c)) }
-    ],
-    legend: cols.map(c => `${c.label}: ${t(loadStatus(periodValue(tot.utilisation, c)).label)}`).join(' · ')
+      foot('Summe Total', 'Auswahl', tot.demand),
+      foot('davon vor Baukredit-Freigabe', 'Auswahl', tot.preCredit),
+      foot('davon extern beauftragt', 'Gesamtportfolio', tot.external),
+      foot('Kapazität netto, nach Abwesenheiten', 'Gesamtportfolio', tot.net),
+      foot('Auslastung', 'Gesamtportfolio', tot.utilisation)
+    ]
   };
 }
 
@@ -84,7 +94,8 @@ function fileName(ext) {
   return `personalplanung_${scope}_${stamp}.${ext}`;
 }
 
-function download(blob, name) {
+/** Hand a file to the browser. The PDF goes out through here too. */
+export function download(blob, name) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
@@ -102,50 +113,62 @@ function download(blob, name) {
    -------------------------------------------------------------------------- */
 
 /*
- * Semicolons and a comma decimal mark: what Excel expects from a de-CH locale.
- * The BOM is what makes it open with the umlauts intact rather than as mojibake.
+ * Semicolons, and no decimal mark at all. Every figure in the file is a whole
+ * number — the pensum in points, the credit in francs — because the mark is
+ * the one thing no CSV can get right: a comma is read as text where Windows is
+ * set to German (Switzerland), which uses a point, and a point is read as
+ * text, or as a date, everywhere else that speaks German. The file used to
+ * write «2,73» for a credit in millions, and in Swiss Excel 97 of 99 credits
+ * arrived as text. The BOM is what makes it open with the umlauts intact.
  */
 const SEP = ';';
 
 /*
  * A cell a spreadsheet will not run. Quoting does not defuse a formula —
  * Excel and Calc both evaluate a quoted cell that opens with = + - or @ — so
- * such a text cell is prefixed with a tab, which they strip on display.
- * Numbers take the other branch untouched, so a negative value stays negative.
+ * such a cell is prefixed with a tab: it stays in the value, and the cell is
+ * text. Decided on the value, not on the column: only a real number goes out
+ * bare, so a negative figure stays negative and a string in a numeric column
+ * is still defused.
  */
 const RISKY = /^[=+\-@\t\r]/;
-const csvCell = (value, type) => {
+const csvCell = (value) => {
   if (value === null || value === undefined) return '';
-  let text = type === 'text' ? String(value) : String(value).replace('.', ',');
-  if (type === 'text' && RISKY.test(text)) text = '\t' + text;
+  let text = String(value);
+  const number = typeof value === 'number' && Number.isFinite(value);
+  if (!number && RISKY.test(text)) text = '\t' + text;
   return /[";\r\n\t]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
 };
+
+/** The credit in whole francs, for the one file that cannot carry a decimal. */
+const francs = mio => (typeof mio === 'number' ? Math.round(mio * 1e6) : mio);
 
 export function exportCsv() {
   const table = buildTable();
   const lines = [];
   const pad = table.columns.length - 1;
+  const head = c => (c.key === 'credit' ? t('Kredit CHF') : c.label);
+  const value = (row, c) => (c.key === 'credit' ? francs(row[c.key]) : row[c.key]);
 
-  lines.push(csvCell(table.name, 'text') + SEP.repeat(pad));
-  lines.push(csvCell(table.subtitle, 'text') + SEP.repeat(pad));
+  lines.push(csvCell(table.name) + SEP.repeat(pad));
+  lines.push(csvCell(table.subtitle) + SEP.repeat(pad));
   lines.push('');
-  lines.push(table.columns.map(c => csvCell(c.label, 'text')).join(SEP));
+  lines.push(table.columns.map(c => csvCell(head(c))).join(SEP));
 
   table.groups.forEach(group => {
-    if (group.label) lines.push(csvCell(group.label, 'text') + SEP.repeat(pad));
+    lines.push(csvCell(group.label) + SEP.repeat(pad));
     group.rows.forEach(row => {
-      lines.push(table.columns.map(c => csvCell(row[c.key], c.type)).join(SEP));
+      lines.push(table.columns.map(c => csvCell(value(row, c))).join(SEP));
     });
   });
 
   lines.push('');
-  const lead = table.columns.length - periods().length;
   table.footer.forEach(row => {
-    lines.push([csvCell(row.label, 'text'), ...Array(lead - 1).fill(''),
-      ...row.values.map(v => csvCell(v, 'pct'))].join(SEP));
+    lines.push([csvCell(row.label), ...Array(table.lead - 1).fill(''),
+      ...row.values.map(v => csvCell(v))].join(SEP));
   });
 
-  const blob = new Blob(['﻿' + lines.join('\r\n') + '\r\n'],
+  const blob = new Blob(['\uFEFF' + lines.join('\r\n') + '\r\n'],
     { type: 'text/csv;charset=utf-8' });
   return download(blob, fileName('csv'));
 }
@@ -246,7 +269,14 @@ function zip(files, iso) {
     { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
 }
 
+/*
+ * Text for an XML part: the three characters that are markup, and before that
+ * the ones XML 1.0 does not allow at all. A search typed with a stray control
+ * character — it arrives raw from the hash — went into the subtitle as it
+ * was, and Excel refused the whole workbook.
+ */
 const xmlText = s => String(s)
+  .replace(/[^\t\n\r\x20-\uD7FF\uE000-\uFFFD\u{10000}-\u{10FFFF}]/gu, '')
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 /* Element escaping leaves the quote alone, which is fine until the value is
@@ -295,24 +325,22 @@ function sheetXml(table) {
   push(cols.map((c, i) => cell(i + 1, headRow, c.label, S.head)));
 
   table.groups.forEach(group => {
-    if (group.label) {
-      const r = n + 1;
-      push([cell(1, r, group.label, S.group),
-        ...cols.slice(1).map((_, i) => cell(i + 2, r, '', S.group))]);
-    }
+    const g = n + 1;
+    push([cell(1, g, group.label, S.group),
+      ...cols.slice(1).map((_, i) => cell(i + 2, g, '', S.group))]);
     group.rows.forEach(row => {
       const r = n + 1;
       push(cols.map((c, i) => {
         const v = row[c.key];
-        if (c.type === 'text') return cell(i + 1, r, v, 0);
-        if (v === null || v === undefined) return cell(i + 1, r, '', 0);
-        return cell(i + 1, r, v, c.type === 'num' ? S.mio : S.pct, 'n');
+        if (c.type === 'text') return cell(i + 1, r, v, S.plain);
+        if (v === null || v === undefined) return cell(i + 1, r, '', S.plain);
+        return cell(i + 1, r, v, { num: S.mio, int: S.plain }[c.type] ?? S.pct, 'n');
       }));
     });
   });
 
   push([]);
-  const lead = cols.length - periods().length;
+  const lead = table.lead;
   table.footer.forEach(row => {
     const r = n + 1;
     push([

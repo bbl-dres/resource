@@ -40,26 +40,79 @@ h1, h2, h3, h4, h5, h6 { font-size: inherit; font-weight: inherit; }
 h1, h2, h3, p, dl, dd, figure { margin: 0; }
 ul, ol { margin: 0; padding: 0; list-style: none; }
 
-a { color: var(--color-text-link); text-decoration: underline; text-underline-offset: 2px; }
+a { color: var(--color-text-link); text-decoration: underline; text-underline-offset: var(--underline-offset); }
 a:hover { color: var(--color-text-link-hover); }
 
 button, input, select, textarea { font: inherit; color: inherit; }
 
 :focus-visible { outline: var(--focus-ring); outline-offset: var(--focus-ring-offset); border-radius: var(--radius-xs); }
+/* The ring changes colour where the blue one would sink into the ground: on
+   the navy header and inside a chosen segment. A menu that opens from the
+   header is a white panel again. */
+.shell-header :focus-visible, .segmented button.is-on:focus-visible { outline-color: var(--color-focus-on-dark); }
+.shell-header .dd__panel :focus-visible { outline-color: var(--color-focus); }
+/* A search field hides its own ring — the frame around it is the field — so
+   the frame has to show it. Its border was the same blue focused and not. */
+.xsearch:has(input:focus-visible), .dd__searchfield:has(input:focus-visible) {
+  outline: var(--focus-ring); outline-offset: var(--focus-ring-offset);
+}
+/* Where focus lands when the thing that had it is gone: no ring round the page. */
+#main:focus { outline: none; }
 /*
  * These sit inside something with overflow:hidden, which ate the whole 5px ring
  * box — .prow__title lost it entirely. Drawn inside, it survives the clip.
  */
 .prow__title:focus-visible,
 .sorthead:focus-visible,
-.pcell--val:focus-visible,
 .segmented button:focus-visible,
-.pgrouphead__toggle:focus-visible { outline-offset: -3px; }
+.pgrouphead__toggle:focus-visible { outline-offset: calc(-1 * var(--focus-ring-width)); }
 
 .sr-only {
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
   overflow: hidden; clip-path: inset(50%); white-space: nowrap;
 }
+
+/* --------------------------------------------------------------------------
+   Patterns — what several components share, said once. A component that
+   needs one joins the list here instead of repeating the declarations; what
+   is its own stays in its own rule further down.
+   -------------------------------------------------------------------------- */
+
+/* One line of text that ends in an ellipsis where the room runs out. A flex
+   or grid child also needs `min-width: 0` where it stands, or it never
+   shrinks below its text and there is nothing to cut. */
+.brand__text, .brand__sub, .proto-pill, .notify__title, .chip,
+.toolbar .btn > :not(.icon):not(.badge-count),
+.pgrouphead__name, .pcell--text, .pcell--title, .pcell--lead, .pcell--phase, .prow__title, .sorthead__label,
+.gantt__rowtitle, .gantt__barlabel,
+.gantt__row .gantt__col--phase, .gantt__row .gantt__col--lead, .gantt__row .gantt__col--portfolio,
+.gantt__row .gantt__col--organisation, .gantt__row .gantt__col--credit,
+.log__project, .sheet__lead, .sheet__project, .sheet__muted,
+.lane__role, .lane__person, .lane__label > .lane__project {
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* A card: a white surface lifted off the page ground by a soft shadow. */
+.kpi, .bi-card, .pblock, .table-card, .signout__card {
+  border-radius: var(--radius-lg); background: var(--color-surface); box-shadow: var(--shadow-raised);
+}
+/* The two that hold a table clip it to their corners. */
+.pblock, .table-card { overflow: hidden; }
+
+/* A name that opens a dialog — a project's, a person's: text until it is
+   pointed at, a link then. */
+button.prow__title:hover, .gantt__rowtitle:hover, .lane__label > .lane__project:hover {
+  color: var(--color-text-link); text-decoration: underline; text-underline-offset: var(--underline-offset);
+}
+
+/* The second line under a figure or a title, and the small print of a panel. */
+.kpi__note, .bi-card__sub { margin-top: var(--space-1); font-size: var(--text-sm); color: var(--color-text-muted); }
+.account__meta, .account__note, .signout__note, .signout__demo {
+  margin: 0; font-size: var(--text-sm); color: var(--color-text-muted);
+}
+
+/* The buttons at the right-hand end of a header, the shell's and the page's. */
+.shell-header__actions, .page-header__actions { display: flex; align-items: center; gap: var(--space-5); flex: 0 0 auto; }
 
 .skip-link {
   position: absolute; left: var(--space-4); top: -3rem; z-index: var(--z-toast);
@@ -75,8 +128,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 
 /* Numbers are tabular everywhere — a system rule, not an option. */
 .kpi__value, .pcell, .barlist__value, .colchart__val,
-.log__date, .log__value, .sorthead__label, .capband__cell,
-.minigrid__v { font-variant-numeric: tabular-nums; }
+.log__date, .log__value, .sorthead__label, .capband__cell { font-variant-numeric: tabular-nums; }
 
 /* ==========================================================================
    2 · Boot / error states
@@ -98,8 +150,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
   background: var(--color-surface-sunken); padding: 1px var(--space-3); border-radius: var(--radius-sm);
 }
 .boot__spinner {
-  width: 16px; height: 16px; border-radius: var(--radius-pill);
-  border: 2px solid var(--color-border-rule); border-top-color: var(--color-accent);
+  width: var(--mark-size); height: var(--mark-size); border-radius: var(--radius-pill);
+  border: var(--border-emphasis) solid var(--color-border-rule); border-top-color: var(--color-accent);
   animation: spin var(--dur-spin) linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
@@ -126,9 +178,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
   display: flex; align-items: center; gap: var(--space-6);
   color: inherit; text-decoration: none; flex: 0 1 auto; min-width: 0;
 }
-.brand__text, .brand__sub {
-  min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
+.brand__text, .brand__sub { min-width: 0; }
 .brand:hover { color: inherit; }
 .brand__text {
   display: block; font-size: var(--text-base); font-weight: var(--font-semibold);
@@ -156,10 +206,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
   border-radius: var(--radius-pill);
   background: var(--color-brand-control-bg-strong);
   font-size: var(--text-sm); font-weight: var(--font-semibold);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 
-.shell-header__actions { display: flex; align-items: center; gap: var(--space-5); flex: 0 0 auto; }
 
 .hdr-btn {
   display: inline-flex; align-items: center; gap: var(--space-3);
@@ -191,14 +239,13 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .notify + .notify { border-top: var(--border-hairline) solid var(--color-border-subtle); }
 .notify__mark { margin-top: 5px; }   /* optical centre of the title line */
 .notify__mark { flex: 0 0 auto; }
-.notify__body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.notify__body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--space-1); }
 /* Title and date share a line so the message below gets the panel's full width. */
 .notify__line {
   display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-5);
 }
 .notify__title {
   font-weight: var(--font-semibold); color: var(--color-text-strong);
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .notify__text { color: var(--color-text-secondary); font-size: var(--text-sm); white-space: normal; }
 .notify__head {
@@ -219,7 +266,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .hdr-notify__badge {
   position: absolute; top: -6px; right: -6px;
   display: inline-flex; align-items: center; justify-content: center;
-  min-width: 17px; height: 17px; padding: 0 4px;
+  min-width: var(--badge-size); height: var(--badge-size); padding: 0 var(--space-2);
   border: var(--border-emphasis) solid var(--color-brand);
   border-radius: var(--radius-pill);
   background: var(--color-accent); color: var(--color-text-inverse);
@@ -272,7 +319,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .xsearch input::-webkit-search-cancel-button { display: none; }
 .xsearch__icon { display: inline-flex; flex: 0 0 auto; color: var(--color-text-muted); }
 .xsearch__close {
-  display: inline-flex; flex: 0 0 auto; border: 0; padding: 2px; background: none;
+  display: inline-flex; flex: 0 0 auto; border: 0; padding: var(--space-1); background: none;
   color: var(--color-text-muted); cursor: pointer; border-radius: var(--radius-sm);
 }
 .xsearch__close:hover { background: var(--color-surface-sunken); color: var(--color-text-strong); }
@@ -314,12 +361,6 @@ button, input, select, textarea { font: inherit; color: inherit; }
  * but it opens from the same shell, and a page that steps in by 240px on each
  * side read as a different site.
  */
-:root[data-tab="overview"],
-:root[data-tab="people"],
-:root[data-tab="dashboard"],
-:root[data-tab="history"],
-:root[data-tab="api"],
-:root[data-tab="export"] { --layout-width: var(--layout-width-grid); }
 
 /*
  * Ground rules: navy chrome, one white strip that answers "where am I", then a
@@ -365,7 +406,6 @@ h1, h2, h3,
   font-size: var(--text-2xl); font-weight: var(--font-semibold);
   color: var(--color-text-strong);
 }
-.page-header__actions { display: flex; align-items: center; gap: var(--space-5); flex: 0 0 auto; }
 
 .tabs {
   display: flex; gap: var(--space-2); margin-top: var(--space-6);
@@ -402,17 +442,12 @@ h1, h2, h3,
 .kpi-strip {
   display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-8);
 }
-.kpi {
-  padding: var(--space-10);
-  border-radius: var(--radius-lg); background: var(--color-surface);
-  box-shadow: var(--shadow-raised);
-}
+.kpi { padding: var(--space-10); }
 .kpi__label { font-size: var(--text-base); font-weight: var(--font-regular); color: var(--color-text-secondary); }
 .kpi__value {
   margin-top: var(--space-3); font-size: var(--text-xl);
   font-weight: var(--font-semibold); color: var(--color-text-strong);
 }
-.kpi__note { margin-top: var(--space-1); font-size: var(--text-sm); color: var(--color-text-muted); }
 
 /* ==========================================================================
    5 · Buttons, switches, chips, dropdowns
@@ -505,7 +540,7 @@ h1, h2, h3,
 }
 /* A light press is invisible on the navy header, so those two darken instead. */
 .hdr-btn:active:active, .avatar[data-act]:active:active {
-  background: var(--alpha-white-25);
+  background: var(--color-brand-control-pressed);
 }
 
 /* A chosen control still answers the pointer; without this it read as dead. */
@@ -518,7 +553,7 @@ h1, h2, h3,
  */
 .iconbtn {
   display: inline-flex; align-items: center; justify-content: center;
-  width: 28px; height: 28px; padding: 0;
+  width: var(--control-height); height: var(--control-height); padding: 0;
   border: var(--border-hairline) solid transparent; border-radius: var(--radius);
   background: transparent; color: var(--color-text-secondary); cursor: pointer;
 }
@@ -529,8 +564,8 @@ h1, h2, h3,
 .linkbtn {
   min-height: var(--target-min); border: 0; padding: 0; background: none;
   color: var(--color-text-link); font-size: var(--text-base); font-weight: var(--font-semibold);
-  text-decoration: underline; text-underline-offset: 2px; cursor: pointer;
-  display: inline-flex; align-items: center; gap: 4px;
+  text-decoration: underline; text-underline-offset: var(--underline-offset); cursor: pointer;
+  display: inline-flex; align-items: center; gap: var(--space-2);
 }
 .linkbtn:hover { color: var(--color-text-link-hover); }
 
@@ -551,7 +586,7 @@ h1, h2, h3,
 
 .badge-count {
   display: inline-flex; align-items: center; justify-content: center;
-  min-width: 18px; height: 18px; padding: 0 5px;
+  min-width: var(--badge-size); height: var(--badge-size); padding: 0 5px;
   border-radius: var(--radius-pill);
   background: var(--color-text-strong); color: var(--color-text-inverse);
   font-size: var(--text-xs); font-weight: var(--font-semibold);
@@ -568,11 +603,11 @@ h1, h2, h3,
   display: inline-flex; align-items: center; gap: var(--space-3);
   height: var(--control-height-sm); padding: 0 var(--space-4) 0 var(--space-5);
   border-radius: var(--radius-pill);
-  background: var(--fill-chip); color: var(--color-text);
+  background: var(--color-chip-bg); color: var(--color-text);
   font-size: var(--text-base); font-weight: var(--font-semibold);
   /* A search term is free text and a chip repeats it. Without a ceiling one
      long unbroken token sets the width of the whole document. */
-  max-width: 22rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  max-width: 22rem;
 }
 /* The glyph stays small; the hit area is the one the design system requires. */
 .chip__x, .xsearch__close {
@@ -597,8 +632,16 @@ h1, h2, h3,
 .segmented button:hover { background: var(--color-surface); }
 /* A chosen segment still answers the pointer; without this it read as dead. */
 .segmented button.is-on:hover { filter: brightness(1.12); }
+/* Greyed with the switches beside it in a menu, and for the same reason: the
+   choice is still readable, and there is nothing for it to change just now. */
+.segmented button:disabled, .segmented button:disabled:hover {
+  background: transparent; color: var(--color-text-disabled); cursor: default; filter: none;
+}
 .segmented button.is-on {
   background: var(--color-toggle-on); color: var(--color-toggle-on-fg); font-weight: var(--font-semibold);
+}
+.segmented button.is-on:disabled, .segmented button.is-on:disabled:hover {
+  background: var(--color-neutral-bg-alt); color: var(--color-text-disabled);
 }
 
 /* Dropdowns ---------------------------------------------------------------- */
@@ -620,7 +663,7 @@ h1, h2, h3,
  */
 .dd__panel {
   position: fixed; z-index: var(--z-popover);
-  width: var(--dd-w, 244px);
+  width: var(--dd-w, var(--menu-width));
   /* never wider or taller than the window leaves room for */
   max-width: calc(100vw - 2 * var(--space-8));
   max-height: min(70vh, var(--dd-max-h, 70vh));
@@ -641,7 +684,7 @@ h1, h2, h3,
 }
 .dd__item > span:first-child:not(.dd__tickbox):not(.notify__mark) { flex: 1; min-width: 0; }
 .dd__item:hover { background: var(--color-surface-hover); }
-.dd__item.is-checked:hover { background: var(--blue-100); }
+.dd__item.is-checked:hover { background: var(--color-surface-selected-hover); }
 .dd__item.is-checked {
   background: var(--color-surface-selected); color: var(--color-text-strong);
   font-weight: var(--font-semibold);
@@ -656,7 +699,7 @@ h1, h2, h3,
 .dd__check { flex: 0 0 auto; display: inline-flex; color: var(--color-accent); }
 
 .dd__tickbox {
-  flex: 0 0 16px; width: 16px; height: 16px; box-sizing: border-box;
+  flex: 0 0 var(--mark-size); width: var(--mark-size); height: var(--mark-size); box-sizing: border-box;
   border: var(--border-control) solid var(--color-border-emphasis);
   border-radius: var(--radius-sm); background: var(--color-surface);
 }
@@ -675,10 +718,13 @@ h1, h2, h3,
   padding: 0 var(--space-5) var(--space-4); color: var(--color-text-muted);
 }
 .dd__bulk button {
-  border: 0; padding: 0; background: none;
+  min-height: var(--target-min); border: 0; padding: 0; background: none;
   color: var(--color-text-link); font-size: var(--text-sm); font-weight: var(--font-semibold); cursor: pointer;
 }
-.dd__divider { height: 1px; margin: var(--space-3) 0; background: var(--color-border); }
+.dd__divider { height: var(--border-hairline); margin: var(--space-3) 0; background: var(--color-border); }
+.dd__panel--sm { --dd-w: var(--menu-width-sm); }
+.dd__panel--lg { --dd-w: var(--menu-width-lg); }
+.dd__panel--xl { --dd-w: var(--menu-width-xl); }
 .dd__segmented { padding: 0 var(--space-5) var(--space-5); }
 
 /* Search inside a menu — the lead list has to survive a real directory. */
@@ -717,14 +763,20 @@ h1, h2, h3,
 
 .toolbar {
   display: flex; align-items: center; gap: var(--space-4);
-  flex-wrap: nowrap; min-width: 0;
+  /* The row breaks when it has to and not before. Its right-hand half — the
+     steps and «Ansicht» — is one item, so it takes the second line whole and
+     keeps to the right-hand end of it. Where that happens depends on the tab,
+     the language, an open search field and how many filters carry a count, so
+     no window width is named: there used to be three (1100, 1250 and 1300px),
+     each an estimate for one of those cases, and a fourth for the phone that
+     the second of them overrode. */
+  flex-wrap: wrap; min-width: 0;
 }
+.toolbar__end { display: flex; align-items: center; gap: inherit; flex: 0 0 auto; margin-left: auto; }
 /* Labelled triggers give up width before the row ever breaks. */
 .toolbar > .dd { min-width: 0; }
 .toolbar > .dd > .btn { max-width: 100%; }
-.toolbar .btn > :not(.icon):not(.badge-count) {
-  min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
+.toolbar .btn > :not(.icon):not(.badge-count) { min-width: 0; }
 .toolbar .btn { min-width: 0; }
 /* A filter you switch on, not a mode you enter — so it reads as a checkbox. */
 .toolbar__check {
@@ -735,10 +787,10 @@ h1, h2, h3,
   white-space: nowrap;
 }
 .toolbar__check:hover { background: var(--color-surface-hover); color: var(--color-text-strong); }
-.toolbar__check input { width: 16px; height: 16px; margin: 0; accent-color: var(--color-brand); cursor: pointer; }
+.toolbar__check input { width: var(--mark-size); height: var(--mark-size); margin: 0; accent-color: var(--color-brand); cursor: pointer; }
 .toolbar__check:has(input:checked) { color: var(--color-text-strong); font-weight: var(--font-semibold); }
 
-.toolbar__sep { width: 1px; height: var(--space-11); background: var(--color-border); }
+.toolbar__sep { width: var(--border-hairline); height: var(--space-11); background: var(--color-border); }
 .toolbar__spacer { flex: 1; }
 
 /*
@@ -786,19 +838,16 @@ h1, h2, h3,
  * content and its edges left the window. app.js keeps the scrollers in step,
  * so every card still shows the same time window.
  */
-.pblock {
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-raised);
-  overflow: hidden;
-}
 .pblock + .pgroup, .pgroup + .pblock { margin-top: var(--space-13); }
 .pblock > .prow:first-child { border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
 .pblock > .prow:last-child { border-radius: 0 0 var(--radius-lg) var(--radius-lg); border-bottom: 0; }
 .pblock > .prow:first-child > :last-child { border-top-right-radius: var(--radius-lg); }
 .pblock > .prow:last-child > :last-child { border-bottom-right-radius: var(--radius-lg); }
 
-.pgrid { position: relative; overflow-x: auto; }
+/* scroll-padding: a cell that takes focus is scrolled into view, and without
+   it «in view» included the strip under the frozen columns — a figure could
+   be typed into a field nobody could see. */
+.pgrid { position: relative; overflow-x: auto; scroll-padding-inline-start: var(--sticky-w, 0px); }
 
 /*
  * One track for the whole grid. Every row is its own CSS grid, so they only
@@ -862,7 +911,7 @@ h1, h2, h3,
 .has-more::before { opacity: 1; }
 
 .prow--head {
-  min-height: 30px; --row-bg: var(--color-surface);
+  min-height: var(--row-height-sub); --row-bg: var(--color-surface);
   border-bottom: var(--border-hairline) solid var(--color-border-rule);
   font-size: var(--text-sm); font-weight: var(--font-semibold); color: var(--color-text-secondary);
 }
@@ -911,7 +960,6 @@ h1, h2, h3,
 .pgrouphead__name {
   min-width: 0; margin: 0;
   font-size: var(--text-tab); font-weight: var(--font-semibold); color: var(--color-text-strong);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 
 .caret { display: inline-flex; color: var(--color-text-secondary); transition: transform var(--dur-fast) var(--ease); }
@@ -929,7 +977,7 @@ h1, h2, h3,
    edited, and against the hairline of the column before it. */
 .pcell--text, .pcell--title, .pcell--lead, .pcell--phase {
   padding-inline: var(--space-4);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;
+  display: block;
   line-height: var(--row-height);
 }
 .pcell--id { padding-inline: var(--space-4); color: var(--color-text-muted); font-size: var(--text-sm); }
@@ -939,32 +987,13 @@ h1, h2, h3,
   /* The darker ink already makes the name the row's anchor; the weight on top
      of it only added mass to 111 rows. Its neighbours stay secondary. */
   color: var(--color-text-strong); font-size: var(--text-base);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-/* Text, not a control, in both tables: the row it sits in is the switch,
-   and a link inside it promised a second thing a click would do. */
+/* A project's name on Planung and a person's on Personen are links to a small
+   dialog, and look like one when pointed at. */
+button.prow__title { cursor: pointer; }
 .pcell--phase { color: var(--color-text-secondary); }
 .pcell--lead { color: var(--color-text); }
 .pcell--lead.is-none { color: var(--color-text-muted); }
-.leadbtn {
-  display: block; width: 100%; min-height: var(--target-min);
-  border: 0; padding: 0; background: none; text-align: left;
-  color: inherit; font: inherit; cursor: pointer;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-/* Editable at rest looks like any other value; the pointer and the hover say
-   it is a control, which is as much as the reader asked to be told. */
-.leadbtn:hover { color: var(--color-text-link); text-decoration: underline solid; text-underline-offset: 3px; }
-/* Block-level, so it is exactly one line box tall and no row grows for it. */
-.lead-open {
-  display: flex; align-items: center; gap: var(--space-3);
-  font-style: italic;
-}
-.lead-open::before {
-  content: ""; flex: 0 0 auto; width: 6px; height: 6px;
-  border-radius: var(--radius-pill);
-  border: 1.5px solid var(--color-warn-solid);
-}
 /* The same right padding every other column has, so a figure sits at the same
    distance from its column edge in both grids. */
 .pcell--credit {
@@ -1012,9 +1041,10 @@ h1, h2, h3,
    dashboard draws the same cell and is read-only. */
 .pgrid--editable .pcell--val:hover { filter: brightness(.93); }
 
-.pcell--val.is-edited { box-shadow: inset 0 -3px 0 var(--color-accent); }
 
-button.pcell--val { cursor: pointer; }
+/* A quarter of a row that folds takes the row's pointer; it is no control of
+   its own — the caret in front of the row is. */
+.prow--project > .pcell--val { cursor: pointer; }
 
 .heat-null { background: var(--heat-null-bg); color: var(--heat-null-fg); }
 .heat-neg  { background: var(--heat-neg-bg);  color: var(--heat-neg-fg); }
@@ -1052,7 +1082,7 @@ button.pcell--val { cursor: pointer; }
   border-top: var(--border-hairline) solid var(--color-border-rule);
   font-size: var(--text-base); font-weight: var(--font-semibold); color: var(--color-text-strong);
 }
-.prow--foot { min-height: 30px; font-size: var(--text-sm); color: var(--color-text-secondary); }
+.prow--foot { min-height: var(--row-height-sub); font-size: var(--text-sm); color: var(--color-text-secondary); }
 /*
  * A group sum closes its own card, so it must not read as loudly as the total
  * that closes the table. Same structure, one step quieter, and no rule above
@@ -1106,10 +1136,10 @@ button.pcell--val { cursor: pointer; }
 }
 .pcell--num .sorthead { justify-content: flex-end; }
 .pcell--period .sorthead { justify-content: center; }
-.sorthead__label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sorthead__label { min-width: 0; }
 .sorthead__dir { flex: 0 0 auto; color: var(--color-accent); font-size: var(--text-xs); }
 .sorthead__dir:not(:empty) { margin-left: var(--space-2); }
-.sorthead:hover .sorthead__label { color: var(--color-text-strong); text-decoration: underline; text-underline-offset: 3px; }
+.sorthead:hover .sorthead__label { color: var(--color-text-strong); text-decoration: underline; text-underline-offset: var(--underline-offset); }
 .prow--head .is-sorted { color: var(--color-text-strong); }
 
 /* One legend, shared by the screen and the print sheet. */
@@ -1135,8 +1165,8 @@ button.pcell--val { cursor: pointer; }
 .legend dd { display: inline-flex; align-items: center; gap: var(--space-6); flex-wrap: wrap; margin: 0; }
 .legend__item { display: inline-flex; align-items: center; gap: var(--space-3); }
 .legend__swatch {
-  width: 11px; height: 11px; flex: 0 0 auto;
-  border: var(--border-hairline) solid var(--color-border-rule);
+  width: var(--diamond-size); height: var(--diamond-size); flex: 0 0 auto;
+  border: var(--border-hairline) solid var(--color-border-emphasis);
 }
 .legend__swatch.is-nolead { background: var(--pattern-no-lead); border-color: var(--color-warn-solid); }
 .legend__swatch.is-delay { background: var(--pattern-delay); border-color: var(--color-danger-solid); }
@@ -1182,33 +1212,13 @@ button.pcell--val { cursor: pointer; }
   font-size: var(--text-base); font-weight: var(--font-semibold); color: var(--color-text-strong);
 }
 
-.minigrid { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: var(--space-2); }
-.minigrid__col { display: flex; flex-direction: column; gap: var(--space-2); text-align: center; }
-.minigrid__q { font-size: var(--text-xs); font-weight: var(--font-semibold); color: var(--color-text-muted); }
-/* Live text, so it clears AA; --color-text-subtle is 2.54:1 and belongs to
-   disabled items, which the contrast rules exempt. */
-.minigrid__q span { color: var(--color-text-muted); font-weight: var(--font-regular); }
-.minigrid__v {
-  display: flex; align-items: center; justify-content: center; height: var(--control-height-lg);
-  border: var(--border-hairline) solid var(--color-border);
-  border-radius: var(--radius-sm);
-  font-size: var(--text-base); font-weight: var(--font-semibold);
-}
-
-.modal__log li {
-  display: grid; grid-template-columns: 100px 120px minmax(0, 1fr) 130px;
-  gap: var(--space-5); padding: var(--space-3) 0;
-  border-top: var(--border-hairline) solid var(--color-border-subtle);
-  font-size: var(--text-sm); color: var(--color-text-secondary);
-}
-.modal__log li:first-child { border-top: 0; }
 .modal__foot {
   display: flex; align-items: center; justify-content: flex-end; gap: var(--space-4);
   padding: var(--space-8) var(--space-11);
   background: var(--color-surface-frame);
 }
 
-/* Project modal — the five facts the wireframe fixes in order. */
+/* The facts of a dialog — a project's four, a phase's, a gate's. */
 .facts { padding: var(--space-4) var(--space-11) var(--space-8); }
 .facts__row {
   display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: var(--space-8);
@@ -1231,12 +1241,12 @@ button.pcell--val { cursor: pointer; }
 .share { display: flex; gap: var(--space-4); padding: var(--space-8) var(--space-11) var(--space-11); }
 .share__field { flex: 1; min-width: 0; }
 .share__field input {
-  width: 100%; height: var(--control-height-xl); padding: 0 var(--space-6);
+  width: 100%; height: var(--control-height-lg); padding: 0 var(--space-6);
   border: var(--border-hairline) solid var(--color-border-strong); border-radius: var(--radius);
   background: var(--color-surface-frame); color: var(--color-text-secondary);
   font-family: var(--font-mono); font-size: var(--text-sm);
 }
-.share .btn { height: var(--control-height-xl); flex: 0 0 auto; }
+.share .btn { flex: 0 0 auto; }
 
 .modal__meta-line { margin-top: var(--space-2); font-size: var(--text-base); color: var(--color-text-muted); }
 
@@ -1251,8 +1261,6 @@ button.pcell--val { cursor: pointer; }
    ========================================================================== */
 
 .gantt {
-  /* --gantt-lead comes from the view: it is the width of whichever columns the
-     Attribute menu has switched on, and the overlay and the min-width follow it. */
   display: flex; flex-direction: column; gap: var(--space-13);
 }
 
@@ -1363,10 +1371,8 @@ button.pcell--val { cursor: pointer; }
   display: block; min-width: 0; flex: 1; min-height: var(--target-min);
   border: 0; padding: 0; background: none; text-align: left;
   font-size: var(--text-base); color: var(--color-text-strong);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   cursor: pointer;
 }
-.gantt__rowtitle:hover { color: var(--color-text-link); text-decoration: underline; text-underline-offset: 2px; }
 .gantt__row .gantt__col--id {
   font-size: var(--text-sm); color: var(--color-text-muted);
   font-variant-numeric: tabular-nums;
@@ -1377,7 +1383,7 @@ button.pcell--val { cursor: pointer; }
 .gantt__row .gantt__col--organisation,
 .gantt__row .gantt__col--credit {
   font-size: var(--text-base); color: var(--color-text-secondary);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;
+  display: block;
   line-height: var(--row-height);
 }
 
@@ -1413,12 +1419,11 @@ button.pcell--val { cursor: pointer; }
 .gantt__bar { cursor: pointer; text-align: left; transition: filter var(--dur-fast) var(--ease); }
 .gantt__bar:hover { filter: brightness(.95); }
 .gantt__bar:active { filter: brightness(.92); }
-.gantt__bar:focus-visible { outline-offset: -3px; }
+.gantt__bar:focus-visible { outline-offset: calc(-1 * var(--focus-ring-width)); }
 
 .gantt__bar.is-first { border-left: var(--border-hairline) solid var(--color-bar-border); border-radius: var(--radius-sm) 0 0 var(--radius-sm); }
 .gantt__bar.is-last { border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
 .gantt__bar.is-first.is-last { border-radius: var(--radius-sm); }
-.gantt__barlabel { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .gantt__bar.is-delay {
   background: var(--pattern-delay); border-color: var(--color-danger-solid);
@@ -1447,13 +1452,13 @@ button.pcell--val { cursor: pointer; }
 .gantt__gate .diamond { transition: transform var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease); }
 .gantt__gate:hover .diamond { transform: rotate(45deg) scale(1.25); }
 .gantt__gate:active .diamond { transform: rotate(45deg) scale(1.1); }
-.gantt__gate:focus-visible { outline-offset: -3px; }
+.gantt__gate:focus-visible { outline-offset: calc(-1 * var(--focus-ring-width)); }
 
 .gantt__more { display: inline-flex; color: var(--color-text-muted); }
 
 .gantt__rail {
   position: absolute; top: 50%; z-index: var(--z-base);
-  height: 1px; border-top: 2px dashed var(--color-border-rule);
+  height: 1px; border-top: var(--border-emphasis) dashed var(--color-border-rule);
 }
 .gantt__railcaption {
   position: absolute; top: 50%; transform: translateY(-50%); z-index: var(--z-raised);
@@ -1465,7 +1470,7 @@ button.pcell--val { cursor: pointer; }
 }
 
 .diamond {
-  flex: 0 0 auto; width: 11px; height: 11px;
+  flex: 0 0 auto; width: var(--diamond-size); height: var(--diamond-size);
   background: var(--color-milestone); transform: rotate(45deg);
 }
 
@@ -1484,14 +1489,11 @@ button.pcell--val { cursor: pointer; }
 .bi-card {
   display: flex; flex-direction: column; gap: var(--space-7);
   padding: var(--space-10);
-  border-radius: var(--radius-lg); background: var(--color-surface);
-  box-shadow: var(--shadow-raised);
 }
 .bi-card--full { grid-column: 1 / -1; }
 .bi-card__head { display: flex; align-items: flex-start; gap: var(--space-6); }
 .bi-card__head > div:first-child { flex: 1; min-width: 0; }
 .bi-card__title { font-size: var(--text-sub); font-weight: var(--font-semibold); color: var(--color-text-strong); }
-.bi-card__sub { margin-top: var(--space-1); font-size: var(--text-sm); color: var(--color-text-muted); }
 .bi-card__tools { margin-left: auto; }
 .bi-card__section { padding-top: var(--space-8); border-top: var(--border-hairline) solid var(--color-border-subtle); }
 .bi-card__subtitle { font-size: var(--text-base); font-weight: var(--font-semibold); color: var(--color-text-strong); }
@@ -1523,7 +1525,7 @@ button.pcell--val { cursor: pointer; }
     + (var(--chart-cols, 8) - 1) * var(--space-4));
 }
 .colchart__plot { position: relative; height: var(--chart-h, 150px); }
-.colchart__ref { position: absolute; left: 0; right: 0; border-top: 1px dashed var(--color-neutral-solid); }
+.colchart__ref { position: absolute; left: 0; right: 0; border-top: var(--border-hairline) dashed var(--color-border-emphasis); }
 /*
  * The label of the reference line sits at the right edge of what is on
  * screen, not of the track: the track is twice the card, and a label at its
@@ -1545,7 +1547,7 @@ button.pcell--val { cursor: pointer; }
 .colchart__grid { display: grid; grid-auto-columns: minmax(var(--chart-col), 1fr); grid-auto-flow: column; gap: var(--space-4); height: 100%; align-items: end; }
 .colchart__col { display: flex; flex-direction: column; justify-content: flex-end; gap: var(--space-2); height: 100%; }
 .colchart__val { font-size: var(--text-xs); font-weight: var(--font-semibold); text-align: center; }
-.colchart__bar { border-radius: var(--radius-sm) var(--radius-sm) 0 0; border: 1px solid; }
+.colchart__bar { border-radius: var(--radius-sm) var(--radius-sm) 0 0; border: var(--border-hairline) solid; }
 .colchart__axis { display: grid; grid-auto-columns: minmax(var(--chart-col), 1fr); grid-auto-flow: column; gap: var(--space-4); font-size: var(--text-xs); color: var(--color-text-secondary); text-align: center; }
 /* A value belongs on one line; the column is sized so that it fits. */
 .colchart__val { white-space: nowrap; }
@@ -1583,10 +1585,6 @@ button.pcell--val { cursor: pointer; }
    12 · Change log
    ========================================================================== */
 
-.table-card {
-  border-radius: var(--radius-lg); background: var(--color-surface); overflow: hidden;
-  box-shadow: var(--shadow-raised);
-}
 
 .log {
   display: grid; align-items: center; gap: var(--space-6);
@@ -1606,7 +1604,7 @@ button.pcell--val { cursor: pointer; }
 .log:hover:not(.log--head) { background: var(--color-surface-hover); }
 .log--empty { display: block; padding: var(--space-11); text-align: center; color: var(--color-text-muted); }
 .log__date { color: var(--color-text-secondary); }
-.log__project { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.log__project { min-width: 0; }
 .log__project .linkbtn { font-weight: var(--font-regular); text-align: left; }
 .log__change { color: var(--color-text-secondary); }
 .log__value { font-weight: var(--font-semibold); color: var(--color-text-strong); }
@@ -1782,8 +1780,7 @@ button.pcell--val { cursor: pointer; }
   --bar-height: 18px;
   --grid-col-id: 46px;
   --grid-col-title: 190px;
-  --gantt-lead: calc(var(--grid-col-id) + var(--grid-col-title));
-  margin-top: 6px;
+  margin-top: var(--space-3);
 }
 .sheet--landscape .sheet__gantt { --grid-col-title: 240px; }
 
@@ -1791,15 +1788,20 @@ button.pcell--val { cursor: pointer; }
 .sheet__gantt .gantt__track { grid-template-rows: 24px; }
 .sheet__gantt .gantt__axis { min-height: 24px; }
 .sheet__gantt .gantt__quarters { font-size: var(--sheet-text); }
-.sheet__gantt .gantt__axislabel { font-size: var(--sheet-text); padding-inline: 6px; }
-.sheet__gantt .gantt__rowlabel { padding: 0 6px; }
+.sheet__gantt .gantt__axislabel { font-size: var(--sheet-text); padding-inline: var(--space-3); }
+.sheet__gantt .gantt__rowlabel { padding: 0 var(--space-3); }
 .sheet__gantt .gantt__col--id { font-size: var(--sheet-text); }
+/* Every attribute column at the sheet's size and inside the sheet's row. They
+   kept the screen's 38px line, so switching one on — Bearbeitende is enough —
+   made each row 39px where the page budget counts 26, and an A4 sheet grew
+   70px past the paper. */
+.sheet__gantt .gantt__row .gantt__rowlabel { font-size: var(--sheet-text); line-height: 24px; }
 .sheet__gantt .gantt__rowtitle { font-size: var(--sheet-text); }
 .sheet__gantt .gantt__barlabel { font-size: var(--sheet-text); }
 .sheet__gantt .gantt__track { align-items: center; }
 
 /* The plan closes on the same figure the screen shows beneath it. */
-.sheet__gantt .gantt__row--load { border-top: 1px solid var(--color-border-rule); margin-top: 4px; }
+.sheet__gantt .gantt__row--load { border-top: var(--border-hairline) solid var(--color-border-rule); margin-top: var(--space-2); }
 .sheet__gantt .gantt__track--load {
   display: grid; grid-template-columns: repeat(var(--gantt-cols, 8), minmax(0, 1fr));
 }
@@ -1811,23 +1813,23 @@ button.pcell--val { cursor: pointer; }
  * Not grid rows here: on the bar plan the heading and the continuation note
  * span the whole sheet rather than sitting in the first column.
  */
-.sheet__gantt .sheet__row--more { display: block; padding: 4px 6px 0; }
+.sheet__gantt .sheet__row--more { display: block; padding: var(--space-2) var(--space-3) 0; }
 
 /* Not a grid row here: the bar plan's heading spans the whole sheet. */
 .sheet__gantt .sheet__grouphead {
-  display: flex; align-items: baseline; gap: 8px;
-  padding: 5px 6px; margin-top: var(--space-8);
+  display: flex; align-items: baseline; gap: var(--space-4);
+  padding: 5px var(--space-3); margin-top: var(--space-8);
   background: var(--color-surface-frame);
   font-size: var(--sheet-lead); font-weight: var(--font-semibold);
 }
 .sheet__gantt .sheet__grouphead:first-child { margin-top: 0; }
 
 .sheet__head {
-  display: flex; align-items: flex-start; justify-content: space-between; gap: 20px;
-  border-bottom: 2px solid var(--color-text-strong); padding-bottom: 12px;
+  display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-10);
+  border-bottom: var(--border-emphasis) solid var(--color-text-strong); padding-bottom: var(--space-6);
 }
-.sheet__sender { display: flex; align-items: flex-start; gap: 12px; flex: 0 0 auto; }
-.sheet__sender img { display: block; margin-top: 2px; }
+.sheet__sender { display: flex; align-items: flex-start; gap: var(--space-6); flex: 0 0 auto; }
+.sheet__sender img { display: block; margin-top: var(--space-1); }
 .sheet__sender div { font-size: var(--sheet-lead); line-height: var(--leading-normal); }
 .sheet__sender span { display: block; white-space: nowrap; }
 .sheet__sender .is-muted { color: var(--color-text-muted); }
@@ -1840,7 +1842,7 @@ button.pcell--val { cursor: pointer; }
   white-space: nowrap;
 }
 
-.sheet__table { margin-top: 14px; }
+.sheet__table { margin-top: var(--space-7); }
 .sheet__row {
   display: grid; grid-template-columns: var(--sheet-cols);
   align-items: center; min-height: 22px;
@@ -1848,7 +1850,7 @@ button.pcell--val { cursor: pointer; }
   font-size: var(--text-xs);
 }
 .sheet__row--head {
-  min-height: var(--target-min); border-bottom: 1px solid var(--color-border-rule);
+  min-height: var(--target-min); border-bottom: var(--border-hairline) solid var(--color-border-rule);
   font-size: var(--sheet-text); font-weight: var(--font-semibold); color: var(--color-text-muted);
 }
 /*
@@ -1858,25 +1860,28 @@ button.pcell--val { cursor: pointer; }
  * the table's head agree with it.
  */
 .sheet__row--head > * { align-self: stretch; display: flex; align-items: center; }
+/* One line each, whatever is switched on. With six columns on an A4 portrait
+   sheet «Projekt-ID» broke into two lines and so did a group's credit sum —
+   11px the row budget does not know about, and twenty of fifty-one pages
+   came out taller than the paper. */
+.sheet__row--head > *, .sheet__row .sheet__num { white-space: nowrap; }
 .sheet__row--head > .sheet__num { justify-content: flex-end; }
 .sheet__row--head > .sheet__period { justify-content: center; }
-.sheet__id { padding-left: 8px; color: var(--color-text-muted); font-variant-numeric: tabular-nums; }
+.sheet__id { padding-left: var(--space-4); color: var(--color-text-muted); font-variant-numeric: tabular-nums; }
 /*
  * 162 of 222 titles were clipped with no tooltip and no way back — on paper an
  * ellipsis is permanent. Two lines cost some rows per sheet and lose nothing.
  */
 /* Only the title wraps; the rest clip, so no column can spill into the next. */
-.sheet__lead { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .sheet__project {
   padding-right: var(--space-3);
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .sheet__muted {
   color: var(--color-text-secondary);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 6px;
+  padding-right: var(--space-3);
 }
-.sheet__num { text-align: right; padding-right: 6px; font-variant-numeric: tabular-nums; }
+.sheet__num { text-align: right; padding-right: var(--space-3); font-variant-numeric: tabular-nums; }
 /* Same rule as on screen: the time axis is centred, the master data is not. */
 .sheet__period { text-align: center; padding-right: 0; }
 /*
@@ -1893,7 +1898,7 @@ button.pcell--val { cursor: pointer; }
 }
 .sheet__cell {
   height: 26px; display: flex; align-items: center; justify-content: center;
-  padding-inline: 4px; border-left: var(--border-hairline) solid var(--color-border-subtle);
+  padding-inline: var(--space-2); border-left: var(--border-hairline) solid var(--color-border-subtle);
   font-variant-numeric: tabular-nums;
 }
 .sheet__row.is-unassigned { box-shadow: var(--rail-warn); }
@@ -1916,15 +1921,15 @@ button.pcell--val { cursor: pointer; }
 .sheet .pband .gantt__gate { width: 12px; height: 12px; }
 .sheet .pband .diamond { width: 8px; height: 8px; }
 .sheet__row--more { border-bottom: 0; font-size: var(--sheet-text); color: var(--color-text-muted); font-style: italic; }
-.sheet__row--more span { padding-left: 8px; }
+.sheet__row--more span { padding-left: var(--space-4); }
 .sheet__row--sum, .sheet__row--load {
-  border-top: 1px solid var(--color-border-rule); border-bottom: 0;
+  border-top: var(--border-hairline) solid var(--color-border-rule); border-bottom: 0;
   font-weight: var(--font-semibold);
 }
 .sheet__row--foot { border-bottom: 0; color: var(--color-text-secondary); }
 .sheet__row--sum > span:first-child,
 .sheet__row--foot > span:first-child,
-.sheet__row--load > span:first-child { padding-left: 8px; }
+.sheet__row--load > span:first-child { padding-left: var(--space-4); }
 .sheet__row--load .is-neutral { color: var(--color-text-secondary); }
 .sheet__row--load .is-danger { color: var(--color-danger-fg); }
 .sheet__row--load .is-warn { color: var(--color-warn-fg); }
@@ -1948,36 +1953,36 @@ button.pcell--val { cursor: pointer; }
 }
 
 /* The closing sheet is prose, so it gets a measure rather than a grid. */
-.sheet__prose { flex: 1; display: grid; gap: 20px; align-content: start; padding-top: 14px; }
-.sheet--landscape .sheet__prose { grid-template-columns: 1fr 1fr; column-gap: 32px; }
+.sheet__prose { flex: 1; display: grid; gap: var(--space-10); align-content: start; padding-top: var(--space-7); }
+.sheet--landscape .sheet__prose { grid-template-columns: 1fr 1fr; column-gap: var(--space-13); }
 .sheet__prose h3 {
-  margin: 0 0 6px; font-size: var(--text-xs); font-weight: var(--font-bold);
+  margin: 0 0 var(--space-3); font-size: var(--text-xs); font-weight: var(--font-bold);
   color: var(--color-text-strong);
 }
 .sheet__prose dl {
-  display: grid; grid-template-columns: 132px minmax(0, 1fr); gap: 4px 12px;
+  display: grid; grid-template-columns: 132px minmax(0, 1fr); gap: var(--space-2) var(--space-6);
   font-size: var(--text-xs); line-height: 1.45;
 }
 .sheet__prose dt { font-weight: var(--font-semibold); color: var(--color-text-strong); }
 .sheet__prose dd { margin: 0; color: var(--color-text-secondary); }
 /* On every sheet now, so it needs its own air above the footer rule. */
 .sheet__disclaimer {
-  margin: 0 0 10px; padding-top: 10px;
+  margin: 0 0 var(--space-5); padding-top: var(--space-5);
   font-size: var(--sheet-text); font-style: italic; color: var(--color-text-muted);
 }
 
 /* The sheet's own scale for the same structure. */
 .legend--sheet {
-  margin-top: 14px; padding: var(--space-4) var(--space-6);
+  margin-top: var(--space-7); padding: var(--space-4) var(--space-6);
   gap: 3px var(--space-7); font-size: var(--sheet-text);
 }
 .legend--sheet dd { gap: var(--space-7); }
 .legend--sheet .legend__swatch { width: 9px; height: 9px; }
 
 .sheet__foot {
-  display: flex; align-items: center; justify-content: space-between; gap: 16px;
-  margin-top: auto; padding-top: 8px;
-  border-top: 1px solid var(--color-border-rule);
+  display: flex; align-items: center; justify-content: space-between; gap: var(--space-8);
+  margin-top: auto; padding-top: var(--space-4);
+  border-top: var(--border-hairline) solid var(--color-border-rule);
   font-size: var(--sheet-text); color: var(--color-text-muted);
 }
 
@@ -2007,38 +2012,30 @@ button.pcell--val { cursor: pointer; }
    16 · Responsive
    The mockup is designed at 1440px. Below that the order of degradation is:
    fewer quarters before narrower columns, then optional columns, then scroll.
-   ========================================================================== */
 
-@media (max-width: 1100px) {
-  .kpi-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  /* Below the planning widths the row may break rather than overflow. */
-  .toolbar { flex-wrap: wrap; }
-}
+   Four widths, each named for what changes there, and one height:
+
+     ≤ 1440   the small laptop — every band gives back what it did not need
+     ≤ 1024   a tablet on its side — the page's padding, one card per row
+     ≤  820   a tablet held upright — the tab line stacks
+     ≤  760   a phone — one column of everything
+     ≤  460 high, landscape — a phone on its side: the header shrinks
+
+   Anything else adapts to its content rather than to the window: the toolbar
+   wraps where it runs out of room, and the two grids drop the columns that
+   no longer fit (leadLayout() in columns.js, personLayout() in
+   views-analysis.js), because how much room a table needs depends on which
+   columns are on, not on how wide a screen is.
+   ========================================================================== */
 
 @media (max-width: 1024px) {
   .wrap { padding-inline: var(--space-8); }
+  /* Two and two: three tiles in a row leave the fourth alone on a line. */
+  .kpi-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .bi-grid { grid-template-columns: minmax(0, 1fr); }
   .proto-pill { display: none; }
   /* The pull cancels Swagger's own 20px padding; the rail is 16px here. */
   #swagger { margin-inline: calc(-1 * var(--space-8)); }
-}
-
-/*
- * On a phone the nine toolbar controls wrapped into six rows: 202px of chrome,
- * and the first data row landed at 95 % of the window height — you scrolled a
- * whole screen to see a number. One row that scrolls sideways keeps every
- * control reachable and gives the table back most of the screen.
- */
-@media (max-width: 700px) {
-  .toolbar {
-    flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none;
-    scroll-padding-inline: var(--space-8);
-    margin-inline: calc(-1 * var(--space-8)); padding-inline: var(--space-8);
-  }
-  .toolbar::-webkit-scrollbar { width: 0; height: 0; }
-  .toolbar > * { flex: 0 0 auto; }
-  .toolbar .btn > :not(.icon):not(.badge-count) { overflow: visible; }
-
 }
 
 @media (max-width: 760px) {
@@ -2048,24 +2045,26 @@ button.pcell--val { cursor: pointer; }
   .log { grid-template-columns: minmax(0, 1fr); gap: var(--space-2); }
   .log--head { display: none; }
   /* The modal's twin of the .chg/.log reflow, missed when that one was written. */
-  .modal__log li, .facts__row { grid-template-columns: minmax(0, 1fr); gap: var(--space-2); }
+  .facts__row { grid-template-columns: minmax(0, 1fr); gap: var(--space-2); }
 }
 
 /*
- * Below 760 the page actions wrap; on a phone two stacked rows cost 66px of an
- * 844px screen. Declared after that block so it wins on source order.
+ * The tab line. Tabs and page actions stand side by side while both fit —
+ * 375 and 349px in German, 740 with the gap. Below that the actions kept
+ * their width and the tabs got what was left: one tab cut off on a tablet
+ * held upright, and nothing at all on a phone, where all four tabs were in
+ * the page and none could be seen, with the page itself 397px wide in a
+ * 390px window. Stacked, the tabs have the line to themselves and still
+ * scroll if four of them are wider than the phone.
  */
-@media (max-width: 700px) {
-  .page-header__actions {
-    /* The row above turns into a column with align-items: flex-start, so this
-       box sizes to its content and overflow-x never fires — it grew 4px past
-       the window instead of scrolling inside it. */
-    align-self: stretch;
-    flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none;
-    margin-inline: calc(-1 * var(--space-8)); padding-inline: var(--space-8);
-  }
-  .page-header__actions::-webkit-scrollbar { width: 0; height: 0; }
-  .page-header__actions > * { flex: 0 0 auto; }
+@media (max-width: 820px) {
+  .tabline { flex-direction: column; align-items: stretch; gap: 0; box-shadow: none; }
+  .tabline .tabs { box-shadow: inset 0 -1px 0 var(--color-border); }
+  .tabline .page-header__actions { flex-wrap: wrap; padding-block: var(--space-4) 0; }
+  .tabline .page-header__actions .btn { padding-inline: var(--space-5); }
+  /* The paper's size and its orientation break onto two lines rather than
+     push the page 37px past a phone's edge; so does the log's pager. */
+  .sheetbar__paper, .log__pager { flex-wrap: wrap; }
 }
 
 /*
@@ -2113,6 +2112,27 @@ button.pcell--val { cursor: pointer; }
   .mount { gap: 0; }
 }
 
+/*
+ * Windows contrast themes. The browser replaces every colour with the
+ * theme's and drops backgrounds and shadows — and half of this stylesheet's
+ * states are a background or a shadow: the ring round the cell being typed
+ * in, a switch that is on, a ticked box, a milestone, the bar of a chart.
+ * Each gets an outline or a system colour to stand on.
+ */
+@media (forced-colors: active) {
+  .pcell--lanev:focus-within { outline: var(--border-emphasis) solid Highlight; outline-offset: calc(-1 * var(--border-emphasis)); }
+  .switch { border: var(--border-hairline) solid ButtonText; }
+  .switch__knob { background: ButtonText; }
+  .switch.is-on { background: Highlight; }
+  .switch.is-on .switch__knob { background: HighlightText; }
+  .dd__tickbox.is-on, .dd__item.is-checked .dd__tickbox { forced-color-adjust: none; background: Highlight; border-color: Highlight; }
+  .diamond, .barlist__fill, .colchart__bar { background: CanvasText; }
+  .gantt__bar { border: var(--border-hairline) solid CanvasText; }
+  .tabs__tab.is-active { border-bottom-color: Highlight; }
+  .segmented button.is-on { forced-color-adjust: none; background: Highlight; color: HighlightText; }
+  .pcell--val[class*="heat-"], .pcell--lanev { border: 0; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
@@ -2131,11 +2151,7 @@ button.pcell--val { cursor: pointer; }
   padding: var(--space-4) var(--space-5) var(--space-3);
 }
 .account__name { margin: 0; font-weight: var(--font-semibold); color: var(--color-text-strong); }
-.account__meta, .account__note {
-  margin: 0; font-size: var(--text-sm); color: var(--color-text-muted);
-}
 .account__note { padding: 0 var(--space-5) var(--space-4); }
-.dd__sep { height: 1px; margin: var(--space-2) 0; background: var(--color-border); }
 
 /* ---- the settings dialog ------------------------------------------------ */
 
@@ -2171,13 +2187,13 @@ button.pcell--val { cursor: pointer; }
 .settings__row:hover { background: var(--color-surface-hover); }
 /* The inline margins are the browser's own — 4px on a checkbox, 5px on a radio —
    and they push the control off the gutter the rest of the block sits on. */
-.settings__row input { margin: 3px 0 0; width: 16px; height: 16px; flex: 0 0 auto; accent-color: var(--color-accent); }
-.settings__row > span { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.settings__row input { margin: 3px 0 0; width: var(--mark-size); height: var(--mark-size); flex: 0 0 auto; accent-color: var(--color-accent); }
+.settings__row > span { display: flex; flex-direction: column; gap: var(--space-1); min-width: 0; }
 .settings__label { color: var(--color-text-strong); }
 .settings__note { font-size: var(--text-sm); color: var(--color-text-muted); }
 .settings__note--lead { margin: 0 0 var(--space-2); }
 .settings__row--inline > span { flex-direction: row; align-items: baseline; gap: var(--space-4); }
-.settings__langs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px; }
+.settings__langs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-1); }
 
 .settings__eiam {
   margin: 0; padding: var(--space-5);
@@ -2192,15 +2208,12 @@ button.pcell--val { cursor: pointer; }
   display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-6);
   max-width: 52ch; padding: var(--space-10);
   border: var(--border-hairline) solid var(--color-border);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface); box-shadow: var(--shadow-raised);
 }
 .signout__title { margin: 0; font-size: var(--text-2xl); color: var(--color-text-strong); }
 .signout__lead { margin: 0; color: var(--color-text-body); }
-.signout__note, .signout__demo { margin: 0; font-size: var(--text-sm); color: var(--color-text-muted); }
 .signout__demo { font-style: italic; }
 
-@media (max-width: 700px) {
+@media (max-width: 760px) {
   .settings__langs { grid-template-columns: minmax(0, 1fr); }
   .signout { padding: var(--space-8) var(--space-6); }
   .signout__card { padding: var(--space-8); }
@@ -2280,6 +2293,9 @@ button.pcell--val { cursor: pointer; }
    Termine tab. */
 .grid-card.is-values-off .pband { pointer-events: auto; }
 
+/* The strip is 14px tall and a pointer target has to be 24: the bar answers
+   five pixels above and below what it draws. */
+.pband .gantt__bar::before { content: ''; position: absolute; inset: -5px 0; }
 .pband .gantt__bar {
   height: var(--band-h);
   padding-inline: var(--band-lab-pad);
@@ -2351,21 +2367,19 @@ button.pcell--val { cursor: pointer; }
 .pcell--caret { padding-right: 0; }
 .rowcaret {
   display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto;
-  width: 22px; height: 22px;
+  width: var(--target-min); height: var(--target-min);
   border: 0; border-radius: var(--radius-sm); background: none;
   color: var(--color-text-secondary); cursor: pointer;
 }
 .rowcaret:hover { background: var(--color-surface-hover); color: var(--color-text-strong); }
 
-/* The folded row's «Bearbeitende» cell: one name, and how many more. The
-   name gives way before the count does. */
-.leadcell { display: flex; align-items: baseline; gap: var(--space-3); min-width: 0; }
-.leadcell__name { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-.leadcell__more { flex: 0 0 auto; color: var(--color-text-muted); font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
-
 /* The link that folds a whole group, beside its heading. */
 .pgrouphead { display: flex; align-items: center; gap: var(--space-5); }
-.pgrouphead__toggle { flex: 1; min-width: 0; width: auto; }
+/* The heading is the group's name and nothing else: «Alle aufklappen» stands
+   beside it, not inside it, or every list of headings reads it out as part
+   of the name. */
+.pgrouphead__h { flex: 1; min-width: 0; }
+.pgrouphead__toggle { min-width: 0; }
 .pgroup__expand {
   display: inline-flex; align-items: center; gap: var(--space-2); flex: 0 0 auto;
   font-size: var(--text-base); white-space: nowrap;
@@ -2375,7 +2389,7 @@ button.pcell--val { cursor: pointer; }
 /* A row under a project: a step shorter than the project's, on a ground a
    shade off it so the block reads as belonging to the row above. No hover
    fill — the cells answer the pointer, not the row. */
-.prow--lane { min-height: 30px; --row-bg: var(--color-surface-sunken); }
+.prow--lane { min-height: var(--row-height-sub); --row-bg: var(--color-surface-sunken); }
 .prow--lane:hover { --row-bg: var(--color-surface-sunken); }
 
 /* Its frozen cells. One per column of the block, so the role stands under
@@ -2386,61 +2400,35 @@ button.pcell--val { cursor: pointer; }
   padding-inline: var(--space-4);
   font-size: var(--text-sm); color: var(--color-text-secondary);
 }
-.lane__role { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--color-text); }
+.lane__role, .lane__person { min-width: 0; color: var(--color-text); }
 .lane__role--short { flex: 0 0 auto; color: var(--color-text-muted); }
-/* A role the project does not have yet: there, but greyed, until it is planned. */
-.prow--lane.is-unplanned .lane__role { color: var(--color-text-disabled); }
+/* The person, as text: who holds a role is read from ePPM, not chosen here.
+   A role nobody holds says so in the warning hue of the «nicht zugewiesen»
+   mark. */
+.lane__person.is-open { color: var(--color-warn-fg); font-style: italic; }
 
-/* «Weitere Person»: a second row for the role, on its last one. */
-.lane__more {
-  display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto;
-  width: var(--target-min); height: var(--target-min);
-  border: 0; border-radius: var(--radius-sm); background: none;
-  color: var(--color-text-muted); cursor: pointer;
-}
-.lane__more:hover { background: var(--color-surface-hover); color: var(--color-text-strong); }
-
-/* The person, as the list it is chosen from. At rest it is the name and
-   nothing else; the chevron and the frame come with the pointer or the
-   focus, which is as much as a cell of a table should say about itself. */
-.lanepick {
-  flex: 1; min-width: 0; width: 100%; height: var(--target-min);
-  margin-inline: calc(-1 * var(--space-2)); padding: 0 var(--space-7) 0 var(--space-2);
-  border: var(--border-hairline) solid transparent; border-radius: var(--radius-sm);
-  background: transparent; color: var(--color-text);
-  font: inherit; text-overflow: ellipsis; cursor: pointer;
-  appearance: none; -webkit-appearance: none;
-}
-.lanepick:hover, .lanepick:focus-visible {
-  border-color: var(--color-border-strong); background-color: var(--color-surface);
-  background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%);
-  background-position: calc(100% - 11px) 50%, calc(100% - 7px) 50%;
-  background-size: 4px 4px, 4px 4px; background-repeat: no-repeat;
-}
-/* A role with pensum and nobody to carry it, in the warning hue of the mark. */
-.lanepick.is-open { color: var(--color-warn-fg); font-style: italic; }
-/* An empty row: nothing chosen yet. */
-.lanepick.is-blank { color: var(--color-text-muted); }
-.lanepick option { color: var(--color-text); font-style: normal; }
-
-/* The Personen tab's rows: the role under the person's name, and across the
-   rest of the frozen block the project it is held on — number first. */
+/* The Personen tab's rows: the role under the person's name and, from the
+   «Projekte» column on, the name of the project it is held on. */
 .lane__label {
-  display: flex; align-items: center; gap: var(--space-4); min-width: 0;
+  display: flex; align-items: center; gap: var(--space-3); min-width: 0;
   padding-inline: var(--space-4);
   font-size: var(--text-sm); color: var(--color-text-secondary);
 }
-.lane__label > span, .lane__label > .linkbtn { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.lane__num { flex: 0 0 auto; color: var(--color-text-muted); }
-.lane__project { font-size: var(--text-sm); font-weight: var(--font-regular); text-align: left; }
-.lane__note { flex: 0 0 auto; color: var(--color-text-muted); }
+/* The project's name, as it looks on Planung: text until it is pointed at,
+   a link then. A block, not the link's usual inline flex box — only a block
+   ends in an ellipsis; the whole name is in the row's hint. */
+.lane__label > .lane__project {
+  display: block; flex: 0 1 auto; min-width: 0; line-height: var(--target-min);
+  color: var(--color-text); font-size: var(--text-sm); font-weight: var(--font-regular);
+  text-align: left; text-decoration: none;
+}
 
 /* The number. The project row's cell without the band's share of the row —
    a row under a project has no bar — and with a field in it. */
-.pcell--lanev { min-height: 30px; padding: 0; font-size: var(--text-sm); }
+.pcell--lanev { min-height: var(--row-height-sub); padding: 0; font-size: var(--text-sm); }
 .pgrid .prow--lane > .pcell--val { padding-bottom: 0; }
 .lanev__in {
-  width: 100%; height: 100%; min-height: 30px; padding: 0 var(--space-2);
+  width: 100%; height: 100%; min-height: var(--row-height-sub); padding: 0 var(--space-2);
   border: 0; border-radius: 0; background: transparent; outline: none;
   color: inherit; font: inherit; font-variant-numeric: tabular-nums; text-align: center;
   cursor: cell;
@@ -2462,32 +2450,12 @@ button.pcell--val { cursor: pointer; }
 .pcell--lanev.is-open { background: var(--color-warn-bg-subtle); color: var(--color-warn-fg); font-style: italic; }
 .grid-card.is-uncoloured .pgrid .pcell--lanev.is-open { background: var(--color-warn-bg-subtle); color: var(--color-warn-fg); }
 .grid-card.is-uncoloured .pgrid .pcell--lanev.is-zero { background: transparent; }
-.pcell--lanev.is-edited:focus-within { box-shadow: var(--ring-cell-edit), inset 0 -3px 0 var(--color-accent); }
 
 /* The legend's swatch for pensum nobody carries. */
 .legend__swatch.is-open-role {
-  width: 22px; border: var(--border-hairline) dashed var(--color-warn-solid); border-radius: var(--radius-sm);
+  width: 22px; border: var(--border-hairline) dashed var(--color-warn-fg-alt); border-radius: var(--radius-sm);
   background: var(--color-warn-bg-subtle);
 }
-
-/* The project dialog's Bearbeitende: a line per role and person, and the band of when they hold it. */
-.rolelist { display: flex; flex-direction: column; gap: var(--space-6); }
-.rolelist__head { display: flex; align-items: baseline; gap: var(--space-5); font-size: var(--text-sm); }
-.rolelist__role { flex: 0 0 auto; font-weight: var(--font-semibold); color: var(--color-text-strong); }
-.rolelist__holder { flex: 1; min-width: 0; color: var(--color-text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.rolelist__holder.is-open { color: var(--color-warn-fg); font-style: italic; }
-.rolelist__now { flex: 0 0 auto; color: var(--color-text-muted); font-variant-numeric: tabular-nums; }
-.roleband { position: relative; height: 22px; margin-top: var(--space-2); border-radius: var(--radius-sm); background: var(--color-surface-alt); }
-.roleband__seg {
-  position: absolute; top: 0; bottom: 0; box-sizing: border-box;
-  display: flex; align-items: center; padding: 0 var(--space-3);
-  border: var(--border-hairline) solid var(--color-bar-border); border-radius: var(--radius-sm);
-  background: var(--color-bar-bg); color: var(--color-text-body);
-  font-size: var(--text-xs); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.roleband__seg.is-open { background: var(--pattern-no-lead); border-color: var(--color-warn-solid); color: var(--color-warn-fg); font-style: italic; }
-.roleband__axis { position: relative; height: 14px; font-size: var(--text-2xs); color: var(--color-text-muted); }
-.roleband__axis span { position: absolute; top: 0; padding-left: var(--space-2); border-left: var(--border-hairline) solid var(--color-border); line-height: 14px; }
 
 /* ==========================================================================
    19 · One row for the projects and the time; the small laptop
@@ -2495,27 +2463,9 @@ button.pcell--val { cursor: pointer; }
 /* Search and filters on the left say WHICH projects; the steps and «Ansicht»
    on the right say WHICH quarters and HOW the rows are drawn. The time bar
    that used to hold the right half is gone, and with it 40px above the first
-   row. Measured: 1060px of controls at 1280 against 1233 available; below
-   1250px the row may still break, the time half taking a second line,
-   right-aligned. */
-@media (max-width: 1250px) {
-  .toolbar { flex-wrap: wrap; }
-  .toolbar__spacer { flex-basis: 100%; }
-  .toolbar__spacer + .btn { margin-left: auto; }
-}
-
-/* With the search open the row is longer by what the field keeps once it has
-   shrunk to its floor — some 175px over the closed icon — so it may break
-   that much sooner. 1300 is a first estimate from the figures above, not a
-   measurement of the rendered row, and the French labels run wider than the
-   German ones the row was sized against. Bounded below at 701px: the phone
-   rule in section 16 wants one scrolling row, and a later wrap rule of equal
-   specificity would override it. */
-@media (min-width: 701px) and (max-width: 1300px) {
-  .toolbar:has(.xsearch.is-open) { flex-wrap: wrap; }
-  .toolbar:has(.xsearch.is-open) .toolbar__spacer { flex-basis: 100%; }
-  .toolbar:has(.xsearch.is-open) .toolbar__spacer + .btn { margin-left: auto; }
-}
+   row. Measured: 1060px of controls at 1280 against 1233 available; where
+   the row is longer than the window it breaks, the time half taking a second
+   line, right-aligned — see .toolbar in section 6. */
 
 /* The mockup is designed at 1440px and the first breakpoint above was 1100px.
    A 1366×768 laptop sits in the gap, and at that width the first project row
@@ -2602,7 +2552,7 @@ button.pcell--val { cursor: pointer; }
 .setnote { margin-right: auto; font-size: var(--text-sm); color: var(--color-text-muted); }
 .setnote.is-invalid { color: var(--color-danger-fg); font-weight: var(--font-semibold); }
 
-@media (max-width: 700px) {
+@media (max-width: 760px) {
   /* The derived column is a courtesy; on a phone the field is what matters. */
   .settable__extra { display: none; }
   .settable__row { grid-template-columns: minmax(0, 1fr) 56px 124px; gap: var(--space-5); }

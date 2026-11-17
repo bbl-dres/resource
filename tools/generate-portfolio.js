@@ -23,8 +23,13 @@ const core = n => JSON.parse(fs.readFileSync(`tools/seed/${n}.json`, 'utf8'));
 const read = n => JSON.parse(fs.readFileSync(`data/${n}.json`, 'utf8'));
 /* LF, like every other file in the repository: the checkout normalises to it,
    and a run that wrote CRLF showed up as a rewrite of every line in every
-   data file it touched. */
-const write = (n, v) => fs.writeFileSync(`data/${n}.json`, JSON.stringify(v, null, 2) + '\n');
+   data file it touched.
+
+   Kept in memory until the run has checked itself — see the end of the file.
+   Written straight away, a run that failed its own check had already left
+   the files it was refusing on disk. */
+const written = {};
+const write = (n, v) => { written[n] = JSON.stringify(v, null, 2) + '\n'; };
 
 /* mulberry32 — small, seeded, and good enough for mock data */
 let seed = 0x5bb1e1d;
@@ -279,7 +284,9 @@ function barsFor(bars) {
         to: b.to,
         label: span >= 2 ? LABEL[b.phase] : b.phase
       };
-      if (b.to > QUARTERS && i === list.length - 1) bar.continues = true;
+      /* Whichever bar is the last inside the window, if the chain goes on
+         behind it — not only a bar that crosses the edge itself. */
+      if (i === list.length - 1 && bars.at(-1).to > QUARTERS) bar.continues = true;
       return bar;
     });
 }
@@ -399,20 +406,34 @@ function makeMilestones(projects) {
        */
       const pending = rnd() < (OPEN[code] ?? 0.10) * (near ? 0.35 : 1);
 
+      /*
+       * A gate that is held has one date: its forecast is its plan. The two
+       * were drawn independently, so 215 of 226 gates marked «Termin
+       * gehalten» showed a forecast on another day, half of them earlier.
+       * The draws stay where they were — a held gate still takes the second
+       * day and throws it away — so nothing drawn after this point moves.
+       * The delay is what is left after the clamp to the window, and only a
+       * gate that is late carries a reason for it.
+       */
+      const planDate = dayNearEnd(planIdx);
+      const drawnDate = pending ? null : dayNearEnd(forecastIdx);
+      const reason = late ? pick(REASONS) : null;
+      const slip = forecastIdx - planIdx;
+
       items.push({
         id: `ms-${p.id.slice(2)}-${code}`,
         code,
         projectId: p.id,
         subPhase: bar.phase,
         plan: QUARTER_IDS[planIdx],
-        planDate: dayNearEnd(planIdx),
+        planDate,
         forecast: pending ? null : QUARTER_IDS[forecastIdx],
-        forecastDate: pending ? null : dayNearEnd(forecastIdx),
-        status: pending ? 'pending' : late ? 'late' : 'ok',
+        forecastDate: pending ? null : slip ? drawnDate : planDate,
+        status: pending ? 'pending' : slip ? 'late' : 'ok',
         statusLabel: pending ? '▲ Auftrag noch hängig'
-          : late ? `▲ ${late} Quartal${late > 1 ? 'e' : ''} verspätet`
+          : slip ? `▲ ${slip} Quartal${slip > 1 ? 'e' : ''} verspätet`
             : 'Termin gehalten',
-        ...(late ? { impact: pick(REASONS) } : {})
+        ...(reason && slip && !pending ? { impact: reason } : {})
       });
     }
   }
@@ -577,10 +598,14 @@ milestones.items = makeMilestones(projects).map(m => {
   const planIdx = QUARTER_IDS.indexOf(m.plan);
   const late = s.forecast ? Math.max(0, QUARTER_IDS.indexOf(s.forecast) - QUARTER_IDS.indexOf(s.plan)) : 0;
   const forecastIdx = Math.min(QUARTERS - 1, planIdx + late);
+  /* The generated gate's reason goes with the generated story: a seed gate
+     that is held kept «Kreditfreigabe verschoben» from the gate it replaced. */
+  const { impact, ...gate } = m;
+  const drawnDate = s.forecast === null ? null : dayNearEnd(forecastIdx);
   return {
-    ...m,
+    ...gate,
     forecast: s.forecast === null ? null : QUARTER_IDS[forecastIdx],
-    forecastDate: s.forecast === null ? null : dayNearEnd(forecastIdx),
+    forecastDate: s.forecast === null ? null : forecastIdx > planIdx ? drawnDate : m.planDate,
     status: s.status, statusLabel: s.statusLabel,
     ...(s.impact ? { impact: s.impact } : {})
   };
@@ -649,7 +674,10 @@ function changeLog() {
     let value;
     if (field === 'Pensum') {
       const from = Math.max(5, Math.round(Math.max(...p.demand) * (0.5 + rnd() * 0.5) / 5) * 5);
-      const to = Math.max(5, from + (rnd() < 0.55 ? 1 : -1) * (5 + Math.floor(rnd() * 4) * 5));
+      /* Clamped at 5 a step down from 5 was «5 % → 5 %»; such a step goes up. */
+      const step = (rnd() < 0.55 ? 1 : -1) * (5 + Math.floor(rnd() * 4) * 5);
+      const down = Math.max(5, from + step);
+      const to = down === from ? from + Math.abs(step) : down;
       value = `${from} % → ${to} %`;
     } else if (field === 'Meilenstein' || field === 'Termin') {
       const a = between(0, 5);
@@ -679,27 +707,33 @@ function changeLog() {
 }
 
 const changes = core('changes');
-write('changes', [...changes, ...changeLog()]);
+/* Newest first, as Verlauf prints it — the file's order is the page's. */
+write('changes', [...changes, ...changeLog()].sort((a, b) => b.date.localeCompare(a.date)));
 
 /* Committed credit by year of realisation, derived rather than asserted. */
 const dashboard = read('dashboard');
 /* Which year a quarter belongs to, derived so it cannot fall short of the window. */
 const YEAR_OF = QUARTER_CAL.map(c => String(c.year));
 const BUCKET_YEARS = [...new Set(YEAR_OF)].slice(0, 3);
-const buckets = { later: [0, 0] };
+const buckets = { built: [0, 0], later: [0, 0] };
 for (const y of BUCKET_YEARS) buckets[y] = [0, 0];
 for (const p of projects) {
   if (p.credit === null) continue;
   const build = p.bars.find(b => b.phase === '53');   // tender to commissioning
-  const key = !build ? 'later' : (YEAR_OF[Math.min(QUARTERS - 1, Math.max(0, build.from))] ?? 'later');
+  /* No build phase in the window is two different things: not yet reached,
+     or behind us. A project already in Betrieb was filed under «später» —
+     15 of the 23 projects in that row were finished buildings. */
+  const key = !build ? (stage(p.phase) > stage('53') ? 'built' : 'later')
+    : (YEAR_OF[Math.min(QUARTERS - 1, Math.max(0, build.from))] ?? 'later');
   const bucket = buckets[key] ?? buckets.later;
   bucket[0] += p.credit;
   bucket[1] += 1;
 }
 dashboard.creditByYear.rows = [
+  [`vor ${BUCKET_YEARS[0]}`, buckets.built],
   ...BUCKET_YEARS.map(y => [y, buckets[y]]),
   [`${Number(BUCKET_YEARS.at(-1)) + 1} und später`, buckets.later]
-].map(([label, [sum, count]]) => ({
+].filter(([, [, count]]) => count > 0).map(([label, [sum, count]]) => ({
   label,
   value: Math.round(sum * 10) / 10,
   valueLabel: (Math.round(sum * 10) / 10).toFixed(1).replace('.', ',') + ' Mio.',
@@ -962,6 +996,8 @@ for (const p of projects) {
     if (sum !== v) throw new Error(`${p.id} Q${q}: assignees ${sum} ≠ demand ${v}`);
   });
 }
+
+for (const [n, text] of Object.entries(written)) fs.writeFileSync(`data/${n}.json`, text);
 
 console.log('projects   ', projects.length, '(' + existing.length + ' kept, 100 generated)');
 console.log('people     ', people.length, '· roster', people.reduce((a, p) => a + p.employment, 0), '%');

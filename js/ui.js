@@ -6,8 +6,8 @@
    ============================================================================= */
 
 import {
-  data, state, t, FILTERS, activeFilters, kpis, filteredProjects, canStep, notifications,
-  columnSet, coloured, searchMatcher
+  data, state, t, FILTERS, filtersHere, selectedHere, idsHere, activeFilters, kpis, filteredProjects, canStep, todayOffset, notifications,
+  columnSet, coloured, figuresShown, searchMatcher
 } from './store.js';
 import { toggleableColumns } from './columns.js';
 import { icon } from './icons.js';
@@ -66,7 +66,7 @@ export const raw = s => new Html(String(s));
    Icons — Lucide, loaded from assets/icons and referenced through the sprite
    -------------------------------------------------------------------------- */
 
-const ico = (name, size, opts) => raw(icon(name, size, opts));
+const ico = (name, size) => raw(icon(name, size));
 
 export const icons = {
   search: (s = 15) => ico('search', s),
@@ -79,14 +79,8 @@ export const icons = {
   kebab: (s = 15) => ico('ellipsis-vertical', s),
   check: (s = 13) => ico('check', s),
   plus: (s = 15) => ico('plus', s),
-  minus: (s = 15) => ico('minus', s),
-  warn: (s = 13) => ico('triangle-alert', s),
   info: (s = 15) => ico('info', s),
-  pencil: (s = 15) => ico('pencil', s),
   share: (s = 15) => ico('share-2', s),
-  sortAsc: (s = 15) => ico('arrow-up-narrow-wide', s),
-  sortDesc: (s = 15) => ico('arrow-down-wide-narrow', s),
-  grid: (s = 15) => ico('layout-grid', s),
   filter: (s = 15) => ico('funnel', s),
   download: (s = 15) => ico('download', s),
   printer: (s = 15) => ico('printer', s),
@@ -126,10 +120,8 @@ export function tokenPx(name) {
 }
 
 /*
- * Some of these tokens depend on the time scale, so the cache cannot outlive a
- * change of it. It nearly did: after switching from Jahr to Quartal the grids
- * went on laying out quarters at a year's width, three thousand pixels of track
- * for sixteen columns, and only a reload put it right.
+ * Some of these tokens change under a media query — the shell's inset below
+ * 1440px — so the cache cannot outlive a resize: app.js clears it there.
  */
 export function forgetTokens() {
   pxCache.clear();
@@ -210,16 +202,31 @@ export const pinCls = (s, k, extra = '') =>
 export const pinLeft = (s, k) => (s[k] === undefined ? '' : `left:${s[k]}px`);
 
 /**
+ * A registry column's value for a project, as a table cell prints it: the
+ * short form with the full one as its hint where the column has one, the
+ * plain text otherwise, and a dash for nothing. The planning grid and the
+ * bar plan each had this, and disagreed about the dash.
+ */
+export const plainCell = (col, p) => (col.short
+  ? html`<span title="${col.text(p)}">${col.short(p) || '—'}</span>`
+  : col.text(p) || '—');
+
+/**
  * The first cell of every row in the two folding tables: a narrow frozen
  * track of its own, in front of the columns, that holds the caret on a row
  * that folds and nothing on any other. The caret used to sit inside the
  * first column's cell, which tied it to whichever column that was.
  */
-export const caretCell = (body = '') => html`<span class="pcell pcell--caret is-frozen" style="left:0">${body}</span>`;
+export const caretCell = (body = '') => html`<span role="cell" class="pcell pcell--caret is-frozen" style="left:0">${body}</span>`;
 
-/** The caret itself: the row's switch, for the keyboard and for the eye. */
+/**
+ * The caret itself: the row's switch, for the keyboard and for the eye. It
+ * carries a focus key of its own: the row around it dispatches the same
+ * action with the same value, and found by those the row came first — a div,
+ * which cannot take focus, so folding a row by keyboard dropped it to <body>.
+ */
 export const rowCaret = ({ act, val, open, label }) => html`<button type="button" class="rowcaret"
-    data-act="${act}" data-val="${val}" aria-expanded="${open}" aria-label="${label}">
+    data-act="${act}" data-val="${val}" data-fk="caret:${val}" aria-expanded="${open}" aria-label="${label}">
   <span class="caret ${open ? '' : 'is-collapsed'}" aria-hidden="true">${icons.chevronDown()}</span>
 </button>`;
 
@@ -227,12 +234,15 @@ export const rowCaret = ({ act, val, open, label }) => html`<button type="button
  * A sortable column header. Both grids use it; they differ only in which pair
  * of state fields they sort by and which action they dispatch.
  */
-export function sortableHead({ key, label, act, active, ascending, cls = '', style = '', title = '' }) {
+export function sortableHead({ key, label, act, active, ascending, cls = '', style = '', title = '', fk = '' }) {
   const name = typeof label === 'string' ? label : key;
   /* The direction is a glyph the reader sees; the name says it for everyone else. */
   const dir = active ? `, ${t(ascending ? 'aufsteigend' : 'absteigend')}` : '';
-  return html`<span class="pcell--text ${cls} ${active ? 'is-sorted' : ''}" style="${style}">
-    <button type="button" class="sorthead" data-act="${act}" data-val="${key}"
+  /* A column heading of the table it stands in, and it says which way the
+     table is sorted — the arrow beside the label is for the eye only. */
+  return html`<span role="columnheader" aria-sort="${active ? (ascending ? 'ascending' : 'descending') : 'none'}"
+      class="pcell--text ${cls} ${active ? 'is-sorted' : ''}" style="${style}">
+    <button type="button" class="sorthead" data-act="${act}" data-val="${key}" ${attr(fk, `data-fk="${esc(fk)}"`)}
             title="${title || `${t('Sortieren nach')} ${name}`}"
             aria-label="${t('Sortieren nach')} ${name}${dir}">
       <span class="sorthead__label">${label}</span>
@@ -272,17 +282,16 @@ export function badge(n) {
  * The label sits in a span of its own. A plain string lands in the button as
  * a bare text node, and the anonymous flex item that makes cannot shrink
  * below its text: squeezed in the toolbar, the filter triggers kept their
- * label whole and pushed the chevron out over the border, while the group
- * trigger, whose label is already an element, cropped as intended.
+ * label whole and pushed the chevron out over the border.
  */
-export function dropdown({ id, label, lead, count, width = 244, align = 'left', body, cls = '', title = '' }) {
+export function dropdown({ id, label, lead, count, size = 'md', align = 'left', body }) {
   const open = state.menu === id;
-  return html`<div class="dd ${cls}" data-menu="${id}">
+  return html`<div class="dd">
     <button type="button" class="btn ${open ? 'is-open' : ''}" data-act="menu" data-val="${id}"
-            aria-expanded="${open}" aria-haspopup="menu" ${title && raw(`title="${esc(title)}"`)}>
+            aria-expanded="${open}" aria-haspopup="menu">
       ${lead ?? ''}<span>${label}</span>${count ? badge(count) : ''}${icons.chevronDown()}
     </button>
-    ${open && menuPanel({ align, width, body: typeof body === 'function' ? body() : body })}
+    ${open && menuPanel({ align, size, label, body: typeof body === 'function' ? body() : body })}
   </div>`;
 }
 
@@ -290,9 +299,9 @@ export function dropdown({ id, label, lead, count, width = 244, align = 'left', 
  * The panel itself. `--dd-w` lets the stylesheet clamp the width to the
  * viewport, and `max-height` keeps a long list reachable near the bottom edge.
  */
-export function menuPanel({ align = 'left', width = 244, body, label }) {
-  return html`<div class="dd__panel dd__panel--${align}" role="menu"
-      ${label ? raw(`aria-label="${esc(label)}"`) : ''} style="--dd-w:${width}px">${body}</div>`;
+export function menuPanel({ align = 'left', size = 'md', body, label }) {
+  return html`<div class="dd__panel dd__panel--${align} dd__panel--${size}" role="menu"
+      ${label ? raw(`aria-label="${esc(label)}"`) : ''}>${body}</div>`;
 }
 
 /*
@@ -336,15 +345,22 @@ export function menuTick(label, on, act, val, meta) {
   </button>`;
 }
 
-export function segmented(options, value, act, label = '') {
+/*
+ * A row of exclusive choices inside a menu — the time scale, the unit. They
+ * are items of the menu they sit in: as plain buttons the arrow keys passed
+ * over them and Tab closes a menu, so the time scale could not be changed
+ * from the keyboard at all.
+ */
+export function segmented(options, value, act, label = '', { disabled = false } = {}) {
   return html`<div class="segmented" role="group" ${label && raw(`aria-label="${esc(t(label))}"`)}>
-    ${options.map(o => html`<button type="button" class="${o.value === value ? 'is-on' : ''}"
-      aria-pressed="${o.value === value}" data-act="${act}" data-val="${o.value}">${t(o.label)}</button>`)}
+    ${options.map(o => html`<button type="button" class="${o.value === value ? 'is-on' : ''}" role="menuitemradio"
+      aria-checked="${o.value === value}" data-act="${act}" data-val="${o.value}"
+      ${attr(disabled, 'aria-disabled="true" disabled')}>${t(o.label)}</button>`)}
   </div>`;
 }
 
 
-export function divider() { return html`<div class="dd__divider"></div>`; }
+export function divider() { return html`<div class="dd__divider" role="separator"></div>`; }
 
 /* -----------------------------------------------------------------------------
    Application shell
@@ -360,6 +376,10 @@ const TABS = [
   { id: 'dashboard', label: 'Dashboard' },
   { id: 'history', label: 'Verlauf' }
 ];
+
+/** What the page in front of the reader is called: its tab, or the title of a page that has none. */
+export const tabTitle = () => t(TABS.find(x => x.id === state.tab)?.label
+  ?? { export: 'PDF-Export — Drucklayout', api: 'API-Dokumentation' }[state.tab] ?? 'Planung');
 
 export function appHeader() {
   const m = data.meta;
@@ -383,12 +403,12 @@ export function appHeader() {
       ${state.signedIn ? html`<div class="shell-header__actions">
         <div class="dd">
           <button type="button" class="hdr-btn" data-act="menu" data-val="lang"
-                  aria-expanded="${open}" aria-haspopup="menu" aria-label="${t('Sprache wählen')}">
+                  aria-expanded="${open}" aria-haspopup="menu" aria-label="${t('Sprache wählen')}: ${state.lang.toUpperCase()}">
             ${state.lang.toUpperCase()}${icons.chevronDown()}
           </button>
-          ${open && html`<div class="dd__panel dd__panel--right" role="menu" style="width:216px">
+          ${open && html`<div class="dd__panel dd__panel--right" role="menu" aria-label="${t('Sprache wählen')}">
             ${langs.map(l => html`<button type="button" class="dd__item ${state.lang === l.code ? 'is-checked' : ''}"
-                role="menuitemradio" aria-checked="${state.lang === l.code}"
+                role="menuitemradio" aria-checked="${state.lang === l.code}" lang="${l.code}"
                 ${attr(!l.available, 'aria-disabled="true" disabled')}
                 data-act="lang" data-val="${l.code}">
               <span>${l.label} <span class="dd__meta">${l.tag}</span></span>
@@ -426,7 +446,7 @@ function accountMenu() {
             aria-expanded="${open}" aria-haspopup="menu"
             aria-label="${t('Konto')}: ${m.user.name}">${m.user.initials}</button>
     ${open && html`<div class="dd__panel dd__panel--right" role="menu"
-        aria-label="${t('Konto')}" style="--dd-w:260px">
+        aria-label="${t('Konto')}">
       <div class="account">
         <span class="avatar avatar--lg" aria-hidden="true">${m.user.initials}</span>
         <div>
@@ -435,7 +455,7 @@ function accountMenu() {
         </div>
       </div>
       <p class="account__note">${t('Angemeldet über eIAM')}</p>
-      <div class="dd__sep" role="separator"></div>
+      ${divider()}
       <button type="button" class="dd__item" role="menuitem" data-act="settings">
         <span>${t('Einstellungen')}</span>
       </button>
@@ -484,7 +504,7 @@ export function notifyBell() {
         aria-label="${t('Benachrichtigungen')}: ${items.length}">${icons.bell()}</button>
     ${items.length ? html`<span class="hdr-notify__badge" aria-hidden="true">${items.length}</span>` : ''}
     ${open && menuPanel({
-      align: 'right', width: 348, label: t('Benachrichtigungen'), body: notifyList(items)
+      align: 'right', size: 'xl', label: t('Benachrichtigungen'), body: notifyList(items)
     })}
   </div>`;
 }
@@ -512,10 +532,7 @@ function notifyList(items) {
   </button>`;
 }
 
-/**
- * Icon that expands into a search field in place. The header and the toolbar
- * each render one; both drive the same query.
- */
+/** Icon that expands into a search field in place, at the head of the toolbar. */
 export function expandableSearch({ placeholder }) {
   if (!state.searchOpen) {
     return html`<button type="button" class="xsearch" data-act="search-toggle"
@@ -547,7 +564,8 @@ export function expandableSearch({ placeholder }) {
 export function pageHeader({ title, actions = [], chrome = true }) {
   return html`<div class="wrap page-header">
     ${chrome
-      ? html`<div class="tabline">${tabBar()}<div class="page-header__actions">${actions}</div></div>`
+      ? html`<h1 class="sr-only">${tabTitle()}</h1>
+          <div class="tabline">${tabBar()}<div class="page-header__actions">${actions}</div></div>`
       : html`<div class="page-header__row">
           <h1 class="page-title">${t(title)}</h1>
           <div class="page-header__actions">${actions}</div>
@@ -581,7 +599,7 @@ export function exportMenu() {
   return html`<div class="dd">
     <button type="button" class="btn ${open ? 'is-open' : ''}" data-act="menu" data-val="export"
             aria-expanded="${open}" aria-haspopup="menu">${icons.download(15)}${t('Exportieren')}${icons.chevronDown()}</button>
-    ${open && html`<div class="dd__panel dd__panel--right" role="menu" style="width:190px">
+    ${open && html`<div class="dd__panel dd__panel--right dd__panel--sm" role="menu" aria-label="${t('Exportieren')}">
       ${exportItem('csv', t('Daten als CSV'))}
       ${exportItem('xlsx', t('Daten als Excel'))}
     </div>`}
@@ -598,7 +616,7 @@ export function tabBar() {
   </nav>`;
 }
 
-/* Two neutral figures, no alert state: what the strip says is the size of the
+/* Neutral figures, no alert state: what the strip says is the size of the
    work, not a verdict on the people doing it. */
 export function kpiStrip() {
   return html`<div class="kpi-strip">
@@ -638,16 +656,19 @@ export function kpiStrip() {
  * drawn («Ansicht»). The time controls used to be a bar of their own under
  * this one; folded in they give back 40px above the first row.
  */
-export function toolbar({ time = false, view = false, print = false, exclude = [] } = {}) {
+export function toolbar({ time = false, view = false, print = false } = {}) {
   const mine = data.meta.user.personId;
   const minesOnly = state.leads.length === 1 && state.leads[0] === mine;
+  /* Only the filters this tab's rows answer to: a menu that changes nothing
+     on the page under it reads as a broken one. */
+  const here = new Set(filtersHere().map(f => f.kind));
 
   return html`<div class="toolbar">
     ${expandableSearch({ placeholder: 'Projekt, ID oder Person' })}
 
-    ${filterMenu('portfolio', { label: 'Teilportfolio', width: 276 })}
-    ${filterMenu('phase', { label: 'Phase (ePPM)', heading: 'Phase (ePPM) · Mehrfachauswahl', width: 284 })}
-    ${filterMenu('organisation', { label: 'Organisation', width: 244 })}
+    ${here.has('portfolio') && filterMenu('portfolio', { label: 'Teilportfolio', size: 'lg' })}
+    ${here.has('phase') && filterMenu('phase', { label: 'Phase (ePPM)', heading: 'Phase (ePPM) · Mehrfachauswahl', size: 'lg' })}
+    ${here.has('organisation') && filterMenu('organisation', { label: 'Organisation' })}
 
     <span class="toolbar__sep" aria-hidden="true"></span>
 
@@ -655,7 +676,7 @@ export function toolbar({ time = false, view = false, print = false, exclude = [
       /* The filter finds everybody on a project, not only the one name a
          folded row shows in the column. */
       id: 'lead', lead: icons.filter(), label: t('Bearbeitende'),
-      count: state.leads.length, width: 312,
+      count: selectedHere(FILTERS.find(f => f.kind === 'lead')).length, size: 'xl',
       body: leadMenuBody
     })}
 
@@ -664,28 +685,28 @@ export function toolbar({ time = false, view = false, print = false, exclude = [
       <span>${t('Mir zugewiesen')}</span>
     </label>` : ''}
 
-    <span class="toolbar__spacer"></span>
-
-    ${time && html`
+    ${(time || view) && html`<div class="toolbar__end">
+      ${time && html`
       <button type="button" class="btn btn--square" data-act="period" data-val="-1"
               ${attr(!canStep(-1), 'disabled')} aria-label="${t('Zurück')}">${icons.chevronLeft()}</button>
       <button type="button" class="btn" data-act="period" data-val="today"
-              ${attr(state.periodOffset === 0, 'disabled')}>${t('Zu heute')}</button>
+              ${attr(state.periodOffset === todayOffset(), 'disabled')}>${t('Zu heute')}</button>
       <button type="button" class="btn btn--square" data-act="period" data-val="1"
               ${attr(!canStep(1), 'disabled')} aria-label="${t('Weiter')}">${icons.chevronRight()}</button>
       ${view && html`<span class="toolbar__sep" aria-hidden="true"></span>`}`}
 
-    ${view && dropdown({
-      id: 'view', lead: icons.eye(), label: t('Ansicht'), width: 296, align: 'right', body: () => viewMenuBody({ exclude, print })
-    })}
+      ${view && dropdown({
+        id: 'view', lead: icons.eye(), label: t('Ansicht'), size: 'lg', align: 'right', body: () => viewMenuBody({ print })
+      })}
+    </div>`}
   </div>`;
 }
 
-/** «Alle · Keine» at the head of a filter's menu. */
-const bulkLinks = key => html`<div class="dd__bulk">
-  <button type="button" data-act="bulk" data-kind="${key}" data-val="all">${t('Alle')}</button>
+/** «Alle · Keine» at the head of a filter's menu — items of it, so the arrow keys reach them. */
+const bulkLinks = kind => html`<div class="dd__bulk">
+  <button type="button" role="menuitem" data-act="bulk" data-kind="${kind}" data-val="all">${t('Alle')}</button>
   <span aria-hidden="true">·</span>
-  <button type="button" data-act="bulk" data-kind="${key}" data-val="none">${t('Keine')}</button>
+  <button type="button" role="menuitem" data-act="bulk" data-kind="${kind}" data-val="none">${t('Keine')}</button>
 </div>`;
 
 /**
@@ -693,12 +714,12 @@ const bulkLinks = key => html`<div class="dd__bulk">
  * tick per value, under «Alle · Keine». Three of these were written out in
  * full, differing in four words.
  */
-function filterMenu(kind, { label, heading = 'Mehrfachauswahl', width }) {
+function filterMenu(kind, { label, heading = 'Mehrfachauswahl', size }) {
   const f = FILTERS.find(x => x.kind === kind);
   return dropdown({
-    id: kind, lead: icons.filter(), label: t(label), count: state[f.key].length, width,
-    body: () => html`${menuGroupLabel(t(heading))}${bulkLinks(f.key)}
-      ${f.ids().map(id => menuTick(f.name(id), state[f.key].includes(id), `toggle-${f.kind}`, id))}`
+    id: kind, lead: icons.filter(), label: t(label), count: selectedHere(f).length, size,
+    body: () => html`${menuGroupLabel(t(heading))}${bulkLinks(f.kind)}
+      ${idsHere(f).map(id => menuTick(f.name(id), state[f.key].includes(id), `toggle-${f.kind}`, id))}`
   });
 }
 
@@ -724,11 +745,11 @@ const SCALES = [
   { value: 'month', label: 'Monat' }
 ];
 
-const unitSwitch = () => html`<div class="dd__segmented">
-  ${segmented([{ value: 'pct', label: 'Pensum %' }, { value: 'fte', label: 'FTE' }], state.unit, 'unit')}
+const unitSwitch = disabled => html`<div class="dd__segmented">
+  ${segmented([{ value: 'pct', label: 'Pensum %' }, { value: 'fte', label: 'FTE' }], state.unit, 'unit', 'Einheit', { disabled })}
 </div>`;
 
-const columnSwitches = exclude => toggleableColumns().filter(c => !exclude.includes(c.id))
+const columnSwitches = () => toggleableColumns()
   .map(c => menuCheckbox(t(c.label), !!columnSet()[c.id], 'toggle-col', c.id));
 
 /*
@@ -745,37 +766,46 @@ const columnSwitches = exclude => toggleableColumns().filter(c => !exclude.inclu
  * or the figures with the band under them. The one switch paper has no use
  * for is «Heute» — a printed sheet carries its date in the letterhead — so
  * that one is greyed there.
+ *
+ * Personen carries it too, with the part that changes a table of people: the
+ * time scale and how a pensum is written. It has no named view, no layers
+ * and no columns to choose. The scale and the unit set on Planung always
+ * applied there; without the menu they could be seen and not changed.
+ *
+ * All three switches under «Pensumwerte» grey out together while no figure
+ * is drawn. The unit used to stay live in the bar plan, where it set nothing.
  */
-function viewMenuBody({ exclude = [], print = false } = {}) {
-  const noFigures = !state.layers.values;
-  return html`${menuGroupLabel(t('Ansicht'))}
+function viewMenuBody({ print = false } = {}) {
+  const people = state.tab === 'people';
+  const noFigures = !figuresShown();
+  return html`${!people && html`${menuGroupLabel(t('Ansicht'))}
     ${VIEWS.map(v => menuRadio(t(v.label), state.view === v.id, 'view', v.id))}
     ${state.view === 'custom' && html`${divider()}
       ${menuGroupLabel(t('Ebenen'))}
       ${LAYERS.map(l => menuCheckbox(t(l.label), !!state.layers[l.id], 'toggle-layer', l.id, null,
         { disabled: print && l.id === 'today' }))}`}
-    ${divider()}
+    ${divider()}`}
     ${menuGroupLabel(t('Zeitskala'))}
-    <div class="dd__segmented">${segmented(SCALES, state.scale, 'scale')}</div>
-    ${divider()}
+    <div class="dd__segmented">${segmented(SCALES, state.scale, 'scale', 'Zeitskala')}</div>
+    ${!people && html`${divider()}
     ${menuGroupLabel(t('Spalten'))}
-    ${columnSwitches(exclude)}
+    ${columnSwitches()}`}
     ${divider()}
     ${menuGroupLabel(t('Pensumwerte'))}
-    ${unitSwitch()}
+    ${unitSwitch(noFigures)}
     ${menuCheckbox(t('Pensum einfärben'), coloured(), 'colour', 'toggle', null, { disabled: noFigures })}
     ${menuCheckbox(t('Nullwerte ausblenden'), state.hideZeros, 'toggle-flag', 'hideZeros', null, { disabled: noFigures })}`;
 }
 
 /**
  * The lead menu is the one that has to survive a real directory: it filters as
- * you type, offers the signed-in user's own projects in one click, floats the
- * selected entries to the top and scrolls the rest.
+ * you type, floats the selected entries to the top and scrolls the rest. The
+ * reader's own projects are one click away beside it, in «Mir zugewiesen».
  */
 function leadMenuBody() {
   const f = FILTERS.find(x => x.kind === 'lead');
   const q = state.menuSearch.trim().toLowerCase();
-  const entries = f.ids().map(id => ({ id, name: f.name(id) }));
+  const entries = idsHere(f).map(id => ({ id, name: f.name(id) }));
   const matches = entries.filter(e => !q || e.name.toLowerCase().includes(q));
   // Selected first, so a choice never scrolls out of sight as the list grows.
   const selected = matches.filter(e => state.leads.includes(e.id));
@@ -789,7 +819,7 @@ function leadMenuBody() {
                placeholder="${t('Person suchen')}" aria-label="${t('Person suchen')}" autocomplete="off">
       </label>
     </div>
-    ${bulkLinks(f.key)}
+    ${bulkLinks(f.kind)}
     <div class="dd__scroll">
       ${matches.length
         ? [...selected, ...rest].map(e => menuTick(e.name, state.leads.includes(e.id), 'toggle-lead', e.id))
@@ -805,9 +835,25 @@ export function scopeLine(shown) {
     : `${shown} ${t('von')} ${total} ${t('Bauprojekten')}`;
 }
 
-export function activeFilterRow() {
+/** «11 Bauprojekte», «1 Bauprojekt» — a count that says what it counts, on screen and on paper. */
+export const projectCount = n => `${n} ${t(n === 1 ? 'Bauprojekt' : 'Bauprojekte')}`;
+
+/** The label of the row that closes a group: the group is named in the heading above it. */
+export const sumLabel = n => `${t('Summe')} (${projectCount(n)})`;
+
+/** The same line for a table of people: «50 Personen», or «3 von 50 Personen». */
+export function peopleLine(shown) {
+  const total = data.people.length;
+  return shown === total ? `${total} ${t('Personen')}` : `${shown} ${t('von')} ${total} ${t('Personen')}`;
+}
+
+/**
+ * The chips of the filters that are set, and how much they leave. What is
+ * counted is what the tab lists — projects everywhere but on Personen, which
+ * hands its own line in.
+ */
+export function activeFilterRow({ count = scopeLine(filteredProjects().length) } = {}) {
   const chips = activeFilters();
-  const shown = filteredProjects().length;
   return html`<div class="filterbar">
     ${chips.length
       ? html`<span class="filterbar__label">${t('Aktive Filter:')}</span>
@@ -815,21 +861,15 @@ export function activeFilterRow() {
              <button type="button" class="linkbtn" data-act="filters-reset">${icons.close(13)} ${t('Alle Filter zurücksetzen')}</button>`
       : html`<span class="filterbar__label">${t('Aktive Filter:')} <span class="filterbar__none">${t('keine')}</span></span>`}
     <span class="toolbar__spacer"></span>
-    <span class="filterbar__count">${scopeLine(shown)}</span>
+    <span class="filterbar__count">${count}</span>
   </div>`;
 }
 
 /* -----------------------------------------------------------------------------
-   Footer + design notes
+   Footer
    -------------------------------------------------------------------------- */
 
-/**
- * The prototype notice, acknowledged once per session.
- *
- * Over the page rather than in it, so dismissing it reflows nothing — and the
- * shell carries its measured height as bottom padding while it is there, so it
- * never covers the last row of a table.
- */
+/** The line at the foot of every page: the data's date, the version, the links. */
 export function appFooter() {
   const m = data.meta;
   return html`<footer class="shell-footer"><div class="wrap shell-footer__inner">
@@ -888,7 +928,6 @@ export function columnCharts(panels, { col } = {}) {
 }
 
 /** One chart on its own. */
-export const columnChart = (rows, opts = {}) => columnCharts([{ rows, ...opts }], opts);
 
 /** Horizontal bar list used by five of the six dashboard cards. */
 export function barList(rows, { max, gap = 12 } = {}) {
@@ -913,15 +952,17 @@ export function barList(rows, { max, gap = 12 } = {}) {
 
 
 
-/** Shown where a view needs more width than the window offers. */
 /**
  * Nothing matched. Saying so beats a grid with no rows, and the way out is the
  * same control that got the user here.
  */
 export function noResults(what = 'Projekte') {
+  const text = what === 'Personen'
+    ? `${t('Auf keine der')} ${data.people.length} ${t('Personen treffen die aktiven Filter zu.')}`
+    : `${t('Die aktiven Filter schliessen alle')} ${data.projects.length} ${t('Projekte aus.')}`;
   return html`<div class="empty">
     <p class="empty__title">${t('Keine')} ${t(what)} ${t('im gesetzten Umfang')}</p>
-    <p class="empty__text">${t('Die aktiven Filter schliessen alle')} ${data.projects.length} ${t('Projekte aus.')}</p>
+    <p class="empty__text">${text}</p>
     <button type="button" class="btn" data-act="filters-reset">${t('Alle Filter zurücksetzen')}</button>
   </div>`;
 }

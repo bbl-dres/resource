@@ -7,7 +7,7 @@
    ============================================================================= */
 
 import {
-  data, state, t, num, fmtMio, cellValue, projectDemand, printPeriods, columnSet, coloured,
+  data, state, t, VOCAB, num, fmtMio, cellValue, projectDemand, printPeriods, columnSet, coloured,
   periodValue,
   totals, loadStatus, heatStep, filteredProjects, activeFilters,
   groupProjects
@@ -16,9 +16,9 @@ import {
 import {
   html, raw, attr, icons, pageHeader, toolbar, activeFilterRow, noResults,
   dropdown, menuRadio,
-  scopeLine, yearRule
+  scopeLine, projectCount, sumLabel, yearRule
 } from './ui.js';
-import { visibleColumns, leadLayout } from './columns.js';
+import { visibleColumns, leadLayout, alignCls } from './columns.js';
 import { ganttRow, ganttLegend, phaseBand, planLegend } from './views-schedule.js';
 
 /* =============================================================================
@@ -30,7 +30,9 @@ export function renderApi() {
     ${pageHeader({
       title: 'API-Dokumentation',
       chrome: false,
-      actions: html`<a class="btn" href="." data-act="home">
+      /* Back to the plan as it was left: «home» is the brand link's reset,
+         and took every filter with it. */
+      actions: html`<a class="btn" href="." data-act="tab" data-val="overview">
         ${icons.chevronLeft(15)}${t('Zurück')}</a>`
     })}
     <div class="wrap"><div class="content">
@@ -40,17 +42,26 @@ export function renderApi() {
 
 /**
  * Swagger UI is a real widget, not markup: it mounts itself into the container
- * after the view has rendered. app.js calls this once the DOM is in place.
+ * after the view has rendered, and app.js calls this after every render.
+ *
+ * Every render replaces the container, so the mounted one is kept here and
+ * put back in place of the fresh, empty one. The guard used to be a flag on
+ * the container itself — on the node the next render throws away — so any
+ * render on this tab, a menu opening or a window resized, rebuilt the widget
+ * from the spec and folded shut whatever the reader had opened.
  */
+let swaggerHost = null;
+
 export function mountSwagger() {
-  const host = document.querySelector('[data-swagger]');
-  if (!host || host.dataset.mounted) return;
-  host.dataset.mounted = '1';
+  const slot = document.querySelector('[data-swagger]');
+  if (!slot || slot === swaggerHost) return;
+  if (swaggerHost) return void slot.replaceWith(swaggerHost);
+  swaggerHost = slot;
 
   loadSwagger()
     .then(() => window.SwaggerUIBundle({
       url: 'data/openapi.json',
-      domNode: host,
+      domNode: slot,
       // The spec is the documentation; the operation list is the navigation.
       docExpansion: 'list',
       defaultModelsExpandDepth: 0,
@@ -61,11 +72,14 @@ export function mountSwagger() {
       layout: 'BaseLayout'
     }))
     .catch(error => {
-      host.innerHTML = '';
-      host.append(Object.assign(document.createElement('p'), {
+      slot.innerHTML = '';
+      slot.append(Object.assign(document.createElement('p'), {
         className: 'empty',
         textContent: `${t('Die API-Dokumentation konnte nicht geladen werden.')} ${error.message}`
       }));
+      /* Not kept: the next visit to the tab tries again from the start. */
+      swaggerHost = null;
+      swaggerReady = null;
     });
 }
 
@@ -105,7 +119,7 @@ function loadSwagger() {
  * that is the whole difference between a format and its neighbour.
  */
 /* Up to A0: the large sheets are for a workshop wall, not for a desk. */
-const PAPERS = ['a4', 'a3', 'a2', 'a1', 'a0'].map(id => ({ id, label: id.toUpperCase() }));
+const PAPERS = VOCAB.paper.map(id => ({ id, label: id.toUpperCase() }));
 
 const ORIENTATIONS = [
   { id: 'portrait', label: 'Hoch' },
@@ -117,12 +131,6 @@ const ORIENTATIONS = [
  * wide and no screen shows one at its own size; the fixed steps are for reading
  * the small print, and the preview pans once a sheet is wider than the pane.
  */
-/*
- * The report prints the plan at the same three grains the screen offers. Four
- * and a half years by month is 54 columns, which is what the large papers are
- * for.
- */
-
 const ZOOMS = [
   { id: 'fit', label: 'Anpassen' },
   { id: '50', label: '50 %' },
@@ -183,11 +191,10 @@ const sheetQuarter = (sheet) => (sheet.orientation === 'portrait' ? 54 : 50);
  * one pixel in the tenth.
  */
 const PAPER_PX = [794, 1123, 1587, 2245, 3179, 4494];
-const PAPER_ORDER = ['a4', 'a3', 'a2', 'a1', 'a0'];
 const SHEET_PAD = 65;     // the sheet's own inset, both sides together
 
 function ganttColumn(sheet, leadWidth, cols) {
-  const step = PAPER_ORDER.indexOf(sheet.paper) + (sheet.orientation === 'landscape' ? 1 : 0);
+  const step = VOCAB.paper.indexOf(sheet.paper) + (sheet.orientation === 'landscape' ? 1 : 0);
   const paper = PAPER_PX[step] ?? PAPER_PX.at(-1);
   return cols ? Math.max(1, (paper - SHEET_PAD - leadWidth) / cols) : 0;
 }
@@ -232,11 +239,11 @@ export function renderExport() {
       <div class="sheetbar">
         <div class="sheetbar__paper">
           ${dropdown({
-            id: 'zoom', label: `${t('Zoom')}: ${zoomLabel()}`, width: 180,
+            id: 'zoom', label: `${t('Zoom')}: ${zoomLabel()}`, size: 'sm',
             body: () => html`${ZOOMS.map(z => menuRadio(t(z.label), state.zoom === z.id, 'zoom', z.id))}`
           })}
           ${dropdown({
-            id: 'paper', label: `${t('Format')}: ${state.paper.toUpperCase()}`, width: 180,
+            id: 'paper', label: `${t('Format')}: ${state.paper.toUpperCase()}`, size: 'sm',
             body: () => html`${PAPERS.map(p => menuRadio(p.label, state.paper === p.id, 'paper', p.id))}`
           })}
           <div class="segmented">
@@ -252,8 +259,8 @@ export function renderExport() {
 }
 
 /*
- * A report prints everything. Portrait holds four quarters and 24 rows, so a
- * portfolio of this size needs a stack: every quarter block, and within each
+ * A report prints everything. A sheet holds a few quarters and a few dozen
+ * rows — see FORMATS — so a portfolio of this size needs a stack: every quarter block, and within each
  * block every page of rows. The totals close each block, the way a real
  * summary sheet does — not each page, which would invite reading a page total
  * as a portfolio total.
@@ -266,9 +273,9 @@ export function renderExport() {
 function sheetRows() {
   const rows = [];
   for (const group of groupProjects()) {
-    if (group.label) rows.push({ kind: 'group', label: group.label, count: group.projects.length });
+    rows.push({ kind: 'group', label: group.label, count: group.projects.length });
     group.projects.forEach(p => rows.push({ kind: 'project', p }));
-    if (group.label) rows.push({ kind: 'sum', label: group.label, projects: group.projects });
+    rows.push({ kind: 'sum', label: group.label, projects: group.projects });
   }
   return rows;
 }
@@ -291,37 +298,36 @@ const SHEET_TITLE_MAX = 320;
 
 const ROW_COST = { group: 2.3, sum: 0.85, project: 1 };
 const SCHEDULE_COST = { ...ROW_COST, group: 1.95, sum: 0 };
-const rowCost = (row, cost = ROW_COST) => row.cost ?? cost[row.kind];
+const rowCost = (row, cost = ROW_COST) => cost[row.kind];
 const costOf = (page, cost) => page.reduce((a, r) => a + rowCost(r, cost), 0);
 
+/*
+ * Break the stream into pages, looking one step ahead: a row goes onto a
+ * page only if what must stand under it still fits — a heading wants its
+ * first project, and a group's last project wants the sum. A page that
+ * breaks inside a group opens on that group's heading, marked as continued.
+ *
+ * It used to break first and repair afterwards, and the repair missed two
+ * cases the default portfolio hits: on A4 landscape the heading «(Kredit
+ * offen)» closed a sheet with no row under it, and a sum pulled back to the
+ * top of a sheet arrived with one project and no heading or column head.
+ */
 function paginate(rows, perPage, costs = ROW_COST) {
   const pages = [];
   let page = [];
   let group = null;
-
-  for (const row of rows) {
+  rows.forEach((row, i) => {
     if (row.kind === 'group') group = row;
-    const cost = costOf(page, costs);
-    // A heading on the last line of a page belongs to the next one.
-    const orphan = row.kind === 'group' && cost + costs.group > perPage;
-    if (cost + rowCost(row, costs) > perPage || orphan) {
+    const closesGroup = rows[i + (row.kind === 'group' ? 2 : 1)]?.kind === 'sum';
+    const under = row.kind === 'group' ? costs.project + (closesGroup ? costs.sum : 0)
+      : row.kind === 'project' && closesGroup ? costs.sum : 0;
+    if (page.length && costOf(page, costs) + rowCost(row, costs) + under > perPage) {
       pages.push(page);
-      page = group && row.kind === 'project' ? [{ ...group, continued: true }] : [];
+      page = row.kind === 'group' || !group ? [] : [{ ...group, continued: true }];
     }
     page.push(row);
-  }
+  });
   if (page.length) pages.push(page);
-
-  /*
-   * A sum belongs to rows the reader can see. If a break left one at the top of
-   * a page on its own, pull the last row of the previous page along with it.
-   */
-  for (let i = 1; i < pages.length; i++) {
-    while (pages[i][0]?.kind === 'sum' && pages[i - 1].length > 1) {
-      pages[i].unshift(pages[i - 1].pop());
-      if (pages[i][0].kind !== 'sum') break;
-    }
-  }
   return pages.length ? pages : [[]];
 }
 
@@ -339,16 +345,15 @@ function printSheets(sheet, report) {
   for (let from = 0; from < columns.length; from += sheet.quarters) {
     blocks.push(columns.slice(from, from + sheet.quarters));
   }
-  // Every row is now one line high, so the page budget is a plain row count and
-  // switching attributes on can no longer push a sheet past the paper.
+  // Every row is one line high, so switching attributes on cannot push a sheet
+  // past the paper; what a row costs against the budget is in ROW_COST.
   const pages = paginate(sheetRows(), perSheet,
     report.id === 'schedule' ? SCHEDULE_COST : ROW_COST);
   const total = blocks.length * pages.length + 1;   // + the method sheet
 
   /*
    * The same for every sheet in the run, so they are worked out once rather
-   * than per sheet. At month scale grouped by lead that was 270 calls where 30
-   * were needed, and totals() walks the whole filtered portfolio each time.
+   * than per sheet. At month scale that was 270 calls where 30 were needed, and totals() walks the whole filtered portfolio each time.
    */
   const tot = totals(all);
   const chips = activeFilters();
@@ -386,7 +391,7 @@ const METHOD = [
 
 const GLOSSARY = [
   ['Pensum', 'Arbeitsanteil in Prozent einer Vollzeitstelle. 100 % entspricht einer Person Vollzeit.'],
-  ['Pensum', 'Geplanter Einsatz eines Projekts in einem Quartal, in Prozent einer Stelle oder in FTE.'],
+  ['Projektpensum', 'Geplanter Einsatz eines Projekts in einem Quartal, in Prozent einer Stelle oder in FTE.'],
   ['Extern beauftragt', 'Leistung, die nicht die eigene Abteilung erbringt; sie mindert das Pensum, das die Abteilung selbst leisten muss.'],
   ['Baukredit-Freigabe', 'Gate 4 Ausschreibung. Davor ist ein Projekt planerisch, aber nicht finanziell gebunden — «vor Baukredit-Freigabe» weist diesen Anteil aus.'],
   ['Phase (ePPM)', 'Teilphase, wie ePPM sie führt: Vorstudien, 22 Auswahlverfahren, 31 Vorprojekt, 32 Bauprojekt, 53 Inbetriebnahme, 61 Betrieb.'],
@@ -395,14 +400,25 @@ const GLOSSARY = [
   ['Überlast · knapp · ok · frei', 'Auslastung über 100 · 95 – 100 · 80 – 94 · darunter.']
 ];
 
+/** The sender, at the head of every sheet. */
+const sheetSender = cfg => html`<div class="sheet__sender">
+  <img src="assets/swiss-logo-flag.svg" alt="" width="24" height="26">
+  <div>${cfg.sender.map((line, i) => html`<span class="${i === 2 ? 'is-muted' : ''}">${t(line)}</span>`)}</div>
+</div>`;
+
+/** Who made the sheet, which document it is, and where it stands in the run. */
+const sheetFoot = (cfg, page, total, { synced = false } = {}) => html`<footer class="sheet__foot">
+  <span>${t('Erstellt am')} ${cfg.createdAt} ${t('durch')} ${cfg.createdBy}${
+    synced ? ` · ${t('Datenstand ePPM')}: ${cfg.syncedAt}` : ''}</span>
+  <span>${cfg.documentId}</span>
+  <span>${t('Blatt')} ${page} ${t('von')} ${total}</span>
+</footer>`;
+
 function methodSheet(sheet, { page, total }) {
   const cfg = data.print;
   return html`<article class="sheet sheet--${sheet.paper} sheet--${sheet.orientation} sheet--method">
     <header class="sheet__head">
-      <div class="sheet__sender">
-        <img src="assets/swiss-logo-flag.svg" alt="" width="24" height="26">
-        <div>${cfg.sender.map((line, i) => html`<span class="${i === 2 ? 'is-muted' : ''}">${t(line)}</span>`)}</div>
-      </div>
+      ${sheetSender(cfg)}
       <div class="sheet__titles">
         <div class="sheet__title">${t('Methodik und Begriffe')}</div>
         <div class="sheet__sub">${t('Wie die Zahlen dieses Berichts entstehen')}</div>
@@ -426,11 +442,7 @@ function methodSheet(sheet, { page, total }) {
 
     <p class="sheet__disclaimer">${t(data.meta.prototypeNotice)}</p>
 
-    <footer class="sheet__foot">
-      <span>${t('Erstellt am')} ${cfg.createdAt} ${t('durch')} ${cfg.createdBy}</span>
-      <span>${cfg.documentId}</span>
-      <span>${t('Blatt')} ${page} ${t('von')} ${total}</span>
-    </footer>
+    ${sheetFoot(cfg, page, total)}
   </article>`;
 }
 
@@ -443,12 +455,14 @@ function sheetColumns(sheet) {
   const wide = sheet.orientation === 'landscape';
   return visibleColumns(columnSet()).map(c => ({
     key: c.key,
-    // The sheet has room for the longer name where the grid header does not.
-    label: t(c.sheet.label ?? c.label),
+    label: t(c.label),
     w: c.sheet.w[wide ? 1 : 0],
     cls: c.sheet.cls,
     flex: c.sheet.flex,
-    text: c.text ?? (() => '')
+    text: c.text,
+    /* The house's short form — «PM Inland II» — where the column has one:
+       left out, a 70px column printed three units as the same clipped name. */
+    short: c.short
   }));
 }
 
@@ -485,6 +499,7 @@ const continuation = (span) => html`<div class="sheet__row sheet__row--more">
  */
 function scheduleTable(rows, block, tot, last, sheet) {
   const cols = block;
+  const layers = { bars: state.layers.phases, gates: state.layers.gates };
   // Paper widths, not screen ones — the same numbers the printed table uses.
   const wide = sheet.orientation === 'landscape';
   const lay = leadLayout(columnSet(), {
@@ -497,19 +512,17 @@ function scheduleTable(rows, block, tot, last, sheet) {
    * came out blank while the same row on screen was fully labelled.
    */
   lay.colWidth = ganttColumn(sheet, lay.width, cols.length);
-  return html`<div class="sheet__gantt gantt"
-      style="--gantt-cols:${cols.length};--gantt-lead:${lay.width}px">
-    ${rows.some(r => r.kind === 'group') ? '' : ganttAxisHead(cols, lay)}
+  return html`<div class="sheet__gantt gantt" style="--gantt-cols:${cols.length}">
     ${rows.map(row => {
       if (row.kind === 'sum') return '';          // a bar plan has nothing to add up
       if (row.kind === 'group') {
         return html`<div class="sheet__grouphead">
           <span>${t(row.label)}</span>
-          <span class="sheet__groupcount">${row.count} ${t('Projekte')}${
+          <span class="sheet__groupcount">${projectCount(row.count)}${
             row.continued ? ` · ${t('Fortsetzung')}` : ''}</span>
         </div>${ganttAxisHead(cols, lay)}`;
       }
-      return ganttRow(row.p, cols, lay);
+      return ganttRow(row.p, cols, lay, layers);
     })}
     ${last ? capacityRow(cols, tot, lay) : continuation(0)}
   </div>`;
@@ -518,7 +531,7 @@ function scheduleTable(rows, block, tot, last, sheet) {
 /** The axis, repeated above every group exactly as the column head is. */
 const ganttAxisHead = (cols, lay) => html`<header class="gantt__axis"
     style="grid-template-columns:${raw(lay.tpl)}">
-  ${lay.shown.map(c => html`<div class="gantt__axislabel">${t(c.sheet.label ?? c.label)}</div>`)}
+  ${lay.shown.map(c => html`<div class="gantt__axislabel ${alignCls(c)}">${t(c.label)}</div>`)}
   <div class="gantt__quarters">
     ${cols.map(col => html`<div class="${col.isNow ? 'is-today' : ''} ${yearRule(col)}">${col.short}</div>`)}
   </div>
@@ -544,9 +557,7 @@ const demandLegend = (cfg, band = false) => planLegend({
   coloured: coloured(), legend: cfg.legend, cls: 'legend--sheet'
 });
 
-/** The column header, repeated wherever the reader needs it again. */
-/** True where a quarter opens a year, the way markYears() does it on screen. */
-
+/** The column header, repeated under every group heading. */
 function columnHead(lead, columns) {
   return html`<div class="sheet__row sheet__row--head">
     ${lead.map(c => html`<span class="${c.cls ?? ''}">${c.label}</span>`)}
@@ -571,21 +582,17 @@ function printSheet(sheet, report, { rows, all, block, page, total, last, tot, c
    * A sheet wider than the table keeps the difference as margin.
    */
   const quarter = sheetQuarter(sheet);
-  const cols = schedule
-    ? `var(--grid-col-id) minmax(0, 1fr)`
-    : lead.map(c => (c.flex ? `minmax(${c.w}px, ${SHEET_TITLE_MAX}px)` : `minmax(0, ${c.w}px)`))
+  /* The bar plan lays itself out — see scheduleTable(). */
+  const cols = schedule ? '' : lead.map(c => (c.flex ? `minmax(${c.w}px, ${SHEET_TITLE_MAX}px)` : `minmax(0, ${c.w}px)`))
       .join(' ') + ` repeat(${block.length}, ${quarter}px)`;
 
   const span = lead.length;
-  const numbers = (values, cls = '') => block.map(col =>
-    html`<span class="sheet__num sheet__period ${cls} ${yearRule(col)}">${num(periodValue(values, col))}</span>`);
+  const numbers = values => block.map(col =>
+    html`<span class="sheet__num sheet__period ${yearRule(col)}">${num(periodValue(values, col))}</span>`);
 
-  return html`<article class="sheet sheet--${sheet.paper} sheet--${sheet.orientation}" style="--sheet-cols:${raw(cols)}">
+  return html`<article class="sheet sheet--${sheet.paper} sheet--${sheet.orientation}" ${attr(cols, `style="--sheet-cols:${cols}"`)}>
     <header class="sheet__head">
-      <div class="sheet__sender">
-        <img src="assets/swiss-logo-flag.svg" alt="" width="24" height="26">
-        <div>${cfg.sender.map((line, i) => html`<span class="${i === 2 ? 'is-muted' : ''}">${t(line)}</span>`)}</div>
-      </div>
+      ${sheetSender(cfg)}
       <div class="sheet__titles">
         <div class="sheet__title">${t('Personalplanung')} — ${t(report.label)}</div>
         <div class="sheet__sub">${t(report.sub)}${schedule ? '' : ` · ${state.unit === 'fte' ? t('Pensum in FTE') : t('Pensum in %')}`}
@@ -593,22 +600,21 @@ function printSheet(sheet, report, { rows, all, block, page, total, last, tot, c
       </div>
       <div class="sheet__meta">
         <span>${t('Umfang')}: ${scopeLine(all.length)}</span>
-        <span>${t('Filter')}: ${chips.length ? chips.map(c => c.label).join(', ') : t('keine')}
-          · ${t('Einheit')}: ${state.unit === 'fte' ? 'FTE' : t('Pensum in %')}</span>
+        <span>${t('Filter')}: ${chips.length ? chips.map(c => c.label).join(', ') : t('keine')}${
+          /* A bar plan carries no figure for a unit to be the unit of. */
+          schedule ? '' : ` · ${t('Einheit')}: ${state.unit === 'fte' ? 'FTE' : t('Pensum in %')}`}</span>
         <span>${t(cfg.classification)}</span>
       </div>
     </header>
 
     <div class="sheet__table">
       ${schedule ? scheduleTable(rows, block, tot, last, sheet)
-        : html`${rows.some(r => r.kind === 'group') ? '' : columnHead(lead, block)}
-
-      ${rows.map(row => {
+        : html`${rows.map(row => {
         if (row.kind === 'group') {
           // A page can hold several groups, so each carries its own head.
           return html`<div class="sheet__row sheet__row--group">
             <span style="grid-column:span ${block.length + lead.length}">${t(row.label)}
-              <span class="sheet__groupcount">${row.count} ${t('Projekte')}${
+              <span class="sheet__groupcount">${projectCount(row.count)}${
                 row.continued ? ` · ${t('Fortsetzung')}` : ''}</span></span>
           </div>${columnHead(lead, block)}`;
         }
@@ -620,8 +626,8 @@ function printSheet(sheet, report, { rows, all, block, page, total, last, tot, c
           const values = data.quarters.map((_, q) =>
             row.projects.reduce((a, p) => a + cellValue(p, q), 0));
           return html`<div class="sheet__row sheet__row--groupsum">
-            ${sheetSumLead(`${t('Summe')} ${t(row.label)}`, row.projects, lead)}
-            ${block.map(col => html`<span class="sheet__num sheet__period ${yearRule(col)}">${num(periodValue(values, col))}</span>`)}
+            ${sheetSumLead(sumLabel(row.projects.length), row.projects, lead)}
+            ${numbers(values)}
           </div>`;
         }
 
@@ -632,9 +638,8 @@ function printSheet(sheet, report, { rows, all, block, page, total, last, tot, c
           ${lead.map(c => html`<span class="${c.key === 'title' ? 'sheet__project' : `sheet__lead ${c.cls ?? ''}`}"
             >${sheetCell(c, p)}</span>`)}
           ${block.map((col) => {
-            const q = col.quarters[0];
             const v = periodValue(cells, col);
-            return html`<span class="sheet__cell ${coloured() ? `heat-${heatStep(v)}` : ''} ${yearRule(col)}"><span class="cellv">${v ? num(v) : '–'}</span></span>`;
+            return html`<span class="sheet__cell ${coloured() ? `heat-${heatStep(v)}` : ''} ${yearRule(col)}"><span class="cellv">${v ? num(v) : state.hideZeros ? '' : '–'}</span></span>`;
           })}
           ${band && phaseBand(p, block, { colWidth: quarter },
             { compact: true, bars: state.layers.phases, gates: state.layers.gates })}
@@ -662,14 +667,10 @@ function printSheet(sheet, report, { rows, all, block, page, total, last, tot, c
       </div>` : continuation(block.length + span)}`}
     </div>
 
-    ${schedule ? ganttLegend('legend--sheet') : demandLegend(cfg, band)}
+    ${schedule ? ganttLegend({ bars: state.layers.phases, gates: state.layers.gates }, 'legend--sheet') : demandLegend(cfg, band)}
 
     <p class="sheet__disclaimer">${t(data.meta.prototypeNotice)}</p>
 
-    <footer class="sheet__foot">
-      <span>${t('Erstellt am')} ${cfg.createdAt} ${t('durch')} ${cfg.createdBy} · ${t('Datenstand ePPM')}: ${cfg.syncedAt}</span>
-      <span>${cfg.documentId}</span>
-      <span>${t('Blatt')} ${page} ${t('von')} ${total}</span>
-    </footer>
+    ${sheetFoot(cfg, page, total, { synced: true })}
   </article>`;
 }

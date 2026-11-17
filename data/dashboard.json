@@ -12,6 +12,12 @@
     "subtitle": "Gebundene Mittel nach Jahr der Realisierung",
     "rows": [
       {
+        "label": "vor 2026",
+        "value": 142.8,
+        "valueLabel": "142,8 Mio.",
+        "note": "15 Projekte"
+      },
+      {
         "label": "2026",
         "value": 495.4,
         "valueLabel": "495,4 Mio.",
@@ -31,9 +37,9 @@
       },
       {
         "label": "2029 und später",
-        "value": 210.2,
-        "valueLabel": "210,2 Mio.",
-        "note": "23 Projekte"
+        "value": 67.4,
+        "valueLabel": "67,4 Mio.",
+        "note": "8 Projekte"
       }
     ]
   }

@@ -9,6 +9,7 @@
    A column carries what all six need:
      key      identity, and the field name in an exported row
      label    German source string; every consumer runs it through t()
+     gridLabel  the heading on the screen's grid, where it differs (optional)
      flag     the switch that turns it on, or null for a column that is always
               there. Only `id` is always there: a row has to be identifiable.
      align    'end' for a figure, 'center' for a mark; text reads from the left
@@ -18,30 +19,29 @@
      width    the design token holding its width in the grid
      sheet    { w: [portrait, landscape], cls } for the printed sheet
      xls      { type, width } for the spreadsheet
-     text     the plain value, used by the CSV and the workbook
+     text     the plain value, as a cell prints it
+     value    the same as a number, where the column is one: what the CSV and
+              the workbook carry instead of the text (optional)
      short    a shorter form for a cell, with `text` as its hint (optional)
    ============================================================================= */
 
 import { data, t, eppmOf, peopleOn } from './store.js';
 
-/**
- * Who is on the project, in the width of one name: the lead — see leadOf() in
- * store.js — and how many more, or the words that stand in for nobody. The
- * names themselves are the rows a folded-open project shows.
+/*
+ * How many people are on the project — everybody who holds a role on it at
+ * any time in the window, each counted once. On a project row the
+ * «Bearbeitende» column says that and nothing else: it named the lead and
+ * counted the others («Sonja Beispiel +2»), and the users asked for the
+ * number alone. The names are the rows under the project.
  */
-const leadName = p => {
-  const lead = data.peopleById[p.leadId];
-  const more = peopleOn(p).filter(id => id !== p.leadId).length;
-  return (lead ? lead.name : t('nicht zugewiesen')) + (more > 0 ? ` +${more}` : '');
-};
+const staffCount = p => peopleOn(p).length;
 
 /*
  * Six columns, not eleven. Ampel, Priorität, Nächster Meilenstein, Soll-Pensum
  * and Verlauf were taken out in review: nobody switched them on, and a menu
  * of eleven switches hid the five that matter. The facts are still in the
  * data and in the project dialog; only the columns are gone. «Rollen», a
- * count of a project's rows, went too: «Bearbeitende» says how many people
- * are on the project beside the one it names.
+ * count of a project's rows, went too: «Bearbeitende» counts the people.
  */
 
 export const COLUMNS = [
@@ -56,7 +56,10 @@ export const COLUMNS = [
     text: p => p.number
   },
   {
-    key: 'title', label: 'Projekt', flag: 'title', sort: 'project', width: '--grid-col-title',
+    /* On the screen's grid the column holds two things — a project's name
+       and, in the rows under it, a role — and its heading says both. The
+       sheet, the file and the Ansicht menu have projects only. */
+    key: 'title', label: 'Projekt', gridLabel: 'Projekt / Rolle', flag: 'title', sort: 'project', width: '--grid-col-title',
     grow: true, cls: 'pcell--title', sheet: { w: [150, 190], flex: true }, xls: { type: 'text', width: 38 },
     text: p => p.title
   },
@@ -68,13 +71,15 @@ export const COLUMNS = [
   },
   {
     /*
-     * Plural: the column names the people on the project. On a project row
-     * that is the lead and a count of the others; folded open, each row under
-     * it carries the person of one role in this same column.
+     * Plural: the people on the project. On a project row that is their
+     * number; folded open, each row under it names the person of one role in
+     * this same column. A figure, and still set from the left: it stands over
+     * a column of names.
      */
     key: 'lead', label: 'Bearbeitende', flag: 'lead', sort: 'lead', width: '--grid-col-lead',
-    cls: 'pcell--lead', sheet: { w: [112, 128], cls: 'sheet__muted' }, xls: { type: 'text', width: 24 },
-    text: leadName
+    cls: 'pcell--lead', sheet: { w: [74, 84], cls: 'sheet__muted' }, xls: { type: 'int', width: 14 },
+    text: p => String(staffCount(p)),
+    value: staffCount
   },
   {
     key: 'portfolio', label: 'Teilportfolio', flag: 'portfolio', sort: 'portfolio',
@@ -96,7 +101,8 @@ export const COLUMNS = [
     key: 'credit', label: 'Kredit CHF', flag: 'credit', sort: 'credit',
     width: '--grid-col-credit', cls: 'pcell--credit', numeric: true, align: 'end',
     sheet: { w: [62, 76], cls: 'sheet__num sheet__muted' }, xls: { type: 'num', width: 14 },
-    text: p => t(p.creditLabel)
+    text: p => t(p.creditLabel),
+    value: p => p.credit ?? null
   }
 ];
 
@@ -105,10 +111,12 @@ export const column = key => BY_KEY[key];
 
 /*
  * Which column gives way first when the window is too narrow, least
- * load-bearing to most. `id` is not in the list — it is the floor, and on a
- * phone the list runs to its end and leaves exactly that.
+ * load-bearing to most. The name is not in the list — it is the floor. The
+ * number used to be, and on a phone the list ran to its end and left a
+ * column of four-digit IDs: nothing to tell a project by, and no link to
+ * its dialog, which hangs on the name.
  */
-const YIELD_ORDER = ['organisation', 'portfolio', 'credit', 'phase', 'lead', 'title'];
+const YIELD_ORDER = ['organisation', 'portfolio', 'credit', 'phase', 'lead', 'id'];
 
 /**
  * The columns that fit. `room` is the width available to the card and
@@ -121,7 +129,9 @@ export function fittingColumns(set, { room, axis, widthOf, lead: before = 0 }) {
   const lead = () => before + shown.reduce((a, c) => a + widthOf(c), 0);
 
   for (const key of YIELD_ORDER) {
-    if (lead() + axis <= room) break;
+    /* The last column stays whatever it is: with the name switched off in
+       the Ansicht menu the list would otherwise run to nothing. */
+    if (lead() + axis <= room || shown.length === 1) break;
     const i = shown.findIndex(c => c.key === key);
     if (i < 0) continue;
     hidden.push(shown[i]);
@@ -172,14 +182,18 @@ export function leadLayout(set, fit) {
  * The columns the project name is reckoned against: the pensum grid's own
  * defaults. Not what is switched on right now, so toggling an attribute never
  * moves the name either.
+ *
+ * The phase was on this list from the time it was a default column. It no
+ * longer is, and the name was still giving up 152px to a column that was not
+ * there — clipped at its floor on a laptop with room to spare beside it.
  */
-const TITLE_REFERENCE = ['id', 'phase', 'lead', 'credit'];
+const TITLE_REFERENCE = ['id', 'lead', 'credit'];
 
 /*
  * And against a fixed number of quarter columns, not however many the current
  * time scale happens to show. Reckoned against the visible count, the year view
  * — five columns instead of eighteen — left so much over that the project name
- * grew from 285 to 460px, and it changed width on every scale change.
+ * grew from its floor to its ceiling, and it changed width on every scale change.
  */
 const REFERENCE_COLUMNS = 8;
 

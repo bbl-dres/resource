@@ -40,10 +40,9 @@
       "plan": "2026Q3",
       "planDate": "2026-09-27",
       "forecast": "2026Q3",
-      "forecastDate": "2026-09-23",
+      "forecastDate": "2026-09-27",
       "status": "ok",
-      "statusLabel": "Termin gehalten",
-      "impact": "Kreditfreigabe verschoben"
+      "statusLabel": "Termin gehalten"
     },
     {
       "id": "ms-51-5",
@@ -53,7 +52,7 @@
       "plan": "2028Q3",
       "planDate": "2028-09-28",
       "forecast": "2028Q3",
-      "forecastDate": "2028-09-13",
+      "forecastDate": "2028-09-28",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -65,7 +64,7 @@
       "plan": "2030Q1",
       "planDate": "2030-03-25",
       "forecast": "2030Q1",
-      "forecastDate": "2030-03-13",
+      "forecastDate": "2030-03-25",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -79,8 +78,7 @@
       "forecast": null,
       "forecastDate": null,
       "status": "pending",
-      "statusLabel": "▲ Auftrag noch hängig",
-      "impact": "Kreditfreigabe verschoben"
+      "statusLabel": "▲ Auftrag noch hängig"
     },
     {
       "id": "ms-12-6",
@@ -116,7 +114,7 @@
       "plan": "2028Q1",
       "planDate": "2028-03-27",
       "forecast": "2028Q1",
-      "forecastDate": "2028-03-11",
+      "forecastDate": "2028-03-27",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -141,7 +139,7 @@
       "plan": "2032Q2",
       "planDate": "2032-06-12",
       "forecast": "2032Q2",
-      "forecastDate": "2032-06-22",
+      "forecastDate": "2032-06-12",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -153,7 +151,7 @@
       "plan": "2026Q4",
       "planDate": "2026-12-27",
       "forecast": "2026Q4",
-      "forecastDate": "2026-12-11",
+      "forecastDate": "2026-12-27",
       "status": "ok",
       "statusLabel": "Termin gehalten",
       "impact": "löst 60 % Bauleitung aus"
@@ -166,7 +164,7 @@
       "plan": "2028Q4",
       "planDate": "2028-12-12",
       "forecast": "2028Q4",
-      "forecastDate": "2028-12-11",
+      "forecastDate": "2028-12-12",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -178,7 +176,7 @@
       "plan": "2030Q1",
       "planDate": "2030-03-22",
       "forecast": "2030Q1",
-      "forecastDate": "2030-03-23",
+      "forecastDate": "2030-03-22",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -203,7 +201,7 @@
       "plan": "2028Q3",
       "planDate": "2028-09-25",
       "forecast": "2028Q3",
-      "forecastDate": "2028-09-24",
+      "forecastDate": "2028-09-25",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -215,7 +213,7 @@
       "plan": "2026Q4",
       "planDate": "2026-12-27",
       "forecast": "2026Q4",
-      "forecastDate": "2026-12-30",
+      "forecastDate": "2026-12-27",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -227,7 +225,7 @@
       "plan": "2029Q1",
       "planDate": "2029-03-23",
       "forecast": "2029Q1",
-      "forecastDate": "2029-03-14",
+      "forecastDate": "2029-03-23",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -239,7 +237,7 @@
       "plan": "2026Q4",
       "planDate": "2026-12-23",
       "forecast": "2026Q4",
-      "forecastDate": "2026-12-12",
+      "forecastDate": "2026-12-23",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -276,7 +274,7 @@
       "plan": "2029Q3",
       "planDate": "2029-09-27",
       "forecast": "2029Q3",
-      "forecastDate": "2029-09-28",
+      "forecastDate": "2029-09-27",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -288,7 +286,7 @@
       "plan": "2030Q3",
       "planDate": "2030-09-10",
       "forecast": "2030Q3",
-      "forecastDate": "2030-09-12",
+      "forecastDate": "2030-09-10",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -300,7 +298,7 @@
       "plan": "2027Q2",
       "planDate": "2027-06-15",
       "forecast": "2027Q2",
-      "forecastDate": "2027-06-11",
+      "forecastDate": "2027-06-15",
       "status": "ok",
       "statusLabel": "Termin gehalten",
       "impact": "entlastet 10 %"
@@ -328,8 +326,7 @@
       "forecast": null,
       "forecastDate": null,
       "status": "pending",
-      "statusLabel": "▲ Auftrag noch hängig",
-      "impact": "Verzug durch Statikprüfung"
+      "statusLabel": "▲ Auftrag noch hängig"
     },
     {
       "id": "ms-26-3",
@@ -339,7 +336,7 @@
       "plan": "2028Q1",
       "planDate": "2028-03-28",
       "forecast": "2028Q1",
-      "forecastDate": "2028-03-12",
+      "forecastDate": "2028-03-28",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -376,7 +373,7 @@
       "plan": "2033Q2",
       "planDate": "2033-06-19",
       "forecast": "2033Q2",
-      "forecastDate": "2033-06-14",
+      "forecastDate": "2033-06-19",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -388,7 +385,7 @@
       "plan": "2026Q3",
       "planDate": "2026-09-21",
       "forecast": "2026Q3",
-      "forecastDate": "2026-09-12",
+      "forecastDate": "2026-09-21",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -400,10 +397,9 @@
       "plan": "2026Q4",
       "planDate": "2026-12-28",
       "forecast": "2026Q4",
-      "forecastDate": "2026-12-30",
+      "forecastDate": "2026-12-28",
       "status": "ok",
-      "statusLabel": "Termin gehalten",
-      "impact": "Verzug durch Statikprüfung"
+      "statusLabel": "Termin gehalten"
     },
     {
       "id": "ms-39-4",
@@ -425,7 +421,7 @@
       "plan": "2029Q3",
       "planDate": "2029-09-11",
       "forecast": "2029Q3",
-      "forecastDate": "2029-09-19",
+      "forecastDate": "2029-09-11",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -437,7 +433,7 @@
       "plan": "2030Q2",
       "planDate": "2030-06-12",
       "forecast": "2030Q2",
-      "forecastDate": "2030-06-22",
+      "forecastDate": "2030-06-12",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -474,7 +470,7 @@
       "plan": "2027Q4",
       "planDate": "2027-12-30",
       "forecast": "2027Q4",
-      "forecastDate": "2027-12-17",
+      "forecastDate": "2027-12-30",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -486,7 +482,7 @@
       "plan": "2028Q3",
       "planDate": "2028-09-20",
       "forecast": "2028Q3",
-      "forecastDate": "2028-09-27",
+      "forecastDate": "2028-09-20",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -498,7 +494,7 @@
       "plan": "2029Q1",
       "planDate": "2029-03-27",
       "forecast": "2029Q1",
-      "forecastDate": "2029-03-12",
+      "forecastDate": "2029-03-27",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -510,7 +506,7 @@
       "plan": "2026Q4",
       "planDate": "2026-12-18",
       "forecast": "2026Q4",
-      "forecastDate": "2026-12-28",
+      "forecastDate": "2026-12-18",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -570,7 +566,7 @@
       "plan": "2028Q3",
       "planDate": "2028-09-18",
       "forecast": "2028Q3",
-      "forecastDate": "2028-09-12",
+      "forecastDate": "2028-09-18",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -582,7 +578,7 @@
       "plan": "2029Q2",
       "planDate": "2029-06-24",
       "forecast": "2029Q2",
-      "forecastDate": "2029-06-17",
+      "forecastDate": "2029-06-24",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -594,7 +590,7 @@
       "plan": "2027Q2",
       "planDate": "2027-06-26",
       "forecast": "2027Q2",
-      "forecastDate": "2027-06-22",
+      "forecastDate": "2027-06-26",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -606,7 +602,7 @@
       "plan": "2028Q2",
       "planDate": "2028-06-12",
       "forecast": "2028Q2",
-      "forecastDate": "2028-06-11",
+      "forecastDate": "2028-06-12",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -618,7 +614,7 @@
       "plan": "2027Q2",
       "planDate": "2027-06-11",
       "forecast": "2027Q2",
-      "forecastDate": "2027-06-22",
+      "forecastDate": "2027-06-11",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -630,7 +626,7 @@
       "plan": "2028Q3",
       "planDate": "2028-09-12",
       "forecast": "2028Q3",
-      "forecastDate": "2028-09-11",
+      "forecastDate": "2028-09-12",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -655,7 +651,7 @@
       "plan": "2027Q4",
       "planDate": "2027-12-21",
       "forecast": "2027Q4",
-      "forecastDate": "2027-12-15",
+      "forecastDate": "2027-12-21",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -667,7 +663,7 @@
       "plan": "2028Q2",
       "planDate": "2028-06-19",
       "forecast": "2028Q2",
-      "forecastDate": "2028-06-26",
+      "forecastDate": "2028-06-19",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -691,7 +687,7 @@
       "plan": "2031Q2",
       "planDate": "2031-06-29",
       "forecast": "2031Q2",
-      "forecastDate": "2031-06-10",
+      "forecastDate": "2031-06-29",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -703,7 +699,7 @@
       "plan": "2032Q1",
       "planDate": "2032-03-28",
       "forecast": "2032Q1",
-      "forecastDate": "2032-03-13",
+      "forecastDate": "2032-03-28",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -715,7 +711,7 @@
       "plan": "2026Q4",
       "planDate": "2026-12-20",
       "forecast": "2026Q4",
-      "forecastDate": "2026-12-15",
+      "forecastDate": "2026-12-20",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -740,7 +736,7 @@
       "plan": "2029Q4",
       "planDate": "2029-12-14",
       "forecast": "2029Q4",
-      "forecastDate": "2029-12-11",
+      "forecastDate": "2029-12-14",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -765,7 +761,7 @@
       "plan": "2028Q1",
       "planDate": "2028-03-13",
       "forecast": "2028Q1",
-      "forecastDate": "2028-03-30",
+      "forecastDate": "2028-03-13",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -789,7 +785,7 @@
       "plan": "2031Q3",
       "planDate": "2031-09-20",
       "forecast": "2031Q3",
-      "forecastDate": "2031-09-27",
+      "forecastDate": "2031-09-20",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -801,7 +797,7 @@
       "plan": "2027Q4",
       "planDate": "2027-12-12",
       "forecast": "2027Q4",
-      "forecastDate": "2027-12-13",
+      "forecastDate": "2027-12-12",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -813,7 +809,7 @@
       "plan": "2030Q3",
       "planDate": "2030-09-21",
       "forecast": "2030Q3",
-      "forecastDate": "2030-09-13",
+      "forecastDate": "2030-09-21",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -825,7 +821,7 @@
       "plan": "2027Q4",
       "planDate": "2027-12-21",
       "forecast": "2027Q4",
-      "forecastDate": "2027-12-17",
+      "forecastDate": "2027-12-21",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -837,7 +833,7 @@
       "plan": "2028Q4",
       "planDate": "2028-12-22",
       "forecast": "2028Q4",
-      "forecastDate": "2028-12-29",
+      "forecastDate": "2028-12-22",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -849,7 +845,7 @@
       "plan": "2027Q3",
       "planDate": "2027-09-11",
       "forecast": "2027Q3",
-      "forecastDate": "2027-09-20",
+      "forecastDate": "2027-09-11",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -861,7 +857,7 @@
       "plan": "2028Q2",
       "planDate": "2028-06-20",
       "forecast": "2028Q2",
-      "forecastDate": "2028-06-25",
+      "forecastDate": "2028-06-20",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -873,7 +869,7 @@
       "plan": "2027Q2",
       "planDate": "2027-06-13",
       "forecast": "2027Q2",
-      "forecastDate": "2027-06-11",
+      "forecastDate": "2027-06-13",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -885,7 +881,7 @@
       "plan": "2029Q4",
       "planDate": "2029-12-22",
       "forecast": "2029Q4",
-      "forecastDate": "2029-12-30",
+      "forecastDate": "2029-12-22",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -897,7 +893,7 @@
       "plan": "2036Q2",
       "planDate": "2036-06-29",
       "forecast": "2036Q2",
-      "forecastDate": "2036-06-13",
+      "forecastDate": "2036-06-29",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -935,7 +931,7 @@
       "plan": "2032Q1",
       "planDate": "2032-03-15",
       "forecast": "2032Q1",
-      "forecastDate": "2032-03-22",
+      "forecastDate": "2032-03-15",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -947,7 +943,7 @@
       "plan": "2034Q2",
       "planDate": "2034-06-26",
       "forecast": "2034Q2",
-      "forecastDate": "2034-06-16",
+      "forecastDate": "2034-06-26",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -959,7 +955,7 @@
       "plan": "2026Q4",
       "planDate": "2026-12-14",
       "forecast": "2026Q4",
-      "forecastDate": "2026-12-15",
+      "forecastDate": "2026-12-14",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -971,7 +967,7 @@
       "plan": "2030Q1",
       "planDate": "2030-03-28",
       "forecast": "2030Q1",
-      "forecastDate": "2030-03-24",
+      "forecastDate": "2030-03-28",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -983,7 +979,7 @@
       "plan": "2032Q2",
       "planDate": "2032-06-22",
       "forecast": "2032Q2",
-      "forecastDate": "2032-06-27",
+      "forecastDate": "2032-06-22",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -995,7 +991,7 @@
       "plan": "2026Q4",
       "planDate": "2026-12-11",
       "forecast": "2026Q4",
-      "forecastDate": "2026-12-22",
+      "forecastDate": "2026-12-11",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -1007,7 +1003,7 @@
       "plan": "2028Q2",
       "planDate": "2028-06-16",
       "forecast": "2028Q2",
-      "forecastDate": "2028-06-15",
+      "forecastDate": "2028-06-16",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -1019,7 +1015,7 @@
       "plan": "2029Q1",
       "planDate": "2029-03-23",
       "forecast": "2029Q1",
-      "forecastDate": "2029-03-28",
+      "forecastDate": "2029-03-23",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -1033,8 +1029,7 @@
       "forecast": null,
       "forecastDate": null,
       "status": "pending",
-      "statusLabel": "▲ Auftrag noch hängig",
-      "impact": "Vergabe verschoben"
+      "statusLabel": "▲ Auftrag noch hängig"
     },
     {
       "id": "ms-115-2",
@@ -1044,7 +1039,7 @@
       "plan": "2027Q3",
       "planDate": "2027-09-21",
       "forecast": "2027Q3",
-      "forecastDate": "2027-09-13",
+      "forecastDate": "2027-09-21",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -1056,7 +1051,7 @@
       "plan": "2028Q2",
       "planDate": "2028-06-18",
       "forecast": "2028Q2",
-      "forecastDate": "2028-06-23",
+      "forecastDate": "2028-06-18",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -1068,7 +1063,7 @@
       "plan": "2029Q2",
       "planDate": "2029-06-27",
       "forecast": "2029Q2",
-      "forecastDate": "2029-06-12",
+      "forecastDate": "2029-06-27",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -1092,7 +1087,7 @@
       "plan": "2034Q2",
       "planDate": "2034-06-21",
       "forecast": "2034Q2",
-      "forecastDate": "2034-06-28",
+      "forecastDate": "2034-06-21",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -1104,7 +1099,7 @@
       "plan": "2026Q3",
       "planDate": "2026-09-15",
       "forecast": "2026Q3",
-      "forecastDate": "2026-09-17",
+      "forecastDate": "2026-09-15",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -1128,7 +1123,7 @@
       "plan": "2029Q1",
       "planDate": "2029-03-23",
       "forecast": "2029Q1",
-      "forecastDate": "2029-03-11",
+      "forecastDate": "2029-03-23",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -1140,7 +1135,7 @@
       "plan": "2029Q4",
       "planDate": "2029-12-15",
       "forecast": "2029Q4",
-      "forecastDate": "2029-12-28",
+      "forecastDate": "2029-12-15",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -1152,7 +1147,7 @@
       "plan": "2031Q3",
       "planDate": "2031-09-20",
       "forecast": "2031Q3",
-      "forecastDate": "2031-09-25",
+      "forecastDate": "2031-09-20",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -1176,7 +1171,7 @@
       "plan": "2027Q2",
       "planDate": "2027-06-14",
       "forecast": "2027Q2",
-      "forecastDate": "2027-06-24",
+      "forecastDate": "2027-06-14",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -1188,7 +1183,7 @@
       "plan": "2028Q2",
       "planDate": "2028-06-15",
       "forecast": "2028Q2",
-      "forecastDate": "2028-06-11",
+      "forecastDate": "2028-06-15",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -1200,7 +1195,7 @@
       "plan": "2027Q1",
       "planDate": "2027-03-15",
       "forecast": "2027Q1",
-      "forecastDate": "2027-03-19",
+      "forecastDate": "2027-03-15",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -1224,7 +1219,7 @@
       "plan": "2033Q2",
       "planDate": "2033-06-28",
       "forecast": "2033Q2",
-      "forecastDate": "2033-06-11",
+      "forecastDate": "2033-06-28",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -1236,7 +1231,7 @@
       "plan": "2026Q4",
       "planDate": "2026-12-22",
       "forecast": "2026Q4",
-      "forecastDate": "2026-12-23",
+      "forecastDate": "2026-12-22",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -1248,7 +1243,7 @@
       "plan": "2028Q1",
       "planDate": "2028-03-23",
       "forecast": "2028Q1",
-      "forecastDate": "2028-03-16",
+      "forecastDate": "2028-03-23",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -1273,7 +1268,7 @@
       "plan": "2031Q4",
       "planDate": "2031-12-19",
       "forecast": "2031Q4",
-      "forecastDate": "2031-12-29",
+      "forecastDate": "2031-12-19",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -1285,7 +1280,7 @@
       "plan": "2034Q1",
       "planDate": "2034-03-24",
       "forecast": "2034Q1",
-      "forecastDate": "2034-03-11",
+      "forecastDate": "2034-03-24",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -1297,7 +1292,7 @@
       "plan": "2026Q3",
       "planDate": "2026-09-17",
       "forecast": "2026Q3",
-      "forecastDate": "2026-09-26",
+      "forecastDate": "2026-09-17",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -1324,8 +1319,7 @@
       "forecast": null,
       "forecastDate": null,
       "status": "pending",
-      "statusLabel": "▲ Auftrag noch hängig",
-      "impact": "Bewilligung ausstehend"
+      "statusLabel": "▲ Auftrag noch hängig"
     },
     {
       "id": "ms-124-6",
@@ -1335,7 +1329,7 @@
       "plan": "2028Q4",
       "planDate": "2028-12-25",
       "forecast": "2028Q4",
-      "forecastDate": "2028-12-16",
+      "forecastDate": "2028-12-25",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -1347,7 +1341,7 @@
       "plan": "2026Q3",
       "planDate": "2026-09-11",
       "forecast": "2026Q3",
-      "forecastDate": "2026-09-25",
+      "forecastDate": "2026-09-11",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -1359,7 +1353,7 @@
       "plan": "2029Q1",
       "planDate": "2029-03-16",
       "forecast": "2029Q1",
-      "forecastDate": "2029-03-22",
+      "forecastDate": "2029-03-16",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -1371,7 +1365,7 @@
       "plan": "2026Q3",
       "planDate": "2026-09-27",
       "forecast": "2026Q3",
-      "forecastDate": "2026-09-22",
+      "forecastDate": "2026-09-27",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -1383,7 +1377,7 @@
       "plan": "2028Q4",
       "planDate": "2028-12-26",
       "forecast": "2028Q4",
-      "forecastDate": "2028-12-20",
+      "forecastDate": "2028-12-26",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -1395,7 +1389,7 @@
       "plan": "2027Q1",
       "planDate": "2027-03-12",
       "forecast": "2027Q1",
-      "forecastDate": "2027-03-15",
+      "forecastDate": "2027-03-12",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -1407,7 +1401,7 @@
       "plan": "2028Q2",
       "planDate": "2028-06-27",
       "forecast": "2028Q2",
-      "forecastDate": "2028-06-23",
+      "forecastDate": "2028-06-27",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -1419,7 +1413,7 @@
       "plan": "2027Q3",
       "planDate": "2027-09-14",
       "forecast": "2027Q3",
-      "forecastDate": "2027-09-20",
+      "forecastDate": "2027-09-14",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -1457,7 +1451,7 @@
       "plan": "2030Q1",
       "planDate": "2030-03-22",
       "forecast": "2030Q1",
-      "forecastDate": "2030-03-23",
+      "forecastDate": "2030-03-22",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -1469,7 +1463,7 @@
       "plan": "2026Q4",
       "planDate": "2026-12-18",
       "forecast": "2026Q4",
-      "forecastDate": "2026-12-26",
+      "forecastDate": "2026-12-18",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -1493,7 +1487,7 @@
       "plan": "2029Q3",
       "planDate": "2029-09-27",
       "forecast": "2029Q3",
-      "forecastDate": "2029-09-26",
+      "forecastDate": "2029-09-27",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -1505,7 +1499,7 @@
       "plan": "2027Q1",
       "planDate": "2027-03-18",
       "forecast": "2027Q1",
-      "forecastDate": "2027-03-12",
+      "forecastDate": "2027-03-18",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -1529,7 +1523,7 @@
       "plan": "2026Q3",
       "planDate": "2026-09-21",
       "forecast": "2026Q3",
-      "forecastDate": "2026-09-24",
+      "forecastDate": "2026-09-21",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -1541,7 +1535,7 @@
       "plan": "2027Q1",
       "planDate": "2027-03-24",
       "forecast": "2027Q1",
-      "forecastDate": "2027-03-26",
+      "forecastDate": "2027-03-24",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -1553,7 +1547,7 @@
       "plan": "2028Q1",
       "planDate": "2028-03-30",
       "forecast": "2028Q1",
-      "forecastDate": "2028-03-27",
+      "forecastDate": "2028-03-30",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -1577,7 +1571,7 @@
       "plan": "2031Q2",
       "planDate": "2031-06-29",
       "forecast": "2031Q2",
-      "forecastDate": "2031-06-10",
+      "forecastDate": "2031-06-29",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -1589,7 +1583,7 @@
       "plan": "2027Q4",
       "planDate": "2027-12-28",
       "forecast": "2027Q4",
-      "forecastDate": "2027-12-14",
+      "forecastDate": "2027-12-28",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -1601,7 +1595,7 @@
       "plan": "2028Q2",
       "planDate": "2028-06-21",
       "forecast": "2028Q2",
-      "forecastDate": "2028-06-24",
+      "forecastDate": "2028-06-21",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -1613,7 +1607,7 @@
       "plan": "2028Q4",
       "planDate": "2028-12-23",
       "forecast": "2028Q4",
-      "forecastDate": "2028-12-20",
+      "forecastDate": "2028-12-23",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -1638,7 +1632,7 @@
       "plan": "2028Q1",
       "planDate": "2028-03-30",
       "forecast": "2028Q1",
-      "forecastDate": "2028-03-28",
+      "forecastDate": "2028-03-30",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -1652,8 +1646,7 @@
       "forecast": null,
       "forecastDate": null,
       "status": "pending",
-      "statusLabel": "▲ Auftrag noch hängig",
-      "impact": "Vergabe verschoben"
+      "statusLabel": "▲ Auftrag noch hängig"
     },
     {
       "id": "ms-136-5",
@@ -1675,7 +1668,7 @@
       "plan": "2027Q3",
       "planDate": "2027-09-22",
       "forecast": "2027Q3",
-      "forecastDate": "2027-09-10",
+      "forecastDate": "2027-09-22",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -1687,7 +1680,7 @@
       "plan": "2028Q1",
       "planDate": "2028-03-24",
       "forecast": "2028Q1",
-      "forecastDate": "2028-03-26",
+      "forecastDate": "2028-03-24",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -1711,7 +1704,7 @@
       "plan": "2030Q3",
       "planDate": "2030-09-27",
       "forecast": "2030Q3",
-      "forecastDate": "2030-09-15",
+      "forecastDate": "2030-09-27",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -1749,7 +1742,7 @@
       "plan": "2027Q2",
       "planDate": "2027-06-25",
       "forecast": "2027Q2",
-      "forecastDate": "2027-06-24",
+      "forecastDate": "2027-06-25",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -1774,7 +1767,7 @@
       "plan": "2030Q3",
       "planDate": "2030-09-27",
       "forecast": "2030Q3",
-      "forecastDate": "2030-09-23",
+      "forecastDate": "2030-09-27",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -1786,7 +1779,7 @@
       "plan": "2031Q2",
       "planDate": "2031-06-17",
       "forecast": "2031Q2",
-      "forecastDate": "2031-06-25",
+      "forecastDate": "2031-06-17",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -1810,7 +1803,7 @@
       "plan": "2031Q2",
       "planDate": "2031-06-25",
       "forecast": "2031Q2",
-      "forecastDate": "2031-06-23",
+      "forecastDate": "2031-06-25",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -1835,7 +1828,7 @@
       "plan": "2027Q3",
       "planDate": "2027-09-19",
       "forecast": "2027Q3",
-      "forecastDate": "2027-09-12",
+      "forecastDate": "2027-09-19",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -1859,7 +1852,7 @@
       "plan": "2027Q4",
       "planDate": "2027-12-14",
       "forecast": "2027Q4",
-      "forecastDate": "2027-12-21",
+      "forecastDate": "2027-12-14",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -1871,7 +1864,7 @@
       "plan": "2031Q3",
       "planDate": "2031-09-12",
       "forecast": "2031Q3",
-      "forecastDate": "2031-09-16",
+      "forecastDate": "2031-09-12",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -1883,7 +1876,7 @@
       "plan": "2026Q3",
       "planDate": "2026-09-26",
       "forecast": "2026Q3",
-      "forecastDate": "2026-09-10",
+      "forecastDate": "2026-09-26",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -1908,7 +1901,7 @@
       "plan": "2026Q4",
       "planDate": "2026-12-18",
       "forecast": "2026Q4",
-      "forecastDate": "2026-12-16",
+      "forecastDate": "2026-12-18",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -1933,7 +1926,7 @@
       "plan": "2028Q1",
       "planDate": "2028-03-14",
       "forecast": "2028Q1",
-      "forecastDate": "2028-03-16",
+      "forecastDate": "2028-03-14",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -1945,7 +1938,7 @@
       "plan": "2029Q4",
       "planDate": "2029-12-26",
       "forecast": "2029Q4",
-      "forecastDate": "2029-12-11",
+      "forecastDate": "2029-12-26",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -1957,7 +1950,7 @@
       "plan": "2030Q2",
       "planDate": "2030-06-10",
       "forecast": "2030Q2",
-      "forecastDate": "2030-06-22",
+      "forecastDate": "2030-06-10",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -1982,7 +1975,7 @@
       "plan": "2028Q1",
       "planDate": "2028-03-20",
       "forecast": "2028Q1",
-      "forecastDate": "2028-03-28",
+      "forecastDate": "2028-03-20",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -1994,7 +1987,7 @@
       "plan": "2028Q4",
       "planDate": "2028-12-29",
       "forecast": "2028Q4",
-      "forecastDate": "2028-12-16",
+      "forecastDate": "2028-12-29",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2006,7 +1999,7 @@
       "plan": "2029Q3",
       "planDate": "2029-09-14",
       "forecast": "2029Q3",
-      "forecastDate": "2029-09-19",
+      "forecastDate": "2029-09-14",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2057,7 +2050,7 @@
       "plan": "2029Q1",
       "planDate": "2029-03-16",
       "forecast": "2029Q1",
-      "forecastDate": "2029-03-25",
+      "forecastDate": "2029-03-16",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2069,7 +2062,7 @@
       "plan": "2030Q3",
       "planDate": "2030-09-18",
       "forecast": "2030Q3",
-      "forecastDate": "2030-09-25",
+      "forecastDate": "2030-09-18",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2081,7 +2074,7 @@
       "plan": "2026Q4",
       "planDate": "2026-12-24",
       "forecast": "2026Q4",
-      "forecastDate": "2026-12-30",
+      "forecastDate": "2026-12-24",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2093,7 +2086,7 @@
       "plan": "2029Q1",
       "planDate": "2029-03-22",
       "forecast": "2029Q1",
-      "forecastDate": "2029-03-14",
+      "forecastDate": "2029-03-22",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2105,7 +2098,7 @@
       "plan": "2030Q1",
       "planDate": "2030-03-17",
       "forecast": "2030Q1",
-      "forecastDate": "2030-03-18",
+      "forecastDate": "2030-03-17",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2117,7 +2110,7 @@
       "plan": "2028Q1",
       "planDate": "2028-03-15",
       "forecast": "2028Q1",
-      "forecastDate": "2028-03-14",
+      "forecastDate": "2028-03-15",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2129,7 +2122,7 @@
       "plan": "2030Q2",
       "planDate": "2030-06-10",
       "forecast": "2030Q2",
-      "forecastDate": "2030-06-11",
+      "forecastDate": "2030-06-10",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2141,7 +2134,7 @@
       "plan": "2026Q4",
       "planDate": "2026-12-18",
       "forecast": "2026Q4",
-      "forecastDate": "2026-12-17",
+      "forecastDate": "2026-12-18",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2166,7 +2159,7 @@
       "plan": "2028Q2",
       "planDate": "2028-06-13",
       "forecast": "2028Q2",
-      "forecastDate": "2028-06-22",
+      "forecastDate": "2028-06-13",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2178,7 +2171,7 @@
       "plan": "2029Q1",
       "planDate": "2029-03-11",
       "forecast": "2029Q1",
-      "forecastDate": "2029-03-30",
+      "forecastDate": "2029-03-11",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2190,7 +2183,7 @@
       "plan": "2029Q4",
       "planDate": "2029-12-13",
       "forecast": "2029Q4",
-      "forecastDate": "2029-12-25",
+      "forecastDate": "2029-12-13",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2202,7 +2195,7 @@
       "plan": "2028Q3",
       "planDate": "2028-09-17",
       "forecast": "2028Q3",
-      "forecastDate": "2028-09-10",
+      "forecastDate": "2028-09-17",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2216,8 +2209,7 @@
       "forecast": null,
       "forecastDate": null,
       "status": "pending",
-      "statusLabel": "▲ Auftrag noch hängig",
-      "impact": "Lieferfristen Haustechnik"
+      "statusLabel": "▲ Auftrag noch hängig"
     },
     {
       "id": "ms-151-5",
@@ -2227,7 +2219,7 @@
       "plan": "2026Q3",
       "planDate": "2026-09-26",
       "forecast": "2026Q3",
-      "forecastDate": "2026-09-18",
+      "forecastDate": "2026-09-26",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2265,7 +2257,7 @@
       "plan": "2028Q1",
       "planDate": "2028-03-26",
       "forecast": "2028Q1",
-      "forecastDate": "2028-03-28",
+      "forecastDate": "2028-03-26",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2277,7 +2269,7 @@
       "plan": "2027Q2",
       "planDate": "2027-06-15",
       "forecast": "2027Q2",
-      "forecastDate": "2027-06-11",
+      "forecastDate": "2027-06-15",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2289,7 +2281,7 @@
       "plan": "2031Q2",
       "planDate": "2031-06-26",
       "forecast": "2031Q2",
-      "forecastDate": "2031-06-12",
+      "forecastDate": "2031-06-26",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2301,7 +2293,7 @@
       "plan": "2033Q1",
       "planDate": "2033-03-19",
       "forecast": "2033Q1",
-      "forecastDate": "2033-03-21",
+      "forecastDate": "2033-03-19",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2313,7 +2305,7 @@
       "plan": "2027Q1",
       "planDate": "2027-03-30",
       "forecast": "2027Q1",
-      "forecastDate": "2027-03-25",
+      "forecastDate": "2027-03-30",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2325,7 +2317,7 @@
       "plan": "2027Q4",
       "planDate": "2027-12-22",
       "forecast": "2027Q4",
-      "forecastDate": "2027-12-23",
+      "forecastDate": "2027-12-22",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2337,7 +2329,7 @@
       "plan": "2028Q1",
       "planDate": "2028-03-28",
       "forecast": "2028Q1",
-      "forecastDate": "2028-03-12",
+      "forecastDate": "2028-03-28",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2361,7 +2353,7 @@
       "plan": "2030Q4",
       "planDate": "2030-12-27",
       "forecast": "2030Q4",
-      "forecastDate": "2030-12-16",
+      "forecastDate": "2030-12-27",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2373,7 +2365,7 @@
       "plan": "2031Q4",
       "planDate": "2031-12-11",
       "forecast": "2031Q4",
-      "forecastDate": "2031-12-29",
+      "forecastDate": "2031-12-11",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2385,7 +2377,7 @@
       "plan": "2026Q4",
       "planDate": "2026-12-18",
       "forecast": "2026Q4",
-      "forecastDate": "2026-12-26",
+      "forecastDate": "2026-12-18",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2397,7 +2389,7 @@
       "plan": "2028Q1",
       "planDate": "2028-03-19",
       "forecast": "2028Q1",
-      "forecastDate": "2028-03-28",
+      "forecastDate": "2028-03-19",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2422,7 +2414,7 @@
       "plan": "2031Q1",
       "planDate": "2031-03-12",
       "forecast": "2031Q1",
-      "forecastDate": "2031-03-18",
+      "forecastDate": "2031-03-12",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2434,7 +2426,7 @@
       "plan": "2027Q4",
       "planDate": "2027-12-30",
       "forecast": "2027Q4",
-      "forecastDate": "2027-12-12",
+      "forecastDate": "2027-12-30",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2446,7 +2438,7 @@
       "plan": "2028Q4",
       "planDate": "2028-12-22",
       "forecast": "2028Q4",
-      "forecastDate": "2028-12-28",
+      "forecastDate": "2028-12-22",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2458,7 +2450,7 @@
       "plan": "2027Q2",
       "planDate": "2027-06-21",
       "forecast": "2027Q2",
-      "forecastDate": "2027-06-23",
+      "forecastDate": "2027-06-21",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2470,7 +2462,7 @@
       "plan": "2028Q3",
       "planDate": "2028-09-16",
       "forecast": "2028Q3",
-      "forecastDate": "2028-09-23",
+      "forecastDate": "2028-09-16",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2482,7 +2474,7 @@
       "plan": "2026Q4",
       "planDate": "2026-12-21",
       "forecast": "2026Q4",
-      "forecastDate": "2026-12-20",
+      "forecastDate": "2026-12-21",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2494,7 +2486,7 @@
       "plan": "2027Q4",
       "planDate": "2027-12-13",
       "forecast": "2027Q4",
-      "forecastDate": "2027-12-16",
+      "forecastDate": "2027-12-13",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2519,7 +2511,7 @@
       "plan": "2027Q2",
       "planDate": "2027-06-21",
       "forecast": "2027Q2",
-      "forecastDate": "2027-06-10",
+      "forecastDate": "2027-06-21",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2533,8 +2525,7 @@
       "forecast": null,
       "forecastDate": null,
       "status": "pending",
-      "statusLabel": "▲ Auftrag noch hängig",
-      "impact": "Bewilligung ausstehend"
+      "statusLabel": "▲ Auftrag noch hängig"
     },
     {
       "id": "ms-160-5",
@@ -2544,7 +2535,7 @@
       "plan": "2029Q1",
       "planDate": "2029-03-20",
       "forecast": "2029Q1",
-      "forecastDate": "2029-03-28",
+      "forecastDate": "2029-03-20",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2556,7 +2547,7 @@
       "plan": "2030Q1",
       "planDate": "2030-03-22",
       "forecast": "2030Q1",
-      "forecastDate": "2030-03-13",
+      "forecastDate": "2030-03-22",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2568,7 +2559,7 @@
       "plan": "2027Q1",
       "planDate": "2027-03-25",
       "forecast": "2027Q1",
-      "forecastDate": "2027-03-18",
+      "forecastDate": "2027-03-25",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2580,7 +2571,7 @@
       "plan": "2028Q4",
       "planDate": "2028-12-14",
       "forecast": "2028Q4",
-      "forecastDate": "2028-12-23",
+      "forecastDate": "2028-12-14",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2604,7 +2595,7 @@
       "plan": "2032Q1",
       "planDate": "2032-03-26",
       "forecast": "2032Q1",
-      "forecastDate": "2032-03-17",
+      "forecastDate": "2032-03-26",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2616,7 +2607,7 @@
       "plan": "2027Q2",
       "planDate": "2027-06-25",
       "forecast": "2027Q2",
-      "forecastDate": "2027-06-20",
+      "forecastDate": "2027-06-25",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2640,7 +2631,7 @@
       "plan": "2027Q3",
       "planDate": "2027-09-19",
       "forecast": "2027Q3",
-      "forecastDate": "2027-09-24",
+      "forecastDate": "2027-09-19",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2652,7 +2643,7 @@
       "plan": "2029Q2",
       "planDate": "2029-06-18",
       "forecast": "2029Q2",
-      "forecastDate": "2029-06-11",
+      "forecastDate": "2029-06-18",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2664,7 +2655,7 @@
       "plan": "2030Q3",
       "planDate": "2030-09-22",
       "forecast": "2030Q3",
-      "forecastDate": "2030-09-23",
+      "forecastDate": "2030-09-22",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2688,7 +2679,7 @@
       "plan": "2035Q4",
       "planDate": "2035-12-18",
       "forecast": "2035Q4",
-      "forecastDate": "2035-12-26",
+      "forecastDate": "2035-12-18",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2713,7 +2704,7 @@
       "plan": "2030Q2",
       "planDate": "2030-06-16",
       "forecast": "2030Q2",
-      "forecastDate": "2030-06-26",
+      "forecastDate": "2030-06-16",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2753,8 +2744,7 @@
       "forecast": null,
       "forecastDate": null,
       "status": "pending",
-      "statusLabel": "▲ Auftrag noch hängig",
-      "impact": "Verzug durch Einsprache"
+      "statusLabel": "▲ Auftrag noch hängig"
     },
     {
       "id": "ms-166-6",
@@ -2764,7 +2754,7 @@
       "plan": "2029Q1",
       "planDate": "2029-03-19",
       "forecast": "2029Q1",
-      "forecastDate": "2029-03-16",
+      "forecastDate": "2029-03-19",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2776,7 +2766,7 @@
       "plan": "2027Q4",
       "planDate": "2027-12-27",
       "forecast": "2027Q4",
-      "forecastDate": "2027-12-17",
+      "forecastDate": "2027-12-27",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2788,7 +2778,7 @@
       "plan": "2031Q4",
       "planDate": "2031-12-24",
       "forecast": "2031Q4",
-      "forecastDate": "2031-12-14",
+      "forecastDate": "2031-12-24",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2800,7 +2790,7 @@
       "plan": "2033Q4",
       "planDate": "2033-12-18",
       "forecast": "2033Q4",
-      "forecastDate": "2033-12-27",
+      "forecastDate": "2033-12-18",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2812,7 +2802,7 @@
       "plan": "2026Q3",
       "planDate": "2026-09-16",
       "forecast": "2026Q3",
-      "forecastDate": "2026-09-18",
+      "forecastDate": "2026-09-16",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2884,7 +2874,7 @@
       "plan": "2027Q1",
       "planDate": "2027-03-24",
       "forecast": "2027Q1",
-      "forecastDate": "2027-03-19",
+      "forecastDate": "2027-03-24",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2896,7 +2886,7 @@
       "plan": "2027Q3",
       "planDate": "2027-09-16",
       "forecast": "2027Q3",
-      "forecastDate": "2027-09-22",
+      "forecastDate": "2027-09-16",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2908,7 +2898,7 @@
       "plan": "2028Q3",
       "planDate": "2028-09-27",
       "forecast": "2028Q3",
-      "forecastDate": "2028-09-29",
+      "forecastDate": "2028-09-27",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2920,7 +2910,7 @@
       "plan": "2029Q3",
       "planDate": "2029-09-10",
       "forecast": "2029Q3",
-      "forecastDate": "2029-09-16",
+      "forecastDate": "2029-09-10",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2945,7 +2935,7 @@
       "plan": "2027Q1",
       "planDate": "2027-03-22",
       "forecast": "2027Q1",
-      "forecastDate": "2027-03-12",
+      "forecastDate": "2027-03-22",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2957,7 +2947,7 @@
       "plan": "2028Q1",
       "planDate": "2028-03-25",
       "forecast": "2028Q1",
-      "forecastDate": "2028-03-28",
+      "forecastDate": "2028-03-25",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2969,7 +2959,7 @@
       "plan": "2028Q4",
       "planDate": "2028-12-11",
       "forecast": "2028Q4",
-      "forecastDate": "2028-12-27",
+      "forecastDate": "2028-12-11",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2981,7 +2971,7 @@
       "plan": "2030Q3",
       "planDate": "2030-09-20",
       "forecast": "2030Q3",
-      "forecastDate": "2030-09-13",
+      "forecastDate": "2030-09-20",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -2993,7 +2983,7 @@
       "plan": "2032Q3",
       "planDate": "2032-09-21",
       "forecast": "2032Q3",
-      "forecastDate": "2032-09-27",
+      "forecastDate": "2032-09-21",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -3007,8 +2997,7 @@
       "forecast": null,
       "forecastDate": null,
       "status": "pending",
-      "statusLabel": "▲ Auftrag noch hängig",
-      "impact": "Vergabe verschoben"
+      "statusLabel": "▲ Auftrag noch hängig"
     },
     {
       "id": "ms-172-5",
@@ -3018,7 +3007,7 @@
       "plan": "2028Q1",
       "planDate": "2028-03-29",
       "forecast": "2028Q1",
-      "forecastDate": "2028-03-11",
+      "forecastDate": "2028-03-29",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -3030,7 +3019,7 @@
       "plan": "2029Q2",
       "planDate": "2029-06-13",
       "forecast": "2029Q2",
-      "forecastDate": "2029-06-27",
+      "forecastDate": "2029-06-13",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -3042,7 +3031,7 @@
       "plan": "2027Q2",
       "planDate": "2027-06-23",
       "forecast": "2027Q2",
-      "forecastDate": "2027-06-28",
+      "forecastDate": "2027-06-23",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -3054,7 +3043,7 @@
       "plan": "2028Q3",
       "planDate": "2028-09-14",
       "forecast": "2028Q3",
-      "forecastDate": "2028-09-25",
+      "forecastDate": "2028-09-14",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -3079,7 +3068,7 @@
       "plan": "2028Q1",
       "planDate": "2028-03-18",
       "forecast": "2028Q1",
-      "forecastDate": "2028-03-12",
+      "forecastDate": "2028-03-18",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -3104,7 +3093,7 @@
       "plan": "2028Q2",
       "planDate": "2028-06-11",
       "forecast": "2028Q2",
-      "forecastDate": "2028-06-28",
+      "forecastDate": "2028-06-11",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -3116,7 +3105,7 @@
       "plan": "2029Q1",
       "planDate": "2029-03-18",
       "forecast": "2029Q1",
-      "forecastDate": "2029-03-13",
+      "forecastDate": "2029-03-18",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -3167,7 +3156,7 @@
       "plan": "2027Q2",
       "planDate": "2027-06-27",
       "forecast": "2027Q2",
-      "forecastDate": "2027-06-14",
+      "forecastDate": "2027-06-27",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -3179,7 +3168,7 @@
       "plan": "2028Q1",
       "planDate": "2028-03-15",
       "forecast": "2028Q1",
-      "forecastDate": "2028-03-19",
+      "forecastDate": "2028-03-15",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -3204,7 +3193,7 @@
       "plan": "2031Q1",
       "planDate": "2031-03-22",
       "forecast": "2031Q1",
-      "forecastDate": "2031-03-14",
+      "forecastDate": "2031-03-22",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -3242,7 +3231,7 @@
       "plan": "2028Q4",
       "planDate": "2028-12-29",
       "forecast": "2028Q4",
-      "forecastDate": "2028-12-23",
+      "forecastDate": "2028-12-29",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -3254,7 +3243,7 @@
       "plan": "2026Q4",
       "planDate": "2026-12-29",
       "forecast": "2026Q4",
-      "forecastDate": "2026-12-27",
+      "forecastDate": "2026-12-29",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -3266,7 +3255,7 @@
       "plan": "2028Q4",
       "planDate": "2028-12-17",
       "forecast": "2028Q4",
-      "forecastDate": "2028-12-25",
+      "forecastDate": "2028-12-17",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -3302,7 +3291,7 @@
       "plan": "2028Q2",
       "planDate": "2028-06-15",
       "forecast": "2028Q2",
-      "forecastDate": "2028-06-20",
+      "forecastDate": "2028-06-15",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -3326,7 +3315,7 @@
       "plan": "2034Q3",
       "planDate": "2034-09-10",
       "forecast": "2034Q3",
-      "forecastDate": "2034-09-14",
+      "forecastDate": "2034-09-10",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -3338,7 +3327,7 @@
       "plan": "2036Q2",
       "planDate": "2036-06-17",
       "forecast": "2036Q2",
-      "forecastDate": "2036-06-11",
+      "forecastDate": "2036-06-17",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -3350,7 +3339,7 @@
       "plan": "2027Q1",
       "planDate": "2027-03-24",
       "forecast": "2027Q1",
-      "forecastDate": "2027-03-15",
+      "forecastDate": "2027-03-24",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -3362,7 +3351,7 @@
       "plan": "2027Q2",
       "planDate": "2027-06-20",
       "forecast": "2027Q2",
-      "forecastDate": "2027-06-13",
+      "forecastDate": "2027-06-20",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -3374,7 +3363,7 @@
       "plan": "2028Q1",
       "planDate": "2028-03-11",
       "forecast": "2028Q1",
-      "forecastDate": "2028-03-23",
+      "forecastDate": "2028-03-11",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -3399,7 +3388,7 @@
       "plan": "2029Q3",
       "planDate": "2029-09-27",
       "forecast": "2029Q3",
-      "forecastDate": "2029-09-22",
+      "forecastDate": "2029-09-27",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -3424,7 +3413,7 @@
       "plan": "2027Q2",
       "planDate": "2027-06-22",
       "forecast": "2027Q2",
-      "forecastDate": "2027-06-26",
+      "forecastDate": "2027-06-22",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -3436,7 +3425,7 @@
       "plan": "2028Q1",
       "planDate": "2028-03-27",
       "forecast": "2028Q1",
-      "forecastDate": "2028-03-25",
+      "forecastDate": "2028-03-27",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -3448,7 +3437,7 @@
       "plan": "2028Q4",
       "planDate": "2028-12-24",
       "forecast": "2028Q4",
-      "forecastDate": "2028-12-16",
+      "forecastDate": "2028-12-24",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -3460,7 +3449,7 @@
       "plan": "2026Q3",
       "planDate": "2026-09-12",
       "forecast": "2026Q3",
-      "forecastDate": "2026-09-10",
+      "forecastDate": "2026-09-12",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -3485,7 +3474,7 @@
       "plan": "2031Q3",
       "planDate": "2031-09-26",
       "forecast": "2031Q3",
-      "forecastDate": "2031-09-14",
+      "forecastDate": "2031-09-26",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -3497,7 +3486,7 @@
       "plan": "2026Q4",
       "planDate": "2026-12-14",
       "forecast": "2026Q4",
-      "forecastDate": "2026-12-28",
+      "forecastDate": "2026-12-14",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -3509,7 +3498,7 @@
       "plan": "2027Q3",
       "planDate": "2027-09-20",
       "forecast": "2027Q3",
-      "forecastDate": "2027-09-21",
+      "forecastDate": "2027-09-20",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -3547,7 +3536,7 @@
       "plan": "2027Q3",
       "planDate": "2027-09-19",
       "forecast": "2027Q3",
-      "forecastDate": "2027-09-13",
+      "forecastDate": "2027-09-19",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -3559,7 +3548,7 @@
       "plan": "2029Q2",
       "planDate": "2029-06-29",
       "forecast": "2029Q2",
-      "forecastDate": "2029-06-28",
+      "forecastDate": "2029-06-29",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -3571,7 +3560,7 @@
       "plan": "2029Q4",
       "planDate": "2029-12-30",
       "forecast": "2029Q4",
-      "forecastDate": "2029-12-21",
+      "forecastDate": "2029-12-30",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -3632,7 +3621,7 @@
       "plan": "2029Q4",
       "planDate": "2029-12-12",
       "forecast": "2029Q4",
-      "forecastDate": "2029-12-27",
+      "forecastDate": "2029-12-12",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -3644,7 +3633,7 @@
       "plan": "2030Q3",
       "planDate": "2030-09-20",
       "forecast": "2030Q3",
-      "forecastDate": "2030-09-10",
+      "forecastDate": "2030-09-20",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -3669,7 +3658,7 @@
       "plan": "2028Q1",
       "planDate": "2028-03-24",
       "forecast": "2028Q1",
-      "forecastDate": "2028-03-23",
+      "forecastDate": "2028-03-24",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -3707,7 +3696,7 @@
       "plan": "2031Q2",
       "planDate": "2031-06-29",
       "forecast": "2031Q2",
-      "forecastDate": "2031-06-12",
+      "forecastDate": "2031-06-29",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -3721,8 +3710,7 @@
       "forecast": null,
       "forecastDate": null,
       "status": "pending",
-      "statusLabel": "▲ Auftrag noch hängig",
-      "impact": "Abstimmung mit Nutzer offen"
+      "statusLabel": "▲ Auftrag noch hängig"
     },
     {
       "id": "ms-193-3",
@@ -3732,7 +3720,7 @@
       "plan": "2027Q2",
       "planDate": "2027-06-15",
       "forecast": "2027Q2",
-      "forecastDate": "2027-06-12",
+      "forecastDate": "2027-06-15",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -3757,7 +3745,7 @@
       "plan": "2029Q3",
       "planDate": "2029-09-13",
       "forecast": "2029Q3",
-      "forecastDate": "2029-09-12",
+      "forecastDate": "2029-09-13",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -3781,7 +3769,7 @@
       "plan": "2027Q1",
       "planDate": "2027-03-22",
       "forecast": "2027Q1",
-      "forecastDate": "2027-03-29",
+      "forecastDate": "2027-03-22",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -3793,7 +3781,7 @@
       "plan": "2027Q4",
       "planDate": "2027-12-11",
       "forecast": "2027Q4",
-      "forecastDate": "2027-12-27",
+      "forecastDate": "2027-12-11",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -3817,7 +3805,7 @@
       "plan": "2030Q4",
       "planDate": "2030-12-17",
       "forecast": "2030Q4",
-      "forecastDate": "2030-12-27",
+      "forecastDate": "2030-12-17",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -3842,7 +3830,7 @@
       "plan": "2027Q2",
       "planDate": "2027-06-13",
       "forecast": "2027Q2",
-      "forecastDate": "2027-06-22",
+      "forecastDate": "2027-06-13",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -3867,7 +3855,7 @@
       "plan": "2029Q2",
       "planDate": "2029-06-18",
       "forecast": "2029Q2",
-      "forecastDate": "2029-06-28",
+      "forecastDate": "2029-06-18",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -3891,7 +3879,7 @@
       "plan": "2026Q3",
       "planDate": "2026-09-20",
       "forecast": "2026Q3",
-      "forecastDate": "2026-09-29",
+      "forecastDate": "2026-09-20",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -3915,7 +3903,7 @@
       "plan": "2027Q2",
       "planDate": "2027-06-15",
       "forecast": "2027Q2",
-      "forecastDate": "2027-06-19",
+      "forecastDate": "2027-06-15",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -3927,7 +3915,7 @@
       "plan": "2027Q4",
       "planDate": "2027-12-15",
       "forecast": "2027Q4",
-      "forecastDate": "2027-12-24",
+      "forecastDate": "2027-12-15",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -3939,7 +3927,7 @@
       "plan": "2028Q3",
       "planDate": "2028-09-18",
       "forecast": "2028Q3",
-      "forecastDate": "2028-09-15",
+      "forecastDate": "2028-09-18",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -3964,7 +3952,7 @@
       "plan": "2031Q3",
       "planDate": "2031-09-26",
       "forecast": "2031Q3",
-      "forecastDate": "2031-09-15",
+      "forecastDate": "2031-09-26",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     },
@@ -3976,7 +3964,7 @@
       "plan": "2032Q3",
       "planDate": "2032-09-24",
       "forecast": "2032Q3",
-      "forecastDate": "2032-09-13",
+      "forecastDate": "2032-09-24",
       "status": "ok",
       "statusLabel": "Termin gehalten"
     }

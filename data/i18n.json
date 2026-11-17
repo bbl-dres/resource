@@ -636,11 +636,6 @@
       "fr": "Capacité libre par trimestre",
       "it": "Capacità libera per trimestre"
     },
-    "Freigabe steht aus": {
-      "en": "Release pending",
-      "fr": "Libération en attente",
-      "it": "Sblocco in sospeso"
-    },
     "Für Projekte verfügbar": {
       "en": "Available for projects",
       "fr": "Disponible pour les projets",
@@ -711,11 +706,6 @@
       "fr": "Charge maximale de la personne en charge sur la période affichée",
       "it": "Carico massimo dell'incaricato nel periodo visualizzato"
     },
-    "Höchste Auslastung im sichtbaren Zeitraum": {
-      "en": "Highest utilisation in the visible period",
-      "fr": "Charge maximale sur la période visible",
-      "it": "Carico massimo nel periodo visibile"
-    },
     "Ihre Auslastung": {
       "en": "Your workload",
       "fr": "Votre charge",
@@ -725,11 +715,6 @@
       "en": "Not implemented in the prototype.",
       "fr": "Non implémenté dans le prototype.",
       "it": "Non implementato nel prototipo."
-    },
-    "Im ePPM öffnen": {
-      "en": "Open in ePPM",
-      "fr": "Ouvrir dans ePPM",
-      "it": "Apri in ePPM"
     },
     "In Termine öffnen": {
       "en": "Open in Schedule",
@@ -831,11 +816,6 @@
       "fr": "Crédit CHF",
       "it": "Credito CHF"
     },
-    "Kredit freigegeben": {
-      "en": "Credit released",
-      "fr": "Crédit libéré",
-      "it": "Credito sbloccato"
-    },
     "Kredit nach Jahr": {
       "en": "Credit by year",
       "fr": "Crédit par année",
@@ -860,11 +840,6 @@
       "en": "Culture and monuments",
       "fr": "Culture et monuments",
       "it": "Cultura e monumenti"
-    },
-    "Letzte Änderungen": {
-      "en": "Recent changes",
-      "fr": "Dernières modifications",
-      "it": "Ultime modifiche"
     },
     "Link": {
       "en": "Link",
@@ -1081,16 +1056,6 @@
       "fr": "Charge par projet et trimestre, avec phases et jalons",
       "it": "Carico per progetto e trimestre, con fasi e milestone"
     },
-    "Pensum je Quartal": {
-      "en": "Workload by quarter",
-      "fr": "Charge par trimestre",
-      "it": "Carico per trimestre"
-    },
-    "Pensum offen": {
-      "en": "Workload open",
-      "fr": "Besoin ouvert",
-      "it": "Fabbisogno aperto"
-    },
     "Pensum total": {
       "en": "Total workload",
       "fr": "Charge totale",
@@ -1125,11 +1090,6 @@
       "en": "Search person — name or initials",
       "fr": "Rechercher une personne — nom ou initiales",
       "it": "Cerca persona — nome o sigla"
-    },
-    "Person wählen": {
-      "en": "Choose person",
-      "fr": "Choisir une personne",
-      "it": "Scegli una persona"
     },
     "Person über 100 % belegt, Überlast": {
       "en": "Person booked over 100 %, over capacity",
@@ -1446,11 +1406,6 @@
       "fr": "Échéances en PDF",
       "it": "Scadenze in PDF"
     },
-    "Termine anzeigen": {
-      "en": "Show schedule",
-      "fr": "Afficher les échéances",
-      "it": "Mostra scadenze"
-    },
     "Total": {
       "en": "Total",
       "fr": "Total",
@@ -1570,11 +1525,6 @@
       "en": "To today",
       "fr": "À aujourd'hui",
       "it": "A oggi"
-    },
-    "Zugewiesen an": {
-      "en": "Assigned to",
-      "fr": "Attribué à",
-      "it": "Assegnato a"
     },
     "Zur Einstiegsseite, ohne Filter": {
       "en": "To the entry page, without filters",
@@ -1701,20 +1651,10 @@
       "fr": "dans les limites",
       "it": "entro i limiti"
     },
-    "im Soll": {
-      "en": "on target",
-      "fr": "conforme",
-      "it": "in linea"
-    },
     "im gesetzten Umfang": {
       "en": "in the current scope",
       "fr": "dans le périmètre défini",
       "it": "nell'ambito definito"
-    },
-    "kein Gate im Zeitraum": {
-      "en": "no gate in this period",
-      "fr": "aucun jalon dans la période",
-      "it": "nessun traguardo nel periodo"
     },
     "keine": {
       "en": "none",
@@ -1861,11 +1801,6 @@
       "fr": "plus de",
       "it": "oltre"
     },
-    "über Soll": {
-      "en": "above target",
-      "fr": "au-dessus du prévu",
-      "it": "oltre il previsto"
-    },
     "— Pflicht bei jeder Umbuchung": {
       "en": "— required for every reallocation",
       "fr": "— obligatoire pour toute réaffectation",
@@ -1896,26 +1831,6 @@
       "fr": "Rôles",
       "it": "Ruoli"
     },
-    "Besetzung": {
-      "en": "Staffing",
-      "fr": "Dotation",
-      "it": "Assegnazione"
-    },
-    "Besetzung aufklappen": {
-      "en": "Show staffing",
-      "fr": "Afficher la dotation",
-      "it": "Mostra l'assegnazione"
-    },
-    "Besetzung zuklappen": {
-      "en": "Hide staffing",
-      "fr": "Masquer la dotation",
-      "it": "Nascondi l'assegnazione"
-    },
-    "Besetzung ein-/ausklappen": {
-      "en": "Show or hide staffing",
-      "fr": "Afficher ou masquer la dotation",
-      "it": "Mostra o nascondi l'assegnazione"
-    },
     "Rollen ein-/ausklappen": {
       "en": "Show or hide roles",
       "fr": "Afficher ou masquer les rôles",
@@ -1930,11 +1845,6 @@
       "en": "Handover",
       "fr": "Transfert",
       "it": "Passaggio"
-    },
-    "im Projekt nicht vorgesehen (ePPM)": {
-      "en": "not foreseen for this project (ePPM)",
-      "fr": "non prévu pour ce projet (ePPM)",
-      "it": "non previsto per questo progetto (ePPM)"
     },
     "Bearbeitende": {
       "en": "People",
@@ -1951,25 +1861,10 @@
       "fr": "actuel",
       "it": "attuale"
     },
-    "Keine Rollen geplant.": {
-      "en": "No roles planned.",
-      "fr": "Aucun rôle planifié.",
-      "it": "Nessun ruolo pianificato."
-    },
-    "Summe über alle Rollen": {
-      "en": "sum over all roles",
-      "fr": "somme de tous les rôles",
-      "it": "somma di tutti i ruoli"
-    },
     "Projekt-ID": {
       "en": "Project ID",
       "fr": "ID du projet",
       "it": "ID progetto"
-    },
-    "Weitere Person": {
-      "en": "Another person",
-      "fr": "Autre personne",
-      "it": "Altra persona"
     },
     "Die Daten konnten nicht geladen werden.": {
       "en": "The data could not be loaded.",
@@ -1990,6 +1885,231 @@
       "en": "Search",
       "fr": "Recherche",
       "it": "Ricerca"
+    },
+    "Projekt, ID oder Person": {
+      "en": "Project, ID or person",
+      "fr": "Projet, ID ou personne",
+      "it": "Progetto, ID o persona"
+    },
+    "Quer": {
+      "en": "Landscape",
+      "fr": "Paysage",
+      "it": "Orizzontale"
+    },
+    "Hoch": {
+      "en": "Portrait",
+      "fr": "Portrait",
+      "it": "Verticale"
+    },
+    "PDF herunterladen": {
+      "en": "Download PDF",
+      "fr": "Télécharger le PDF",
+      "it": "Scarica PDF"
+    },
+    "API-Dokumentation": {
+      "en": "API documentation",
+      "fr": "Documentation de l’API",
+      "it": "Documentazione API"
+    },
+    "Anpassen": {
+      "en": "Fit",
+      "fr": "Ajuster",
+      "it": "Adatta"
+    },
+    "Phasen und Meilensteine je Projekt": {
+      "en": "Phases and milestones by project",
+      "fr": "Phases et jalons par projet",
+      "it": "Fasi e traguardi per progetto"
+    },
+    "PDF-Export — Drucklayout": {
+      "en": "PDF export — print layout",
+      "fr": "Export PDF — mise en page",
+      "it": "Esportazione PDF — layout di stampa"
+    },
+    "Pensum ist eine Rate, kein Vorrat": {
+      "en": "Workload is a rate, not a stock",
+      "fr": "La charge est un taux, pas un stock",
+      "it": "Il carico è un tasso, non una scorta"
+    },
+    "Ein Jahr zeigt den Durchschnitt seiner Quartale, ein Monat den Wert seines Quartals — nie eine Summe. 80 % über vier Quartale bleiben 80 %.": {
+      "en": "A year shows the average of its quarters, a month the value of its quarter — never a sum. 80 % over four quarters is still 80 %.",
+      "fr": "Une année affiche la moyenne de ses trimestres, un mois la valeur de son trimestre — jamais une somme. 80 % sur quatre trimestres restent 80 %.",
+      "it": "Un anno mostra la media dei suoi trimestri, un mese il valore del suo trimestre — mai una somma. L’80 % su quattro trimestri resta 80 %."
+    },
+    "Summe der Projektpensen je Quartal über den gesetzten Umfang. Steht ein Filter, zählt nur die Auswahl.": {
+      "en": "Sum of the project workloads per quarter over the selected scope. With a filter set, only the selection counts.",
+      "fr": "Somme des charges de projet par trimestre sur le périmètre choisi. Avec un filtre, seule la sélection compte.",
+      "it": "Somma dei carichi di progetto per trimestre sull’ambito selezionato. Con un filtro attivo conta solo la selezione."
+    },
+    "Kapazität brutto abzüglich Abwesenheiten. Brutto ist die Summe der Anstellungsgrade der Abteilung.": {
+      "en": "Gross capacity less absences. Gross is the sum of the division’s employment levels.",
+      "fr": "Capacité brute moins les absences. La capacité brute est la somme des taux d’occupation de la division.",
+      "it": "Capacità lorda meno le assenze. La capacità lorda è la somma dei gradi di occupazione della divisione."
+    },
+    "Pensum des Gesamtportfolios abzüglich extern beauftragter Leistung, geteilt durch Kapazität netto. Die Zahl beschreibt immer die ganze Abteilung — auch wenn ein Filter gesetzt ist, denn Kapazität lässt sich nicht filtern.": {
+      "en": "Workload of the whole portfolio less externally contracted work, divided by net capacity. The figure always describes the whole division — even with a filter set, because capacity cannot be filtered.",
+      "fr": "Charge de l’ensemble du portefeuille moins les prestations mandatées à l’externe, divisée par la capacité nette. Le chiffre décrit toujours toute la division — même avec un filtre, car la capacité ne se filtre pas.",
+      "it": "Carico dell’intero portafoglio meno le prestazioni affidate all’esterno, diviso per la capacità netta. La cifra descrive sempre l’intera divisione — anche con un filtro attivo, perché la capacità non si può filtrare."
+    },
+    "Blaustufen": {
+      "en": "Shades of blue",
+      "fr": "Nuances de bleu",
+      "it": "Tonalità di blu"
+    },
+    "Sie kodieren die Grösse eines Pensums, nicht seinen Status. Rot kennzeichnet Überlast.": {
+      "en": "They encode the size of a workload, not its status. Red marks over capacity.",
+      "fr": "Elles codent l’importance d’une charge, pas son statut. Le rouge signale une surcharge.",
+      "it": "Indicano l’entità di un carico, non il suo stato. Il rosso segnala un sovraccarico."
+    },
+    "Arbeitsanteil in Prozent einer Vollzeitstelle. 100 % entspricht einer Person Vollzeit.": {
+      "en": "Share of work as a percentage of a full-time position. 100 % is one person full time.",
+      "fr": "Part de travail en pour cent d’un poste à plein temps. 100 % correspond à une personne à plein temps.",
+      "it": "Quota di lavoro in percento di un posto a tempo pieno. Il 100 % corrisponde a una persona a tempo pieno."
+    },
+    "Projektpensum": {
+      "en": "Project workload",
+      "fr": "Charge de projet",
+      "it": "Carico di progetto"
+    },
+    "Geplanter Einsatz eines Projekts in einem Quartal, in Prozent einer Stelle oder in FTE.": {
+      "en": "Planned effort for a project in a quarter, as a percentage of a position or in FTE.",
+      "fr": "Engagement prévu pour un projet durant un trimestre, en pour cent d’un poste ou en EPT.",
+      "it": "Impegno pianificato per un progetto in un trimestre, in percento di un posto o in ETP."
+    },
+    "Leistung, die nicht die eigene Abteilung erbringt; sie mindert das Pensum, das die Abteilung selbst leisten muss.": {
+      "en": "Work not carried out by the division itself; it reduces the workload the division has to carry.",
+      "fr": "Prestation que la division ne fournit pas elle-même ; elle réduit la charge que la division doit assumer.",
+      "it": "Prestazione non fornita dalla divisione stessa; riduce il carico che la divisione deve sostenere."
+    },
+    "Gate 4 Ausschreibung. Davor ist ein Projekt planerisch, aber nicht finanziell gebunden — «vor Baukredit-Freigabe» weist diesen Anteil aus.": {
+      "en": "Gate 4 Tendering. Before it a project is committed in planning but not financially — «before construction credit release» shows that share.",
+      "fr": "Jalon 4 Appel d’offres. Avant celui-ci, un projet est engagé sur le plan de la planification mais pas financièrement — «avant libération du crédit de construction» indique cette part.",
+      "it": "Gate 4 Appalto. Prima di esso un progetto è vincolato a livello di pianificazione ma non finanziariamente — «prima dello sblocco del credito di costruzione» indica questa quota."
+    },
+    "Teilphase, wie ePPM sie führt: Vorstudien, 22 Auswahlverfahren, 31 Vorprojekt, 32 Bauprojekt, 53 Inbetriebnahme, 61 Betrieb.": {
+      "en": "Sub-phase as ePPM keeps it: preliminary studies, 22 selection procedure, 31 preliminary project, 32 construction project, 53 commissioning, 61 operation.",
+      "fr": "Phase partielle telle que la tient ePPM : études préliminaires, 22 procédure de sélection, 31 avant-projet, 32 projet de l’ouvrage, 53 mise en service, 61 exploitation.",
+      "it": "Fase parziale come gestita in ePPM: studi preliminari, 22 procedura di selezione, 31 progetto di massima, 32 progetto definitivo, 53 messa in esercizio, 61 esercizio."
+    },
+    "Die Hauptphasen 1 bis 6, als Entscheidpunkte zwischen den Teilphasen, mit Plan- und Prognosetermin.": {
+      "en": "The main phases 1 to 6, as decision points between the sub-phases, with a planned and a forecast date.",
+      "fr": "Les phases principales 1 à 6, comme points de décision entre les phases partielles, avec date planifiée et date prévisionnelle.",
+      "it": "Le fasi principali da 1 a 6, come punti di decisione tra le fasi parziali, con data pianificata e data prevista."
+    },
+    "Gebäudekategorie des BBL, etwa Verwaltung, Zoll oder Bauten im Ausland.": {
+      "en": "Building category of the FOBL, such as administration, customs or buildings abroad.",
+      "fr": "Catégorie de bâtiments de l’OFCL, par exemple administration, douane ou bâtiments à l’étranger.",
+      "it": "Categoria di edifici dell’UFCL, ad esempio amministrazione, dogana o edifici all’estero."
+    },
+    "Überlast · knapp · ok · frei": {
+      "en": "Over capacity · tight · ok · free",
+      "fr": "Surcharge · juste · ok · libre",
+      "it": "Sovraccarico · al limite · ok · libero"
+    },
+    "Auslastung über 100 · 95 – 100 · 80 – 94 · darunter.": {
+      "en": "Utilisation above 100 · 95 – 100 · 80 – 94 · below.",
+      "fr": "Taux de charge supérieur à 100 · 95 – 100 · 80 – 94 · en dessous.",
+      "it": "Grado di utilizzo superiore a 100 · 95 – 100 · 80 – 94 · inferiore."
+    },
+    "Abteilung Projektmanagement": {
+      "en": "Project Management Division",
+      "fr": "Division Gestion de projets",
+      "it": "Divisione Gestione dei progetti"
+    },
+    "▲ Auftrag noch hängig": {
+      "en": "▲ Mandate still pending",
+      "fr": "▲ Mandat encore en suspens",
+      "it": "▲ Mandato ancora in sospeso"
+    },
+    "▲ 2 Quartale verspätet": {
+      "en": "▲ 2 quarters late",
+      "fr": "▲ 2 trimestres de retard",
+      "it": "▲ 2 trimestri di ritardo"
+    },
+    "▲ 1 Quartal verspätet": {
+      "en": "▲ 1 quarter late",
+      "fr": "▲ 1 trimestre de retard",
+      "it": "▲ 1 trimestre di ritardo"
+    },
+    "Projektentwicklung": {
+      "en": "Project development",
+      "fr": "Développement de projets",
+      "it": "Sviluppo dei progetti"
+    },
+    "In SAP ePPM öffnen": {
+      "en": "Open in SAP ePPM",
+      "fr": "Ouvrir dans SAP ePPM",
+      "it": "Apri in SAP ePPM"
+    },
+    "Alle aufklappen": {
+      "en": "Expand all",
+      "fr": "Tout déplier",
+      "it": "Espandi tutto"
+    },
+    "Alle zuklappen": {
+      "en": "Collapse all",
+      "fr": "Tout replier",
+      "it": "Comprimi tutto"
+    },
+    "Person / Rolle": {
+      "en": "Person / role",
+      "fr": "Personne / rôle",
+      "it": "Persona / ruolo"
+    },
+    "Projekt / Rolle": {
+      "en": "Project / role",
+      "fr": "Projet / rôle",
+      "it": "Progetto / ruolo"
+    },
+    "Im Admin-Verzeichnis öffnen": {
+      "en": "Open in the admin directory",
+      "fr": "Ouvrir dans l’annuaire de l’administration",
+      "it": "Apri nell’elenco dell’amministrazione"
+    },
+    "Bauprojekt": {
+      "en": "Construction project",
+      "fr": "Projet de construction",
+      "it": "Progetto di costruzione"
+    },
+    "Auf keine der": {
+      "en": "None of the",
+      "fr": "Aucune des",
+      "it": "Nessuna delle"
+    },
+    "Personen treffen die aktiven Filter zu.": {
+      "en": "people match the active filters.",
+      "fr": "personnes ne correspond aux filtres actifs.",
+      "it": "persone corrisponde ai filtri attivi."
+    },
+    "Zum Inhalt springen": {
+      "en": "Skip to content",
+      "fr": "Aller au contenu",
+      "it": "Vai al contenuto"
+    },
+    "Kein Pensum": {
+      "en": "Not a workload",
+      "fr": "Taux non valable",
+      "it": "Percentuale non valida"
+    },
+    "Zulässig sind ganze Zahlen im Bereich": {
+      "en": "Whole numbers are allowed in the range",
+      "fr": "Sont admis les nombres entiers dans la plage",
+      "it": "Sono ammessi numeri interi nell'intervallo"
+    },
+    "Gespeichert als": {
+      "en": "Saved as",
+      "fr": "Enregistré comme",
+      "it": "Salvato come"
+    },
+    "gespeichert": {
+      "en": "saved",
+      "fr": "enregistré",
+      "it": "salvato"
+    },
+    "Phasen und Meilensteine": {
+      "en": "Phases and milestones",
+      "fr": "Phases et jalons",
+      "it": "Fasi e traguardi"
     }
   }
 }

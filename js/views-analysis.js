@@ -5,18 +5,18 @@
    ============================================================================= */
 
 import {
-  data, state, t, num, unitSuffix, fmtMio, fmtFte, totals, loadStatus, cellValue, heatStep,
+  data, state, t, fmtMio, fmtFte, totals, loadStatus, cellValue, coloured,
   filteredProjects, visibleChanges,
   periods, periodValue, personRows, sortPersonRows, pageOf, chartTone, nowIndex, compareDe,
   projectShare, projectCapacity, personHeatStep, assignmentsOf, roleOf, activeSpan
 } from './store.js';
-import { card } from './views-overview.js';
+import { card, laneCell, cardWidth, MIN_PERIODS } from './views-overview.js';
 
 import {
-  html, raw, icons, pageHeader, pageActions, toolbar, activeFilterRow,
+  html, raw, icons, pageHeader, pageActions, toolbar, activeFilterRow, peopleLine, noResults,
   columnCharts, barList, kpiStrip,
   tokenPx, yearRule, pinCls, pinLeft, sortableHead, attr, dropdown, menuRadio, menuGroupLabel, divider, changeProject,
-  highlight, caretCell, rowCaret
+  highlight, caretCell, rowCaret, droppedNote
 } from './ui.js';
 
 /* =============================================================================
@@ -54,14 +54,15 @@ export function renderDashboard() {
  * who carries how much, and on what — is asked often enough for a tab.
  */
 export function renderPeople() {
+  const rows = sortPersonRows(personRows());
   return html`
     ${pageHeader({
       actions: pageActions()
     })}
     <div class="wrap"><div class="content">
-      ${toolbar({ time: true })}
-      ${activeFilterRow()}
-      ${personSection()}
+      ${toolbar({ time: true, view: true })}
+      ${activeFilterRow({ count: peopleLine(rows.length) })}
+      ${rows.length ? personSection(rows) : noResults('Personen')}
     </div></div>`;
 }
 
@@ -79,36 +80,59 @@ const PERSON_COLS = [
   /* The caret's own track, as on Planung — see caretCell() in ui.js. */
   { key: 'caret', token: '--grid-col-caret' },
   { key: 'name', token: '--person-col-name', grow: true },
+  /* How many projects the person is on — and the heading the project names
+     of an open row stand under, as «Bearbeitende» is for the names on
+     Planung. Narrow: on a person's row it holds a number, and the names in
+     the rows below run on across the columns after it, which are empty there. */
+  { key: 'projects', token: '--person-col-projects', label: 'Projekte' },
   /* The same short form and width as the planning grid's column. */
-  { key: 'organisation', token: '--grid-col-organisation' },
-  { key: 'employment', token: '--person-col-employment' },
+  { key: 'organisation', token: '--grid-col-organisation', label: 'Organisation' },
+  { key: 'employment', token: '--person-col-employment', label: 'Anstellung' },
   /* How much of that contract may go to projects — the ceiling the figures
      to the right are measured against. */
-  { key: 'share', token: '--person-col-share' },
-  /* «Projekte» became «Rollen»: the rows a person folds open to are one per
-     role, and a person can hold two on one project. Same width. */
-  { key: 'roles', token: '--person-col-projects' },
-  { key: 'peak', token: '--person-col-peak' }
+  { key: 'share', token: '--person-col-share', label: 'Projektanteil' }
+  /* «Rollen» and «Spitze» stood here, a count and a maximum. The users asked
+     for both to go: the roles are the rows a person folds open to, and the
+     highest figure is in the quarters beside it, coloured. */
 ];
 
+/*
+ * Which of them gives way first when the window is too narrow, as
+ * YIELD_ORDER in columns.js does for the planning grid. The caret and the
+ * name are the floor. All five are frozen, and together they are 526px
+ * wide: on a tablet held upright that left two quarters, and on a phone
+ * the frozen block was wider than the window — the quarters were in the
+ * page and could not be scrolled into view.
+ */
+const PERSON_YIELD = ['share', 'employment', 'organisation', 'projects'];
+
 function personLayout(cols) {
+  const quarterW = tokenPx('--grid-period');
+  const room = cardWidth();
+  const shown = [...PERSON_COLS];
+  const hidden = [];
+  const width = () => shown.reduce((a, c) => a + tokenPx(c.token), 0);
+  for (const key of PERSON_YIELD) {
+    if (width() + MIN_PERIODS * quarterW <= room) break;
+    hidden.push(...shown.splice(shown.findIndex(c => c.key === key), 1));
+  }
+
   const parts = [];
   const sticky = {};
   let offset = 0;
-  for (const c of PERSON_COLS) {
+  for (const c of shown) {
     const w = tokenPx(c.token);
     sticky[c.key] = offset;
     offset += w;
     parts.push(c.grow ? `minmax(${w}px, 1fr)` : `${w}px`);
   }
   sticky.width = offset;
-  sticky.last = PERSON_COLS.at(-1).key;
+  sticky.last = shown.at(-1).key;
 
   /* The same floor and ceiling as the planning grid, so the two tables share
      a column width — and, past the ceiling, the name takes the slack. */
-  const quarterW = tokenPx('--grid-period');
   parts.push(`repeat(${cols.length}, minmax(${quarterW}px, ${tokenPx('--grid-period-max')}px))`);
-  return { tpl: parts.join(' '), minWidth: offset + quarterW * cols.length, sticky };
+  return { tpl: parts.join(' '), minWidth: offset + quarterW * cols.length, sticky, shown, hidden };
 }
 
 /** A sortable header cell for the person table. */
@@ -118,11 +142,11 @@ const personHead = (key, label, sticky, cls = '', title = '') => sortableHead({
   active: state.pSort === key, ascending: state.pDir === 'asc'
 });
 
-function personSection() {
+function personSection(rows) {
   const cols = periods();
-  const { tpl, minWidth, sticky } = personLayout(cols);
-  const rows = sortPersonRows(personRows());
-  const span = PERSON_COLS.length;
+  const { tpl, minWidth, sticky, shown, hidden } = personLayout(cols);
+  const span = shown.length;
+  const has = key => shown.some(c => c.key === key);
   /*
    * A total adds up what is booked, not the percentages: a row's figure is a
    * share of that person's own contract, and a sum of shares of different
@@ -132,18 +156,17 @@ function personSection() {
   const sumOf = list => cols.map(col => list.reduce((a, r) => a + periodValue(r.load, col), 0));
 
   /* The frozen lead cells differ only in their class and their content. */
-  const leadCell = (key, cls, body, title = '') => html`<span class="pcell ${cls} ${pinCls(sticky, key)}"
+  const leadCell = (key, cls, body, title = '') => html`<span role="${key === 'name' ? 'rowheader' : 'cell'}" class="pcell ${cls} ${pinCls(sticky, key)}"
       style="${pinLeft(sticky, key)}" title="${title}">${body}</span>`;
 
-  const head = html`<div class="prow prow--head" style="grid-template-columns:${raw(tpl)}">
+  const head = html`<div role="row" class="prow prow--head" style="grid-template-columns:${raw(tpl)}">
     ${caretCell()}
-    ${personHead('name', t('Person'), sticky)}
-    ${personHead('organisation', t('Organisation'), sticky)}
-    ${personHead('employment', t('Anstellung'), sticky, 'pcell--num align-end')}
-    ${personHead('share', t('Projektanteil'), sticky, 'pcell--num align-end',
+    ${personHead('name', t('Person / Rolle'), sticky)}
+    ${has('projects') && personHead('projects', t('Projekte'), sticky)}
+    ${has('organisation') && personHead('organisation', t('Organisation'), sticky)}
+    ${has('employment') && personHead('employment', t('Anstellung'), sticky, 'pcell--num align-end')}
+    ${has('share') && personHead('share', t('Projektanteil'), sticky, 'pcell--num align-end',
       t('Anteil der Anstellung, der für Projekte eingesetzt werden darf'))}
-    ${personHead('roles', t('Rollen'), sticky, 'pcell--num align-end')}
-    ${personHead('peak', t('Spitze'), sticky, 'pcell--num align-end', t('Höchste Auslastung im sichtbaren Zeitraum'))}
     ${cols.map((col, i) => personHead(`q${i}`, col.short,
       sticky, `pcell--num pcell--period align-center ${col.isNow ? 'is-today' : ''} ${yearRule(col)}`,
       /* The heading is a short form; the hint says the whole quarter, as on Planung. */
@@ -151,35 +174,48 @@ function personSection() {
   </div>`;
 
   /*
-   * A person's row folds open to the roles they hold, one row per role and
-   * project: the role under the person's name, then the project — its number
-   * in front of its name, as on Planung — and the pensum they carry there
-   * quarter by quarter, blank where they carry none. The rows under a
-   * project on Planung, read from the other side. The whole row is the
-   * switch, and that is all a click on it does: the name used to open a
-   * dialog about the person, and the users found the table said enough.
+   * A person's row folds open to the roles they hold, one row each: the role
+   * under the person's name, the project's name under «Projekte», and the
+   * pensum they carry there quarter by quarter, blank where they carry none.
+   * The person's own name is a link, to a small dialog about them, as a
+   * project's is on Planung; a click anywhere else on their row folds it.
+   * The rows under a project on Planung, read from the other side — and
+   * written from it too: the cells are the same fields, because this is
+   * where somebody looks their own figures up.
+   *
+   * The name and nothing beside it. The row used to carry the Projekt-ID in
+   * front and «bis Q3/2026» behind, and the users found it too dense to
+   * read; both are in the hint, and the quarters say when. The name is the
+   * same link it is on Planung, to the project's dialog.
    */
-  const rest = PERSON_COLS.length - 2;
+  const rest = shown.length - 2;
+  /*
+   * Where columns had to go, the project's name has lost the room it ran
+   * across — three and a half columns of it. The row is one cell then, from
+   * the name's column to the edge of the frozen block: the role in its
+   * short form, and the project after it.
+   */
+  const compact = hidden.length > 0;
   const personLanes = r => assignmentsOf(r.person.id).map(({ project: p, lane }) => {
-    const label = t(roleOf(lane.role).label);
+    const role = roleOf(lane.role);
+    const label = t(role.label);
     const when = activeSpan(lane);
-    const hint = `${label} · ${p.title}${when ? ` · ${when}` : ''}`;
-    return html`<div class="prow prow--lane" style="grid-template-columns:${raw(tpl)}">
+    const hint = `${label} · ${p.number} ${p.title}${when ? ` · ${when}` : ''}`;
+    const project = html`<button type="button" class="linkbtn lane__project" data-act="open-project"
+        data-val="${p.id}">${highlight(p.title)}</button>`;
+    return html`<div role="row" class="prow prow--lane" style="grid-template-columns:${raw(tpl)}">
       ${caretCell()}
-      <span class="pcell lane__cell ${pinCls(sticky, 'name')}" style="${pinLeft(sticky, 'name')}" title="${hint}">
-        <span class="lane__role">${label}</span>
-      </span>
-      <div style="grid-column:span ${rest}; ${pinLeft(sticky, PERSON_COLS[2].key)}" class="lane__label is-frozen" title="${hint}">
-        <span class="lane__num">${p.number}</span>
-        <button type="button" class="linkbtn lane__project" data-act="open-project" data-val="${p.id}">${p.title}</button>
-        ${when && html`<span class="lane__note">${when}</span>`}
-      </div>
-      ${cols.map(col => {
-        const v = periodValue(lane.demand, col);
-        if (!v) return html`<span class="pcell pcell--val pcell--lanev is-zero ${yearRule(col)}"></span>`;
-        return html`<span class="pcell pcell--val pcell--lanev heat-${heatStep(v)} ${yearRule(col)}"
-          title="${label} · ${p.title}, ${col.label}: ${num(v)}${unitSuffix()}">${num(v)}</span>`;
-      })}
+      ${compact
+        ? html`<div role="cell" aria-colspan="${shown.length - 1}" style="grid-column:span ${shown.length - 1}; ${pinLeft(sticky, 'name')}" class="lane__label is-frozen" title="${hint}">
+            <span class="lane__role lane__role--short">${t(role.short)}</span>${project}
+          </div>`
+        : html`<span role="cell" class="pcell lane__cell ${pinCls(sticky, 'name')}" style="${pinLeft(sticky, 'name')}" title="${hint}">
+            <span class="lane__role">${label}</span>
+          </span>
+          <div role="cell" aria-colspan="${rest}" style="grid-column:span ${rest}; ${pinLeft(sticky, PERSON_COLS[2].key)}" class="lane__label is-frozen" title="${hint}">
+            ${project}
+          </div>`}
+      ${cols.map(col => laneCell(p, role, lane, col))}
     </div>`;
   });
 
@@ -189,45 +225,52 @@ function personSection() {
     const open = !!state.openPeople[r.person.id];
     /* The ceiling in pensum points, which is what a sum of pensa is held against. */
     const capacity = String(Math.round(projectCapacity(r.person) * 10) / 10).replace('.', ',');
-    const row = html`<div class="prow prow--project ${open ? 'is-open' : ''}" style="grid-template-columns:${raw(tpl)}"
+    const row = html`<div role="row" class="prow prow--project ${open ? 'is-open' : ''}" style="grid-template-columns:${raw(tpl)}"
         data-act="toggle-person" data-val="${r.person.id}">
       ${caretCell(rowCaret({
         act: 'toggle-person', val: r.person.id, open, label: `${t('Rollen ein-/ausklappen')}: ${r.person.name}`
       }))}
-      ${leadCell('name', 'pcell--title', html`<span class="prow__title">${r.person.name}</span>`)}
-      ${leadCell('organisation', 'pcell--phase', org ? t(org.short) : '—', org ? t(org.label) : '')}
-      ${leadCell('employment', 'pcell--target align-end', `${r.person.employment} %`)}
-      ${leadCell('share', 'pcell--target align-end', `${share} %`,
+      ${leadCell('name', 'pcell--title', html`<button type="button" class="prow__title" data-act="open-person"
+          data-val="${r.person.id}" title="${r.person.name}">${highlight(r.person.name)}</button>`)}
+      ${has('projects') && leadCell('projects', 'pcell--lead', r.projects || '—')}
+      ${has('organisation') && leadCell('organisation', 'pcell--phase', org ? t(org.short) : '—', org ? t(org.label) : '')}
+      ${has('employment') && leadCell('employment', 'pcell--target align-end', `${r.person.employment} %`)}
+      ${has('share') && leadCell('share', 'pcell--target align-end', `${share} %`,
         `${t('Für Projekte verfügbar')}: ${capacity} % (${share} % ${t('von')} ${r.person.employment} % ${t('Anstellung')})`)}
-      ${leadCell('roles', 'pcell--target align-end', r.roles || '—')}
-      ${leadCell('peak', `pcell--target align-end ${r.peak > 100 ? 'is-over' : ''}`,
-        r.peak === null ? '—' : `${r.peak} %`)}
       ${cols.map((col, i) => {
         const v = r.values[i];
+        /* The figure alone, as in a project's row on Planung: a quarter cell is a
+           number in both grids, and its unit is said in the hint, not two
+           thousand times over. A nought is hidden where Planung hides one. The
+           one figure that keeps its sign is this row in a table set to FTE: it
+           is a share of the person's capacity whatever a pensum is written in,
+           and the sign is what tells it from the FTE in the rows under it. */
         const label = r.roles ? `${v} %` : '—';
-        return html`<span class="pcell pcell--val ${r.roles ? `heat-${personHeatStep(v)}` : ''}
+        const shown = !r.roles ? '—' : state.hideZeros && v === 0 ? '' : state.unit === 'fte' ? label : v;
+        return html`<span role="cell" class="pcell pcell--val ${r.roles ? `heat-${personHeatStep(v)}` : ''}
             ${r.roles && v > 100 ? 'is-warn' : ''} ${yearRule(col)}"
-            title="${r.person.name}, ${col.label}: ${label} ${t('der Projektkapazität')}">${label}</span>`;
+            title="${r.person.name}, ${col.label}: ${label} ${t('der Projektkapazität')}">${shown}</span>`;
       })}
     </div>`;
     return open ? html`${row}${personLanes(r)}` : row;
   };
 
-  const sumRow = (label, note, list) => html`<div class="prow prow--sum"
+  const sumRow = (label, note, list) => html`<div role="row" class="prow prow--sum"
       style="grid-template-columns:${raw(tpl)}">
-    <div style="grid-column:span ${span}" class="prow__sumlabel is-frozen">
+    <div role="rowheader" aria-colspan="${span}" style="grid-column:span ${span}" class="prow__sumlabel is-frozen">
       ${label}${note && html`<span class="prow__sumnote">${note}</span>`}
     </div>
-    ${sumOf(list).map((v, i) => html`<span class="pcell pcell--sum ${yearRule(cols[i])}">${fmtFte(v)}</span>`)}
+    ${sumOf(list).map((v, i) => html`<span role="cell" class="pcell pcell--sum ${yearRule(cols[i])}">${fmtFte(v)}</span>`)}
   </div>`;
 
-  /* One table: people have no size to stand in groups by, and the sort —
-     the peak first, as it opens — is what orders them. */
+  /* One table: people have no size to stand in groups by. It opens in the
+     order of the names; a click on a quarter's heading puts the most loaded
+     first. */
   const body = html`<section class="pgroup">
-    ${card(html`${head}${rows.map(personRow)}`, { minWidth, sticky })}
+    ${card(html`${head}${rows.map(personRow)}`, { minWidth, sticky, label: t('Personen') })}
   </section>`;
 
-  const foot = sumRow(t('Summe Total'), `${rows.length} ${t('Personen')} · ${t('Pensum in FTE')}`, rows);
+  const foot = sumRow(t('Summe Total'), `${rows.length} ${t(rows.length === 1 ? 'Person' : 'Personen')} · ${t('Pensum in FTE')}`, rows);
 
   /*
    * The same cards as the planning grid — the table and, under it, the
@@ -236,9 +279,9 @@ function personSection() {
    * table has no band: without them the figures kept a band's worth of room
    * under every number.
    */
-  return html`<section class="grid-card is-bars-off is-gates-off">
+  return html`${droppedNote(hidden)}<section class="grid-card is-bars-off is-gates-off ${coloured() ? '' : 'is-uncoloured'}">
     ${body}
-    ${card(foot, { minWidth, sticky, cls: 'pblock--foot' })}
+    ${card(foot, { minWidth, sticky, cls: 'pblock--foot', label: t('Summe Total') })}
   </section>`;
 }
 
@@ -287,7 +330,7 @@ function biCard(id, title, subtitle, body, { full = false, sort = true } = {}) {
         <button type="button" class="iconbtn ${open ? 'is-open' : ''}" data-act="menu" data-val="card:${id}"
                 aria-expanded="${open}" aria-haspopup="menu"
                 aria-label="${t('Karte sortieren, exportieren oder teilen')}">${icons.kebab(15)}</button>
-        ${open && html`<div class="dd__panel dd__panel--right" role="menu" style="width:212px">
+        ${open && html`<div class="dd__panel dd__panel--right" role="menu">
           ${sort && html`${menuGroupLabel(t('Sortieren nach'))}
             ${menuRadio(t('Kategorie'), by === 'label', 'card-sort', `${id}:by:label`)}
             ${menuRadio(t('Wert'), by === 'value', 'card-sort', `${id}:by:value`)}
@@ -399,8 +442,9 @@ function organisationFteCard() {
 
 function creditYearCard() {
   const cfg = data.dashboard.creditByYear;
-  const rows = cfg.rows.map(r => ({
-    label: r.label, value: r.value, valueLabel: r.valueLabel
+  const rows = cfg.rows.map((r, key) => ({
+    /* The years have an order of their own; the alphabet put «vor 2026» last. */
+    key, label: r.label, value: r.value, valueLabel: r.valueLabel
   }));
   return biCard('kreditjahr', cfg.title, t(cfg.subtitle), barList(ordered('kreditjahr', rows)));
 }
@@ -437,18 +481,20 @@ export function renderHistory() {
       ${activeFilterRow()}
 
       <section class="table-card">
-        <div class="log log--history log--head">
-          <span>${t('Datum')}</span><span>${t('Person')}</span><span>${t('Projekt')}</span>
-          <span>${t('Feld')}</span><span>${t('Änderung')}</span><span>${t('Wert')}</span>
+        <div role="table" aria-label="${t('Verlauf')}">
+        <div role="row" class="log log--history log--head">
+          <span role="columnheader">${t('Datum')}</span><span role="columnheader">${t('Person')}</span><span role="columnheader">${t('Projekt')}</span>
+          <span role="columnheader">${t('Feld')}</span><span role="columnheader">${t('Änderung')}</span><span role="columnheader">${t('Wert')}</span>
         </div>
-        ${page.rows.length ? page.rows.map((c, i) => html`<div class="log log--history ${i % 2 === 1 ? 'is-zebra' : ''}">
-          <span class="log__date">${c.dateLabel}</span>
-          <span>${highlight(c.actor)}</span>
-          <span class="log__project">${changeProject(c)}</span>
-          <span><span class="fieldtag">${highlight(t(c.field))}</span></span>
-          <span class="log__change">${highlight(t(c.change))}</span>
-          <span class="log__value">${highlight(t(c.value))}</span>
-        </div>`) : html`<div class="log log--history log--empty">${t('Keine Einträge im gesetzten Umfang.')}</div>`}
+        ${page.rows.length ? page.rows.map((c, i) => html`<div role="row" class="log log--history ${i % 2 === 1 ? 'is-zebra' : ''}">
+          <span role="cell" class="log__date">${c.dateLabel}</span>
+          <span role="cell">${highlight(c.actor)}</span>
+          <span role="cell" class="log__project">${changeProject(c)}</span>
+          <span role="cell"><span class="fieldtag">${highlight(t(c.field))}</span></span>
+          <span role="cell" class="log__change">${highlight(t(c.change))}</span>
+          <span role="cell" class="log__value">${highlight(t(c.value))}</span>
+        </div>`) : html`<div role="row" class="log log--history log--empty"><span role="cell">${t('Keine Einträge im gesetzten Umfang.')}</span></div>`}
+        </div>
         ${logFoot(page)}
       </section>
     </div></div>`;
@@ -463,7 +509,7 @@ function logFoot({ page, pages, from, rows, total }) {
     <span>${total ? `${from + 1} – ${from + rows.length}` : '0'} ${t('von')} ${total} ${t('Einträgen')}</span>
     <div class="log__pager">
       ${dropdown({
-        id: 'pagesize', label: `${state.pageSize} ${t('pro Seite')}`, width: 170, align: 'right',
+        id: 'pagesize', label: `${state.pageSize} ${t('pro Seite')}`, size: 'sm', align: 'right',
         body: () => html`${['25', '50', '100'].map(n =>
           menuRadio(`${n} ${t('pro Seite')}`, state.pageSize === n, 'page-size', n))}`
       })}

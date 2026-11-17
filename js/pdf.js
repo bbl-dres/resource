@@ -127,7 +127,14 @@ export function createPdf() {
         + '/Encoding /WinAnsiEncoding >>');
       const fontBold = add('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold '
         + '/Encoding /WinAnsiEncoding >>');
-      const resources = `<< /Font << /F1 ${fontRegular} 0 R /F2 ${fontBold} 0 R >> >>`;
+      /* The sheets set two things in italics — «Fortsetzung auf dem nächsten
+         Blatt» and the notice at the foot — and they came out upright. */
+      const fontItalic = add('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Oblique '
+        + '/Encoding /WinAnsiEncoding >>');
+      const fontBoldItalic = add('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-BoldOblique '
+        + '/Encoding /WinAnsiEncoding >>');
+      const resources = `<< /Font << /F1 ${fontRegular} 0 R /F2 ${fontBold} 0 R `
+        + `/F3 ${fontItalic} 0 R /F4 ${fontBoldItalic} 0 R >> >>`;
 
       const pagesId = objects.length + pages.length * 2;
       const kids = [];
@@ -190,17 +197,19 @@ export function pageStream(height) {
     },
 
     /** A run of text, scaled horizontally to the width the layout gave it. */
-    text(left, baseline, run, { size, bold, colour, width }) {
+    text(left, baseline, run, { size, bold, italic = false, colour, width }) {
       if (!run.trim()) return;
       const natural = textWidth(run, size, bold);
       const scale = natural > 0 && width > 0 ? Math.min(100, width / natural * 100) : 100;
-      ops.push('BT', `${colour} rg`, `/${bold ? 'F2' : 'F1'} ${round(size * PT)} Tf`,
+      /* The oblique faces set on the widths of the upright ones. */
+      const font = italic ? (bold ? 'F4' : 'F3') : (bold ? 'F2' : 'F1');
+      ops.push('BT', `${colour} rg`, `/${font} ${round(size * PT)} Tf`,
         `${round(scale)} Tz`, `${x(left)} ${y(baseline)} Td`, `${pdfString(run)} Tj`, 'ET');
     },
 
     /** A closed path from points given in document coordinates. */
     shape(points, fill, stroke, width) {
-      if (!points.length) return;
+      if (!points.length || (!fill && !stroke)) return;
       const path = points.map(([px, py], i) => `${x(px)} ${y(py)} ${i ? 'l' : 'm'}`).join(' ');
       if (fill) ops.push(`${fill} rg`);
       if (stroke) ops.push(`${stroke} RG`, `${round((width || 1) * PT)} w`);
@@ -209,6 +218,7 @@ export function pageStream(height) {
 
     /** A circle, as four Bézier arcs. */
     circle(cx, cy, r, fill, stroke, width) {
+      if (r <= 0 || (!fill && !stroke)) return;
       const k = r * 0.5523;
       const px = (v) => x(v), py = (v) => y(v);
       if (fill) ops.push(`${fill} rg`);
@@ -302,6 +312,31 @@ function rotationOf(transform) {
   return Math.atan2(b, a);
 }
 
+/*
+ * A run as CSS set it: white space collapsed, and none at either end where
+ * the layout dropped it. A text node is whatever stood between two tags in
+ * the template, line breaks and indentation included; the browser collapses
+ * that, and the writer did not — it counted every space as a glyph, found the
+ * run far wider than the box the layout had measured, and squeezed it to
+ * fit. Group headings set at 64 to 78 % of their width, with a hole where
+ * the indentation had been.
+ */
+function setRun(node, line) {
+  const probe = document.createRange();
+  const shown = (from, to) => {
+    probe.setStart(node, from);
+    probe.setEnd(node, to);
+    return probe.getBoundingClientRect().width > 0;
+  };
+  const raw = line.text;
+  const lead = raw.length - raw.trimStart().length;
+  const trail = raw.length - raw.trimEnd().length;
+  const end = line.start + raw.length;
+  return (lead && shown(line.start, line.start + lead) ? ' ' : '')
+    + raw.trim().replace(/\s+/g, ' ')
+    + (trail && shown(end - trail, end) ? ' ' : '');
+}
+
 function drawElement(el, page, origin) {
   const cs = getComputedStyle(el);
   if (cs.display === 'none' || cs.visibility === 'hidden' || Number(cs.opacity) === 0) return;
@@ -350,9 +385,30 @@ function drawElement(el, page, origin) {
     }
   }
 
+  /*
+   * An inset rail down the left edge — box-shadow: inset 3px 0 0 colour — is
+   * how a row without a lead is marked. Shadows were not read at all, so the
+   * legend on paper explained a mark the paper did not carry.
+   */
+  const rail = /^(rgba?\([^)]+\)) (-?[\d.]+)px 0px 0px 0px inset$/.exec(cs.boxShadow);
+  if (rail && Number(rail[2]) > 0) page.fill(left, top, Number(rail[2]), r.height, colourOf(rail[1]));
+
+  /*
+   * What the box clips on screen it clips on paper, and where the screen ends
+   * a name in an ellipsis, so does the sheet. Neither was honoured: text was
+   * drawn at its full width, and with several columns switched on the names
+   * of one ran across the next.
+   */
+  const clips = cs.overflowX !== 'visible' || cs.overflowY !== 'visible';
+  if (clips) page.clip(left, top, r.width, r.height);
+  const collapses = !cs.whiteSpace.startsWith('pre');
+  const ellipsis = clips && cs.textOverflow === 'ellipsis';
+  const roomRight = r.right - (parseFloat(cs.paddingRight) || 0) - (parseFloat(cs.borderRightWidth) || 0);
+
   /* Text belonging to this element, line by line. */
   const size = parseFloat(cs.fontSize);
   const bold = Number(cs.fontWeight) >= 600;
+  const italic = cs.fontStyle !== 'normal';
   const colour = colourOf(cs.color) ?? '0 0 0';
   for (const node of el.childNodes) {
     if (node.nodeType !== Node.TEXT_NODE || !node.nodeValue.trim()) continue;
@@ -361,7 +417,18 @@ function drawElement(el, page, origin) {
       const ly = baselineIn({ top: line.rect.top - origin.top, height: line.rect.height }, size);
       const mark = line.text.indexOf(UP_TRIANGLE);
       if (mark < 0) {
-        page.text(lx, ly, line.text, { size, bold, colour, width: line.rect.width });
+        let run = collapses ? setRun(node, line) : line.text;
+        let width = line.rect.width;
+        const room = roomRight - line.rect.left;
+        if (ellipsis && width > room + 0.5) {
+          /* Cut where the column ends, as the screen does, and say so. */
+          const ratio = Math.min(1, width / textWidth(run, size, bold));
+          let cut = run.length;
+          while (cut > 0 && textWidth(run.slice(0, cut).trimEnd() + '…', size, bold) * ratio > room) cut--;
+          run = run.slice(0, cut).trimEnd() + '…';
+          width = room;
+        }
+        page.text(lx, ly, run, { size, bold, italic, colour, width });
         continue;
       }
       /*
@@ -384,12 +451,13 @@ function drawElement(el, page, origin) {
       const rest = line.text.slice(mark + 1);
       const restX = box.right - origin.left;
       page.text(restX, ly, rest, {
-        size, bold, colour, width: line.rect.right - box.right
+        size, bold, italic, colour, width: line.rect.right - box.right
       });
     }
   }
 
   for (const kid of el.children) drawElement(kid, page, origin);
+  if (clips) page.restore();
 }
 
 /**
@@ -410,6 +478,16 @@ export function sheetsToPdf(sheets) {
     const doc = createPdf();
     for (const sheet of sheets) {
       const box = sheet.getBoundingClientRect();
+      /*
+       * The page is as large as the sheet was rendered. A sheet whose table
+       * outgrew its row budget is taller than its paper, and the file would
+       * carry a page of a size no printer has — said here, where somebody
+       * changing the layout will see it.
+       */
+      const [short, long] = [Math.min(box.width, box.height), Math.max(box.width, box.height)];
+      if (Math.abs(long / short - Math.SQRT2) > 0.01) {
+        console.warn(`PDF: a sheet is ${Math.round(box.width)} × ${Math.round(box.height)}px, which is not an ISO page.`);
+      }
       const page = pageStream(box.height);
       drawElement(sheet, page, box);
       doc.addPage(box.width, box.height, page.toString());

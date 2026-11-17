@@ -82,10 +82,21 @@ for (const p of data.projects) {
 for (const m of data.milestones.items) {
   check(`milestone ${m.id} belongs to a project`, !!data.projectsById[m.projectId], m.projectId);
   check(`milestone ${m.id} is in the catalogue`, !!data.milestoneCatalog[m.code], m.code);
+  /* The tooltip reads the plan quarter's label without asking whether there is one. */
+  check(`milestone ${m.id} is planned in a known quarter`, data.quarterIndex[m.plan] !== undefined, m.plan);
+  check(`milestone ${m.id} is forecast in a known quarter, or open`, m.forecast === null || data.quarterIndex[m.forecast] !== undefined, String(m.forecast));
+  check(`milestone ${m.id}: open means pending`, (m.forecast === null) === (m.status === 'pending'));
+  check(`milestone ${m.id}: a gate that is held has one date`, m.status !== 'ok' || m.forecastDate === m.planDate, `${m.planDate} / ${m.forecastDate}`);
+  check(`milestone ${m.id}: forecast not before plan`, !m.forecastDate || m.forecastDate >= m.planDate, `${m.planDate} / ${m.forecastDate}`);
 }
+check('milestones: ids are unique', new Set(data.milestones.items.map(m => m.id)).size === data.milestones.items.length);
 for (const c of data.changes) {
   check(`change ${c.id} belongs to a project or to none`, c.projectId == null || !!data.projectsById[c.projectId], String(c.projectId));
 }
+check('changes: ids are unique', new Set(data.changes.map(c => c.id)).size === data.changes.length);
+/* Verlauf prints the file's order. */
+check('changes: newest first', data.changes.every((c, i) => i === 0 || data.changes[i - 1].date >= c.date));
+check('changes: an entry changes something', !data.changes.some(c => /^(\d+) % → \1 %$/.test(c.value)));
 
 /* -----------------------------------------------------------------------------
    What is derived from them
@@ -128,28 +139,16 @@ for (const scale of ['year', 'quarter', 'month']) {
 store.setState({ scale: 'quarter' });
 
 /* -----------------------------------------------------------------------------
-   Edits — the three writes the grid makes
+   Edits — the one write the grid makes: a pensum typed into a cell
    -------------------------------------------------------------------------- */
 
 group('edits');
 {
   const p = data.projects.find(x => x.assignees.length >= 2 && x.assignees[0].person);
   const before = structuredClone(p.assignees);
+  const rows = p.assignees.length;
   const total = p.demand.reduce((a, v) => a + v, 0);
-  const [first, second] = p.assignees;
-  const somebody = data.people.find(x => !store.assignedTo(p, x.id)).id;
-
-  /* A new row goes where its role belongs. */
-  const row = store.addLane(p, first.role, somebody);
-  check('addLane: under the last row of its role', p.assignees.indexOf(row) === store.lanesOf(p, first.role).length - 1 + p.assignees.indexOf(first));
-  check('addLane: found again by role and person', store.laneOf(p, first.role, somebody) === row);
-
-  /* A person with no figures stays; nobody with no figures goes. */
-  store.pruneLanes(p);
-  check('pruneLanes: keeps a person without pensum', p.assignees.includes(row));
-  row.person = null;
-  store.pruneLanes(p);
-  check('pruneLanes: drops a row with neither', !p.assignees.includes(row));
+  const [first] = p.assignees;
 
   /* A typed figure moves the sum and the person's load. */
   const was = store.personLoad(first.person, now);
@@ -158,18 +157,17 @@ group('edits');
   store.touch();
   check('a typed figure moves the project\'s demand', p.demand.reduce((a, v) => a + v, 0) === total + 10);
   check('…and the person\'s load', store.personLoad(first.person, now) === was + 10);
+  check('…and is found again by role and person', store.laneOf(p, first.role, store.holderKey(first)) === first);
 
-  /* Giving a row to somebody who has one for the role merges the two. */
-  const twin = store.addLane(p, second.role, somebody);
-  twin.demand[now] = 5;
-  const kept = second.demand[now];
-  const merged = store.reassignLane(p, second, somebody);
-  check('reassignLane: merges into the row that person has', merged === twin && twin.demand[now] === kept + 5 && !p.assignees.includes(second));
-  const moved = store.reassignLane(p, twin, null);
-  check('reassignLane: «nicht zugewiesen» takes the person off', moved.person === null && store.holderKey(moved) === 'none');
+  /* A row emptied to the last quarter is still a row: the roles are ePPM's. */
+  first.demand.fill(0);
   store.recomputeDemand(p);
-  check('a reassignment leaves the sum alone', p.demand.reduce((a, v) => a + v, 0) === total + 10 + 5);
-  check('unstaffedAt: sees the open row', store.unstaffedAt(p, now));
+  store.touch();
+  check('an emptied row stays', p.assignees.length === rows && store.assignedTo(p, first.person));
+
+  /* Nothing in the store adds a row, removes one or gives it to somebody else. */
+  check('the store has no write but the pensum',
+    !['addLane', 'reassignLane', 'pruneLanes', 'setHolder', 'addRole'].some(name => name in store));
 
   p.assignees = before;
   store.recomputeDemand(p);
@@ -200,8 +198,33 @@ group('url');
   check('unknown ids are dropped from a filter', same(odd.leads, ['none']) && odd.phases.length === 0);
   check('a link from before the fixed groups still opens', !('group' in odd));
   check('a column that no longer exists is ignored', odd.cols.overview.title === true && !('roles' in odd.cols.overview));
+  location.hash = '#?tab=people&psort=peak&pdir=desc';
+  const old = store.readUrl();
+  check('a person table sorted by a column it no longer has opens by name', old.pSort === 'name' && old.pDir === 'asc');
+  location.hash = '#?tab=people&psort=projects&pdir=desc';
+  check('…one sorted by «Projekte» keeps its sort', store.readUrl().pSort === 'projects');
+  const counted = store.personRows();
+  check('«Projekte» counts a person\'s projects once each', counted.every(r =>
+    r.projects === data.projects.filter(p => p.assignees.some(a => a.person === r.person.id)).length));
+  location.hash = '#?tab=people&psort=q2&pdir=desc';
+  const byQuarter = store.readUrl();
+  check('…and one sorted by a quarter keeps its sort', byQuarter.pSort === 'q2' && byQuarter.pDir === 'desc');
 
   store.setState({ ...store.noFilters(), scale: 'quarter', unit: 'pct', sort: 'project', sortDir: 'asc', hideZeros: false });
+
+  /* The person filter — and «Mir zugewiesen», which is the same filter set to
+     the reader — finds a person in any role, not only as Bearbeitender. */
+  const ids = list => list.map(p => p.id).sort().join(',');
+  for (const person of data.people) {
+    store.setState({ leads: [person.id] });
+    const anyRole = data.projects.filter(p => p.assignees.some(a => a.person === person.id));
+    check(`filter lead: ${person.id} is found in every role`, ids(store.filteredProjects()) === ids(anyRole),
+      `${store.filteredProjects().length} shown, ${anyRole.length} held`);
+  }
+  store.setState({ leads: ['none'] });
+  check('filter lead: «nicht zugewiesen» is a role open now',
+    ids(store.filteredProjects()) === ids(data.projects.filter(p => p.assignees.some(a => !a.person && a.demand[now] > 0))));
+  store.setState({ leads: [] });
   check('no filter set: nothing filtered', store.filteredProjects().length === data.projects.length);
   check('…and no chips', store.activeFilters().length === 0);
   for (const f of store.FILTERS) {
@@ -212,6 +235,48 @@ group('url');
     store.removeFilter(f.kind, id);
     check(`filter ${f.kind}: the chip removes it`, state[f.key].length === 0);
   }
+
+  /*
+   * Personen answers to the filters that mean something for a person. A phase
+   * and a sub-portfolio belong to a project: set, they neither thin the table
+   * out nor show as a chip there, and they are still in the link.
+   */
+  const someone = data.people[0];
+  const phase = data.phases.eppm[1].id;
+  store.setState({ tab: 'people', leads: [someone.id, 'none'], phases: [phase], portfolios: [data.meta.portfolios[0].id] });
+  check('people: «Bearbeitende» names the person', same(store.personRows().map(r => r.person.id), [someone.id]));
+  check('people: phase, sub-portfolio and «nicht zugewiesen» carry no chip there',
+    same(store.activeFilters().map(c => c.id), [someone.id]));
+  check('people: a file of projects still names every filter', store.activeFilters({ projects: true }).length === 4);
+  check('people: the filters it does not use stay in the link', store.readUrl().phases.length === 1 && store.readUrl().leads.length === 2);
+  store.setState({ leads: [], phases: [], portfolios: [], organisations: [someone.organisation] });
+  check('people: «Organisation» is the person\'s own',
+    same(store.personRows().map(r => r.person.id).sort(), data.people.filter(p => p.organisation === someone.organisation).map(p => p.id).sort()));
+  store.setState({ organisations: [], search: someone.name });
+  check('people: the search finds a person by name', store.personRows().some(r => r.person.id === someone.id));
+  store.setState({ search: 'zzzz-no-such-thing' });
+  check('people: …and nobody for a word nothing carries', store.personRows().length === 0);
+  store.setState({ ...store.noFilters() });
+  check('people: no filter, everybody', store.personRows().length === data.people.length);
+  check('people: the figures are on whatever the view says', (store.setState(store.viewPatch('termine')), store.figuresShown()) && store.coloured());
+  store.setState({ tab: 'overview' });
+  check('planung: the bar plan has no figures to colour or to set a unit for', !store.figuresShown() && !store.coloured());
+  store.setState(store.viewPatch('pensum'));
+
+  /*
+   * One rule for the link: a parameter is in it wherever it is not at its
+   * default. What belongs to one tab used to be written on that tab only,
+   * and was lost on Back, Forward and reload from any other.
+   */
+  const own = { pSort: 'q2', pDir: 'desc', page: 3, pageSize: '50', paper: 'a3', sheet: 'landscape', zoom: '200', cardSort: { 'phase-count': { by: 'value', dir: 'desc' } } };
+  for (const tab of ['overview', 'people', 'dashboard', 'history', 'export']) {
+    store.setState({ ...own, tab });
+    const read = store.readUrl();
+    check(`url: a tab's own state is in the link on «${tab}»`, Object.keys(own).every(k => same(read[k], own[k])),
+      Object.keys(own).filter(k => !same(read[k], own[k])).join(', '));
+  }
+  store.setState({ tab: 'overview', pSort: 'name', pDir: 'asc', page: 1, pageSize: '25', paper: 'a4', sheet: 'portrait', zoom: 'fit', cardSort: {} });
+  check('url: at the defaults the link is the tab and nothing else', location.hash === '#?tab=overview', location.hash);
 }
 
 /* -----------------------------------------------------------------------------
@@ -224,11 +289,24 @@ group('source');
   const source = Object.fromEntries(files.map(f => [f, read(`js/${f}`)]));
   const all = Object.values(source).join('\n');
 
-  /* Every German string handed to t() as a literal has its entry. */
+  /*
+   * Every German string that reaches t() has its entry — handed over as a
+   * literal, as either arm of a choice, or by name: the registries write
+   * `label: 'Hoch'` and translate it where it is drawn, and those were the
+   * ones nobody caught. Thirty strings of the print layout had no entry.
+   */
   const terms = data.i18n.terms;
   const missing = new Set();
-  for (const m of all.matchAll(/\bt\('([^']+)'\)/g)) if (!(m[1] in terms)) missing.add(m[1]);
-  check('every t(\'…\') literal is in data/i18n.json', missing.size === 0, [...missing].join(' | '));
+  const want = s => { if (/\p{L}{2}/u.test(s) && !(s in terms)) missing.add(s); };
+  for (const m of all.matchAll(/\bt\(\s*'([^']+)'\s*[),]/g)) want(m[1]);
+  for (const m of all.matchAll(/\bt\([^)]*\?\s*'([^']+)'\s*:\s*'([^']+)'\s*\)/g)) { want(m[1]); want(m[2]); }
+  for (const m of all.matchAll(/\b(?:label|sub|heading|placeholder|note|title):\s*'([^']+)'/g)) want(m[1]);
+  for (const m of all.matchAll(/(?:noResults\(|legendItem\([^)]*\), )'([^']+)'\)/g)) want(m[1]);
+  /* The method sheet's prose is two arrays of pairs. */
+  const docs = source['views-docs.js'];
+  const prose = docs.slice(docs.indexOf('const METHOD'), docs.indexOf('];', docs.indexOf('const GLOSSARY')));
+  for (const m of prose.matchAll(/'([^']+)'/g)) want(m[1]);
+  check('every German string that reaches t() is in data/i18n.json', missing.size === 0, [...missing].join(' | '));
   /* …and so has every label the data carries into the interface. */
   /* The short forms — «BL», «PPE I» — are the house's own and read the same
      in every language; they fall back to themselves. */
@@ -236,9 +314,14 @@ group('source');
     ...data.roles.roles.map(r => r.label),
     ...data.phases.eppm.map(e => e.label),
     ...data.meta.portfolios.map(x => x.label),
-    ...data.meta.organisations.map(o => o.label)
-  ].filter(label => !(label in terms));
-  check('every label in the data is in data/i18n.json', labels.length === 0, labels.join(' | '));
+    ...data.meta.organisations.map(o => o.label),
+    data.meta.org.unit, data.meta.user.role, data.meta.prototypeNotice,
+    ...data.people.map(x => x.role),
+    ...data.milestones.catalog.map(c => c.name),
+    ...data.milestones.items.map(m => m.statusLabel),
+    ...data.print.sender, data.print.classification, data.print.legend.thresholds, data.print.legend.noLead
+  ].filter(label => label && !(label in terms));
+  check('every label in the data is in data/i18n.json', labels.length === 0, [...new Set(labels)].join(' | '));
 
   /* Every control dispatches to something. Typed fields are handled by their
      own listeners in app.js, by name. */
