@@ -3,9 +3,9 @@
 
    The eleven wireframe projects stay exactly as they are. A hundred more are
    generated around them, and then the things that depend on them are derived
-   rather than invented: each person's booked load is the sum of the projects
-   they lead, and capacity is set so that portfolio utilisation follows the same
-   curve the wireframe tells its story with.
+   rather than invented: each person's load is the sum of the rows they hold
+   on their projects, and capacity is set so that portfolio utilisation follows
+   the same curve the wireframe tells its story with.
 
    Deterministic: one seeded generator, so re-running produces the same file.
    ============================================================================= */
@@ -334,7 +334,7 @@ function makeTeam(rosterTarget) {
       id, name,
       initials: name.split(' ').map(w => w[0]).join(''),
       shortName: `${name.split(' ')[0]} ${name.split(' ')[1][0]}.`,
-      role: 'Projektleitung',
+      role: null,                         // the function they work in, settled below
       employment
     });
     total += employment;
@@ -515,36 +515,198 @@ const roster = Math.round(Math.max(...demandTotal.map((d, q) =>
   (d - external[q]) / PEAK_UTILISATION / (1 - ABSENCE_RATIO[q]) / HIRE[q])) / 10) * 10;
 
 const people = makeTeam(roster);
-// The wireframe hands projects to Projektentwicklung as well; Bauleitung
-// carries site work this table does not model, so it leads nothing.
-const LEAD_ROLES = new Set(['Projektleitung', 'Projektentwicklung']);
-const leads = people.filter(p => LEAD_ROLES.has(p.role));
 
-/* Existing assignments stay; the rest are spread over the team, and a handful
-   are deliberately left open because that case has to stay visible. */
+/* -----------------------------------------------------------------------------
+   Roles and units — which function a person works in
+   -------------------------------------------------------------------------- */
+
 /*
+ * The four roles of a project in SAP ePPM that this tool plans — PFM, OM, PPE
+ * and PM, in ePPM's order, read from data/roles.json. ePPM lists more (IL-BO,
+ * LIG, RL, Bearbeitende/r); the office plans these four.
+ *
+ * They are functions of the house, not jobs on a project: a role is held by
+ * somebody of the unit that does that work. So a person has one role, the
+ * same on every project they are on, and a unit names the role its people
+ * hold.
+ */
+const ROLE_LIST = read('roles').roles;
+const ROLES = ROLE_LIST.map(r => r.id);
+const ROLE_LABEL = Object.fromEntries(ROLE_LIST.map(r => [r.id, r.label]));
+
+/*
+ * Who carries a project in which Teilphase: Projektentwicklung up to the
+ * award of the design, Projektmanagement from the Vorprojekt on. The other of
+ * the two is on it across the handover — PM joins during the Auswahlverfahren,
+ * PPE stays through the Vorprojekt. These are the roles data/roles.json marks
+ * `lead`; the app reads the carrying one off the pensa, not off this table.
+ */
+const PHASE_LEAD = { 'Vorstudien': 'ppe', '22': 'ppe', '31': 'pm', '32': 'pm', '53': 'pm', '61': 'pm' };
+const leadRoleOf = p => PHASE_LEAD[p.phase];
+
+/*
+ * How a project's demand divides between the roles, by Teilphase. The role
+ * that carries the phase takes whatever the others leave, so a line need not
+ * add up to one. Portfoliomanagement orders the project and steps back as it
+ * is built; Objektmanagement is the planungsbegleitende FM, at the table from
+ * the Auswahlverfahren to the handover into operation; Betrieb is PM alone,
+ * closing the project. The shares are an assumption of the fixtures — the
+ * users named the roles, not their proportions.
+ */
+const ROLE_SHARE = {
+  'Vorstudien': { pfm: 0.25, om: 0,    pm: 0 },
+  '22':         { pfm: 0.15, om: 0.10, pm: 0.15 },
+  '31':         { pfm: 0.10, om: 0.10, ppe: 0.10 },
+  '32':         { pfm: 0.05, om: 0.10, ppe: 0 },
+  '53':         { pfm: 0.05, om: 0.15, ppe: 0 },
+  '61':         { pfm: 0,    om: 0,    ppe: 0 }
+};
+/* The odds that a project has the role at all: a small Unterhalt is built
+   without an order from the portfolio and without the FM at the table. The
+   two roles that carry a project are on every one. */
+const ROLE_ODDS = { pfm: 0.85, om: 0.7 };
+
+/** The Teilphase a project is in at quarter q, read off its bars. */
+function phaseIn(p, q) {
+  const bar = p.bars.find(b => b.from <= q && q < b.to);
+  return bar ? bar.phase : null;
+}
+
+/*
+ * The eight organisational units, in the order of the roles their people
+ * hold: Portfoliomanagement and Objektmanagement, two development teams,
+ * three domestic construction teams and one for abroad. The six of PPE and PM
+ * are named as ePPM names them; the two in front are placeholders for the
+ * units the PFM and OM of a project sit in. The ids are stable slugs so a
+ * shared link survives a renaming.
+ *
+ * `role` is the role the unit's people hold on a project.
+ *
+ * `projectShare` is how much of a contract a team may spend on projects, in
+ * per cent; the rest is line and administrative work. Project management
+ * keeps 20 % back. The 85 for the development teams is a placeholder — the
+ * users named a flat 15 % for administration and said it is not the same for
+ * every team, without saying whose it is — and so is the 80 of the two new
+ * units. A constant, not a draw: the app reads it from meta.json and the
+ * generator's own sizing does not use it yet.
+ */
+const TEAMS = [
+  { id: 'pfm', label: 'Portfoliomanagement', short: 'PFM', role: 'pfm', projectShare: 80 },
+  { id: 'om', label: 'Objektmanagement', short: 'OM', role: 'om', projectShare: 80 },
+  { id: 'ppe-1', label: 'Programm- und Projektentwicklung I', short: 'PPE I', role: 'ppe', projectShare: 85 },
+  { id: 'ppe-2', label: 'Programm- und Projektentwicklung II', short: 'PPE II', role: 'ppe', projectShare: 85 },
+  { id: 'bpi-1', label: 'Bauprojekte Inland I', short: 'PM Inland I', role: 'pm', projectShare: 80 },
+  { id: 'bpi-2', label: 'Bauprojekte Inland II', short: 'PM Inland II', role: 'pm', projectShare: 80 },
+  { id: 'bpi-3', label: 'Bauprojekte Inland III', short: 'PM Inland III', role: 'pm', projectShare: 80 },
+  { id: 'bpa', label: 'Bauprojekte Ausland', short: 'PM Ausland', role: 'pm', projectShare: 80 }
+];
+
+/*
+ * How many people each function has is solved for, as the team is: from the
+ * pensum its role will be asked for, at that role's own peak. Split evenly,
+ * an eighth of the office would sit in Portfoliomanagement with a twentieth
+ * of the work. What a role will be asked for is the split below — the same
+ * steps of five, each taken at the odds that the project has the role at
+ * all; the split itself is drawn last of all.
+ */
+const expected = Object.fromEntries(ROLES.map(id => [id, Array(QUARTERS).fill(0)]));
+for (const p of projects) {
+  p.demand.forEach((total, q) => {
+    if (!total) return;
+    const phase = phaseIn(p, q) ?? '61';
+    let rest = total;
+    for (const id of ROLES) {
+      if (id === PHASE_LEAD[phase]) continue;
+      const v = Math.round(total * (ROLE_SHARE[phase][id] ?? 0) / 5) * 5 * (ROLE_ODDS[id] ?? 1);
+      expected[id][q] += v;
+      rest -= v;
+    }
+    expected[PHASE_LEAD[phase]][q] += rest;
+  });
+}
+/* Nobody works alone: a unit has two people at least. */
+const MIN_PER_TEAM = 2;
+
+/*
+ * Who works where. The six named people keep the function the seed gives
+ * them; the others are handed out down the list, each to the function that
+ * is furthest behind — behind its share of the office's contracts, which is
+ * its share of the work at the peak, or behind the heads its units need. By
+ * contracts, not by heads: four people of whom two work sixty per cent are
+ * not four. Inside a function its units take turns. Derived, never drawn: a
+ * draw here would take a number off the shared generator and reshuffle every
+ * value produced after it.
+ */
+const roleByLabel = Object.fromEntries(ROLE_LIST.map(r => [r.label, r.id]));
+const functionOf = new Map(people.filter(x => x.role).map(x => [x.id, roleByLabel[x.role]]));
+for (const [id, role] of functionOf) {
+  if (!role) throw new Error(`seed person ${id}: «${people.find(x => x.id === id).role}» is not a role of data/roles.json`);
+}
+{
+  const peak = Object.fromEntries(ROLES.map(id => [id, Math.max(...expected[id])]));
+  const peaks = Object.values(peak).reduce((a, v) => a + v, 0);
+  const contracts = people.reduce((a, x) => a + x.employment, 0);
+  const target = Object.fromEntries(ROLES.map(id => [id, contracts * peak[id] / peaks]));
+  const floor = Object.fromEntries(ROLES.map(id => [id, MIN_PER_TEAM * TEAMS.filter(team => team.role === id).length]));
+  const given = Object.fromEntries(ROLES.map(id => [id, 0]));
+  const heads = Object.fromEntries(ROLES.map(id => [id, 0]));
+  const take = (person, role) => { given[role] += person.employment; heads[role]++; };
+  for (const person of people) if (functionOf.has(person.id)) take(person, functionOf.get(person.id));
+  const behind = id => Math.max((target[id] - given[id]) / target[id], (floor[id] - heads[id]) / floor[id]);
+  for (const person of people) {
+    if (functionOf.has(person.id)) continue;
+    const role = ROLES.reduce((a, id) => (behind(id) > behind(a) ? id : a));
+    take(person, role);
+    functionOf.set(person.id, role);
+    person.role = ROLE_LABEL[role];
+  }
+}
+const pool = Object.fromEntries(ROLES.map(id => [id, people.filter(x => functionOf.get(x.id) === id)]));
+/*
+ * A person belongs to a team; a project does not. Its organisation is that of
+ * whoever carries it, joined in the app when it is read, so a project nobody
+ * carries has none and a handover moves the project with the person.
+ */
+for (const id of ROLES) {
+  const teams = TEAMS.filter(team => team.role === id);
+  pool[id].forEach((person, i) => { person.organisation = teams[i % teams.length].id; });
+}
+
+/*
+ * Who carries each project today: somebody of the function that carries the
+ * phase it is in. Existing assignments stay; the rest are spread over that
+ * function, and a handful are deliberately left open because that case has
+ * to stay visible.
+ *
  * Assignment minimises the peak a person would end up carrying, quarter by
  * quarter and against their own contract. Balancing on a total — or on the
  * current quarter — lets a project that peaks later slip past the check, and a
  * 40 % contract ends up leading an 85 % project. What is displayed is the peak,
- * so the peak is what the assignment optimises.
+ * so the peak is what the assignment optimises. A person is charged with the
+ * project's demand in the quarters their function carries it.
  */
+const carried = (p, role) => p.demand.map((v, q) => (PHASE_LEAD[phaseIn(p, q)] === role ? v : 0));
 const loadQ = Object.fromEntries(people.map(p => [p.id, Array(QUARTERS).fill(0)]));
 for (const p of existing) {
-  if (p.leadId) p.demand.forEach((v, q) => { loadQ[p.leadId][q] += v; });
+  if (!p.leadId) continue;
+  if (functionOf.get(p.leadId) !== leadRoleOf(p)) {
+    throw new Error(`seed project ${p.id} is in phase ${p.phase}, which ${leadRoleOf(p)} carries — ${p.leadId} is ${functionOf.get(p.leadId)}`);
+  }
+  carried(p, leadRoleOf(p)).forEach((v, q) => { loadQ[p.leadId][q] += v; });
 }
 
-const peakWith = (person, project) => Math.max(...loadQ[person.id]
-  .map((v, q) => (v + (project ? project.demand[q] : 0)) / person.employment));
+const peakWith = (person, demand) => Math.max(...loadQ[person.id]
+  .map((v, q) => (v + demand[q]) / person.employment));
 
 for (const p of generated) {
-  if (rnd() < 0.05) continue;                        // ohne Projektleitung
+  if (rnd() < 0.05) continue;                        // nobody carries it yet
   // The three who would carry it most lightly; one of them at random, so the
   // team does not come out identical.
-  const pool = [...leads].sort((a, b) => peakWith(a, p) - peakWith(b, p)).slice(0, 3);
-  const to = pick(pool);
+  const mine = carried(p, leadRoleOf(p));
+  const three = [...pool[leadRoleOf(p)]].sort((a, b) => peakWith(a, mine) - peakWith(b, mine)).slice(0, 3);
+  const to = pick(three);
   p.leadId = to.id;
-  p.demand.forEach((v, q) => { loadQ[to.id][q] += v; });
+  mine.forEach((v, q) => { loadQ[to.id][q] += v; });
 }
 
 /*
@@ -552,16 +714,18 @@ for (const p of generated) {
  * what they carry on their projects, quarter by quarter, and the app derives
  * it from the projects (see the assignees section below) — written out as
  * well, it could only drift from the pensa it is the sum of.
- *
- * The draws the authored occupancy of a non-lead used to take are still
- * taken, and thrown away: the gates and the change log are drawn after this
- * point, and dropping the draws re-dated every gate in the portfolio.
  */
-for (const person of people) {
-  delete person.baseLoad;
-  if (projects.some(p => p.leadId === person.id)) continue;
-  for (let i = 0; i <= QUARTERS; i++) rnd();
-}
+for (const person of people) delete person.baseLoad;
+
+/*
+ * The gates and the change log are drawn from here, and the stream is pinned
+ * at this point. It used to arrive here having taken forty-one draws for
+ * every person who carries nothing — figures long since thrown away — so who
+ * carried what decided where the stream stood, and a change to the team
+ * re-dated every gate in the portfolio. This is the state it stood in when
+ * the gates were last drawn.
+ */
+seed = 0xf1a9aaa0 | 0;
 
 /* -----------------------------------------------------------------------------
    Capacity — a team is a team. It does not grow to meet a falling demand curve,
@@ -624,7 +788,7 @@ for (const id of seeded.keys()) {
 const CHANGE_DAYS = 70;
 const WORDS = {
   Pensum: [
-    'Bauleitung Etappe 2 vorgezogen', 'Pensum nach Rückmeldung Nutzer erhöht',
+    'Realisierung Etappe 2 vorgezogen', 'Pensum nach Rückmeldung Nutzer erhöht',
     'Aufwand Submission nach unten korrigiert', 'Zusatzaufwand Schadstoffsanierung',
     'Begleitung Bauherr reduziert', 'Mehraufwand Koordination Haustechnik',
     'Aufwand Ausschreibung neu geschätzt', 'Betreuung nach Vergabe reduziert',
@@ -639,7 +803,9 @@ const WORDS = {
     'Bauende verschoben', 'Baubeginn vorgezogen', 'Bezug neu terminiert',
     'Etappierung angepasst', 'Submissionsfrist verlängert'
   ],
-  Projektleitung: ['Übergabe nach Pensionierung', 'Übergabe wegen Überlast', 'Neuzuteilung Teilportfolio'],
+  /* The role that carries the project changes hands. The entry is filed
+     under that role's name, as the app files a change to a row. */
+  Rolle: ['Übergabe nach Pensionierung', 'Übergabe wegen Überlast', 'Neuzuteilung Teilportfolio'],
   'Begründung': [
     'Überlast freigegeben', 'Abweichung dokumentiert', 'Freigabe Bereichsleitung erfasst'
   ],
@@ -668,7 +834,7 @@ function changeLog() {
     const p = pick(withLead);
     const lead = people.find(x => x.id === p.leadId);
     const field = weighted([['Pensum', 46], ['Meilenstein', 16], ['Termin', 12],
-      ['Begründung', 12], ['Projektleitung', 7], ['Abwesenheiten', 7]]);
+      ['Begründung', 12], ['Rolle', 7], ['Abwesenheiten', 7]]);
     const when = stamp(4 + Math.floor(rnd() * CHANGE_DAYS));
 
     let value;
@@ -682,8 +848,9 @@ function changeLog() {
     } else if (field === 'Meilenstein' || field === 'Termin') {
       const a = between(0, 5);
       value = `${QUARTER_IDS[a].slice(4)}/${QUARTER_IDS[a].slice(2, 4)} → ${QUARTER_IDS[a + 1].slice(4)}/${QUARTER_IDS[a + 1].slice(2, 4)}`;
-    } else if (field === 'Projektleitung') {
-      value = `${pick(people).shortName} → ${lead ? lead.shortName : '—'}`;
+    } else if (field === 'Rolle') {
+      /* From somebody else of the same function: a role stays in its unit. */
+      value = `${pick(pool[leadRoleOf(p)].filter(x => x.id !== p.leadId)).shortName} → ${lead ? lead.shortName : '—'}`;
     } else if (field === 'Abwesenheiten') {
       value = `+${between(1, 4) * 5} %`;
     } else {
@@ -697,7 +864,7 @@ function changeLog() {
       actor: lead ? lead.name : META.user.name,
       projectId: p.id,
       projectLabel: p.location,
-      field,
+      field: field === 'Rolle' ? ROLE_LABEL[leadRoleOf(p)] : field,
       change: pick(WORDS[field]),
       value,
       onLanding: false
@@ -740,52 +907,10 @@ dashboard.creditByYear.rows = [
   note: `${count} Projekte`
 }));
 
-/*
- * Organisation — the team a piece of work sits in.
- *
- * It is really an attribute of a person: a team owns its members, not their
- * projects. The prototype carries it on the project anyway, because that is
- * what the grouping reads and what a denormalised feed would hand us; moving
- * it to the roster later is a change of source, not of shape.
- *
- * Derived, never drawn. A draw here would take a number off the shared
- * generator and reshuffle every value produced after it — the whole fixture,
- * for one new field. Deriving from the lead's place in the roster also keeps
- * the grouping honest: a project whose lead sits in Team B has no business
- * appearing under Team C. The five projects with no lead follow their own
- * position instead, so none of them is left without a team to group under.
- */
-/*
- * The six organisational units as ePPM names them, in ePPM's order. Two
- * development teams, three domestic construction teams, one for abroad. The
- * ids are stable slugs so a shared link survives a renaming.
- */
-/*
- * `projectShare` is how much of a contract a team may spend on projects, in
- * per cent; the rest is line and administrative work. Project management
- * keeps 20 % back. The 85 for the development teams is a placeholder — the
- * users named a flat 15 % for administration and said it is not the same for
- * every team, without saying whose it is. A constant, not a draw: the app
- * reads it from meta.json and the generator's own sizing does not use it yet.
- */
-const TEAMS = [
-  { id: 'ppe-1', label: 'Programm- und Projektentwicklung I', short: 'PPE I', projectShare: 85 },
-  { id: 'ppe-2', label: 'Programm- und Projektentwicklung II', short: 'PPE II', projectShare: 85 },
-  { id: 'bpi-1', label: 'Bauprojekte Inland I', short: 'PM Inland I', projectShare: 80 },
-  { id: 'bpi-2', label: 'Bauprojekte Inland II', short: 'PM Inland II', projectShare: 80 },
-  { id: 'bpi-3', label: 'Bauprojekte Inland III', short: 'PM Inland III', projectShare: 80 },
-  { id: 'bpa', label: 'Bauprojekte Ausland', short: 'PM Ausland', projectShare: 80 }
-];
-const teamOfPerson = new Map(people.map((person, i) => [person.id, TEAMS[i % TEAMS.length].id]));
-/*
- * A person belongs to a team; a project does not. Its organisation is its
- * assignee's, joined in the app when it is read, so an unassigned project has
- * none and a re-assignment moves the project with the person.
- */
-people.forEach(person => { person.organisation = teamOfPerson.get(person.id); });
 /* The short form is the house's own — «PPE» and «PM» — and is what a
-   grid column has room for; the filter and the group headings say the name. */
-META.organisations = TEAMS.map(({ id, label, short, projectShare }) => ({ id, label, short, projectShare }));
+   grid column has room for; the filter and the group headings say the name.
+   `role` is the role the unit's people hold on a project. */
+META.organisations = TEAMS.map(({ id, label, short, role, projectShare }) => ({ id, label, short, role, projectShare }));
 
 /* -----------------------------------------------------------------------------
    Assignees — who carries how much of a project, quarter by quarter
@@ -799,37 +924,13 @@ META.organisations = TEAMS.map(({ id, label, short, projectShare }) => ({ id, la
  * no person. The project's demand is the sum over the rows, so every total
  * the fixtures were sized against is unchanged: the split only says who the
  * work falls to. Drawn last, after everything else, so the portfolio, the
- * team, the gates and the leads come out exactly as they did before a
- * project had more than one person.
+ * team, the gates and the change log do not move when the split does.
  *
  * The split is drawn role by role, as a pensum per quarter and the runs of
  * quarters a person holds it for, and written out as rows afterwards — see
- * assigneesOf() below.
+ * assigneesOf() below. What is shared out and in which proportions is at the
+ * top of the file, with the roles: ROLE_SHARE, ROLE_ODDS, PHASE_LEAD.
  */
-const ROLES = read('roles').roles.map(r => r.id);
-
-/*
- * How a project's demand divides between the roles, by Teilphase. The lead
- * carries whatever the roles a project does not have would have taken, so the
- * shares need not add up to one; Betrieb is the lead alone.
- */
-const ROLE_SHARE = {
-  'Vorstudien': { stv: 0,    bl: 0,    fp: 0.20 },
-  '22':         { stv: 0.15, bl: 0,    fp: 0.20 },
-  '31':         { stv: 0.15, bl: 0,    fp: 0.30 },
-  '32':         { stv: 0.10, bl: 0.20, fp: 0.20 },
-  '53':         { stv: 0.10, bl: 0.50, fp: 0 },
-  '61':         { stv: 0,    bl: 0,    fp: 0 }
-};
-/* The odds that a project has the role at all: a small Unterhalt has no
-   Stellvertretung and no Fachplanung. ePPM decides this per project. */
-const ROLE_ODDS = { stv: 0.45, bl: 0.75, fp: 0.55 };
-
-/** The Teilphase a project is in at quarter q, read off its bars. */
-function phaseIn(p, q) {
-  const bar = p.bars.find(b => b.from <= q && q < b.to);
-  return bar ? bar.phase : null;
-}
 
 /** The runs of quarters with demand, as [from, to) pairs. */
 function runs(demand) {
@@ -844,29 +945,32 @@ function runs(demand) {
 }
 
 /*
- * The split, in steps of five like every pensum here, with the lead taking the
- * remainder so the roles add up to the project's demand to the point. A role
- * holds a run of quarters, one segment per run; who holds it is settled below.
+ * The split, in steps of five like every pensum here. In every quarter the
+ * role that carries the phase takes the remainder, so the roles add up to the
+ * project's demand to the point — and so that role has the largest pensum of
+ * the two that can carry a project, which is how the app tells who does. A
+ * role holds a run of quarters, one segment per run; who holds it is settled
+ * below.
  */
 function splitRoles(p) {
-  const has = { pl: true };
-  for (const id of ROLES) if (id !== 'pl') has[id] = rnd() < ROLE_ODDS[id];
+  const has = Object.fromEntries(ROLES.map(id => [id, id in ROLE_ODDS ? rnd() < ROLE_ODDS[id] : true]));
   const demand = Object.fromEntries(ROLES.map(id => [id, Array(QUARTERS).fill(0)]));
   for (let q = 0; q < QUARTERS; q++) {
     const total = p.demand[q];
     if (!total) continue;
-    const share = ROLE_SHARE[phaseIn(p, q)] ?? ROLE_SHARE['61'];
+    const phase = phaseIn(p, q) ?? '61';
+    const lead = PHASE_LEAD[phase];
     let rest = total;
     for (const id of ROLES) {
-      if (id === 'pl' || !has[id]) continue;
-      const v = Math.min(rest, Math.round(total * share[id] / 5) * 5);
+      if (id === lead || !has[id]) continue;
+      const v = Math.min(rest, Math.round(total * (ROLE_SHARE[phase][id] ?? 0) / 5) * 5);
       demand[id][q] = v;
       rest -= v;
     }
-    demand.pl[q] = rest;
+    demand[lead][q] = rest;
   }
   return ROLES
-    .filter(id => has[id] && demand[id].some(v => v > 0))
+    .filter(id => demand[id].some(v => v > 0))
     .map(id => ({
       role: id, demand: demand[id],
       segs: runs(demand[id]).map(([from, to]) => ({ p: null, from, to }))
@@ -874,12 +978,11 @@ function splitRoles(p) {
 }
 
 /*
- * Who holds each role. The lead keeps the project's assignee — the story
- * projects name theirs, and the generated ones were balanced above — and the
- * other roles go to whoever of the roster would carry them most lightly, peak
- * against contract, the way the leads were placed. There is no roster per
- * role: a Bauleitung is a job on a project, not a team, and the one person
- * whose title says Bauleitung is placed like everyone else.
+ * Who holds each role: somebody of its function. The role that carries the
+ * project today keeps the person it was given above — the story projects name
+ * theirs, and the generated ones were balanced there — and every other role
+ * goes to whoever of its own function would carry it most lightly, peak
+ * against contract.
  */
 const loadByRole = Object.fromEntries(people.map(x => [x.id, Array(QUARTERS).fill(0)]));
 const moveLoad = (id, demand, from, to, sign) => {
@@ -887,18 +990,34 @@ const moveLoad = (id, demand, from, to, sign) => {
 };
 const peakOf = (person, demand, from, to) => Math.max(...loadByRole[person.id]
   .map((v, q) => (v + (from <= q && q < to ? demand[q] : 0)) / person.employment));
-const lightest = (demand, from, to, except) => {
-  const pool = people.filter(x => x.id !== except)
+const lightest = (role, demand, from, to, except) => {
+  const three = pool[role].filter(x => x.id !== except)
     .sort((a, b) => peakOf(a, demand, from, to) - peakOf(b, demand, from, to)).slice(0, 3);
-  return pick(pool).id;
+  return pick(three).id;
 };
 
+/*
+ * In two rounds. First every project's carrying role, which is settled: then
+ * the others, each against what everybody already carries. Taken project by
+ * project, a role was given to whoever looked free at that point of the list
+ * and turned out to carry three projects further down it.
+ */
 for (const p of projects) {
   p.roles = splitRoles(p);
   for (const r of p.roles) {
+    if (r.role !== leadRoleOf(p)) continue;
     for (const s of r.segs) {
-      s.p = r.role === 'pl' ? p.leadId : lightest(r.demand, s.from, s.to, p.leadId);
+      s.p = p.leadId;
       if (s.p) moveLoad(s.p, r.demand, s.from, s.to, +1);
+    }
+  }
+}
+for (const p of projects) {
+  for (const r of p.roles) {
+    if (r.role === leadRoleOf(p)) continue;
+    for (const s of r.segs) {
+      s.p = lightest(r.role, r.demand, s.from, s.to);
+      moveLoad(s.p, r.demand, s.from, s.to, +1);
     }
   }
 }
@@ -908,8 +1027,8 @@ for (const p of projects) {
  * boundary, and a role nobody holds yet. A handover splits the run — the
  * person after the split is somebody else or nobody — and it never falls in
  * the current quarter, which is the one being worked. An open role is a run
- * with no person from its first quarter; the lead's is open exactly where
- * the project has no assignee.
+ * with no person from its first quarter; the role that carries the project
+ * is open exactly where nobody was given it above.
  */
 const HANDOVER = 0.12, OPEN_AFTER = 0.25, OPEN_FROM_START = 0.05;
 for (const p of projects) {
@@ -919,11 +1038,11 @@ for (const p of projects) {
       const span = s.to - s.from;
       if (s.p && span >= 4 && rnd() < HANDOVER) {
         const at = Math.max(1, s.from + between(1, span - 2));
-        const next = rnd() < OPEN_AFTER ? null : lightest(r.demand, at, s.to, s.p);
+        const next = rnd() < OPEN_AFTER ? null : lightest(r.role, r.demand, at, s.to, s.p);
         moveLoad(s.p, r.demand, at, s.to, -1);
         if (next) moveLoad(next, r.demand, at, s.to, +1);
         segs.push({ p: s.p, from: s.from, to: at }, { p: next, from: at, to: s.to });
-      } else if (s.p && r.role !== 'pl' && rnd() < OPEN_FROM_START) {
+      } else if (s.p && r.role !== leadRoleOf(p) && rnd() < OPEN_FROM_START) {
         moveLoad(s.p, r.demand, s.from, s.to, -1);
         segs.push({ ...s, p: null });
       } else {
@@ -963,9 +1082,9 @@ for (const p of projects) p.assignees = assigneesOf(p);
 /*
  * Not written: the lead, the flag for a missing one, the demand curve and the
  * runs the split was drawn with. All of them are sums or readings of the rows
- * — the lead is whoever holds the first role in the current quarter — and
- * the app derives them at load, so a file that carried them as well could
- * only disagree.
+ * — the lead is whoever of Projektentwicklung and Projektmanagement has the
+ * larger pensum in the current quarter — and the app derives them at load,
+ * so a file that carried them as well could only disagree.
  */
 write('projects', projects.map(({ leadId, unassigned, demand, roles, ...rest }) => rest));
 write('people', people);
@@ -990,11 +1109,24 @@ const allAssignees = projects.flatMap(p => p.assignees);
 const staffed = allAssignees.filter(a => a.person);
 const openNow = allAssignees.filter(a => !a.person && a.demand[0] > 0).length;
 /* What was written has to add up to what the rest of the files were sized on. */
+const LEADS = new Set(ROLE_LIST.filter(r => r.lead).map(r => r.id));
 for (const p of projects) {
   p.demand.forEach((v, q) => {
     const sum = p.assignees.reduce((a, x) => a + x.demand[q], 0);
     if (sum !== v) throw new Error(`${p.id} Q${q}: assignees ${sum} ≠ demand ${v}`);
   });
+  /* A role is held by somebody of its function. */
+  for (const a of p.assignees) {
+    if (a.person && functionOf.get(a.person) !== a.role) throw new Error(`${p.id}: ${a.person} is ${functionOf.get(a.person)} and holds ${a.role}`);
+  }
+  /* And the app, which knows nothing of PHASE_LEAD, finds the person the
+     project was given: of the rows of the two carrying roles, the one with
+     the larger pensum now — the later role on a tie — or the first of them
+     where none has any. */
+  const rows = p.assignees.filter(a => LEADS.has(a.role));
+  const now = rows.filter(a => a.demand[0] > 0).reduce((a, x) => (!a || x.demand[0] >= a.demand[0] ? x : a), null);
+  const lead = (now ?? rows[0])?.person ?? null;
+  if (lead !== p.leadId) throw new Error(`${p.id}: the rows say ${lead} carries it, the plan says ${p.leadId}`);
 }
 
 for (const [n, text] of Object.entries(written)) fs.writeFileSync(`data/${n}.json`, text);
@@ -1010,7 +1142,13 @@ console.log('milestones ', milestones.items.length,
   '· late', milestones.items.filter(m => m.status === 'late').length,
   '· ok', milestones.items.filter(m => m.status === 'ok').length,
   '· offen', milestones.items.filter(m => m.forecast === null).length);
-console.log('ohne Projektleitung', unassigned, '· Personen über 100 %', over);
+console.log('ohne PPE/PM', unassigned, '· Personen über 100 %', over);
+console.log('functions  ', ROLES.map(id => `${id} ${pool[id].length} Personen, ${pool[id].reduce((a, x) => a + x.employment, 0)} % (${Math.round(Math.max(...expected[id]))} % am Höchststand)`).join(' · '));
+console.log('load now   ', ROLES.map(id => {
+  const capacity = pool[id].reduce((a, x) => a + x.employment * shareOf[x.organisation] / 100, 0);
+  const at = q => Math.round(pool[id].reduce((a, x) => a + loadByRole[x.id][q], 0) / capacity * 100);
+  return `${id} ${at(0)} % (Höchststand ${Math.max(...Array.from({ length: QUARTERS }, (_, q) => at(q)))} %)`;
+}).join(' · '));
 console.log('rows       ', allAssignees.length, '·', ROLES.map(id => `${id} ${allAssignees.filter(a => a.role === id).length}`).join(' · '),
   '· Übergaben', handovers, '· offene Rollen', allAssignees.length - staffed.length, '· davon heute', openNow);
 console.log('rows per person    ', (staffed.length / people.length).toFixed(1));

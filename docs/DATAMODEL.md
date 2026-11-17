@@ -10,9 +10,9 @@ the current fixture counts.
 ## Entities
 
 ```
+roles.roles ───────1:n──▶ projects.assignees[].role · meta.organisations[].role
 meta.organisations ──1:n──▶ people.organisation
-roles.roles ───────1:n──▶ projects.assignees[].role
-people ────────────1:n──▶ projects.assignees[].person projects.leadId = holder of role «pl» in the current quarter (derived)
+people ────────────1:n──▶ projects.assignees[].person projects.leadId = holder of the carrying role — PPE or PM — in the current quarter (derived)
                                                       projects.organisation = people[leadId].organisation (derived)
 meta.portfolios ───1:n──▶ projects.portfolio
 phases.eppm ───────1:n──▶ projects.phase · projects.bars[].phase · milestones.items[].subPhase
@@ -21,18 +21,23 @@ projects ──────────1:n──▶ milestones.items.projectId �
 meta.quarters[i] ───────▶ index i of every per-quarter array: assignees[].demand, gross, absence, external
 ```
 
-Four rules hold the model together:
+Five rules hold the model together:
 
 - **A project carries rows of a role and a person.** Each row is a role, the
   person who holds it — or nobody, for an open role — and that person's
   pensum per quarter. A role that changes hands is two rows. The project's
   demand, its lead and every person's load are sums or readings of the rows,
   derived in `store.js` and never written as fields.
+- **A role is a function of the house.** The four roles are the ones SAP ePPM
+  keeps on a project and this office plans: PFM, OM, PPE and PM. A role is
+  held by somebody of a unit that does that work — a unit names the role its
+  people hold — so a person has the same role on every project they are on.
 - **A person belongs to an organisation; a project does not.** The unit is a
-  fact about the person. A project reaches its unit through its assignee — the
-  holder of the Bearbeitender role in the current quarter — and the join is one
-  getter in `store.js`, so a project without one has no unit and a handover
-  moves the project with the person.
+  fact about the person. A project reaches its unit through whoever carries
+  it — the holder of Projektentwicklung or Projektmanagement, whichever has
+  the larger pensum on it in the current quarter — and the join is one getter
+  in `store.js`, so a project nobody carries has no unit and a handover moves
+  the project with the person.
 - **Time is one window.** `meta.quarters` lists the forty quarters the
   prototype covers, and every per-quarter array is indexed by position in that
   list. Index 0 is the first quarter of the window, which is also the current
@@ -54,7 +59,7 @@ Four rules hold the model together:
 | `asOf`, `lastVisit`, `version` | the data stamp in the footer, the last visit for the notification badge, the version line |
 | `quarters[]` | the window: `{ id, label, short, year }`, e.g. `2026Q3`, `Q3/2026`, `Q3`, `2026` |
 | `portfolios[]` | the Teilportfolios: `{ id, label }` |
-| `organisations[]` | the six units: `{ id, label, short, projectShare }` — `PPE I`, `PM Inland II` are the short forms the grid columns use; `projectShare` is the per cent of a contract the unit's people may spend on projects |
+| `organisations[]` | the eight units: `{ id, label, short, role, projectShare }` — `PPE I`, `PM Inland II` are the short forms the grid columns use; `role` is the id in `roles.roles` of the role the unit's people hold on a project; `projectShare` is the per cent of a contract the unit's people may spend on projects |
 | `settings` | the office's rules that are not a unit's: `smallProjectMio`, the credit in Mio. CHF up to which a project counts as small |
 | `footerLinks[]`, `prototypeNotice` | chrome |
 
@@ -72,11 +77,32 @@ is the order of the chain; `eppmRank()` in `store.js` sorts by it.
 ### `roles.json` — the role catalogue (hand-written)
 
 `roles[]` is the ordered list of roles a project may carry, as
-`{ id, label, short }`: `pl` Bearbeitender, `stv` Stv. Bearbeitender, `bl`
-Bauleitung, `fp` Fachplanung. The order in the file is the order of the rows
-under a folded-open project. The first role, `pl`, is the one the lead — the
-name a folded row shows under «Bearbeitende» — and the organisation join
-read.
+`{ id, label, short, note?, lead? }`:
+
+| `id` | `short` | `label` | |
+| --- | --- | --- | --- |
+| `pfm` | PFM | Portfoliomanagement | |
+| `om` | OM | Objektmanagement | `note`: «Planungsbegleitendes FM», what the role does on a project — shown in the hint of a row |
+| `ppe` | PPE | Projektentwicklung | `lead` |
+| `pm` | PM | Projektmanagement | `lead` |
+
+They are four of the roles SAP ePPM keeps on a project, in ePPM's order;
+IL-BO, LIG, RL and Bearbeitende/r are kept there too and are not planned
+here. The order in the file is the order of the rows under a folded-open
+project. Written out, a role is its name followed by its short form —
+«Projektmanagement PM» (`roleName()` in `store.js`, and `labelName()` for
+a label the data carries, such as a person's function or the field of a
+change); where there is no room, the short form stands alone.
+
+`lead` marks the roles that can carry a project. A project goes by one name
+where there is room for one — its unit, the line «Projektmanagement: …» in a
+dialog, the mark that nobody carries it — and that is the holder of
+whichever `lead` role has the larger pensum on the project in the current
+quarter, the later role where they are level (`leadLane()` in `store.js`).
+The two overlap where Projektentwicklung hands a project to
+Projektmanagement. A unit whose role is not a `lead` — Portfoliomanagement,
+Objektmanagement — never has a project «in» it: the «Organisation» filter
+offers it on Personen and not where projects are listed.
 
 ### `people.json` — the roster
 
@@ -84,7 +110,7 @@ read.
 | --- | --- |
 | `id` | stable slug, the key `projects.assignees[].person` points at |
 | `name`, `initials`, `shortName` | display forms, precomputed |
-| `role` | the job title, `Projektleitung`, `Projektentwicklung` or `Bauleitung` — not the role on a project, which is in the project |
+| `role` | the function the person works in: the label of the role their unit names, and so of the role they hold on their projects |
 | `employment` | the contract, in % of a full position |
 | `organisation` | id in `meta.organisations` |
 | `projectShare` | optional: the person's own project share in %, where it differs from the unit's. No fixture carries one yet |
@@ -143,8 +169,9 @@ cell, into `demand[]`. A row emptied to its last quarter is still a row.
 Four facts the file used to carry are readings of the rows, defined on every
 project at load time in `store.js`: `demand[]` is the sum over the rows, kept
 as a plain array and recomputed after every edit; `leadId` is the holder of
-role `pl` in the current quarter, or `null` (`leadOf()`); `unassigned` is its
-absence; and `organisation` is that person's unit. The column, the filter,
+the carrying role in the current quarter, or `null` (`leadOf()`, see
+`roles.json`); `unassigned` is its absence; and `organisation` is that
+person's unit. The column, the filter,
 the dashboard cards and the export all read them and see the same answer.
 
 ### `milestones.json` — the gates
@@ -209,9 +236,10 @@ in a file.
 | Derived | From |
 | --- | --- |
 | `peopleById`, `projectsById`, `rolesById`, `portfoliosById`, `organisationsById`, `quarterIndex` | the lists above |
-| `project.demand[]`, `project.leadId`, `project.unassigned`, `project.organisation` | the rows: the sum, the holder of `pl` now, its absence, that person's unit |
+| `project.demand[]`, `project.leadId`, `project.unassigned`, `project.organisation` | the rows: the sum, the holder of the carrying role now, its absence, that person's unit |
 | `cellValue(p, q)`, `projectDemand(p)` | `demand[]`; an edit is written into the rows and the sum recomputed |
 | `laneOf`, `peopleOn`, `holdersAt`, `unstaffedAt`, `assignedTo`, `assignmentsOf`, `activeSpan` | readings of the rows: who holds what when, per project or per person |
+| `leadLane(p)`, `leadOf(p)`, `carriesProjects(unit)` | the row a project goes by and the person on it; whether a unit's role is one that carries projects |
 | `projectShare(person)`, `projectCapacity(person)` | the person's share or the unit's; `employment × share / 100` |
 | `personLoad(id, q)`, `personUtilisation(id, q)` | the sum of the rows the person has in the quarter, indexed per change of state; divided by `projectCapacity` |
 | `totals(list)` | per quarter: `demand`, `preCredit`, `external`, `net`, `utilisation = demand / net`, `free = net − demand` |

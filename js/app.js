@@ -13,7 +13,7 @@ import {
   data, state, load, subscribe, setState, syncFromUrl, closeOverlays, touch, OVERLAYS_CLOSED,
   toggleIn, removeFilter, resetFilters, noFilters, FILTERS, idsHere, defaultDir, t, columnSetKey, writeUrl,
   offsetForScale, maxOffset, windowStep, todayOffset, pageCount, viewPatch, layerPatch, settingChanges,
-  groupProjects, roleOf, laneOf, recomputeDemand, periodValue, num
+  groupProjects, personRows, roleOf, laneOf, recomputeDemand, periodValue, num
 } from './store.js';
 import { loadIcons } from './icons.js';
 import { html, appHeader, appFooter, toast, forgetTokens, signedOutView, tabTitle } from './ui.js';
@@ -553,6 +553,12 @@ const actions = {
   },
   /* A person row on the Personen tab folds open to the roles they hold. */
   'toggle-person': (val) => setState(s => ({ openPeople: { ...s.openPeople, [val]: !s.openPeople[val] } })),
+  /* Every person the table lists, by the rule a group on Planung goes by. */
+  'toggle-people': () => {
+    const ids = personRows().map(r => r.person.id);
+    const all = ids.every(id => state.openPeople[id]);
+    setState(s => ({ openPeople: { ...s.openPeople, ...Object.fromEntries(ids.map(id => [id, !all])) } }));
+  },
 
   'open-phase': (val) => {
     const [projectId, from] = val.split(':');

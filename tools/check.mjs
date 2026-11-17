@@ -58,8 +58,15 @@ check('quarters', Q > 0 && data.quarterIndex[data.meta.todayQuarter] !== undefin
 for (const key of ['gross', 'absence', 'external']) {
   check(`capacity.${key} has one figure per quarter`, data.capacity[key].length === Q, `${data.capacity[key].length} ≠ ${Q}`);
 }
+check('roles: at least one can carry a project', store.roleCatalog().some(r => r.lead));
+for (const o of data.meta.organisations) {
+  check(`organisation ${o.id} names the role its people hold`, !!data.rolesById[o.role], String(o.role));
+}
 for (const person of data.people) {
   check(`${person.id} belongs to a known organisation`, !!data.organisationsById[person.organisation], person.organisation);
+  /* The function a person works in is the role of their unit, by its label. */
+  check(`${person.id}: the function is the unit's role`,
+    person.role === data.rolesById[data.organisationsById[person.organisation]?.role]?.label, person.role);
   check(`${person.id} has a contract`, person.employment > 0 && person.employment <= 100, String(person.employment));
 }
 for (const p of data.projects) {
@@ -75,6 +82,9 @@ for (const p of data.projects) {
     check(`${p.id} ${key}: a pensum per quarter`, a.demand.length === Q, `${a.demand.length} ≠ ${Q}`);
     check(`${p.id} ${key}: pensa are whole steps of five, not negative`, a.demand.every(v => Number.isInteger(v) && v >= 0 && v % 5 === 0));
     check(`${p.id} ${key}: the row says something`, !!a.person || a.demand.some(v => v > 0), 'nobody and nothing');
+    /* A role is a function of the house: whoever holds it sits in a unit that does that work. */
+    check(`${p.id} ${key}: held by somebody of the role's own units`,
+      !a.person || data.organisationsById[data.peopleById[a.person]?.organisation]?.role === a.role);
   }
   const order = p.assignees.map(a => store.roleCatalog().findIndex(r => r.id === a.role));
   check(`${p.id}: rows in the catalogue's order`, order.every((v, i) => i === 0 || order[i - 1] <= v));
@@ -107,10 +117,25 @@ const now = store.nowIndex();
 for (const p of data.projects) {
   const sum = data.quarters.map((_, q) => p.assignees.reduce((a, x) => a + x.demand[q], 0));
   check(`${p.id}: demand is the sum over its rows`, same(p.demand, sum));
-  const lead = p.assignees.find(a => a.role === store.roleCatalog()[0].id && a.demand[now] > 0);
-  if (lead) check(`${p.id}: the lead holds the first role now`, p.leadId === lead.person, `${p.leadId} ≠ ${lead.person}`);
+  /* The lead is on the row of a carrying role — PPE or PM — with the largest
+     pensum now; nobody of another role is ever it. */
+  const carrying = p.assignees.filter(a => store.roleOf(a.role).lead);
+  const top = Math.max(0, ...carrying.map(a => a.demand[now]));
+  const lane = store.leadLane(p);
+  check(`${p.id}: the lead is on a carrying role`, carrying.length ? carrying.includes(lane) : lane === null);
+  if (top > 0) check(`${p.id}: the lead has the largest pensum of the carrying roles now`, lane.demand[now] === top, `${lane.demand[now]} ≠ ${top}`);
+  check(`${p.id}: leadId is the person on that row`, p.leadId === (lane?.person ?? null));
   check(`${p.id}: unassigned says there is no lead`, p.unassigned === !p.leadId);
+  check(`${p.id}: its organisation is the lead's, a unit that carries projects`,
+    p.organisation === (data.peopleById[p.leadId]?.organisation ?? null) && (!p.organisation || store.carriesProjects(p.organisation)));
 }
+/* A role is written out as its name and its short form — «Projektmanagement
+   PM» — whether a row hands it over or the data carries its label. */
+for (const role of store.roleCatalog()) {
+  check(`role ${role.id} is written out with its short form`,
+    store.roleName(role) === `${role.label} ${role.short}` && store.labelName(role.label) === store.roleName(role), store.roleName(role));
+}
+check('a label that is not a role stays the plain word', store.labelName('Pensum') === 'Pensum');
 {
   const load = Object.fromEntries(data.people.map(x => [x.id, data.quarters.map(() => 0)]));
   for (const p of data.projects) for (const a of p.assignees) if (a.person) a.demand.forEach((v, q) => { load[a.person][q] += v; });
@@ -213,7 +238,7 @@ group('url');
   store.setState({ ...store.noFilters(), scale: 'quarter', unit: 'pct', sort: 'project', sortDir: 'asc', hideZeros: false });
 
   /* The person filter — and «Mir zugewiesen», which is the same filter set to
-     the reader — finds a person in any role, not only as Bearbeitender. */
+     the reader — finds a person in any role, not only where they carry the project. */
   const ids = list => list.map(p => p.id).sort().join(',');
   for (const person of data.people) {
     store.setState({ leads: [person.id] });
@@ -228,7 +253,7 @@ group('url');
   check('no filter set: nothing filtered', store.filteredProjects().length === data.projects.length);
   check('…and no chips', store.activeFilters().length === 0);
   for (const f of store.FILTERS) {
-    const id = f.ids()[0];
+    const id = store.idsHere(f)[0];
     store.setState({ [f.key]: [id] });
     const chips = store.activeFilters();
     check(`filter ${f.kind}: one chip, and it has a label`, chips.length === 1 && chips[0].kind === f.kind && !!chips[0].label && chips[0].label !== 'undefined');
@@ -258,6 +283,29 @@ group('url');
   check('people: …and nobody for a word nothing carries', store.personRows().length === 0);
   store.setState({ ...store.noFilters() });
   check('people: no filter, everybody', store.personRows().length === data.people.length);
+
+  /*
+   * The other way round: a unit whose people carry no project — PFM, OM — is
+   * a filter for people. Where projects are listed it is neither offered nor
+   * applied, and it is still in the link.
+   */
+  const organisation = store.FILTERS.find(f => f.kind === 'organisation');
+  const aside = data.meta.organisations.find(o => !store.carriesProjects(o.id));
+  const carrier = data.meta.organisations.find(o => store.carriesProjects(o.id));
+  check('organisations: some carry projects and some do not', !!aside && !!carrier);
+  store.setState({ tab: 'people', organisations: [aside.id] });
+  check('people: a unit that carries no project is offered and applied',
+    store.idsHere(organisation).includes(aside.id) && store.personRows().length > 0
+    && store.personRows().every(r => r.person.organisation === aside.id));
+  store.setState({ tab: 'overview' });
+  check('planung: …it is not offered there', !store.idsHere(organisation).includes(aside.id) && store.idsHere(organisation).includes(carrier.id));
+  check('planung: …nor applied, nor shown as a chip', store.filteredProjects().length === data.projects.length && store.activeFilters().length === 0);
+  check('planung: …nor named in a file of projects', store.activeFilters({ projects: true }).length === 0);
+  check('planung: …and it stays in the link', same(store.readUrl().organisations, [aside.id]));
+  store.setState({ organisations: [aside.id, carrier.id] });
+  check('planung: a unit that carries projects selects its own',
+    same(ids(store.filteredProjects()), ids(data.projects.filter(p => p.organisation === carrier.id))));
+  store.setState({ ...store.noFilters(), tab: 'people' });
   check('people: the figures are on whatever the view says', (store.setState(store.viewPatch('termine')), store.figuresShown()) && store.coloured());
   store.setState({ tab: 'overview' });
   check('planung: the bar plan has no figures to colour or to set a unit for', !store.figuresShown() && !store.coloured());
@@ -308,10 +356,10 @@ group('source');
   for (const m of prose.matchAll(/'([^']+)'/g)) want(m[1]);
   check('every German string that reaches t() is in data/i18n.json', missing.size === 0, [...missing].join(' | '));
   /* …and so has every label the data carries into the interface. */
-  /* The short forms — «BL», «PPE I» — are the house's own and read the same
+  /* The short forms — «PFM», «PPE I» — are the house's own and read the same
      in every language; they fall back to themselves. */
   const labels = [
-    ...data.roles.roles.map(r => r.label),
+    ...data.roles.roles.flatMap(r => [r.label, r.note]),
     ...data.phases.eppm.map(e => e.label),
     ...data.meta.portfolios.map(x => x.label),
     ...data.meta.organisations.map(o => o.label),

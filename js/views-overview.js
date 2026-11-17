@@ -7,12 +7,12 @@ import {
   data, state, t, num, fmt, fmtMio, unitSuffix, cellValue, projectDemand, personUtilisation,
   totals, loadStatus, heatStep, filteredProjects, groupProjects,
   periods, periodValue, windowEdges, columnSet, coloured, phaseOf, nowIndex,
-  roleOf, holderKey, peopleOn, holdersAt, activeSpan
+  roleOf, roleName, roleHint, holderKey, peopleOn, holdersAt, activeSpan
 } from './store.js';
 
 import {
   html, raw, icons, pageHeader, pageActions, toolbar, activeFilterRow,
-  noResults, droppedNote, attr,
+  noResults, droppedNote, attr, expandLink, roleLabel,
   tokenPx, yearRule, pinCls, pinLeft, sortableHead, highlight, caretCell, rowCaret, plainCell, sumLabel, projectCount
 } from './ui.js';
 
@@ -158,7 +158,9 @@ function pensumGrid() {
         <span class="pgrouphead__name">${g.label}</span>
         <span class="count-pill" aria-label="${projectCount(g.projects.length)}">${g.projects.length}</span>
       </button></h2>
-      ${!collapsed && expandLink(g)}
+      ${!collapsed && expandLink({
+        ids: g.projects.map(p => p.id), open: state.openProjects, act: 'toggle-projects-group', val: g.key
+      })}
     </div>`;
 
     if (collapsed) return html`<section class="pgroup">${head}</section>`;
@@ -261,22 +263,6 @@ export function card(rows, { minWidth, sticky, cls = '', label = '' }) {
 /** The legend explains what is on screen, so it says whatever the view says. */
 function heatLegend() {
   return planLegend({ layers: state.layers, coloured: coloured(), legend: data.print.legend, staffing: true });
-}
-
-/*
- * «Alle aufklappen» for a whole group at once — it was «Besetzung
- * aufklappen», and the users did not know what a Besetzung was; «alle» says
- * what the link is about without a word for it. The label says what the
- * click will do: fold every row open while any is still shut, fold them all
- * shut once every one is open.
- */
-function expandLink(g) {
-  const all = g.projects.length > 0 && g.projects.every(p => state.openProjects[p.id]);
-  const any = g.projects.some(p => state.openProjects[p.id]);
-  return html`<button type="button" class="linkbtn pgroup__expand" data-act="toggle-projects-group" data-val="${g.key}">
-    <span class="caret ${any ? '' : 'is-collapsed'}" aria-hidden="true">${icons.chevronDown()}</span>
-    ${t(all ? 'Alle zuklappen' : 'Alle aufklappen')}
-  </button>`;
 }
 
 /** Clicking the active column flips it; the toolbar reads the same state. */
@@ -516,9 +502,9 @@ function laneRow(p, role, a, lay, cols) {
   const who = person ? person.name : t('nicht zugewiesen');
   const shown = new Set(sticky.shown.map(c => c.key));
   const when = activeSpan(a);
-  const hint = `${t(role.label)} · ${who} · ${p.title}${when ? ` · ${when}` : ''}`;
+  const hint = `${roleHint(role)} · ${who} · ${p.title}${when ? ` · ${when}` : ''}`;
 
-  const roleLabel = html`<span class="lane__role">${t(role.label)}</span>`;
+  const roleCell = roleLabel(role);
   /* A name the search matched shows its hit here: the folded row only counts. */
   const name = html`<span class="lane__person ${person ? '' : 'is-open'}">${highlight(who)}</span>`;
 
@@ -528,9 +514,9 @@ function laneRow(p, role, a, lay, cols) {
      beside the role. */
   const cell = col => {
     if (col.key === 'title') {
-      if (shown.has('lead')) return roleLabel;
+      if (shown.has('lead')) return roleCell;
       /* On a phone the name's column is too short for a role written out. */
-      return lay.narrow ? html`<span class="lane__role lane__role--short">${t(role.short)}</span>${name}` : html`${roleLabel}${name}`;
+      return lay.narrow ? html`<span class="lane__role lane__role--short">${t(role.short)}</span>${name}` : html`${roleCell}${name}`;
     }
     if (col.key === 'lead') {
       return shown.has('title') ? name : html`<span class="lane__role lane__role--short">${t(role.short)}</span>${name}`;
@@ -572,7 +558,7 @@ export function laneCell(p, role, a, period, isOver = () => false) {
   const who = a.person ? data.peopleById[a.person]?.name ?? a.person : t('nicht zugewiesen');
   const over = !!a.person && v > 0 && period.quarters.some(x => isOver(a.person, x));
   const tone = v > 0 ? (a.person ? `heat-${heatStep(v)}` : 'is-open') : 'is-zero';
-  const description = `${t(role.label)} · ${who} · ${p.title}, ${period.label}`;
+  const description = `${roleName(role)} · ${who} · ${p.title}, ${period.label}`;
   return html`<span role="cell" class="pcell pcell--val pcell--lanev ${tone} ${yearRule(period)}"
       title="${description}${over ? ` — ${t('Person über 100 % belegt, Überlast')}` : ''}">
     <input type="text" inputmode="decimal" autocomplete="off" class="lanev__in" value="${v > 0 ? num(v) : ''}"

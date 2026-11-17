@@ -106,7 +106,7 @@
       "forecastDate": "2027-03-31",
       "status": "ok",
       "statusLabel": "Termin gehalten",
-      "impact": "löst 60 % Bauleitung aus"
+      "impact": "löst 60 % Projektmanagement aus"
     },
     {
       "id": "ms-39-2",
@@ -143,7 +143,7 @@
       "forecastDate": "2027-12-15",
       "status": "late",
       "statusLabel": "▲ 2 Quartale verspätet",
-      "impact": "Abnahme verschoben, bindet Bauleitung 2 Quartale länger"
+      "impact": "Abnahme verschoben, bindet Projektmanagement 2 Quartale länger"
     },
     {
       "id": "ms-39-3",

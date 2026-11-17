@@ -4,27 +4,27 @@
     "name": "Sonja Beispiel",
     "initials": "SB",
     "shortName": "Sonja B.",
-    "role": "Projektleitung",
+    "role": "Projektmanagement",
     "employment": 100,
-    "organisation": "ppe-1"
+    "organisation": "bpi-1"
   },
   {
     "id": "lars",
     "name": "Lars Muster",
     "initials": "LM",
     "shortName": "Lars M.",
-    "role": "Projektleitung",
+    "role": "Projektmanagement",
     "employment": 100,
-    "organisation": "ppe-2"
+    "organisation": "bpi-2"
   },
   {
     "id": "alina",
     "name": "Alina Beispiel",
     "initials": "AB",
     "shortName": "Alina B.",
-    "role": "Projektleitung",
+    "role": "Projektmanagement",
     "employment": 100,
-    "organisation": "bpi-1"
+    "organisation": "bpi-3"
   },
   {
     "id": "tobias",
@@ -33,7 +33,7 @@
     "shortName": "Tobias M.",
     "role": "Projektentwicklung",
     "employment": 100,
-    "organisation": "bpi-2"
+    "organisation": "ppe-1"
   },
   {
     "id": "paula",
@@ -42,41 +42,41 @@
     "shortName": "Paula B.",
     "role": "Projektentwicklung",
     "employment": 80,
-    "organisation": "bpi-3"
+    "organisation": "ppe-2"
   },
   {
     "id": "nadia",
     "name": "Nadia Muster",
     "initials": "NM",
     "shortName": "Nadia M.",
-    "role": "Bauleitung",
+    "role": "Objektmanagement",
     "employment": 60,
-    "organisation": "bpa"
+    "organisation": "om"
   },
   {
     "id": "annamuster",
     "name": "Anna Muster",
     "initials": "AM",
     "shortName": "Anna M.",
-    "role": "Projektleitung",
+    "role": "Portfoliomanagement",
     "employment": 100,
-    "organisation": "ppe-1"
+    "organisation": "pfm"
   },
   {
     "id": "hansbeispiel",
     "name": "Hans Beispiel",
     "initials": "HB",
     "shortName": "Hans B.",
-    "role": "Projektleitung",
+    "role": "Projektmanagement",
     "employment": 60,
-    "organisation": "ppe-2"
+    "organisation": "bpa"
   },
   {
     "id": "oliviamusterli",
     "name": "Olivia Musterli",
     "initials": "OM",
     "shortName": "Olivia M.",
-    "role": "Projektleitung",
+    "role": "Projektmanagement",
     "employment": 100,
     "organisation": "bpi-1"
   },
@@ -85,7 +85,7 @@
     "name": "Walter Beispieler",
     "initials": "WB",
     "shortName": "Walter B.",
-    "role": "Projektleitung",
+    "role": "Projektmanagement",
     "employment": 70,
     "organisation": "bpi-2"
   },
@@ -94,205 +94,205 @@
     "name": "Eva Mustermann",
     "initials": "EM",
     "shortName": "Eva M.",
-    "role": "Projektleitung",
+    "role": "Objektmanagement",
     "employment": 100,
-    "organisation": "bpi-3"
+    "organisation": "om"
   },
   {
     "id": "leonbeispielmann",
     "name": "Leon Beispielmann",
     "initials": "LB",
     "shortName": "Leon B.",
-    "role": "Projektleitung",
+    "role": "Projektmanagement",
     "employment": 100,
-    "organisation": "bpa"
+    "organisation": "bpi-3"
   },
   {
     "id": "ursinamuster",
     "name": "Ursina Muster",
     "initials": "UM",
     "shortName": "Ursina M.",
-    "role": "Projektleitung",
+    "role": "Projektmanagement",
     "employment": 100,
-    "organisation": "ppe-1"
+    "organisation": "bpa"
   },
   {
     "id": "damianbeispiel",
     "name": "Damian Beispiel",
     "initials": "DB",
     "shortName": "Damian B.",
-    "role": "Projektleitung",
+    "role": "Projektmanagement",
     "employment": 60,
-    "organisation": "ppe-2"
+    "organisation": "bpi-1"
   },
   {
     "id": "ginamusterli",
     "name": "Gina Musterli",
     "initials": "GM",
     "shortName": "Gina M.",
-    "role": "Projektleitung",
+    "role": "Projektmanagement",
     "employment": 100,
-    "organisation": "bpi-1"
+    "organisation": "bpi-2"
   },
   {
     "id": "nicobeispieler",
     "name": "Nico Beispieler",
     "initials": "NB",
     "shortName": "Nico B.",
-    "role": "Projektleitung",
+    "role": "Projektmanagement",
     "employment": 100,
-    "organisation": "bpi-2"
+    "organisation": "bpi-3"
   },
   {
     "id": "veramustermann",
     "name": "Vera Mustermann",
     "initials": "VM",
     "shortName": "Vera M.",
-    "role": "Projektleitung",
+    "role": "Projektmanagement",
     "employment": 100,
-    "organisation": "bpi-3"
+    "organisation": "bpa"
   },
   {
     "id": "dariobeispielmann",
     "name": "Dario Beispielmann",
     "initials": "DB",
     "shortName": "Dario B.",
-    "role": "Projektleitung",
+    "role": "Projektmanagement",
     "employment": 100,
-    "organisation": "bpa"
+    "organisation": "bpi-1"
   },
   {
     "id": "katjamuster",
     "name": "Katja Muster",
     "initials": "KM",
     "shortName": "Katja M.",
-    "role": "Projektleitung",
+    "role": "Projektmanagement",
     "employment": 90,
-    "organisation": "ppe-1"
+    "organisation": "bpi-2"
   },
   {
     "id": "timobeispiel",
     "name": "Timo Beispiel",
     "initials": "TB",
     "shortName": "Timo B.",
-    "role": "Projektleitung",
+    "role": "Portfoliomanagement",
     "employment": 100,
-    "organisation": "ppe-2"
+    "organisation": "pfm"
   },
   {
     "id": "corinamusterli",
     "name": "Corina Musterli",
     "initials": "CM",
     "shortName": "Corina M.",
-    "role": "Projektleitung",
+    "role": "Projektmanagement",
     "employment": 100,
-    "organisation": "bpi-1"
+    "organisation": "bpi-3"
   },
   {
     "id": "fabiobeispieler",
     "name": "Fabio Beispieler",
     "initials": "FB",
     "shortName": "Fabio B.",
-    "role": "Projektleitung",
+    "role": "Projektmanagement",
     "employment": 100,
-    "organisation": "bpi-2"
+    "organisation": "bpa"
   },
   {
     "id": "martamustermann",
     "name": "Marta Mustermann",
     "initials": "MM",
     "shortName": "Marta M.",
-    "role": "Projektleitung",
+    "role": "Objektmanagement",
     "employment": 100,
-    "organisation": "bpi-3"
+    "organisation": "om"
   },
   {
     "id": "ursbeispielmann",
     "name": "Urs Beispielmann",
     "initials": "UB",
     "shortName": "Urs B.",
-    "role": "Projektleitung",
+    "role": "Projektmanagement",
     "employment": 80,
-    "organisation": "bpa"
+    "organisation": "bpi-1"
   },
   {
     "id": "carlamuster",
     "name": "Carla Muster",
     "initials": "CM",
     "shortName": "Carla M.",
-    "role": "Projektleitung",
+    "role": "Projektmanagement",
     "employment": 100,
-    "organisation": "ppe-1"
+    "organisation": "bpi-2"
   },
   {
     "id": "janbeispiel",
     "name": "Jan Beispiel",
     "initials": "JB",
     "shortName": "Jan B.",
-    "role": "Projektleitung",
+    "role": "Projektmanagement",
     "employment": 80,
-    "organisation": "ppe-2"
+    "organisation": "bpi-3"
   },
   {
     "id": "saramusterli",
     "name": "Sara Musterli",
     "initials": "SM",
     "shortName": "Sara M.",
-    "role": "Projektleitung",
+    "role": "Projektmanagement",
     "employment": 80,
-    "organisation": "bpi-1"
+    "organisation": "bpa"
   },
   {
     "id": "bernhardbeispieler",
     "name": "Bernhard Beispieler",
     "initials": "BB",
     "shortName": "Bernhard B.",
-    "role": "Projektleitung",
+    "role": "Projektentwicklung",
     "employment": 100,
-    "organisation": "bpi-2"
+    "organisation": "ppe-1"
   },
   {
     "id": "elenamustermann",
     "name": "Elena Mustermann",
     "initials": "EM",
     "shortName": "Elena M.",
-    "role": "Projektleitung",
+    "role": "Projektmanagement",
     "employment": 100,
-    "organisation": "bpi-3"
+    "organisation": "bpi-1"
   },
   {
     "id": "lucabeispielmann",
     "name": "Luca Beispielmann",
     "initials": "LB",
     "shortName": "Luca B.",
-    "role": "Projektleitung",
+    "role": "Projektmanagement",
     "employment": 60,
-    "organisation": "bpa"
+    "organisation": "bpi-2"
   },
   {
     "id": "tanjamuster",
     "name": "Tanja Muster",
     "initials": "TM",
     "shortName": "Tanja M.",
-    "role": "Projektleitung",
+    "role": "Projektmanagement",
     "employment": 100,
-    "organisation": "ppe-1"
+    "organisation": "bpi-3"
   },
   {
     "id": "brunobeispiel",
     "name": "Bruno Beispiel",
     "initials": "BB",
     "shortName": "Bruno B.",
-    "role": "Projektleitung",
+    "role": "Projektmanagement",
     "employment": 80,
-    "organisation": "ppe-2"
+    "organisation": "bpa"
   },
   {
     "id": "inesmusterli",
     "name": "Ines Musterli",
     "initials": "IM",
     "shortName": "Ines M.",
-    "role": "Projektleitung",
+    "role": "Projektmanagement",
     "employment": 90,
     "organisation": "bpi-1"
   },
@@ -301,7 +301,7 @@
     "name": "Reto Beispieler",
     "initials": "RB",
     "shortName": "Reto B.",
-    "role": "Projektleitung",
+    "role": "Projektmanagement",
     "employment": 80,
     "organisation": "bpi-2"
   },
@@ -310,43 +310,43 @@
     "name": "Aline Mustermann",
     "initials": "AM",
     "shortName": "Aline M.",
-    "role": "Projektleitung",
+    "role": "Objektmanagement",
     "employment": 80,
-    "organisation": "bpi-3"
+    "organisation": "om"
   },
   {
     "id": "danielbeispielmann",
     "name": "Daniel Beispielmann",
     "initials": "DB",
     "shortName": "Daniel B.",
-    "role": "Projektleitung",
+    "role": "Projektmanagement",
     "employment": 100,
-    "organisation": "bpa"
+    "organisation": "bpi-3"
   },
   {
     "id": "karinmuster",
     "name": "Karin Muster",
     "initials": "KM",
     "shortName": "Karin M.",
-    "role": "Projektleitung",
+    "role": "Portfoliomanagement",
     "employment": 100,
-    "organisation": "ppe-1"
+    "organisation": "pfm"
   },
   {
     "id": "simonbeispiel",
     "name": "Simon Beispiel",
     "initials": "SB",
     "shortName": "Simon B.",
-    "role": "Projektleitung",
+    "role": "Projektmanagement",
     "employment": 80,
-    "organisation": "ppe-2"
+    "organisation": "bpa"
   },
   {
     "id": "andreamusterli",
     "name": "Andrea Musterli",
     "initials": "AM",
     "shortName": "Andrea M.",
-    "role": "Projektleitung",
+    "role": "Projektmanagement",
     "employment": 80,
     "organisation": "bpi-1"
   },
@@ -355,7 +355,7 @@
     "name": "Heinz Beispieler",
     "initials": "HB",
     "shortName": "Heinz B.",
-    "role": "Projektleitung",
+    "role": "Projektmanagement",
     "employment": 90,
     "organisation": "bpi-2"
   },
@@ -364,61 +364,61 @@
     "name": "Petra Mustermann",
     "initials": "PM",
     "shortName": "Petra M.",
-    "role": "Projektleitung",
+    "role": "Projektentwicklung",
     "employment": 100,
-    "organisation": "bpi-3"
+    "organisation": "ppe-2"
   },
   {
     "id": "zoebeispielmann",
     "name": "Zoe Beispielmann",
     "initials": "ZB",
     "shortName": "Zoe B.",
-    "role": "Projektleitung",
+    "role": "Projektmanagement",
     "employment": 80,
-    "organisation": "bpa"
+    "organisation": "bpi-3"
   },
   {
     "id": "chiaramuster",
     "name": "Chiara Muster",
     "initials": "CM",
     "shortName": "Chiara M.",
-    "role": "Projektleitung",
+    "role": "Projektmanagement",
     "employment": 100,
-    "organisation": "ppe-1"
+    "organisation": "bpa"
   },
   {
     "id": "jonasbeispiel",
     "name": "Jonas Beispiel",
     "initials": "JB",
     "shortName": "Jonas B.",
-    "role": "Projektleitung",
+    "role": "Projektmanagement",
     "employment": 100,
-    "organisation": "ppe-2"
+    "organisation": "bpi-1"
   },
   {
     "id": "rahelmusterli",
     "name": "Rahel Musterli",
     "initials": "RM",
     "shortName": "Rahel M.",
-    "role": "Projektleitung",
+    "role": "Projektmanagement",
     "employment": 80,
-    "organisation": "bpi-1"
+    "organisation": "bpi-2"
   },
   {
     "id": "zenobeispieler",
     "name": "Zeno Beispieler",
     "initials": "ZB",
     "shortName": "Zeno B.",
-    "role": "Projektleitung",
+    "role": "Objektmanagement",
     "employment": 100,
-    "organisation": "bpi-2"
+    "organisation": "om"
   },
   {
     "id": "gretamustermann",
     "name": "Greta Mustermann",
     "initials": "GM",
     "shortName": "Greta M.",
-    "role": "Projektleitung",
+    "role": "Projektmanagement",
     "employment": 100,
     "organisation": "bpi-3"
   },
@@ -427,7 +427,7 @@
     "name": "Noah Beispielmann",
     "initials": "NB",
     "shortName": "Noah B.",
-    "role": "Projektleitung",
+    "role": "Projektmanagement",
     "employment": 100,
     "organisation": "bpa"
   },
@@ -436,17 +436,17 @@
     "name": "Yves Muster",
     "initials": "YM",
     "shortName": "Yves M.",
-    "role": "Projektleitung",
+    "role": "Projektmanagement",
     "employment": 100,
-    "organisation": "ppe-1"
+    "organisation": "bpi-1"
   },
   {
     "id": "beatbeispiel",
     "name": "Beat Beispiel",
     "initials": "BB",
     "shortName": "Beat B.",
-    "role": "Projektleitung",
+    "role": "Projektmanagement",
     "employment": 80,
-    "organisation": "ppe-2"
+    "organisation": "bpi-2"
   }
 ]

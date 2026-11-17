@@ -67,7 +67,7 @@ mind when the next switch is added.
 |---|---|---|---|---|---|---|
 | `lead` Bearbeitende | ● | ● names the people | ● | ● | ● | ● |
 | `lead=none` nicht zugewiesen | ● | – | ● | ● | ● | ● |
-| `org` Organisation | ● the project's | ● the person's own | ● | ● | ● | ● |
+| `org` Organisation | ● the project's, of the units that carry one | ● the person's own | ● | ● | ● | ● |
 | `phase`, `portfolio` | ● | – | ● | ● | ● | ● |
 | `q` search | ● | ● name, organisation, projects | ● | ● | ● | ● |
 | `scale` Zeitskala | ● | ● | – | – | ● | ● |
@@ -99,6 +99,14 @@ has, and is not offered in the menu there. The registry in `store.js`
 carries this as one flag per filter (`people`), read by `filtersHere()`,
 `selectedHere()` and `idsHere()`; the toolbar, the chips, the badge on the
 menu button and «Alle» all go through them.
+
+*Added with the ePPM roles, the same day:* the rule runs the other way too.
+A project is in the unit of whoever carries it — Projektentwicklung or
+Projektmanagement — so Portfoliomanagement and Objektmanagement, whose
+people are on nearly every project and carry none, select nothing where
+projects are listed. The «Organisation» menu offers them on Personen only
+(flag `projects` on the filter); set there, they stay in the link and are
+neither applied nor shown as a chip on the other tabs.
 
 **1.2 The count beside the chips said «111 Bauprojekte» on Personen.**
 *Fixed:* «50 Personen», «3 von 50 Personen» (`peopleLine()`), and a table

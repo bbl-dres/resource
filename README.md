@@ -26,7 +26,7 @@ Resource-planning prototype for the [Federal Office for Buildings and Logistics 
 ## Features
 
 - Review the portfolio in one planning grid that shows workload figures, the phase schedule, or both in the same rows, plus dashboards and a change history.
-- Fold a project open to its roles — Bearbeitender, Stellvertretung, Bauleitung, Fachplanung — one row per role and person, read from SAP ePPM — and type the workload per quarter straight into the cells, as in a spreadsheet. See [`docs/ROLES.md`](docs/ROLES.md).
+- Fold a project open to its roles — Portfoliomanagement (PFM), Objektmanagement (OM), Projektentwicklung (PPE), Projektmanagement (PM) — one row per role and person, read from SAP ePPM — and type the workload per quarter straight into the cells, as in a spreadsheet. See [`docs/DATAMODEL.md`](docs/DATAMODEL.md).
 - Read the projects by size — small before large — and filter and sort year, quarter, and month views in percent or FTE.
 - Compare demand, capacity, utilisation, free capacity, and person-level workload.
 - Export CSV, Excel, and client-side PDF reports and print schedules from A4 through A0.

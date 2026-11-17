@@ -4,7 +4,7 @@
     "name": "Sonja Beispiel",
     "initials": "SB",
     "shortName": "Sonja B.",
-    "role": "Projektleitung",
+    "role": "Projektmanagement",
     "employment": 100
   },
   {
@@ -12,7 +12,7 @@
     "name": "Lars Muster",
     "initials": "LM",
     "shortName": "Lars M.",
-    "role": "Projektleitung",
+    "role": "Projektmanagement",
     "employment": 100
   },
   {
@@ -20,7 +20,7 @@
     "name": "Alina Beispiel",
     "initials": "AB",
     "shortName": "Alina B.",
-    "role": "Projektleitung",
+    "role": "Projektmanagement",
     "employment": 100
   },
   {
@@ -44,7 +44,7 @@
     "name": "Nadia Muster",
     "initials": "NM",
     "shortName": "Nadia M.",
-    "role": "Bauleitung",
+    "role": "Objektmanagement",
     "employment": 60
   }
 ]

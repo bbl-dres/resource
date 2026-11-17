@@ -8,7 +8,7 @@
 
 import {
   data, state, t, num, fmtFte, unitSuffix, projectDemand, phaseOf, eppmOf, deDate,
-  settingText, settingTyped, settingValue, settingChanges, peopleOn, projectShare, assignmentsOf
+  settingText, settingTyped, settingValue, settingChanges, peopleOn, projectShare, assignmentsOf, leadLane, roleOf, labelName
 } from './store.js';
 
 import { html, icons, attr } from './ui.js';
@@ -45,7 +45,7 @@ function settingsModal() {
   const langs = data.i18n.languages;
 
   return html`
-    ${modalHead(t('Konto'), m.user.name, `${t(m.user.role)} · ${t(m.org.unit)}`)}
+    ${modalHead(t('Konto'), m.user.name, `${labelName(m.user.role)} · ${t(m.org.unit)}`)}
 
     <div class="settings">
       <section class="settings__block">
@@ -238,6 +238,18 @@ function shareModal({ copied }) {
     </div>`;
 }
 
+/*
+ * Who carries the project, as a line of a dialog's facts: the role it is
+ * with now — Projektentwicklung or Projektmanagement — and whoever holds it.
+ * Where a project has neither, the line says so under the column's name.
+ * The term is the role's label; the dialog writes it out with its short form.
+ */
+function carriedBy(p) {
+  const lane = leadLane(p);
+  const person = lane?.person ? data.peopleById[lane.person] : null;
+  return { term: lane ? roleOf(lane.role).label : 'Bearbeitende', value: person ? person.name : t('nicht zugewiesen') };
+}
+
 /**
  * A gate is a date and a consequence, so the dialog stays at that: what it is,
  * when it was planned, when it is now expected, and why if those differ.
@@ -247,7 +259,6 @@ function milestoneModal({ milestoneId }) {
   if (!m) return '';
   const p = data.projectsById[m.projectId];
   const cat = data.milestoneCatalog[m.code];
-  const lead = p.leadId ? data.peopleById[p.leadId] : null;
   const planQ = data.quarters[data.quarterIndex[m.plan]];
   const foreQ = m.forecast ? data.quarters[data.quarterIndex[m.forecast]] : null;
   const moved = m.forecast && m.forecast !== m.plan;
@@ -262,7 +273,7 @@ function milestoneModal({ milestoneId }) {
       sub: m.impact ? t(m.impact) : null,
       tone: moved || !foreQ ? 'danger' : null
     },
-    { term: 'Bearbeitender', value: lead ? lead.name : t('nicht zugewiesen') }
+    carriedBy(p)
   ];
 
   return html`
@@ -270,7 +281,7 @@ function milestoneModal({ milestoneId }) {
 
     <dl class="facts">
       ${facts.map(f => html`<div class="facts__row">
-        <dt>${t(f.term)}</dt>
+        <dt>${labelName(f.term)}</dt>
         <dd class="${f.tone ? `is-${f.tone}` : ''}">${f.value}
           ${f.sub ? html`<span class="facts__sub">${f.sub}</span>` : ''}</dd>
       </div>`)}
@@ -290,7 +301,6 @@ function phaseModal({ projectId, from }) {
   const p = data.projectsById[projectId];
   const bar = p?.bars.find(x => x.from === from);
   if (!bar) return '';
-  const lead = p.leadId ? data.peopleById[p.leadId] : null;
   const sub = phaseOf(bar.phase);
   const cells = projectDemand(p);
 
@@ -312,7 +322,7 @@ function phaseModal({ projectId, from }) {
       value: within.length ? `${t('Spitze')} ${num(peak)}${unitSuffix()}` : '—',
       sub: within.length ? within.map(v => num(v)).join(' · ') : null
     },
-    { term: 'Bearbeitender', value: lead ? lead.name : t('nicht zugewiesen') }
+    carriedBy(p)
   ];
 
   // The number is already in the title; the kicker names the kind of thing.
@@ -324,7 +334,7 @@ function phaseModal({ projectId, from }) {
 
     <dl class="facts">
       ${facts.map(f => html`<div class="facts__row">
-        <dt>${t(f.term)}</dt>
+        <dt>${labelName(f.term)}</dt>
         <dd>${f.value}${f.sub ? html`<span class="facts__sub">${f.sub}</span>` : ''}</dd>
       </div>`)}
     </dl>
@@ -410,7 +420,7 @@ function personModal({ personId }) {
   ];
 
   return html`
-    ${modalHead(t(person.role), person.name)}
+    ${modalHead(labelName(person.role), person.name)}
     ${factList(facts)}
     <footer class="modal__foot">${externalButton('Im Admin-Verzeichnis öffnen')}</footer>`;
 }

@@ -8,7 +8,7 @@ import {
   data, state, t, fmtMio, fmtFte, totals, loadStatus, cellValue, coloured,
   filteredProjects, visibleChanges,
   periods, periodValue, personRows, sortPersonRows, pageOf, chartTone, nowIndex, compareDe,
-  projectShare, projectCapacity, personHeatStep, assignmentsOf, roleOf, activeSpan
+  projectShare, projectCapacity, personHeatStep, assignmentsOf, roleOf, roleHint, labelName, activeSpan, carriesProjects
 } from './store.js';
 import { card, laneCell, cardWidth, MIN_PERIODS } from './views-overview.js';
 
@@ -16,7 +16,7 @@ import {
   html, raw, icons, pageHeader, pageActions, toolbar, activeFilterRow, peopleLine, noResults,
   columnCharts, barList, kpiStrip,
   tokenPx, yearRule, pinCls, pinLeft, sortableHead, attr, dropdown, menuRadio, menuGroupLabel, divider, changeProject,
-  highlight, caretCell, rowCaret, droppedNote
+  highlight, caretCell, rowCaret, droppedNote, expandLink, roleLabel
 } from './ui.js';
 
 /* =============================================================================
@@ -99,7 +99,7 @@ const PERSON_COLS = [
 /*
  * Which of them gives way first when the window is too narrow, as
  * YIELD_ORDER in columns.js does for the planning grid. The caret and the
- * name are the floor. All five are frozen, and together they are 526px
+ * name are the floor. All five are frozen, and together they are 546px
  * wide: on a tablet held upright that left two quarters, and on a phone
  * the frozen block was wider than the window — the quarters were in the
  * page and could not be scrolled into view.
@@ -198,9 +198,8 @@ function personSection(rows) {
   const compact = hidden.length > 0;
   const personLanes = r => assignmentsOf(r.person.id).map(({ project: p, lane }) => {
     const role = roleOf(lane.role);
-    const label = t(role.label);
     const when = activeSpan(lane);
-    const hint = `${label} · ${p.number} ${p.title}${when ? ` · ${when}` : ''}`;
+    const hint = `${roleHint(role)} · ${p.number} ${p.title}${when ? ` · ${when}` : ''}`;
     const project = html`<button type="button" class="linkbtn lane__project" data-act="open-project"
         data-val="${p.id}">${highlight(p.title)}</button>`;
     return html`<div role="row" class="prow prow--lane" style="grid-template-columns:${raw(tpl)}">
@@ -210,7 +209,7 @@ function personSection(rows) {
             <span class="lane__role lane__role--short">${t(role.short)}</span>${project}
           </div>`
         : html`<span role="cell" class="pcell lane__cell ${pinCls(sticky, 'name')}" style="${pinLeft(sticky, 'name')}" title="${hint}">
-            <span class="lane__role">${label}</span>
+            ${roleLabel(role)}
           </span>
           <div role="cell" aria-colspan="${rest}" style="grid-column:span ${rest}; ${pinLeft(sticky, PERSON_COLS[2].key)}" class="lane__label is-frozen" title="${hint}">
             ${project}
@@ -265,8 +264,13 @@ function personSection(rows) {
 
   /* One table: people have no size to stand in groups by. It opens in the
      order of the names; a click on a quarter's heading puts the most loaded
-     first. */
+     first. Above it, where a group on Planung has it, the link that folds
+     every row open at once — the rows that are listed, so under a filter it
+     opens the people the filter left. */
   const body = html`<section class="pgroup">
+    <div class="pgrouphead pgrouphead--end">${expandLink({
+      ids: rows.map(r => r.person.id), open: state.openPeople, act: 'toggle-people', val: 'all'
+    })}</div>
     ${card(html`${head}${rows.map(personRow)}`, { minWidth, sticky, label: t('Personen') })}
   </section>`;
 
@@ -398,7 +402,8 @@ function phaseCountCard() {
 
 function organisationCountCard() {
   const list = filteredProjects();
-  const rows = data.meta.organisations.map(o => {
+  /* The units a project can be in: those whose people carry one. */
+  const rows = data.meta.organisations.filter(o => carriesProjects(o.id)).map(o => {
     const n = list.filter(p => p.organisation === o.id).length;
     return { label: t(o.label), value: n, valueLabel: String(n) };
   });
@@ -469,6 +474,18 @@ function creditPhaseCard() {
    Verlauf — the change log
    ========================================================================== */
 
+/*
+ * What a change was made to. A change to a row of the grid is filed under the
+ * row's role, and a role is written out as it is everywhere — «Projekt-
+ * management PM», labelName() — in the two parts a row of the grids has, so
+ * that in a narrow column the name is shortened and the short form is not.
+ */
+function fieldTag(field) {
+  const role = data.rolesByLabel[field];
+  if (!role || !role.short || role.short === role.label) return html`<span class="fieldtag">${highlight(t(field))}</span>`;
+  return html`<span class="fieldtag" title="${labelName(field)}"><span class="fieldtag__name">${highlight(t(role.label))}</span> <span class="fieldtag__short">${highlight(t(role.short))}</span></span>`;
+}
+
 export function renderHistory() {
   const page = pageOf(visibleChanges());
 
@@ -490,7 +507,7 @@ export function renderHistory() {
           <span role="cell" class="log__date">${c.dateLabel}</span>
           <span role="cell">${highlight(c.actor)}</span>
           <span role="cell" class="log__project">${changeProject(c)}</span>
-          <span role="cell"><span class="fieldtag">${highlight(t(c.field))}</span></span>
+          <span role="cell">${fieldTag(c.field)}</span>
           <span role="cell" class="log__change">${highlight(t(c.change))}</span>
           <span role="cell" class="log__value">${highlight(t(c.value))}</span>
         </div>`) : html`<div role="row" class="log log--history log--empty"><span role="cell">${t('Keine Einträge im gesetzten Umfang.')}</span></div>`}

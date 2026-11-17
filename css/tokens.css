@@ -206,7 +206,7 @@
   --color-warn-fg:        var(--amber-900);
   --color-warn-fg-alt:    var(--amber-750);
   --color-warn-solid:     var(--amber-600);
-  --color-warn-bg-subtle: var(--amber-50);    /* "ohne Projektleitung" row   */
+  --color-warn-bg-subtle: var(--amber-50);    /* a project nobody carries  */
 
   --color-ok-bg:        var(--green-100);
   --color-ok-fg:        var(--green-800);
@@ -470,7 +470,7 @@
   --grid-col-credit:    92px;    /* the heading, 85; a group's sum «898,42 Mio.», 82 */
 
   /* The person table's own lead columns, measured the same way. */
-  --person-col-name:       140px;  /* «Daniel Beispielmann», 132; «Stv. Bearbeitender» under it, 113 */
+  --person-col-name:       160px;  /* «Daniel Beispielmann», 132; «Portfoliomanagement PFM» under it, 142 */
   --person-col-employment: 84px;   /* the heading «Anstellung» with its arrow, 81 */
   --person-col-share:      96px;   /* «Projektanteil», likewise, 95 */
   --person-col-projects:   72px;   /* «Projekte» with its arrow, 67, over a two-digit count; the

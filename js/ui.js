@@ -7,7 +7,7 @@
 
 import {
   data, state, t, FILTERS, filtersHere, selectedHere, idsHere, activeFilters, kpis, filteredProjects, canStep, todayOffset, notifications,
-  columnSet, coloured, figuresShown, searchMatcher
+  columnSet, coloured, figuresShown, searchMatcher, labelName
 } from './store.js';
 import { toggleableColumns } from './columns.js';
 import { icon } from './icons.js';
@@ -231,6 +231,33 @@ export const rowCaret = ({ act, val, open, label }) => html`<button type="button
 </button>`;
 
 /**
+ * A role written out in a row — «Projektmanagement PM», as roleName() says
+ * it — in two parts: where the column is too narrow for both, the name is
+ * what ends in an ellipsis and the short form stays. It is the part the
+ * users read first.
+ */
+export const roleLabel = role => (role.short && role.short !== role.label
+  ? html`<span class="lane__role"><span class="lane__rolename">${t(role.label)}</span> <span class="lane__roleshort">${t(role.short)}</span></span>`
+  : html`<span class="lane__role"><span class="lane__rolename">${t(role.label)}</span></span>`);
+
+/**
+ * «Alle aufklappen», for every row of a card at once: a group's projects on
+ * Planung, the people on Personen. It was «Besetzung aufklappen», and the
+ * users did not know what a Besetzung was; «alle» says what the link is about
+ * without a word for it. The label says what the click will do: fold every
+ * row open while any is still shut, fold them all shut once every one is
+ * open. `open` is the map the rows themselves read — id -> true.
+ */
+export function expandLink({ ids, open, act, val }) {
+  const all = ids.length > 0 && ids.every(id => open[id]);
+  const any = ids.some(id => open[id]);
+  return html`<button type="button" class="linkbtn pgroup__expand" data-act="${act}" data-val="${val}">
+    <span class="caret ${any ? '' : 'is-collapsed'}" aria-hidden="true">${icons.chevronDown()}</span>
+    ${t(all ? 'Alle zuklappen' : 'Alle aufklappen')}
+  </button>`;
+}
+
+/**
  * A sortable column header. Both grids use it; they differ only in which pair
  * of state fields they sort by and which action they dispatch.
  */
@@ -451,7 +478,7 @@ function accountMenu() {
         <span class="avatar avatar--lg" aria-hidden="true">${m.user.initials}</span>
         <div>
           <p class="account__name">${m.user.name}</p>
-          <p class="account__meta">${t(m.user.role)} · ${t(m.org.unit)}</p>
+          <p class="account__meta">${labelName(m.user.role)} · ${t(m.org.unit)}</p>
         </div>
       </div>
       <p class="account__note">${t('Angemeldet über eIAM')}</p>

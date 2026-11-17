@@ -1,8 +1,8 @@
 {
   "roles": [
-    { "id": "pl", "label": "Bearbeitender", "short": "BE" },
-    { "id": "stv", "label": "Stv. Bearbeitender", "short": "Stv" },
-    { "id": "bl", "label": "Bauleitung", "short": "BL" },
-    { "id": "fp", "label": "Fachplanung", "short": "FP" }
+    { "id": "pfm", "label": "Portfoliomanagement", "short": "PFM" },
+    { "id": "om", "label": "Objektmanagement", "short": "OM", "note": "Planungsbegleitendes FM" },
+    { "id": "ppe", "label": "Projektentwicklung", "short": "PPE", "lead": true },
+    { "id": "pm", "label": "Projektmanagement", "short": "PM", "lead": true }
   ]
 }

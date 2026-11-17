@@ -155,27 +155,50 @@ forecast; a late forecast is in the dialog and the dashboard, not on the bar.
 
 ### Roles
 
-Every project's demand is split into roles last of all, after everything
-else has been drawn, so the portfolio, the team, the gates, the leads and the
-change log come out exactly as they did before roles existed — the draws the
-old per-person occupancy figures took are still taken and thrown away, for
-the same reason.
+The four roles are read from `data/roles.json`: PFM, OM, PPE and PM, the
+ones SAP ePPM keeps on a project and the office plans. They are functions of
+the house, so the generator settles three things with them.
 
-`ROLE_SHARE` says what share of a project's demand each role carries in each
-Teilphase; the Bearbeitender takes the remainder, in steps of five, so the
-roles add up to the project's demand to the point. `ROLE_ODDS` decides
-whether a project has a Stellvertretung, a Bauleitung or a Fachplanung at
-all. A role holds a run of quarters with demand; the Bearbeitender keeps the
-project's assignee, the other roles go to whoever of the roster would carry
-them most lightly, peak against contract. Then some runs change hands at a
-quarter boundary — never in the current one — and some stay open, because a
-plan that shows no handover and no vacancy shows nothing the tool is for.
+**Who works where.** `TEAMS` names the role each unit's people hold. How many
+people a function has is solved for, like the roster: from the pensum its
+role will be asked for at its peak, as a share of the office's contracts,
+with two people per unit at least. The six named people keep the function
+the seed gives them; the others are handed out down the list, never drawn.
+
+**Who carries a project.** `PHASE_LEAD` says which of the two carrying roles
+has a project in which Teilphase — Projektentwicklung up to the award of the
+design, Projektmanagement from the Vorprojekt on. A project is given to
+somebody of the function that carries the phase it is in today, the lightest
+loaded of three; a few are left with nobody.
+
+**How the demand divides.** Every project's demand is split into roles last
+of all, after everything else has been drawn, so the portfolio, the gates
+and the change log do not move when the split does. `ROLE_SHARE` says what
+share each role takes in each Teilphase; the role that carries the phase
+takes the remainder, in steps of five, so the roles add up to the project's
+demand to the point. `ROLE_ODDS` decides whether a project has a
+Portfoliomanagement or an Objektmanagement at all. The role that carries the
+project keeps the person it was given; every other role goes to whoever of
+its own function would carry it most lightly, peak against contract. Then
+some runs change hands at a quarter boundary — never in the current one, and
+never out of the function — and some stay open, because a plan that shows no
+handover and no vacancy shows nothing the tool is for.
+
+The shares and the handover between PPE and PM are assumptions of the
+fixtures: the users named the roles, not their proportions.
+
+The gates and the change log are drawn from a pinned state of the random
+stream (`seed = …` after the projects have been given out), so a change to
+the team or to who carries what does not re-date every gate.
 
 That is how the split is drawn, not how it is written. `assigneesOf()` turns
 each role into one row per person who holds it — `{ role, person, demand[] }`,
 the role's pensum in that person's quarters and nought in the others — and a
 row with no person for the part nobody holds. The run checks that the rows
-add up to the demand everything else was sized on, and stops if they do not.
+add up to the demand everything else was sized on, that every row is held by
+somebody of its role's function, and that the app's own rule — the carrying
+role with the larger pensum now — finds the person each project was given;
+it stops if any of them fails.
 
 ### What it writes
 
@@ -185,9 +208,9 @@ carries their organisation and no load; a project carries its `assignees` —
 rows of a role and a person — and no lead and no demand curve: the app derives
 those (see `docs/DATAMODEL.md`). Nothing is written until the run has checked
 that the rows add up to the demand; a run that fails leaves `data/` as it was. The organisations in `meta.json` come from the
-generator's `TEAMS` table, each with its `projectShare`; the generator writes
-that figure out but still sizes and balances the team against whole
-contracts.
+generator's `TEAMS` table, each with the `role` its people hold and its
+`projectShare`; the generator writes that figure out but still sizes and
+balances the team against whole contracts.
 
 Files are written with LF line endings, like everything else in the
 repository.

@@ -351,11 +351,6 @@
       "fr": "Attribuer la personne en charge",
       "it": "Assegna incaricato"
     },
-    "Bearbeitender": {
-      "en": "Assignee",
-      "fr": "Personne en charge",
-      "it": "Incaricato"
-    },
     "Bedürfnis freigegeben": {
       "en": "Need approved",
       "fr": "Besoin validé",
@@ -1216,11 +1211,6 @@
       "fr": "Taille du projet",
       "it": "Dimensione del progetto"
     },
-    "Projektleitung": {
-      "en": "Project lead",
-      "fr": "Direction de projet",
-      "it": "Direzione del progetto"
-    },
     "Prototyp, fiktive Inhalte — nur zur Demonstration": {
       "en": "Prototype, fictional content — for demonstration only",
       "fr": "Prototype, contenu fictif — à des fins de démonstration",
@@ -1701,11 +1691,6 @@
       "fr": "ouvert",
       "it": "aperto"
     },
-    "ohne Bearbeitenden": {
-      "en": "no assignee",
-      "fr": "sans personne en charge",
-      "it": "senza incaricato"
-    },
     "ohne Filter": {
       "en": "no filters",
       "fr": "sans filtre",
@@ -1810,21 +1795,6 @@
       "en": "— unassigned",
       "fr": "— non attribué",
       "it": "— non assegnato"
-    },
-    "Bauleitung": {
-      "en": "Site management",
-      "fr": "Direction des travaux",
-      "it": "Direzione lavori"
-    },
-    "Fachplanung": {
-      "en": "Specialist planning",
-      "fr": "Planification spécialisée",
-      "it": "Progettazione specialistica"
-    },
-    "Stv. Bearbeitender": {
-      "en": "Deputy assignee",
-      "fr": "Suppléance",
-      "it": "Sostituto incaricato"
     },
     "Rollen": {
       "en": "Roles",
@@ -2110,6 +2080,31 @@
       "en": "Phases and milestones",
       "fr": "Phases et jalons",
       "it": "Fasi e traguardi"
+    },
+    "Portfoliomanagement": {
+      "en": "Portfolio management",
+      "fr": "Gestion du portefeuille",
+      "it": "Gestione del portafoglio"
+    },
+    "Objektmanagement": {
+      "en": "Property management",
+      "fr": "Gestion des objets",
+      "it": "Gestione degli oggetti"
+    },
+    "Projektmanagement": {
+      "en": "Project management",
+      "fr": "Gestion de projets",
+      "it": "Gestione dei progetti"
+    },
+    "Planungsbegleitendes FM": {
+      "en": "FM during planning and construction",
+      "fr": "FM accompagnant la planification",
+      "it": "FM di accompagnamento alla progettazione"
+    },
+    "PPE / PM nicht zugewiesen": {
+      "en": "PPE / PM unassigned",
+      "fr": "PPE / PM non attribué",
+      "it": "PPE / PM non assegnato"
     }
   }
 }

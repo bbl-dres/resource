@@ -1,0 +1,3 @@
+# Reference material that shows real people or real systems stays on the
+# machine it was put on. Mark such a file «(GitIgnore this)» in its name.
+docs/references/*(GitIgnore this)*

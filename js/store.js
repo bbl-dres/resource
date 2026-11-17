@@ -300,6 +300,10 @@ export const FILTERS = [
     kind: 'organisation', key: 'organisations', param: 'org',
     ids: () => data.meta.organisations.map(x => x.id),
     name: id => t(data.organisationsById[id]?.label ?? id),
+    /* A project is in the unit of whoever carries it, so only the units whose
+       people can carry one select any: a project is never «in»
+       Portfoliomanagement, however many of its people are on it. */
+    projects: id => carriesProjects(id),
     /* A person has an organisation of their own, and a column that shows it. */
     people: () => true
   }
@@ -309,15 +313,21 @@ export const FILTERS = [
  * What a filter means where the reader is standing. Every tab lists projects
  * or is counted from them, and answers to all four — except Personen, whose
  * rows are people: a phase and a sub-portfolio are properties of a project
- * and select nothing there, so that tab neither offers nor shows them. They
- * stay in the state and in the link, and are back on the next tab.
+ * and select nothing there, so that tab neither offers nor shows them. The
+ * other way round, a unit that carries no project selects nothing where
+ * projects are listed. What a tab does not use stays in the state and in the
+ * link, and is back on the next tab.
  */
 const onPeople = () => state.tab === 'people';
+const forProjects = (f, id) => f.projects?.(id) ?? true;
+const here = (f, id) => (onPeople() ? !!f.people?.(id) : forProjects(f, id));
 export const filtersHere = () => (onPeople() ? FILTERS.filter(f => f.people) : FILTERS);
 /** The ids of one filter that are set and mean something on this tab. */
-export const selectedHere = f => (onPeople() ? state[f.key].filter(id => f.people?.(id)) : state[f.key]);
+export const selectedHere = f => state[f.key].filter(id => here(f, id));
 /** Every id of one filter that this tab's menu offers. */
-export const idsHere = f => (onPeople() ? f.ids().filter(id => f.people?.(id)) : f.ids());
+export const idsHere = f => f.ids().filter(id => here(f, id));
+/** The ids of one filter that thin the projects out, whichever tab is open. */
+export const projectIds = f => state[f.key].filter(id => forProjects(f, id));
 
 /** The state with no filter set and no search — what «zurücksetzen» and the brand link write. */
 export const noFilters = () => ({ ...Object.fromEntries(FILTERS.map(f => [f.key, []])), search: '' });
@@ -500,18 +510,19 @@ export async function load() {
   // Index lookups used all over the views.
   data.peopleById = Object.fromEntries(data.people.map(p => [p.id, p]));
   data.rolesById = Object.fromEntries(data.roles.roles.map(r => [r.id, r]));
+  data.rolesByLabel = Object.fromEntries(data.roles.roles.map(r => [r.label, r]));
   data.quarters = data.meta.quarters;
   data.quarterIndex = Object.fromEntries(data.quarters.map((q, i) => [q.id, i]));
   /*
    * Three readings of a project's Bearbeitende, as getters, so every consumer
    * sees the same answer and a staffing change moves them without anyone
-   * writing a field. The lead is whoever holds the role «Bearbeitender» in
-   * the current quarter — see leadOf(); a project is unassigned while nobody
-   * does; and its organisation is the lead's — people belong to a unit, and a
-   * project follows the person who carries it, so a project with no lead has
-   * no unit. The demand is the sum over the Bearbeitende, kept as a plain
-   * array because the sorts, the totals and the export read it some thousand
-   * times a render.
+   * writing a field. The lead is whoever carries the project in the current
+   * quarter — Projektentwicklung or Projektmanagement, see leadLane(); a
+   * project is unassigned while nobody does; and its organisation is the
+   * lead's — people belong to a unit, and a project follows the person who
+   * carries it, so a project with no lead has no unit. The demand is the sum
+   * over the Bearbeitende, kept as a plain array because the sorts, the
+   * totals and the export read it some thousand times a render.
    */
   for (const p of data.projects) {
     p.assignees ??= [];
@@ -579,23 +590,58 @@ export const laneOf = (p, roleId, holder) =>
 export const peopleOn = p => [...new Set(p.assignees.map(a => a.person).filter(Boolean))];
 
 /**
- * Who the project goes by where one name has to stand for it — the column of
- * a folded row, the sort, the organisation: whoever holds the first role of
- * the catalogue, «Bearbeitender», in the current quarter, and nobody while
- * that role is open. Before the role has started, or after it has ended, the
- * first person to hold it.
+ * A role written out: its name, and after it the short form the house knows
+ * it by — «Projektmanagement PM». The users read the abbreviation faster than
+ * the word and asked for both. Said in one place, so a row, a hint, a dialog
+ * and the change log cannot say it two ways. Where there is no room the short
+ * form stands alone.
  */
-export function leadOf(p) {
+export const roleName = role => (role.short && role.short !== role.label ? `${t(role.label)} ${t(role.short)}` : t(role.label));
+
+/**
+ * The same for a label the data carries — a person's function, the field a
+ * change is filed under. Anything that is not a role is the plain word.
+ */
+export const labelName = label => (data.rolesByLabel?.[label] ? roleName(data.rolesByLabel[label]) : t(label));
+
+/** What a row's role is called where there is room to say what it does: «Objektmanagement OM – Planungsbegleitendes FM». */
+export const roleHint = role => (role.note ? `${roleName(role)} – ${t(role.note)}` : roleName(role));
+
+/**
+ * The row a project goes by where one name has to stand for it — its unit in
+ * the «Organisation» column, the dialogs, the mark that nobody carries it.
+ *
+ * Two roles of the catalogue can carry a project, Projektentwicklung and
+ * Projektmanagement — `lead` in data/roles.json — and they overlap where the
+ * one hands it to the other. The project is with whichever of them has the
+ * larger pensum on it in the current quarter, the later one where they are
+ * level. Where neither has any, because the project has not begun or is
+ * over, it is the first of their rows. Null for a project with no such row.
+ */
+export function leadLane(p) {
   const now = nowIndex();
-  const role = roleCatalog()[0]?.id;
+  let best = null;
   let first = null;
   for (const a of p.assignees) {
-    if (a.role !== role) continue;
-    if (a.demand[now] > 0) return a.person;
-    first ??= a.person;
+    if (!roleOf(a.role).lead) continue;
+    first ??= a;
+    if (a.demand[now] > 0 && (!best || a.demand[now] >= best.demand[now])) best = a;
   }
-  return first;
+  return best ?? first;
 }
+
+/** The person on that row — nobody while the role that carries the project is open. */
+export const leadOf = p => leadLane(p)?.person ?? null;
+
+/**
+ * Does a unit carry projects — do its people hold a role a project goes by?
+ * A unit names the role its people hold (`role` in meta.organisations); one
+ * that names none is taken to.
+ */
+export const carriesProjects = id => {
+  const role = data.organisationsById[id]?.role;
+  return !role || !!roleOf(role).lead;
+};
 
 /** Is the person on the project, in any role, at any time in the window? */
 export const assignedTo = (p, personId) => p.assignees.some(a => a.person === personId);
@@ -961,6 +1007,8 @@ export const searchMatcher = memo(() => {
 export const filteredProjects = memo(() => {
   const match = searchMatcher();
   const now = nowIndex();
+  /* Set on Personen, a unit that carries no project is still in the state. */
+  const organisations = state.organisations.filter(carriesProjects);
   const list = data.projects.filter(p => {
     if (state.phases.length && !state.phases.includes(p.phase)) return false;
     /*
@@ -973,7 +1021,7 @@ export const filteredProjects = memo(() => {
       if (!hit) return false;
     }
     if (state.portfolios.length && !state.portfolios.includes(p.portfolio)) return false;
-    if (state.organisations.length && !state.organisations.includes(p.organisation)) return false;
+    if (organisations.length && !organisations.includes(p.organisation)) return false;
     if (match) {
       /* The words the cells show, translated: in English «unassigned» has to
          find the rows with an open role, and the mark has to land on what
@@ -1266,7 +1314,7 @@ export function activeFilters({ projects = false } = {}) {
   /* A file of projects names every filter its rows went through, whichever
      tab it was asked for on; a tab names the ones its own rows answer to. */
   for (const f of projects ? FILTERS : filtersHere()) {
-    for (const id of projects ? state[f.key] : selectedHere(f)) chips.push({ kind: f.kind, id, label: (f.chip ?? f.name)(id) });
+    for (const id of projects ? projectIds(f) : selectedHere(f)) chips.push({ kind: f.kind, id, label: (f.chip ?? f.name)(id) });
   }
   if (state.search) chips.push({ kind: 'search', id: '1', label: `${t('Suche')}: ${state.search}` });
   return chips;
@@ -1342,7 +1390,7 @@ export function notifications() {
     out.push({
       key: c.id, mark: 'none',
       title: c.projectLabel,
-      text: `${c.actor} · ${t(c.field)}: ${t(c.change)}`,
+      text: `${c.actor} · ${labelName(c.field)}: ${t(c.change)}`,
       meta: c.dateLabel,
       act: 'open-project', val: c.projectId
     });
@@ -1373,7 +1421,7 @@ export function visibleChanges() {
     if (c.projectId && !ids.has(c.projectId)) return false;
     if (!match) return true;
     /* The translated words, as the rows print them. */
-    const hay = `${c.projectLabel} ${c.actor} ${t(c.field)} ${t(c.change)} ${t(c.value)}`;
+    const hay = `${c.projectLabel} ${c.actor} ${labelName(c.field)} ${t(c.change)} ${t(c.value)}`;
     return match.test(hay);
   });
 }
